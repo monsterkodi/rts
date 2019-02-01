@@ -1,0 +1,306 @@
+
+//  0000000  000000000  000   000  000    
+// 000          000      000 000   000    
+// 0000000      000       00000    000    
+//      000     000        000     000    
+// 0000000      000        000     0000000
+
+frameWidth          = 6px
+logFontSize         = 15px
+titlebarFontSize    = 15px
+scrollbarWidth      = 10px
+scrollhandleWidth   = 8px
+minimapWidth        = 130px
+thinBorder          = 1px solid
+fontMono            = "Meslo LG S", "Bitstream Vera Sans Mono", "Menlo", "Cousine", "DejaVu Sans Mono", "Andale Mono", monospace
+titlebarFont        = Bahnschrift Light, Helvetica Neue, Ebrima, Varela Round, Helvetica, Arial
+
+// 0000000     0000000   0000000    000   000
+// 000   000  000   000  000   000   000 000 
+// 0000000    000   000  000   000    00000  
+// 000   000  000   000  000   000     000   
+// 0000000     0000000   0000000       000   
+
+body
+    font-family         fontMono
+    font-size           15px
+        
+// 00     00   0000000   000  000   000  
+// 000   000  000   000  000  0000  000  
+// 000000000  000000000  000  000 0 000  
+// 000 0 000  000   000  000  000  0000  
+// 000   000  000   000  000  000   000  
+
+#main
+    position            relative
+    overflow            hidden
+
+// 000000000   0000000   0000000     0000000
+//    000     000   000  000   000  000
+//    000     000000000  0000000    0000000
+//    000     000   000  000   000       000
+//    000     000   000  0000000    0000000
+
+.tabs
+    flex                10 1 0
+    display             flex
+    flex-direction      row
+    overflow-x          auto
+    overflow-y          hidden
+    -webkit-app-region  no-drag
+
+    &::-webkit-scrollbar
+        height          2px
+
+// 000000000   0000000   0000000
+//    000     000   000  000   000
+//    000     000000000  0000000
+//    000     000   000  000   000
+//    000     000   000  0000000
+
+.tab
+    flex                1 1 0
+    position            relative
+    border-top-left-radius  6px
+    border-top-right-radius 6px
+    // &:not(:first-child)    
+        // border-top-left-radius  10px
+    // &:not(:last-child)
+        // border-top-right-radius 10px
+    padding-left        6px
+    padding-right       12px
+    padding-top         7px
+    cursor              pointer
+    
+    box-sizing          border-box
+    font-size           titlebarFontSize
+    font-family         titlebarFont
+    
+    &:not(.active)
+        opacity         0.5
+
+.tabdrag
+    -webkit-app-region  drag
+    height              titlebarHeight
+    width               titlebarHeight
+    position            absolute
+    top                 0
+    right               0
+
+.tab .dot
+    color               #444
+    &.focus
+        color           #060
+
+.dot
+    display             inline-block
+    vertical-align      top
+    padding-left        6px
+    padding-right       9px
+    margin-top          -1px
+    
+// 000   000  000000000  00000000  00000000   00     00  
+//  000 000      000     000       000   000  000   000  
+//   00000       000     0000000   0000000    000000000  
+//  000 000      000     000       000   000  000 0 000  
+// 000   000     000     00000000  000   000  000   000  
+
+.xterm 
+    position                relative
+    -webkit-user-select     none
+
+    cursor                  text
+    
+    &.enable-mouse-events 
+        cursor           default
+    
+    &.xterm-cursor-pointer 
+        cursor           pointer
+    
+    &.xterm-cursor-crosshair 
+        cursor           crosshair
+    
+    & .xterm-helpers 
+        position         absolute
+        top              0
+        z-index          10
+    
+    & .xterm-helper-textarea 
+        position: absolute
+        opacity          0
+        left             -9999em
+        top              0
+        width            0
+        height           0
+        z-index          -10
+        white-space      nowrap
+        overflow         hidden
+        resize           none
+    
+    & .composition-view 
+        background       #000
+        color            #FFF
+        display          none
+        position         absolute
+        white-space      nowrap
+        z-index          1
+        &.active 
+            display      block
+    
+    & .xterm-viewport 
+        background-color #000
+        overflow-y       hidden
+        cursor           default
+        position         absolute
+        right            0
+        left             0
+        top              0
+        bottom           0
+    
+    & .xterm-screen 
+        position         relative
+        & canvas 
+            position     absolute
+            left         0
+            top          0
+    
+    & .xterm-scroll-area 
+        visibility       hidden
+    
+    & .xterm-accessibility
+    & .xterm-message 
+        position         absolute
+        left             0
+        top              0
+        bottom           0
+        right            0
+        z-index          100
+        color            transparent
+    
+    & .live-region 
+        position         absolute
+        left             -9999px
+        width            1px
+        height           1px
+        overflow         hidden
+
+.xterm-char-measure-element 
+    display          inline-block
+    visibility       hidden
+    position         absolute
+    top              0
+    left             -9999em
+    line-height      normal
+        
+// 00     00  000  000   000  000  00     00   0000000   00000000
+// 000   000  000  0000  000  000  000   000  000   000  000   000
+// 000000000  000  000 0 000  000  000000000  000000000  00000000
+// 000 0 000  000  000  0000  000  000 0 000  000   000  000
+// 000   000  000  000   000  000  000   000  000   000  000
+
+.minimap
+    position            absolute
+    top                 0
+    right               0
+    bottom              0
+    width               minimapWidth
+    overflow            hidden
+    cursor              pointer
+    border-left         thinBorder
+    pointer-events      auto
+
+.minimap canvas
+    pointer-events      none
+    position            absolute
+    top                 0
+    right               0
+    overflow            hidden
+
+.topbot
+    position            absolute
+    right               0
+    width               minimapWidth
+    pointer-events      none
+
+.minimapLines
+    background-color    transparent
+    opacity             0.8
+
+.minimapHighlights
+.minimapSelections
+.minimapCursors
+    background-color    transparent
+    
+//  0000000   0000000  00000000    0000000   000      000      0000000     0000000   00000000
+// 000       000       000   000  000   000  000      000      000   000  000   000  000   000
+// 0000000   000       0000000    000   000  000      000      0000000    000000000  0000000
+//      000  000       000   000  000   000  000      000      000   000  000   000  000   000
+// 0000000    0000000  000   000   0000000   0000000  0000000  0000000    000   000  000   000
+
+.scrollbar
+    position            absolute
+    top                 0
+    cursor              ns-resize
+
+    &.left
+        bottom          0
+        left            0
+        width           scrollbarWidth
+    &.right
+        right           0
+        width           10%
+        height          100%
+
+.scrollhandle
+    position            absolute
+    width               scrollhandleWidth
+    top                 0
+    &.left
+        left            0
+    &.right
+        right           0
+  
+// 000      000  000   000  00000000   0000000  
+// 000      000  0000  000  000       000       
+// 000      000  000 0 000  0000000   0000000   
+// 000      000  000  0000  000            000  
+// 0000000  000  000   000  00000000  0000000   
+
+#terminal
+    position                    relative
+    font-size                   logFontSize
+    -webkit-user-select         text
+    flex                        1 1 0
+    padding                     1px
+    padding-left                scrollbarWidth
+    white-space                 pre
+
+    .line
+        line-height             1.3
+        overflow                hidden
+    
+#cursor
+    position                    absolute
+    left                        0
+    top                         0
+        
+// 000000000   0000000    0000000   000      000000000  000  00000000
+//    000     000   000  000   000  000         000     000  000   000
+//    000     000   000  000   000  000         000     000  00000000
+//    000     000   000  000   000  000         000     000  000
+//    000      0000000    0000000   0000000     000     000  000
+
+.tooltip
+    white-space                 nowrap
+    padding                     3px
+    padding-left                frameWidth
+    padding-right               frameWidth
+    border-bottom-left-radius   frameWidth
+    border-bottom-right-radius  frameWidth
+    font-family                 titlebarFont
+    font-size                   14px
+    opacity                     0
+    transform                   scaleY(0)
+    transition                  transform 0.2s ease-in, opacity 0.2s ease-in
+                
+    

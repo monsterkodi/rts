@@ -1,0 +1,7 @@
+node_modules
+package.json
+.DS_Store
+Icon?
+*-x64
+inno
+js

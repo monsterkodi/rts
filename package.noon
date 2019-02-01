@@ -1,0 +1,13 @@
+name            rts
+productName     rts
+version         0.0.1
+main            js/main.js
+author          monsterkodi
+license         Unlicense
+dependencies
+                kxk         ../kxk
+                sprintf-js  ^1.1.2
+                three       ^0.100.0
+devDependencies
+                electron        ^4.0.3
+                electron-packager  ^13.0.1
