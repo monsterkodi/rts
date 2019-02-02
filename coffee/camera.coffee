@@ -24,8 +24,8 @@ class Camera extends THREE.PerspectiveCamera
         @maxDist = @far/2
         @minDist = 2
         @center  = new Vector 0, 0, 0
-        @degree  = 0
-        @rotate  = 0
+        @degree  = 40
+        @rotate  = 40
 
         @elem.addEventListener 'mousewheel', @onMouseWheel
         @elem.addEventListener 'mousedown',  @onMouseDown
