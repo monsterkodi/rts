@@ -6,9 +6,7 @@
 000   000  000   000  000  000   000
 ###
 
-{ post, app, log } = require 'kxk'
-
-{ BrowserWindow } = require 'electron'
+{ app } = require 'kxk'
 
 class Main extends app
 

@@ -6,7 +6,7 @@
  0000000  000   000  000   000  00000000  000   000  000   000
 ###
 
-{ clamp, log } = require 'kxk'
+{ deg2rad, clamp, log } = require 'kxk'
 
 Vector      = require './lib/vector'
 Quaternion  = require './lib/quaternion'
@@ -16,33 +16,23 @@ class Camera extends THREE.PerspectiveCamera
 
     constructor: (opt) ->
         
-        fov     = opt.fov    ? 60
-        near    = opt.near   ? 0.01
-        far     = opt.far    ? 300
-        aspect  = opt.aspect ? 1
+        aspect = opt.view.clientWidth / opt.view.clientHeight
+        super 60, aspect, 0.01, 300 # fov, aspect, near, far
         
-        super fov, aspect, near, far
-        
-        @fov     = fov
-        @near    = near
-        @far     = far
-        @aspect  = aspect
         @elem    = opt.view
-        @dist    = opt.dist or 3
-        @maxDist = opt.maxDist or @far/2
-        @minDist = opt.minDist or 2
+        @dist    = @far/16
+        @maxDist = @far/2
+        @minDist = 2
         @center  = new Vector 0, 0, 0
+        @degree  = 0
+        @rotate  = 0
 
         @elem.addEventListener 'mousewheel', @onMouseWheel
         @elem.addEventListener 'mousedown',  @onMouseDown
         @elem.addEventListener 'keypress',   @onKeyPress
         @elem.addEventListener 'keyrelease', @onKeyRelease
         
-        @position.set 0, 0, @dist
-
-    reset: ->
-        @lookAt 0,0,0
-        @quaternion.copy Quaternion.ZupY
+        @update()
 
     getPosition:  -> new Vector @position
     getDirection: -> new Quaternion(@quaternion).rotate Vector.minusZ
@@ -61,25 +51,51 @@ class Camera extends THREE.PerspectiveCamera
         @mouseY = event.clientY
         window.addEventListener    'mousemove',  @onMouseDrag
         window.addEventListener    'mouseup',    @onMouseUp
-        @isPivoting = true
         
     onMouseUp: (event) => 
         window.removeEventListener 'mousemove',  @onMouseDrag
         window.removeEventListener 'mouseup',    @onMouseUp
-        @isPivoting = false  
         
-    onMouseDrag:  (event) =>  
-        return if not @isPivoting
+    onMouseDrag:  (event) =>
+
         x = @mouseX-event.clientX
         y = @mouseY-event.clientY
         @mouseX = event.clientX
         @mouseY = event.clientY
-        @pivot x*0.005, y*0.005
         
+        if event.buttons & 1
+            s = @dist * 0.001
+            @move x*s, y*s
+        if event.buttons & 4
+            s = @dist * 0.001
+            @pan x*s, y*s
+        if event.buttons & 2
+            s = 0.1
+            @pivot x*s, y*s
+            
+    move: (x,y) -> @pan x,y
+        
+    pan: (x,y) ->
+        
+        right = new THREE.Vector3 x, 0, 0 
+        right.applyQuaternion @quaternion
+
+        up = new THREE.Vector3 0, -y, 0 
+        up.applyQuaternion @quaternion
+        
+        @center.add right.add up
+        @update()
+            
     pivot: (x,y) ->
-        q = @quaternion.clone()
-        q.multiply new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(1, 0, 0), y
-        q.multiply new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 1, 0), x
+        @rotate += x
+        @degree += y
+        @update()
+        
+    update: -> 
+        @degree = clamp 0, 180, @degree
+        q = new THREE.Quaternion()
+        q.multiply new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 0, 1), deg2rad @rotate
+        q.multiply new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(1, 0, 0), deg2rad @degree
         @position.copy @center.plus new THREE.Vector3(0,0,@dist).applyQuaternion q
         @quaternion.copy q
 
@@ -87,11 +103,7 @@ class Camera extends THREE.PerspectiveCamera
     
     setDist: (factor) =>
         @dist = clamp @minDist, @maxDist, @dist*factor
-        @position.copy @center.plus new THREE.Vector3(0,0,@dist).applyQuaternion @quaternion
-        
-    lookAt: (x,y,z) ->
-        @center = new Vector x,y,z 
-        @position.copy @center.plus new THREE.Vector3(0,0,@dist).applyQuaternion @quaternion
+        @update()
         
     setFov: (fov) -> @fov = Math.max(2.0, Math.min fov, 175.0)
         

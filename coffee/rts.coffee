@@ -8,6 +8,7 @@
 
 { elem, log, _ } = require 'kxk'
 
+FPS    = require './lib/fps'
 World  = require './world'
 Camera = require './camera'
 THREE  = require 'three'
@@ -16,10 +17,9 @@ class RTS
 
     constructor: (@view) ->
         
-        @paused = false
+        @fps = new FPS
         
-        @screenSize = w: @view.clientWidth, h: @view.clientHeight
-        # log "view @screenSize:", @screenSize
+        @paused = false
         
         @renderer = new THREE.WebGLRenderer 
             antialias:              true
@@ -27,7 +27,7 @@ class RTS
             logarithmicDepthBuffer: false
 
         @renderer.setClearColor 0x181818        
-        @renderer.setSize @view.offsetWidth, @view.offsetHeight
+        @renderer.setSize @view.clientWidth, @view.clientHeight
         @renderer.shadowMap.type = THREE.PCFSoftShadowMap
         
         @elem = document.createElement 'div'
@@ -41,36 +41,10 @@ class RTS
         @view.appendChild @elem
         @elem.appendChild @renderer.domElement
         
-        #    0000000   0000000   00     00  00000000  00000000    0000000 
-        #   000       000   000  000   000  000       000   000  000   000
-        #   000       000000000  000000000  0000000   0000000    000000000
-        #   000       000   000  000 0 000  000       000   000  000   000
-        #    0000000  000   000  000   000  00000000  000   000  000   000
+        @camera = new Camera view:@view
         
-        @fov    = 60
-        @near   = 10
-        @far    = 1000
-        @aspect = @view.offsetWidth / @view.offsetHeight
-        @dist   = 20
-        
-        @camera = new Camera 
-            view:   @view
-            aspect: @aspect
-        
-        #    0000000   0000000  00000000  000   000  00000000
-        #   000       000       000       0000  000  000     
-        #   0000000   000       0000000   000 0 000  0000000 
-        #        000  000       000       000  0000  000     
-        #   0000000    0000000  00000000  000   000  00000000
-                
         @scene = new THREE.Scene()
         
-        #   000      000   0000000   000   000  000000000
-        #   000      000  000        000   000     000   
-        #   000      000  000  0000  000000000     000   
-        #   000      000  000   000  000   000     000   
-        #   0000000  000   0000000   000   000     000   
-
         @sun = new THREE.PointLight 0xffffff
         @sun.position.copy @player.camera.getPosition() if @player?
         @sun.position.copy @camera.position
@@ -115,10 +89,8 @@ class RTS
     
     resized: (w,h) ->
         
-        @aspect = w/h
-        @camera.aspect = @aspect
+        @camera.aspect = w/h
         @camera.updateProjectionMatrix()
-        @renderer?.setSize w,h
-        @screenSize = w:w, h:h            
+        @renderer.setSize w,h
         
 module.exports = RTS

@@ -36,5 +36,11 @@ class World
                 mesh = new THREE.Mesh geom, material
                 mesh.position.set x-Math.floor(w/2), y-Math.floor(h/2), 0
                 @scene.add mesh
-        
+
+        geom = new THREE.BoxGeometry 0.8, 0.8, 0.8
+        geom.center()
+        mesh = new THREE.Mesh geom, material
+        mesh.position.set 0, 0, 1
+        @scene.add mesh
+                
 module.exports = World

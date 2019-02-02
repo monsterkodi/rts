@@ -20,9 +20,7 @@ w = new win
     context: (items) -> 
     onLoad: -> window.rts = new RTS $ '#main'
     
-# window.ELECTRON_DISABLE_SECURITY_WARNINGS = true
-window.win   = electron.remote.getCurrentWindow()
-window.winID = window.win.id
+window.win = electron.remote.getCurrentWindow()
     
 # 00000000   00000000   00000000  00000000   0000000
 # 000   000  000   000  000       000       000
@@ -42,7 +40,9 @@ if prefs.get 'devTools'
 # 000   000  000  0000  000       000      000   000       000  000
 #  0000000   000   000   0000000  0000000   0000000   0000000   00000000
 
-onMove  = -> prefs.set 'bounds', window.win.getBounds()
+onMove  = -> saveBounds() 
+
+saveBounds = -> prefs.set 'bounds', window.win.getBounds()
 
 clearListeners = ->
 
@@ -80,33 +80,10 @@ reloadWin = ->
     clearListeners()
     window.win.webContents.reloadIgnoringCache()
 
-# 000   000  000   000  00000000  00000000  000      
-# 000 0 000  000   000  000       000       000      
-# 000000000  000000000  0000000   0000000   000      
-# 000   000  000   000  000       000       000      
-# 00     00  000   000  00000000  00000000  0000000  
-
-onWheel = (event) ->
-    
-    { mod, key, combo } = keyinfo.forEvent event
-
-    if mod == 'ctrl'
-        changeFontSize -event.deltaY/100
-        stopEvent event
-    
-window.document.addEventListener 'wheel', onWheel    
-
 window.onresize = (event) => 
     
-    log 'onresize', event.target.innerWidth, event.target.innerHeight
+    saveBounds()
     rts.resized event.target.innerWidth, event.target.innerHeight
     
 post.on 'menuAction', (action) ->
     
-# 000  000   000  000  000000000    
-# 000  0000  000  000     000       
-# 000  000 0 000  000     000       
-# 000  000  0000  000     000       
-# 000  000   000  000     000       
-
-post.emit 'restore'
