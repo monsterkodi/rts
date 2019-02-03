@@ -9,6 +9,7 @@
 { deg2rad, log, _ } = require 'kxk'
 
 THREE = require 'three'
+AStar  = require './astar'
 Vector = require './lib/vector'
 
 Stone = 
@@ -20,6 +21,14 @@ Stone =
     black:  5
     white:  6
     max:    1000
+    
+Face = 
+    PX: 0
+    PY: 1
+    PZ: 2
+    NX: 3
+    NY: 4
+    NZ: 5
     
 Bot =
     cube:       1
@@ -39,7 +48,6 @@ class World
         
         @stones = {}
         @bots = {}
-        @botMeshes = {}
         
         # # for z in [-5..0]
         # for z in [0..0]
@@ -47,7 +55,8 @@ class World
                 # @wall -40,y*4,z*2, 40,y*4,z*2
                 # @wall y*4,-40,z*2, y*4,40,z*2
   
-        @wall -3, -3, 0, 3, 3, 0
+        @wall -128, 0, 0, 128, 0, 0
+        @wall 0, -128, 0, 0, 128, 0
                 
         @addStone -2,-2,0, Stone.yellow
         @addStone  2,-2,0, Stone.blue
@@ -65,6 +74,8 @@ class World
         @addBot -2, 0,1,  Bot.icosa
         @addBot  0, 2,1,  Bot.knot
         
+        @astar = new AStar @
+        
         @initBotGeoms()
         @constructBots()
         @constructCubes()
@@ -76,23 +87,51 @@ class World
                 for z in [zs..ze]
                     @addStone x, y, z, stone
                     
-    delStone: (x,y,z) -> delete @stones[@cellIndex x,y,z]
-    addStone: (x,y,z, stone=Stone.gray) -> @stones[@cellIndex x,y,z] = stone
-    addBot:   (x,y,z, bot=Bot.cube) -> @bots[@cellIndex x,y,z] = bot
+    delStone: (x,y,z) -> delete @stones[@indexAt x,y,z]
+    addStone: (x,y,z, stone=Stone.gray) -> @stones[@indexAt x,y,z] = stone
+
+    addBot:   (x,y,z, type=Bot.cube, face=Face.PZ) -> 
+        p = @roundPos new Vector x,y,z
+        index = @indexAtPos p
+        @bots[index] = type:type, face:face, pos:p, index:index
+    
+    botAt:     (x,y,z) -> @bots[@indexAt x,y,z]
+    botAtPos:  (v)     -> @bots[@indexAtPos v]
         
-    isStoneAt: (x,y,z) -> @stones[@cellIndex x,y,z] != undefined
+    isStoneAt: (x,y,z) -> @stones[@indexAt x,y,z] != undefined
     isItemAt:  (x,y,z) -> @isStoneAt(x,y,z) or @botAt(x,y,z) 
-    botAt:     (x,y,z) -> @bots[@cellIndex x,y,z]
-    botAtPos:  (v) -> @botAt Math.round(v.x), Math.round(v.y), Math.round(v.z)
-    toIndex:   (v) -> @cellIndex Math.round(v.x), Math.round(v.y), Math.round(v.z)
     roundPos:  (v) -> new Vector(v).round()
         
-    cellIndex: (x,y,z) -> (x+512)+((y+512)<<10)+((z+512)<<20)
+    faceAtPosNorm: (v,n) -> 
+        
+        norm = new Vector n
+        if n.equals Vector.unitX  then return 0
+        if n.equals Vector.unitY  then return 1
+        if n.equals Vector.unitZ  then return 2
+        if n.equals Vector.minusX then return 3
+        if n.equals Vector.minusY then return 4
+        if n.equals Vector.minusZ then return 5
+        
+        # log 'normal:', n, v
+        v = new Vector v 
+        dir = v.to @roundPos(v)
+        angles = [0..5].map (i) -> index:i, norm:Vector.normals[i], angle:Vector.normals[i].angle(norm) + Vector.normals[i].angle(dir)
+        angles.sort (a,b) -> a.angle - b.angle
+        log angles
+        log dir
+        log @roundPos(v)
+        log 'face-> ', angles[0].index
+        return angles[0].index
+        
+        # @indexAtPos(v) + (face<<28)
+    
+    indexAt: (x,y,z) -> (x+256)+((y+256)<<9)+((z+256)<<18)
+    indexAtPos: (v) -> p = @roundPos(v); @indexAt p.x, p.y, p.z
     posAtIndex: (index) -> 
         new Vector 
-            x:( index      & 0b1111111111)-512
-            y:((index>>10) & 0b1111111111)-512
-            z:((index>>20) & 0b1111111111)-512
+            x:( index      & 0b111111111)-256
+            y:((index>>9 ) & 0b111111111)-256
+            z:((index>>18) & 0b111111111)-256
     
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
@@ -100,30 +139,32 @@ class World
     # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
     # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
+    removeHighlight: ->
+        @highlightBot?.highlight?.parent.remove @highlightBot?.highlight
+        delete @highlightBot?.highlight
+        delete @highlightBot
+    
     highlightPos: (v) -> 
         
-        if bot = @botAtPos v
-            index = @toIndex v
-            if index == @highlightIndex
+        p = @roundPos v
+        if bot = @botAtPos p
+            if bot == @highlightBot
                 return
-            @highlightIndex = index
-            @highlightMesh?.parent.remove @highlightMesh
-            
-            p = @posAtIndex index
+            @removeHighlight()
+            @highlightBot = bot
         
             geom = new THREE.BufferGeometry 
-            geom.fromGeometry @botGeoms[bot]
+            geom.fromGeometry @botGeoms[bot.type]
             geom.scale 1.1, 1.1, 1.1
             
             mesh = new THREE.Mesh geom, @highlightMat
             mesh.position.set p.x, p.y, p.z
+            @orientFace mesh, bot.face
             @scene.add mesh
-            @highlightMesh = mesh
             
+            bot.highlight = mesh
         else
-            @highlightMesh?.parent?.remove @highlightMesh
-            delete @highlightMesh
-            @highlightIndex = null
+            @removeHighlight()
         
     # 0000000     0000000   000000000   0000000  
     # 000   000  000   000     000     000       
@@ -178,28 +219,32 @@ class World
                 
         for index,bot of @bots
             p = @posAtIndex index
+            
+            log bot.pos, bot.type
         
-            mesh = new THREE.Mesh @botGeoms[bot], materials[bot]
+            mesh = new THREE.Mesh @botGeoms[bot.type], materials[bot.type]
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.position.set p.x, p.y, p.z
             @scene.add mesh
-            @botMeshes[index] = mesh
+            bot.mesh = mesh
              
-    moveBot: (fromPos, toPos) ->
+    moveBot: (bot, toPos, toFace) ->
         
-        fromIndex = @toIndex fromPos
-        toIndex = @toIndex toPos
-        bot = @bots[fromIndex]
-        mesh = @botMeshes[fromIndex]
+        fromIndex = bot.index
+        toIndex = @indexAtPos toPos
         @bots[toIndex] = bot
-        @botMeshes[toIndex] = mesh
         delete @bots[fromIndex]
-        delete @botMeshes[fromIndex]
         
-        mesh.position.set toPos.x, toPos.y, toPos.z
+        bot.face = toFace
+        bot.index = toIndex
+        bot.pos = toPos
+        bot.mesh.position.set toPos.x, toPos.y, toPos.z
+        @orientFace bot.mesh, toFace
         
-            
+    orientFace: (object, face) ->
+        object.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), Vector.normals[face]
+        
     #  0000000  000   000  0000000    00000000   0000000    
     # 000       000   000  000   000  000       000         
     # 000       000   000  0000000    0000000   0000000     

@@ -6,7 +6,7 @@
  00000 00   0000000   000   000     000     00000000  000   000  000   000  000   0000000   000   000
 ###
 
-{ log } = require 'kxk'
+{ deg2rad, rad2deg, log } = require 'kxk'
 Vector  = require './vector'
 THREE   = require 'three'
 
@@ -87,9 +87,9 @@ class Quaternion
     round: -> @clone @normalize().rounded()
 
     euler: -> [
-        Vector.RAD2DEG Math.atan2 2*(@w*@x+@y*@z), 1-2*(@x*@x+@y*@y)
-        Vector.RAD2DEG Math.asin  2*(@w*@y-@z*@x)
-        Vector.RAD2DEG Math.atan2 2*(@w*@z+@x*@y), 1-2*(@y*@y+@z*@z)]
+        rad2deg Math.atan2 2*(@w*@x+@y*@z), 1-2*(@x*@x+@y*@y)
+        rad2deg Math.asin  2*(@w*@y-@z*@x)
+        rad2deg Math.atan2 2*(@w*@z+@x*@y), 1-2*(@y*@y+@z*@z)]
 
     add: (quat) ->
         @w += quat.w 
@@ -205,14 +205,14 @@ class Quaternion
     @rotationAroundVector: (theta, x,y,z) ->
         v = new Vector x,y,z 
         v.normalize()
-        t = Vector.DEG2RAD(theta)/2.0       
+        t = deg2rad(theta)/2.0       
         s = Math.sin t 
         (new Quaternion Math.cos(t), v.x*s, v.y*s, v.z*s).normalize()
 
     @rotationFromEuler: (x,y,z) ->
-        x = Vector.DEG2RAD x
-        y = Vector.DEG2RAD y
-        z = Vector.DEG2RAD z
+        x = deg2rad x
+        y = deg2rad y
+        z = deg2rad z
         q=new Quaternion  Math.cos(x/2) * Math.cos(y/2) * Math.cos(z/2) + Math.sin(x/2) * Math.sin(y/2) * Math.sin(z/2),
                           Math.sin(x/2) * Math.cos(y/2) * Math.cos(z/2) - Math.cos(x/2) * Math.sin(y/2) * Math.sin(z/2),
                           Math.cos(x/2) * Math.sin(y/2) * Math.cos(z/2) + Math.sin(x/2) * Math.cos(y/2) * Math.sin(z/2),

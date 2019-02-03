@@ -6,7 +6,7 @@
     0      00000000   0000000     000      0000000   000   000
 ###
 
-{ log } = require 'kxk'
+{ rad2deg, log } = require 'kxk'
 
 class Vector
 
@@ -69,13 +69,13 @@ class Vector
         thisXY  = new Vector(@x, @y).normal()
         otherXY = new Vector(v.x, v.y).normal()
         if thisXY.xyperp().dot otherXY >= 0 
-            return Vector.RAD2DEG(Math.acos(thisXY.dot otherXY))
-        -Vector.RAD2DEG(Math.acos(thisXY.dot otherXY))
+            return rad2deg(Math.acos(thisXY.dot otherXY))
+        -rad2deg(Math.acos(thisXY.dot otherXY))
 
         
     dist:   (o) -> @minus(o).length()
     length:    -> Math.sqrt @x*@x + @y*@y + @z*@z
-    angle: (v) -> Vector.RAD2DEG Math.acos @normal().dot v.normal()
+    angle: (v) -> rad2deg Math.acos @normal().dot v.normal()
     dot:   (v) -> @x*v.x + @y*v.y + @z*v.z
     
     mul:   (f) -> new Vector @x*f, @y*f, @z*f
@@ -83,6 +83,7 @@ class Vector
     plus:  (v) -> new Vector(v).add @
     minus: (v) -> new Vector(v).neg().add @
     neg:       -> new Vector -@x, -@y, -@z
+    to:    (v) -> new Vector(v).sub @
      
     add: (v) ->
         @x += v.x 
@@ -129,9 +130,6 @@ class Vector
             throw new Error
         r
 
-    @DEG2RAD: (d) -> Math.PI*d/180.0
-    @RAD2DEG: (r) -> r*180.0/Math.PI
-    
     @unitX  = new Vector 1,0,0
     @unitY  = new Vector 0,1,0
     @unitZ  = new Vector 0,0,1
@@ -139,14 +137,6 @@ class Vector
     @minusY = new Vector 0,-1,0
     @minusZ = new Vector 0,0,-1
     
-    @X  = 0
-    @Y  = 1
-    @Z  = 2
-    @SX = 0
-    @SY = 5
-    @SZ = 10
-    @TX = 12
-    @TY = 13
-    @TZ = 14
-
+    @normals = [Vector.unitX, Vector.unitY, Vector.unitZ, Vector.minusX, Vector.minusY, Vector.minusZ]
+    
 module.exports = Vector
