@@ -9,6 +9,7 @@
 { elem, deg2rad, log, _ } = require 'kxk'
 
 FPS    = require './lib/fps'
+Info   = require './lib/info'
 World  = require './world'
 Camera = require './camera'
 THREE  = require 'three'
@@ -21,6 +22,7 @@ class RTS
         
         window.rts = @
         @fps = new FPS
+        @info = new Info
         
         @paused = false
         
@@ -62,7 +64,7 @@ class RTS
         @light.shadow.mapSize = shadowMapSize
         @scene.add @light
 
-        @light2 = new THREE.PointLight
+        @light2 = new THREE.DirectionalLight
         @light2.intensity = 0.5
         @light2.position.z = 20
         @light2.position.x = 20
@@ -100,7 +102,8 @@ class RTS
         @lastAnimationTime = now
         
         if not @paused
-            @light2.position.applyQuaternion new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 0, 1), -deltaSeconds*0.003
+            angle = -deltaSeconds*0.3
+            @light2.position.applyQuaternion new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 0, 1), angle
         
         oldAnimations = @animations.clone()
         @animations = []
@@ -137,6 +140,7 @@ class RTS
         @scene.remove cone if cone
         
         @fps.draw()
+        @info.draw @renderer.info
 
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000

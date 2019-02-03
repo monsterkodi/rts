@@ -1,0 +1,38 @@
+###
+  000  000   000  00000000   0000000   
+  000  0000  000  000       000   000  
+  000  000 0 000  000000    000   000  
+  000  000  0000  000       000   000  
+  000  000   000  000        0000000   
+###
+{ elem, log, $}  = require 'kxk'
+
+class Info
+
+    constructor: () ->
+                    
+        @elem = elem class:'info', style:'position:absolute; z-index:1'
+        # @elem.style.display = 'none'
+
+        @trias = elem class:'infotext', parent:@elem
+        @lines = elem class:'infotext', parent:@elem
+        @calls = elem class:'infotext', parent:@elem
+
+        document.body.appendChild @elem
+            
+    # 0000000    00000000    0000000   000   000
+    # 000   000  000   000  000   000  000 0 000
+    # 000   000  0000000    000000000  000000000
+    # 000   000  000   000  000   000  000   000
+    # 0000000    000   000  000   000  00     00
+                
+    draw: (info) =>
+        @calls.innerHTML = "calls: #{info.render.calls}"
+        @trias.innerHTML = "trias: #{info.render.triangles}"
+        @lines.innerHTML = "lines: #{info.render.lines}"
+
+    toggle: -> 
+        @elem.style.display = @elem.style.display == 'none' and 'unset' or 'none'       
+
+module.exports = Info
+

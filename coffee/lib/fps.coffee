@@ -5,20 +5,19 @@
   000       000             000
   000       000        0000000 
 ###
-{ clamp, first, last, log, $}  = require 'kxk'
+{ elem, clamp, first, last, log, $}  = require 'kxk'
 
 class FPS
 
     constructor: () ->
                     
-        @elem = document.createElement 'div'
-        @elem.className = 'fps'
+        @elem = elem class:'fps'
         # @elem.style.display = 'none'
 
-        @canvas = document.createElement 'canvas'
-        @canvas.className = "fpsCanvas"
-        @canvas.height = 30*2
-        @canvas.width = 130*2
+        @canvas = elem 'canvas', 
+            class:"fpsCanvas"
+            height: 30*2
+            width:  130*2
         @elem.appendChild @canvas
 
         y = parseInt  -30/2
@@ -38,9 +37,9 @@ class FPS
     # 0000000    000   000  000   000  00     00
                 
     draw: =>
+        
         time = window.performance.now()
         @history.push time-@last
-        # log '???', time-@last
         @history.shift() while @history.length > 260
         @canvas.height = @canvas.height
         ctx = @canvas.getContext '2d'        
@@ -54,9 +53,8 @@ class FPS
         @last = time
 
     toggle: -> 
+        
         @elem.style.display = @elem.style.display == 'none' and 'unset' or 'none'       
-        @history.push 49
-        window.setState 'fps', @elem.style.display != 'none' 
 
 module.exports = FPS
 
