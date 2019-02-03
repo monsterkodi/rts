@@ -26,7 +26,7 @@ class World
         
         @stones = {}
         
-        for z in [-5..0]
+        for z in [-10..0]
         # for z in [0..0]
             for y in [-5..5]
                 @wall -10,y*2,z*2, 10,y*2,z*2
@@ -55,6 +55,8 @@ class World
     addStone: (x,y,z, stone=Stone.gray) ->
         
         @stones[@stoneIndex x,y,z] = stone
+        
+    stoneAt: (x,y,z) -> @stones[@stoneIndex x,y,z] != undefined
         
     stoneIndex: (x,y,z) -> x+Stone.max/2+(y+Stone.max/2)*Stone.max+(z+Stone.max/2)*Stone.max*Stone.max
     stonePos: (index) ->
@@ -124,40 +126,47 @@ class World
         rightside.copy topside
         rightside.rotateY deg2rad 90
         
-        rightside = new THREE.Geometry()
-        rightside.copy topside
-        rightside.rotateY deg2rad 90
+        leftside = new THREE.Geometry()
+        leftside.copy topside
+        leftside.rotateY deg2rad -90
 
         backside = new THREE.Geometry()
         backside.copy topside
-        backside.rotateX deg2rad 90
-        
-        halfcube = new THREE.Geometry()
-        halfcube.merge topside
-        halfcube.merge rightside
-        halfcube.merge backside
-        
-        cubehalf = new THREE.Geometry()
-        cubehalf.copy halfcube
-        cubehalf.rotateX deg2rad 180
-        cubehalf.rotateZ deg2rad 90
+        backside.rotateX deg2rad -90
 
-        cube = new THREE.Geometry()
-        cube.merge cubehalf
-        cube.merge halfcube
-                
-        bufgeo = new THREE.BufferGeometry()
-        bufgeo.fromGeometry cube
-        bufgeo.center()
+        frontside = new THREE.Geometry()
+        frontside.copy topside
+        frontside.rotateX deg2rad 90
+
+        bottomside = new THREE.Geometry()
+        bottomside.copy topside
+        bottomside.rotateX deg2rad -180
         
-        bufgeo.computeBoundingSphere()
+        stonesides = []
+        for stone in [Stone.gray..Stone.white]
+            stonesides.push new THREE.Geometry
         
         for index,stone of @stones
-            pos = @stonePos index
+            p = @stonePos index
+            cube = new THREE.Geometry()
+            if not @stoneAt p.x, p.y, p.z+1 then cube.merge topside
+            if not @stoneAt p.x+1, p.y, p.z then cube.merge rightside
+            if not @stoneAt p.x, p.y+1, p.z then cube.merge backside
+            if not @stoneAt p.x, p.y, p.z-1 then cube.merge bottomside
+            if not @stoneAt p.x-1, p.y, p.z then cube.merge leftside
+            if not @stoneAt p.x, p.y-1, p.z then cube.merge frontside
+            cube.translate p.x, p.y, p.z
+            stonesides[stone].merge cube
+            
+        for stone in [Stone.gray..Stone.white]            
+            
+            bufgeo = new THREE.BufferGeometry()
+            bufgeo.fromGeometry stonesides[stone]
+            
             mesh = new THREE.Mesh bufgeo, materials[stone]
-            mesh.position.set pos.x, pos.y, pos.z
             mesh.castShadow = true
             mesh.receiveShadow = true
             @scene.add mesh
+        
             
 module.exports = World
