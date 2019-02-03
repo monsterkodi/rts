@@ -9,6 +9,7 @@
 { deg2rad, log, _ } = require 'kxk'
 
 THREE = require 'three'
+Vector = require './lib/vector'
 
 Stone = 
     gray:   0
@@ -38,6 +39,7 @@ class World
         
         @stones = {}
         @bots = {}
+        @botMeshes = {}
         
         # # for z in [-5..0]
         # for z in [0..0]
@@ -63,6 +65,7 @@ class World
         @addBot -2, 0,1,  Bot.icosa
         @addBot  0, 2,1,  Bot.knot
         
+        @initBotGeoms()
         @constructBots()
         @constructCubes()
         
@@ -80,18 +83,82 @@ class World
     isStoneAt: (x,y,z) -> @stones[@cellIndex x,y,z] != undefined
     isItemAt:  (x,y,z) -> @isStoneAt(x,y,z) or @botAt(x,y,z) 
     botAt:     (x,y,z) -> @bots[@cellIndex x,y,z]
+    botAtPos:  (v) -> @botAt Math.round(v.x), Math.round(v.y), Math.round(v.z)
+    toIndex:   (v) -> @cellIndex Math.round(v.x), Math.round(v.y), Math.round(v.z)
+    roundPos:  (v) -> new Vector(v).round()
         
     cellIndex: (x,y,z) -> (x+512)+((y+512)<<10)+((z+512)<<20)
-    cellPos:   (index) -> 
-        x:( index      & 0b1111111111)-512
-        y:((index>>10) & 0b1111111111)-512
-        z:((index>>20) & 0b1111111111)-512
+    posAtIndex: (index) -> 
+        new Vector 
+            x:( index      & 0b1111111111)-512
+            y:((index>>10) & 0b1111111111)-512
+            z:((index>>20) & 0b1111111111)-512
     
+    # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
+    # 000   000  000  000        000   000  000      000  000        000   000     000     
+    # 000000000  000  000  0000  000000000  000      000  000  0000  000000000     000     
+    # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
+    # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
+    
+    highlightPos: (v) -> 
+        
+        if bot = @botAtPos v
+            index = @toIndex v
+            if index == @highlightIndex
+                return
+            @highlightIndex = index
+            @highlightMesh?.parent.remove @highlightMesh
+            
+            p = @posAtIndex index
+        
+            geom = new THREE.BufferGeometry 
+            geom.fromGeometry @botGeoms[bot]
+            geom.scale 1.1, 1.1, 1.1
+            
+            mesh = new THREE.Mesh geom, @highlightMat
+            mesh.position.set p.x, p.y, p.z
+            @scene.add mesh
+            @highlightMesh = mesh
+            
+        else
+            @highlightMesh?.parent?.remove @highlightMesh
+            delete @highlightMesh
+            @highlightIndex = null
+        
     # 0000000     0000000   000000000   0000000  
     # 000   000  000   000     000     000       
     # 0000000    000   000     000     0000000   
     # 000   000  000   000     000          000  
     # 0000000     0000000      000     0000000   
+    
+    initBotGeoms: ->
+        
+        @highlightMat = new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.BackSide
+        
+        @botGeoms = [
+            new THREE.Geometry
+            new THREE.BoxGeometry 0.6, 0.6, 0.6          # cube
+            new THREE.ConeGeometry 0.35, 0.6, 12         # cone
+            new THREE.SphereGeometry 0.35, 12, 12        # sphere
+            new THREE.TorusGeometry 0.3, 0.15, 8, 12     # torus
+            new THREE.IcosahedronGeometry 0.4, 0         # icosa
+            new THREE.DodecahedronGeometry 0.4, 0        # dodeca
+            new THREE.TetrahedronGeometry 0.5, 0         # tetra
+            new THREE.OctahedronGeometry 0.4, 0          # octa
+            new THREE.CylinderGeometry 0.3, 0.3, 0.5, 12 # cylinder
+            new THREE.TorusKnotGeometry 0.2, 0.1         # knot
+        ]
+        
+        @botGeoms[Bot.cone].rotateX deg2rad 90
+        @botGeoms[Bot.sphere].rotateX deg2rad 90
+        @botGeoms[Bot.cylinder].rotateX deg2rad 90
+        @botGeoms[Bot.dodeca].rotateX deg2rad 60
+        @botGeoms[Bot.icosa].rotateY deg2rad 60
+        @botGeoms[Bot.icosa].rotateZ deg2rad 18
+
+        for bot in [Bot.cube..Bot.knot]
+            @botGeoms[bot].computeFaceNormals()
+            @botGeoms[bot].computeFlatVertexNormals()
     
     constructBots: ->
         
@@ -108,41 +175,31 @@ class World
             new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5 # cylinder
             new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.5, roughness: 0.5 # knot
         ]       
-        
-        geoms = [
-            new THREE.Geometry
-            new THREE.BoxGeometry 0.6, 0.6, 0.6          # cube
-            new THREE.ConeGeometry 0.35, 0.6, 12         # cone
-            new THREE.SphereGeometry 0.35, 12, 12        # sphere
-            new THREE.TorusGeometry 0.3, 0.15, 8, 12     # torus
-            new THREE.IcosahedronGeometry 0.4, 0         # icosa
-            new THREE.DodecahedronGeometry 0.4, 0        # dodeca
-            new THREE.TetrahedronGeometry 0.5, 0         # tetra
-            new THREE.OctahedronGeometry 0.4, 0          # octa
-            new THREE.CylinderGeometry 0.3, 0.3, 0.5, 12 # cylinder
-            new THREE.TorusKnotGeometry 0.2, 0.1         # knot
-        ]
-        
-        geoms[Bot.cone].rotateX deg2rad 90
-        geoms[Bot.sphere].rotateX deg2rad 90
-        geoms[Bot.cylinder].rotateX deg2rad 90
-        geoms[Bot.dodeca].rotateX deg2rad 60
-        geoms[Bot.icosa].rotateY deg2rad 60
-        geoms[Bot.icosa].rotateZ deg2rad 18
-
-        for bot in [Bot.cube..Bot.knot]
-            geoms[bot].computeFaceNormals()
-            geoms[bot].computeFlatVertexNormals()
-        
+                
         for index,bot of @bots
-            p = @cellPos index
+            p = @posAtIndex index
         
-            mesh = new THREE.Mesh geoms[bot], materials[bot]
+            mesh = new THREE.Mesh @botGeoms[bot], materials[bot]
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.position.set p.x, p.y, p.z
             @scene.add mesh
-                                         
+            @botMeshes[index] = mesh
+             
+    moveBot: (fromPos, toPos) ->
+        
+        fromIndex = @toIndex fromPos
+        toIndex = @toIndex toPos
+        bot = @bots[fromIndex]
+        mesh = @botMeshes[fromIndex]
+        @bots[toIndex] = bot
+        @botMeshes[toIndex] = mesh
+        delete @bots[fromIndex]
+        delete @botMeshes[fromIndex]
+        
+        mesh.position.set toPos.x, toPos.y, toPos.z
+        
+            
     #  0000000  000   000  0000000    00000000   0000000    
     # 000       000   000  000   000  000       000         
     # 000       000   000  0000000    0000000   0000000     
@@ -220,7 +277,7 @@ class World
             stonesides.push new THREE.Geometry
         
         for index,stone of @stones
-            p = @cellPos index
+            p = @posAtIndex index
             cube = new THREE.Geometry()
             if not @isStoneAt p.x, p.y, p.z+1 then cube.merge topside
             if not @isStoneAt p.x+1, p.y, p.z then cube.merge rightside

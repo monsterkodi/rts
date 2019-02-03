@@ -10,20 +10,18 @@
 
 class Vector
 
-    constructor: (x=0,y=0,z=0,w=0) ->
+    constructor: (x=0,y=0,z=0) ->
         if x.x? and x.y?
             @copy x
         else if Array.isArray x
             @x = x[0]
             @y = x[1]
             @z = x[2] ? 0
-            @w = x[3] ? 0
         else
             @x = x
             @y = y
             @z = z ? 0
-            @w = w ? 0
-        if Number.isNaN @x or Number.isNaN @w
+        if Number.isNaN @x
             throw new Error
             
     clone: -> new Vector @
@@ -31,7 +29,6 @@ class Vector
         @x = v.x
         @y = v.y 
         @z = v.z ? 0
-        @w = v.w ? 0
         @
 
     normal: -> new Vector(@).normalize()
@@ -57,11 +54,11 @@ class Vector
             @x *= l
             @y *= l
             @z *= l
-            @w *= l
         @    
 
     xyperp: -> new Vector -@y, @x
-    round:  -> new Vector Math.round(@x), Math.round(@y), Math.round(@z), @w
+    round:  -> new Vector Math.round(@x), Math.round(@y), Math.round(@z)
+    equals: (o) -> @x==o.x and @y==o.y and z=o.z
 
     fade: (o, val) ->
         @x = @x * (1-val) + o.x * val
@@ -76,45 +73,40 @@ class Vector
         -Vector.RAD2DEG(Math.acos(thisXY.dot otherXY))
 
         
-    square:         -> @x*@x + @y*@y + @z*@z
-    distSquare: (o) -> @minus(o).square()
-        
-    length:    -> Math.sqrt @x*@x + @y*@y + @z*@z + @w*@w
+    dist:   (o) -> @minus(o).length()
+    length:    -> Math.sqrt @x*@x + @y*@y + @z*@z
     angle: (v) -> Vector.RAD2DEG Math.acos @normal().dot v.normal()
-    dot:   (v) -> @x*v.x + @y*v.y + @z*v.z + @w*(v.w ? 0)
+    dot:   (v) -> @x*v.x + @y*v.y + @z*v.z
     
-    mul:   (f) -> new Vector @x*f, @y*f, @z*f, @w*f
-    div:   (d) -> new Vector @x/d, @y/d, @z/d, @w/d
+    mul:   (f) -> new Vector @x*f, @y*f, @z*f
+    div:   (d) -> new Vector @x/d, @y/d, @z/d
     plus:  (v) -> new Vector(v).add @
     minus: (v) -> new Vector(v).neg().add @
-    neg:       -> new Vector -@x, -@y, -@z, -@w
+    neg:       -> new Vector -@x, -@y, -@z
      
     add: (v) ->
         @x += v.x 
         @y += v.y 
         @z += v.z ? 0
-        @w += v.w ? 0
         @
     
     sub: (v) ->
         @x -= v.x 
         @y -= v.y 
         @z -= v.z ? 0
-        @w -= v.w ? 0
         @
     
     scale: (f) ->
         @x *= f
         @y *= f
         @z *= f
-        @w *= f
         @
         
     reset: ->
-        @x = @y = @z = @w = 0
+        @x = @y = @z =
         @
     
-    isZero: -> @x == @y == @z == @w == 0
+    isZero: -> @x == @y == @z == 0
 
     @rayPlaneIntersection: (rayPos, rayDirection, planePos, planeNormal) ->
         x = planePos.minus(rayPos).dot(planeNormal) / rayDirection.dot(planeNormal)
@@ -150,7 +142,6 @@ class Vector
     @X  = 0
     @Y  = 1
     @Z  = 2
-    @W  = 3
     @SX = 0
     @SY = 5
     @SZ = 10

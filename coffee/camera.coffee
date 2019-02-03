@@ -20,7 +20,7 @@ class Camera extends THREE.PerspectiveCamera
         super 70, aspect, 0.01, 300 # fov, aspect, near, far
         
         @elem    = opt.view
-        @dist    = @far/16
+        @dist    = @far/64
         @maxDist = @far/2
         @minDist = 0.4
         @center  = new Vector 0, 0, 0
@@ -58,16 +58,22 @@ class Camera extends THREE.PerspectiveCamera
     
     onMouseDown: (event) => 
         
-        if event.buttons == 1
-            @focusOnHit()
-            return
+        @downButtons = event.buttons
+        @mouseMoved  = false
             
         @mouseX = event.clientX
         @mouseY = event.clientY
+        
+        @downPos = new Vector @mouseX, @mouseY
+        
         window.addEventListener    'mousemove',  @onMouseDrag
         window.addEventListener    'mouseup',    @onMouseUp
         
     onMouseUp: (event) => 
+
+        if @downButtons == 1
+            if not @mouseMoved
+                @focusOnHit()
         
         window.removeEventListener 'mousemove',  @onMouseDrag
         window.removeEventListener 'mouseup',    @onMouseUp
@@ -76,8 +82,12 @@ class Camera extends THREE.PerspectiveCamera
 
         x = @mouseX-event.clientX
         y = @mouseY-event.clientY
+        
         @mouseX = event.clientX
         @mouseY = event.clientY
+        
+        if @downPos.dist(new Vector @mouseX, @mouseY) > 60
+            @mouseMoved = true
         
         if event.buttons & 4
             s = @dist * 0.001
@@ -167,7 +177,7 @@ class Camera extends THREE.PerspectiveCamera
         
         @center.fade @centerTarget, deltaSeconds
         @update()
-        if @center.distSquare(@centerTarget) > 0.001
+        if @center.dist(@centerTarget) > 0.00001
             rts.animate @fadeCenter
             
     # 000   000  000   000  00000000  00000000  000      

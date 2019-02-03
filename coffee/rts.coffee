@@ -79,7 +79,10 @@ class RTS
         
         @mouse = new THREE.Vector2
         @raycaster = new THREE.Raycaster()
-        document.addEventListener 'mousemove', @onMouseMove, false
+        
+        document.addEventListener 'mousemove', @onMouseMove
+        document.addEventListener 'mousedown', @onMouseDown
+        document.addEventListener 'mouseup',   @onMouseUp
         
         @animations = []
         @lastAnimationTime = window.performance.now()
@@ -114,30 +117,94 @@ class RTS
         @render()
         setTimeout @animationStep, 1000/60
             
+    # 00     00   0000000   000   000   0000000  00000000  
+    # 000   000  000   000  000   000  000       000       
+    # 000000000  000   000  000   000  0000000   0000000   
+    # 000 0 000  000   000  000   000       000  000       
+    # 000   000   0000000    0000000   0000000   00000000  
+    
+    onMouseDown: (event) =>
+        
+        if event.buttons & 1
+            
+            @castRay @calcMouse event
+            
+            if @world.highlightIndex?
+                @dragBot = 
+                    index: @world.highlightIndex
+                    pos:   @world.posAtIndex @world.highlightIndex
+                    bot:   @world.botAtPos @world.posAtIndex @world.highlightIndex
+            else
+                delete @dragBot
+        
+    onMouseUp: (event) =>
+
+        delete @dragBot
+        @calcMouse event
+    
     onMouseMove: (event) =>
+        
+        hit = @castRay @calcMouse event
+
+        if hit and @dragBot
+            if not hit.bot and not @dragBot.pos.equals hit.pos
+                # log 'bot move', @dragBot, hit
+                @world.moveBot @dragBot.pos, hit.pos 
+                @dragBot.index = @world.toIndex hit.pos
+                @dragBot.pos = hit.pos
+        
+    calcMouse: (event) ->
         
         br = @elem.getBoundingClientRect()
         @mouse.x = ((event.clientX-br.left) / br.width) * 2 - 1
         @mouse.y = -((event.clientY-br.top) / br.height ) * 2 + 1
+        return @mouse
+
+    #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
+    # 000       000   000  000          000     000   000  000   000   000 000   
+    # 000       000000000  0000000      000     0000000    000000000    00000    
+    # 000       000   000       000     000     000   000  000   000     000     
+    #  0000000  000   000  0000000      000     000   000  000   000     000     
+    
+    castRay: (screenPos) ->
         
-    render: ->
-            
-        @raycaster.setFromCamera @mouse, @camera
+        @raycaster.setFromCamera screenPos, @camera
         intersects = @raycaster.intersectObjects @scene.children, true
 
         if intersects.length
-            geom = new THREE.CircleGeometry 0.1, 18
-            geom.translate 0,0,0.01
-            wire = new THREE.WireframeGeometry geom
-            cone = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
-            cone.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), intersects[0].face.normal
-            cone.position.copy intersects[0].point
-            @scene.add cone
+            # log intersects[0].distance, intersects[0].point, intersects[0].face
             
+            point = intersects[0].point
+            @world.highlightPos point     
+            
+            return 
+                norm: intersects[0].face.normal
+                dist: intersects[0].distance
+                bot: @world.botAtPos point
+                pos: @world.roundPos point
+            
+            # @scene.remove @cursor if @cursor
+#             
+            # if intersects[0].face and not @world.highlightIndex
+#                 
+                # geom = new THREE.CircleGeometry 0.1, 18
+                # geom.translate 0,0,0.01
+                # wire = new THREE.WireframeGeometry geom
+                # @cursor = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
+                # @cursor.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), intersects[0].face.normal
+                # @cursor.position.copy intersects[0].point
+                # @scene.add @cursor
+        
+    # 00000000   00000000  000   000  0000000    00000000  00000000   
+    # 000   000  000       0000  000  000   000  000       000   000  
+    # 0000000    0000000   000 0 000  000   000  0000000   0000000    
+    # 000   000  000       000  0000  000   000  000       000   000  
+    # 000   000  00000000  000   000  0000000    00000000  000   000  
+    
+    render: ->
+
         @sun.position.copy @camera.position
         @renderer.render @world.scene, @camera
-        
-        @scene.remove cone if cone
         
         @fps.draw()
         @info.draw @renderer.info
