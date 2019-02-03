@@ -83,7 +83,9 @@ reloadWin = ->
 window.onresize = (event) => 
     
     saveBounds()
-    rts.resized event.target.innerWidth, event.target.innerHeight
+    main =$ "#main"
+    br = main.getBoundingClientRect()
+    rts.resized br.width, br.height
     
 post.on 'menuAction', (action) ->
     

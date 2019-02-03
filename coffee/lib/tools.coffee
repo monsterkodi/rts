@@ -8,8 +8,6 @@
 
 { path, os, fs, _ } = require 'kxk'
 
-sfmt  = require 'sprintf-js'
-
 module.exports = 
 
     # 0000000    000   0000000  000000000
@@ -134,34 +132,3 @@ module.exports =
         
     swapExt: (p, ext) -> path.join(path.dirname(p), path.basename(p, path.extname(p))) + ext
                             
-    # 0000000     0000000   00     00
-    # 000   000  000   000  000   000
-    # 000   000  000   000  000000000
-    # 000   000  000   000  000 0 000
-    # 0000000     0000000   000   000
-        
-    sw: () -> document.body.clientWidth
-    sh: () -> document.body.clientHeight
-    
-#  0000000  000000000  00000000   000  000   000   0000000 
-# 000          000     000   000  000  0000  000  000      
-# 0000000      000     0000000    000  000 0 000  000  0000
-#      000     000     000   000  000  000  0000  000   000
-# 0000000      000     000   000  000  000   000   0000000 
-    
-if not String.prototype.splice
-    String.prototype.splice = (start, delCount, newSubStr='') ->
-        @slice(0, start) + newSubStr + @slice(start + Math.abs(delCount))
-    String.prototype.strip = String.prototype.trim
-    String.prototype.fmt = -> sfmt.vsprintf @, [].slice.call arguments
-
-#  0000000   00000000   00000000    0000000   000   000
-# 000   000  000   000  000   000  000   000   000 000 
-# 000000000  0000000    0000000    000000000    00000  
-# 000   000  000   000  000   000  000   000     000   
-# 000   000  000   000  000   000  000   000     000   
-
-if not Array.prototype.reversed
-    Array.prototype.reversed = ->
-        _.clone(@).reverse()
-

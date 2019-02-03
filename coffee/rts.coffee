@@ -6,7 +6,7 @@
 000   000     000     0000000 
 ###
 
-{ elem, log, _ } = require 'kxk'
+{ elem, deg2rad, log, _ } = require 'kxk'
 
 FPS    = require './lib/fps'
 World  = require './world'
@@ -14,21 +14,12 @@ Camera = require './camera'
 THREE  = require 'three'
 
 window.THREE = THREE
-# require "three/examples/js/postprocessing/EffectComposer"
-# require "three/examples/js/postprocessing/RenderPass"
-# require "three/examples/js/postprocessing/ShaderPass"
-# require "three/examples/js/postprocessing/SAOPass"
-# require "three/examples/js/shaders/CopyShader"
-# require "three/examples/js/shaders/SAOShader"
-# require "three/examples/js/shaders/DepthLimitedBlurShader"
-# require "three/examples/js/shaders/UnpackDepthRGBAShader"
-# require "three/examples/js/postprocessing/SSAOPass"
-# require "three/examples/js/shaders/SSAOShader"
 
 class RTS
 
     constructor: (@view) ->
         
+        window.rts = @
         @fps = new FPS
         
         @paused = false
@@ -82,9 +73,15 @@ class RTS
         @ambient = new THREE.AmbientLight 0x333333
         @scene.add @ambient
             
-        @world = new World @scene        
+        @world = new World @scene    
         
-        @animate()
+        @mouse = new THREE.Vector2
+        @raycaster = new THREE.Raycaster()
+        document.addEventListener 'mousemove', @onMouseMove, false
+        
+        @animations = []
+        @lastAnimationTime = window.performance.now()
+        @animationStep()
 
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -92,25 +89,54 @@ class RTS
     # 000   000  000  0000  000  000 0 000  000   000     000     000       
     # 000   000  000   000  000  000   000  000   000     000     00000000  
     
-    animate: =>
+    animate: (func) ->
         
-        requestAnimationFrame @animate
+        @animations.push func
+    
+    animationStep: =>
+        
+        now = window.performance.now()
+        deltaSeconds = (now - @lastAnimationTime) * 0.001
+        @lastAnimationTime = now
+        
         if not @paused
-            secs = 1.0/60.0
-            @animationStep delta: secs*1000, dsecs: secs
-        @render()
-            
-    animationStep: (step) ->
-
-        @light2.position.applyQuaternion new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 0, 1), -step.dsecs*0.03
+            @light2.position.applyQuaternion new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 0, 1), -deltaSeconds*0.003
         
-        # @camera.pivot step.dsecs*2, step.dsecs*1
+        oldAnimations = @animations.clone()
+        @animations = []
+        
+        for animation in oldAnimations
+            animation deltaSeconds
             
+        @render()
+        setTimeout @animationStep, 1000/60
+            
+    onMouseMove: (event) =>
+        
+        br = @elem.getBoundingClientRect()
+        @mouse.x = ((event.clientX-br.left) / br.width) * 2 - 1
+        @mouse.y = -((event.clientY-br.top) / br.height ) * 2 + 1
+        
     render: ->
+            
+        @raycaster.setFromCamera @mouse, @camera
+        intersects = @raycaster.intersectObjects @scene.children, true
+
+        if intersects.length
+            geom = new THREE.CircleGeometry 0.1, 18
+            geom.translate 0,0,0.01
+            wire = new THREE.WireframeGeometry geom
+            cone = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
+            cone.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), intersects[0].face.normal
+            cone.position.copy intersects[0].point
+            @scene.add cone
             
         @sun.position.copy @camera.position
         @renderer.render @world.scene, @camera
-        # @composer.render()
+        
+        @scene.remove cone if cone
+        
+        @fps.draw()
 
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000

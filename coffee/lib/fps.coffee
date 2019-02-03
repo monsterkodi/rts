@@ -7,8 +7,6 @@
 ###
 { clamp, first, last, log, $}  = require 'kxk'
 
-now = require 'performance-now'
-
 class FPS
 
     constructor: () ->
@@ -29,10 +27,9 @@ class FPS
         @canvas.style.transform = t
         
         @history = []
-        @last = now()
+        @last = window.performance.now()
             
         document.body.appendChild @elem
-        window.requestAnimationFrame @draw
             
     # 0000000    00000000    0000000   000   000
     # 000   000  000   000  000   000  000 0 000
@@ -41,8 +38,9 @@ class FPS
     # 0000000    000   000  000   000  00     00
                 
     draw: =>
-        time = now()
+        time = window.performance.now()
         @history.push time-@last
+        # log '???', time-@last
         @history.shift() while @history.length > 260
         @canvas.height = @canvas.height
         ctx = @canvas.getContext '2d'        
@@ -54,7 +52,6 @@ class FPS
             h = Math.min ms, 60
             ctx.fillRect 260-@history.length+i, 60-h, 2, h
         @last = time
-        window.requestAnimationFrame @draw
 
     toggle: -> 
         @elem.style.display = @elem.style.display == 'none' and 'unset' or 'none'       

@@ -10,23 +10,81 @@
 
 THREE = require 'three'
 
+Stone = 
+    gray:   0
+    red:    1
+    green:  2
+    blue:   3
+    yellow: 4
+    black:  5
+    white:  6
+    max:    1000
+
 class World
 
     constructor: (@scene) ->
-                                 
+        
+        @stones = {}
+        
+        for z in [-5..0]
+        # for z in [0..0]
+            for y in [-5..5]
+                @wall -10,y*2,z*2, 10,y*2,z*2
+                @wall y*2,-10,z*2, y*2,10,z*2
+             
+        @addStone  0,-1,0, Stone.red
+        @addStone -2,-1,0, Stone.yellow
+        @addStone  2,-1,0, Stone.blue
+        @addStone  0,1,0, Stone.green
+        @addStone -2,1,0, Stone.white
+        @addStone  2,1,0, Stone.black
+        
+        @construct()
+        
+    wall: (xs, ys, zs, xe, ye, ze, stone=Stone.gray) ->
+        
+        for x in [xs..xe]
+            for y in [ys..ye]
+                for z in [zs..ze]
+                    @addStone x, y, z, stone
+                    
+    delStone: (x,y,z) ->
+        
+        delete @stones[@stoneIndex x,y,z]
+                    
+    addStone: (x,y,z, stone=Stone.gray) ->
+        
+        @stones[@stoneIndex x,y,z] = stone
+        
+    stoneIndex: (x,y,z) -> x+Stone.max/2+(y+Stone.max/2)*Stone.max+(z+Stone.max/2)*Stone.max*Stone.max
+    stonePos: (index) ->
+            x = index % Stone.max
+            index -= x
+            x -= Stone.max/2
+            y = index % (Stone.max * Stone.max)
+            index -= y
+            y /= Stone.max
+            y -= Stone.max/2
+            z = index / (Stone.max * Stone.max) - Stone.max/2
+            x:x, y:y, z:z
+    
+    construct: ->
+                                         
         #  0000000  000   000  0000000    00000000   0000000    
         # 000       000   000  000   000  000       000         
         # 000       000   000  0000000    0000000   0000000     
         # 000       000   000  000   000  000            000    
         #  0000000   0000000   0000000    00000000  0000000     
         
-        material_gray   = new THREE.MeshPhongMaterial color:0x111111
-        material_red    = new THREE.MeshPhongMaterial color:0xff0000
-        material_blue   = new THREE.MeshPhongMaterial color:0x0000ff
-        material_green  = new THREE.MeshPhongMaterial color:0x004400
-        material_white  = new THREE.MeshPhongMaterial color:0xffffff
-        material_yellow = new THREE.MeshPhongMaterial color:0xffff00
-        material_black  = new THREE.MeshPhongMaterial color:0x000000
+        materials = [
+            new THREE.MeshPhongMaterial color:0x111111
+            new THREE.MeshPhongMaterial color:0xdd0000
+            new THREE.MeshPhongMaterial color:0x008800
+            new THREE.MeshPhongMaterial color:0x0000ff
+            new THREE.MeshPhongMaterial color:0xffff00
+            new THREE.MeshPhongMaterial color:0x000000
+            new THREE.MeshPhongMaterial color:0xffffff
+            ]
             
         s = 0.5
         o = 0.55
@@ -90,52 +148,16 @@ class World
                 
         bufgeo = new THREE.BufferGeometry()
         bufgeo.fromGeometry cube
+        bufgeo.center()
         
         bufgeo.computeBoundingSphere()
         
-        w = 9
-        h = 5
-        for x in [0...w]
-            for y in [0...h]
-                mesh = new THREE.Mesh bufgeo, material_gray
-                mesh.position.set x-Math.floor(w/2), y-Math.floor(h/2), 0
-                mesh.castShadow = true
-                mesh.receiveShadow = true
-                @scene.add mesh
-
-        w = 11
-        h = 7
-        for x in [0...w]
-            for y in [0...h]
-                mesh = new THREE.Mesh bufgeo, material_gray
-                mesh.position.set x-Math.floor(w/2), y-Math.floor(h/2), -2
-                mesh.castShadow = true
-                mesh.receiveShadow = true
-                @scene.add mesh
-                
-        mesh = new THREE.Mesh bufgeo, material_red
-        mesh.castShadow = true
-        mesh.receiveShadow = true
-        mesh.position.set 0, 0, 1
-        @scene.add mesh
-
-        mesh = new THREE.Mesh bufgeo, material_blue
-        mesh.castShadow = true
-        mesh.receiveShadow = true
-        mesh.position.set 2, 1, 2
-        @scene.add mesh
-        
-        mesh = new THREE.Mesh bufgeo, material_green
-        mesh.castShadow = true
-        mesh.receiveShadow = true
-        mesh.position.set 2, 1, 3
-        @scene.add mesh
-
-        mesh = new THREE.Mesh bufgeo, material_yellow
-        mesh.castShadow = true
-        mesh.receiveShadow = true
-        mesh.position.set -2, 1, 3
-        @scene.add mesh
-        
-        
+        for index,stone of @stones
+            pos = @stonePos index
+            mesh = new THREE.Mesh bufgeo, materials[stone]
+            mesh.position.set pos.x, pos.y, pos.z
+            mesh.castShadow = true
+            mesh.receiveShadow = true
+            @scene.add mesh
+            
 module.exports = World

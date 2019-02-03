@@ -63,6 +63,11 @@ class Vector
     xyperp: -> new Vector -@y, @x
     round:  -> new Vector Math.round(@x), Math.round(@y), Math.round(@z), @w
 
+    fade: (o, val) ->
+        @x = @x * (1-val) + o.x * val
+        @y = @y * (1-val) + o.y * val
+        @z = @z * (1-val) + o.z * val
+    
     xyangle: (v) ->
         thisXY  = new Vector(@x, @y).normal()
         otherXY = new Vector(v.x, v.y).normal()
@@ -70,7 +75,11 @@ class Vector
             return Vector.RAD2DEG(Math.acos(thisXY.dot otherXY))
         -Vector.RAD2DEG(Math.acos(thisXY.dot otherXY))
 
-    length:    -> Math.sqrt @x*@x+@y*@y+@z*@z+@w*@w
+        
+    square:         -> @x*@x + @y*@y + @z*@z
+    distSquare: (o) -> @minus(o).square()
+        
+    length:    -> Math.sqrt @x*@x + @y*@y + @z*@z + @w*@w
     angle: (v) -> Vector.RAD2DEG Math.acos @normal().dot v.normal()
     dot:   (v) -> @x*v.x + @y*v.y + @z*v.z + @w*(v.w ? 0)
     
