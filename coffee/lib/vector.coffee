@@ -73,6 +73,7 @@ class Vector
         -rad2deg(Math.acos(thisXY.dot otherXY))
 
         
+    manhattan: (o) -> Math.abs(o.x-@x)+Math.abs(o.y-@y)+Math.abs(o.z-@z)
     dist:   (o) -> @minus(o).length()
     length:    -> Math.sqrt @x*@x + @y*@y + @z*@z
     angle: (v) -> rad2deg Math.acos @normal().dot v.normal()
@@ -130,6 +131,13 @@ class Vector
             throw new Error
         r
 
+    @PX = 0
+    @PY = 1
+    @PZ = 2
+    @NX = 3
+    @NY = 4
+    @NZ = 5
+        
     @unitX  = new Vector 1,0,0
     @unitY  = new Vector 0,1,0
     @unitZ  = new Vector 0,0,1

@@ -77,22 +77,24 @@ class World
                 # @wall -40,y*4,z*2, 40,y*4,z*2
                 # @wall y*4,-40,z*2, y*4,40,z*2
   
-        @wall -128, 0, 0, 128, 0, 0
-        @wall 0, -128, 0, 0, 128, 0
+        # @wall -128, 0, 0, 128, 0, 0
+        # @wall 0, -128, 0, 0, 128, 0
+        
+        @wall -2, 0, 0, 2, 0, 0
+        @wall 0, -2, 0, 0, 2, 0
                 
         @addStone -2,-2,0, Stone.yellow
         @addStone  2,-2,0, Stone.blue
         @addStone -2, 2,0, Stone.white
         @addStone  2, 2,0, Stone.red
 
+        @cube = @addBot  0, 0,1,  Bot.cube
         @addBot -2,-2,1,  Bot.sphere
         @addBot  2,-2,1,  Bot.torus
-        @addBot -2, 2,1,  Bot.cube
+        @addBot -2, 2,1,  Bot.octa
         @addBot  2, 2,1,  Bot.dodeca
-                          
         @addBot  2, 0,1,  Bot.cone
         @addBot  0,-2,1,  Bot.cylinder
-        @addBot  0, 0,1,  Bot.octa
         @addBot -2, 0,1,  Bot.icosa
         @addBot  0, 2,1,  Bot.knot
         
@@ -101,6 +103,52 @@ class World
         @initBotGeoms()
         @constructBots()
         @constructCubes()
+        @constructPaths()
+        
+    constructPaths: ->
+        
+        for index,bot of @bots
+            continue if bot == @cube
+            @addPathFromBotToBot @cube, bot
+            
+    addPathFromBotToBot: (from, to) ->
+        to.path?.parent?.remove to.path
+        path = @astar.findPath @faceIndex(from.face, from.index), @faceIndex(to.face, to.index)
+        if path
+            to.path = @addPath path
+        else
+            delete to.path
+            
+    addPath: (path) ->
+        
+        material = new THREE.LineBasicMaterial color: 0xffffff, depthTest:false
+        
+        # geometry = new THREE.Geometry
+        # for index in path
+            # p = @posAtIndex index
+            # geometry.vertices.push new THREE.Vector3 p.x, p.y, p.z
+#             
+        # line = new THREE.Line geometry, material
+                
+        points = []
+        for faceIndex in path
+            [face, index] = @splitFaceIndex faceIndex
+            p = @posAtIndex index
+            points.push new THREE.Vector3 p.x, p.y, p.z
+        
+        spline = new THREE.CatmullRomCurve3 points
+        
+        extrusionSegments = path.length*4
+        radiusSegments = 4
+        closed = false
+        radius = 0.1
+        
+        geometry = new THREE.TubeBufferGeometry spline, extrusionSegments, radius, radiusSegments, closed
+            
+        line = new THREE.Line geometry, material
+        
+        @scene.add line
+        line
         
     wall: (xs, ys, zs, xe, ye, ze, stone=Stone.gray) ->
         
@@ -116,7 +164,7 @@ class World
     addBot:   (x,y,z, type=Bot.cube, face=Face.PZ) -> 
         p = @roundPos new Vector x,y,z
         index = @indexAtPos p
-        @bots[index] = type:type, face:face, pos:p, index:index
+        @bots[index] = type:type, pos:p, face:face, index:index
     
     botAt:     (x,y,z) -> @bots[@indexAt x,y,z]
     botAtPos:  (v)     -> @bots[@indexAtPos v]
@@ -141,6 +189,22 @@ class World
         angles.sort (a,b) -> a.angle - b.angle
         return angles[0].index
     
+    faceIndex: (face,index) -> (face<<28) | index
+    splitFaceIndex: (faceIndex) -> [faceIndex >> 28, faceIndex & ((Math.pow 2, 27)-1)]
+    stringForFace: (face) ->
+        switch face
+            when Face.PX then return "PX"
+            when Face.PY then return "PY"
+            when Face.PZ then return "PZ"
+            when Face.NX then return "NX"
+            when Face.NY then return "NY"
+            when Face.NZ then return "NZ"
+            
+    stringForFaceIndex: (faceIndex) ->
+        [face,index] = @splitFaceIndex faceIndex
+        pos = @posAtIndex index
+        "#{pos.x} #{pos.y} #{pos.z} #{@stringForFace(face)}"
+    
     indexAt: (x,y,z) -> (x+256)+((y+256)<<9)+((z+256)<<18)
     indexAtPos: (v) -> p = @roundPos(v); @indexAt p.x, p.y, p.z
     posAtIndex: (index) -> 
@@ -148,7 +212,7 @@ class World
             x:( index      & 0b111111111)-256
             y:((index>>9 ) & 0b111111111)-256
             z:((index>>18) & 0b111111111)-256
-    
+                
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
     # 000000000  000  000  0000  000000000  000      000  000  0000  000000000     000     
@@ -248,6 +312,12 @@ class World
         bot.index = toIndex
         bot.pos = @roundPos toPos
         bot.mesh.position.set toPos.x, toPos.y, toPos.z
+        
+        if bot == @cube
+            @constructPaths()
+        else
+            @addPathFromBotToBot @cube, bot
+        
         @orientFace bot.mesh, toFace
         @colorBot bot
         

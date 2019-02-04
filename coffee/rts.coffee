@@ -154,7 +154,10 @@ class RTS
                 @world.moveBot @dragBot, hit.pos, hit.face
                 @world.highlightPos @dragBot.pos
 
-                # log @world.astar.findPath @world.indexAtPos(0,0,1), @world.indexAtPos(0,3,1)
+                sourceFaceIndex = @world.faceIndex Vector.PZ, @world.indexAt(0,0,1)
+                targetFaceIndex = @world.faceIndex @dragBot.face, @dragBot.index
+                log @world.stringForFaceIndex(sourceFaceIndex), @world.stringForFaceIndex(targetFaceIndex)
+                log @world.astar.findPath sourceFaceIndex, targetFaceIndex
                 
     calcMouse: (event) ->
         
