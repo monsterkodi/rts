@@ -44,10 +44,10 @@ Bot =
 
 Materials = 
     highlight:  new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.BackSide
-    botWhite:   new THREE.MeshPhongMaterial color:0xffffff
+    botWhite:   new THREE.MeshStandardMaterial color:0xffaa88, metalness: 0.9, roughness: 0.5 
     # tube:       new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.DoubleSide
-    tube:       new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5, side:THREE.DoubleSide
-    botGray:    new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5
+    tube:       new THREE.MeshStandardMaterial color:0xaa8866, metalness: 0.9, roughness: 0.5 
+    botGray:    new THREE.MeshStandardMaterial color:0xffaa88, metalness: 0.9, roughness: 0.5
     stone: [   
                 new THREE.MeshPhongMaterial color:0x111111 # gray
                 new THREE.MeshPhongMaterial color:0xdd0000 # red
@@ -169,12 +169,12 @@ class World
         
         if p1.face != p2.face
             
-            if p1.index == p2.index
+            if p1.index == p2.index # convex
                 n2 = Vector.normals[p1.face].mul(0.025)
                 n3 = Vector.normals[p2.face].mul(0.025)
                 
-                n1 = n2.plus Vector.normals[p2.face].mul(0.025)
-                n4 = n3.plus Vector.normals[p1.face].mul(0.025)
+                n1 = n2.plus Vector.normals[p2.face].mul(0.02)
+                n4 = n3.plus Vector.normals[p1.face].mul(0.02)
             else
                 n1 = Vector.normals[p1.face].mul(0.025)
                 n4 = Vector.normals[p2.face].mul(0.025)
@@ -198,12 +198,13 @@ class World
         tube.vertices.push new THREE.Vector3 p2.pos.x-n7.x,  p2.pos.y-n7.y, p2.pos.z-n7.z
         tube.vertices.push new THREE.Vector3 p2.pos.x+n8.x,  p2.pos.y+n8.y, p2.pos.z+n8.z
         
-        tube.faces.push new THREE.Face3 0, 1, 2
-        tube.faces.push new THREE.Face3 2, 3, 0
+        tube.faces.push new THREE.Face3 0, 5, 6
+        tube.faces.push new THREE.Face3 6, 3, 0
+        tube.faces.push new THREE.Face3 4, 0, 3
+        tube.faces.push new THREE.Face3 3, 7, 4
+        tube.faces.push new THREE.Face3 5, 4,  6
+        tube.faces.push new THREE.Face3 7, 6,  4
         
-        tube.faces.push new THREE.Face3 4, 5, 6
-        tube.faces.push new THREE.Face3 6, 7, 4
-
         tube
         
     addPath: (path) ->
@@ -344,17 +345,25 @@ class World
                 
         @botGeoms = [
             new THREE.Geometry
-            new THREE.BoxGeometry 0.5, 0.5, 0.5          # cube
-            new THREE.ConeGeometry 0.25, 0.5, 12         # cone
-            new THREE.SphereGeometry 0.25, 12, 12        # sphere
-            new THREE.TorusGeometry 0.2, 0.125, 8, 12     # torus
-            new THREE.IcosahedronGeometry 0.3, 0         # icosa
-            new THREE.DodecahedronGeometry 0.3, 0        # dodeca
-            new THREE.TetrahedronGeometry 0.5, 0         # tetra
-            new THREE.OctahedronGeometry 0.3, 0          # octa
+            # new THREE.BoxGeometry 0.33, 0.33, 0.33         # cube
+            new THREE.DodecahedronGeometry 0.3, 0         # cube
+            new THREE.ConeGeometry 0.25, 0.5, 12           # cone
+            new THREE.SphereGeometry 0.25, 12, 12          # sphere
+            new THREE.TorusGeometry 0.2, 0.125, 8, 12      # torus
+            new THREE.IcosahedronGeometry 0.3, 0           # icosa
+            new THREE.DodecahedronGeometry 0.3, 0          # dodeca
+            new THREE.TetrahedronGeometry 0.5, 0           # tetra
+            new THREE.OctahedronGeometry 0.3, 0            # octa
             new THREE.CylinderGeometry 0.25, 0.25, 0.5, 12 # cylinder
-            new THREE.TorusKnotGeometry 0.15, 0.1         # knot
+            new THREE.TorusKnotGeometry 0.15, 0.1          # knot
         ]
+        
+        # @botGeoms[Bot.cube].merge new THREE.OctahedronGeometry 0.33, 0
+        @botGeoms[Bot.cube].rotateX deg2rad 60
+        icos = new THREE.IcosahedronGeometry 0.3, 0
+        icos.rotateY deg2rad 60
+        icos.rotateZ deg2rad -18
+        @botGeoms[Bot.cube].merge icos
         
         @botGeoms[Bot.cone].rotateX deg2rad 90
         @botGeoms[Bot.sphere].rotateX deg2rad 90
