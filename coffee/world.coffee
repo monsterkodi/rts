@@ -44,6 +44,9 @@ Bot =
 
 Materials = 
     highlight:  new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.BackSide
+    botWhite:   new THREE.MeshPhongMaterial color:0xffffff
+    # tube:       new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.DoubleSide
+    tube:       new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5, side:THREE.DoubleSide
     botGray:    new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5
     stone: [   
                 new THREE.MeshPhongMaterial color:0x111111 # gray
@@ -82,22 +85,24 @@ class World
         
         @wall -2, 0, 0, 2, 0, 0
         @wall 0, -2, 0, 0, 2, 0
+        @wall 2, -2, 0, 2, 2, 0
+        @wall -2, -2, 0, -2, 2, 0
                 
-        @addStone -2,-2,0, Stone.yellow
-        @addStone  2,-2,0, Stone.blue
-        @addStone -2, 2,0, Stone.white
-        @addStone  2, 2,0, Stone.red
+        # @addStone -2,-2,0, Stone.yellow
+        # @addStone  2,-2,0, Stone.blue
+        # @addStone -2, 2,0, Stone.white
+        # @addStone  2, 2,0, Stone.red
 
         @cube = @addBot  0, 0,1,  Bot.cube
+        @addBot  1,-2,0,  Bot.cylinder, Face.PX
         @addBot -2,-2,1,  Bot.sphere
         @addBot  2,-2,1,  Bot.torus
         @addBot -2, 2,1,  Bot.octa
         @addBot  2, 2,1,  Bot.dodeca
         @addBot  2, 0,1,  Bot.cone
-        @addBot  0,-2,1,  Bot.cylinder
         @addBot -2, 0,1,  Bot.icosa
         @addBot  0, 2,1,  Bot.knot
-        
+#         
         @astar = new AStar @
         
         @initBotGeoms()
@@ -105,6 +110,12 @@ class World
         @constructCubes()
         @constructPaths()
         
+    # 00000000    0000000   000000000  000   000  
+    # 000   000  000   000     000     000   000  
+    # 00000000   000000000     000     000000000  
+    # 000        000   000     000     000   000  
+    # 000        000   000     000     000   000  
+    
     constructPaths: ->
         
         for index,bot of @bots
@@ -112,6 +123,7 @@ class World
             @addPathFromBotToBot @cube, bot
             
     addPathFromBotToBot: (from, to) ->
+        
         to.path?.parent?.remove to.path
         path = @astar.findPath @faceIndex(from.face, from.index), @faceIndex(to.face, to.index)
         if path
@@ -119,33 +131,106 @@ class World
         else
             delete to.path
             
+    directionFaceToFace: (fromFaceIndex, toFaceIndex) ->
+        
+        [fromFace, fromIndex] = @splitFaceIndex fromFaceIndex
+        [  toFace,   toIndex] = @splitFaceIndex toFaceIndex
+        if fromFace == toFace # flat case : vector to target
+            @posAtIndex(fromIndex).to(@posAtIndex toIndex).mul 0.5
+        else if fromIndex == toIndex # concave case : flip target face normal
+            Vector.normals[(toFace+3)%6].mul 0.3
+        else
+            Vector.normals[toFace].mul 0.475 # convex case : target face normal
+            
+    tubePoints: (path) ->
+        
+        points = []
+        [lastFace, lastIndex] = @splitFaceIndex path[0]
+        lastPos = @posAtIndex lastIndex
+        
+        aboveFace   = 0.35
+        
+        lastPos.sub Vector.normals[lastFace].mul aboveFace
+        points.push face:lastFace, index:lastIndex, pos:new Vector lastPos.x, lastPos.y, lastPos.z
+        for i in [1...path.length]
+            [nextFace, nextIndex] = @splitFaceIndex path[i]
+            nextPos = @posAtIndex nextIndex
+            nextPos.sub Vector.normals[nextFace].mul aboveFace
+            pos1 = lastPos.plus @directionFaceToFace path[i-1], path[i]
+            pos2 = nextPos.plus @directionFaceToFace path[i], path[i-1]
+            points.push face:lastFace, index:lastIndex, pos:new Vector pos1.x, pos1.y, pos1.z
+            points.push face:nextFace, index:nextIndex, pos:new Vector pos2.x, pos2.y, pos2.z
+            points.push face:nextFace, index:nextIndex, pos:new Vector nextPos.x, nextPos.y, nextPos.z
+            [lastFace, lastIndex] = [nextFace, nextIndex]
+            lastPos = nextPos
+        points
+            
+    addTubeFaces: (p1, p2) -> 
+        
+        if p1.face != p2.face
+            
+            if p1.index == p2.index
+                n2 = Vector.normals[p1.face].mul(0.025)
+                n3 = Vector.normals[p2.face].mul(0.025)
+                
+                n1 = n2.plus Vector.normals[p2.face].mul(0.025)
+                n4 = n3.plus Vector.normals[p1.face].mul(0.025)
+            else
+                n1 = Vector.normals[p1.face].mul(0.025)
+                n4 = Vector.normals[p2.face].mul(0.025)
+                
+                n2 = n1.plus Vector.normals[p2.face].mul(0.02)
+                n3 = n4.plus Vector.normals[p1.face].mul(0.02)
+        else
+            n1 = n2 = n3 = n4 = Vector.normals[p1.face].mul 0.025
+            
+        n5 = n6 = n7 = n8 = Vector.normals[p1.face].cross(p1.pos.to(p2.pos)).normal().mul 0.025
+        
+        tube = new THREE.Geometry
+        
+        tube.vertices.push new THREE.Vector3 p1.pos.x+n1.x,  p1.pos.y+n1.y, p1.pos.z+n1.z
+        tube.vertices.push new THREE.Vector3 p1.pos.x-n2.x,  p1.pos.y-n2.y, p1.pos.z-n2.z
+        tube.vertices.push new THREE.Vector3 p2.pos.x-n3.x,  p2.pos.y-n3.y, p2.pos.z-n3.z
+        tube.vertices.push new THREE.Vector3 p2.pos.x+n4.x,  p2.pos.y+n4.y, p2.pos.z+n4.z
+
+        tube.vertices.push new THREE.Vector3 p1.pos.x+n5.x,  p1.pos.y+n5.y, p1.pos.z+n5.z
+        tube.vertices.push new THREE.Vector3 p1.pos.x-n6.x,  p1.pos.y-n6.y, p1.pos.z-n6.z
+        tube.vertices.push new THREE.Vector3 p2.pos.x-n7.x,  p2.pos.y-n7.y, p2.pos.z-n7.z
+        tube.vertices.push new THREE.Vector3 p2.pos.x+n8.x,  p2.pos.y+n8.y, p2.pos.z+n8.z
+        
+        tube.faces.push new THREE.Face3 0, 1, 2
+        tube.faces.push new THREE.Face3 2, 3, 0
+        
+        tube.faces.push new THREE.Face3 4, 5, 6
+        tube.faces.push new THREE.Face3 6, 7, 4
+
+        tube
+        
     addPath: (path) ->
         
-        material = new THREE.LineBasicMaterial color: 0xffffff, depthTest:false
+        tube = new THREE.Geometry
         
-        # geometry = new THREE.Geometry
-        # for index in path
-            # p = @posAtIndex index
-            # geometry.vertices.push new THREE.Vector3 p.x, p.y, p.z
+        points = @tubePoints path    
+        for i in [1...points.length]
+            tube.merge @addTubeFaces points[i-1], points[i]
+             
+        tube.computeFaceNormals()
+        tube.computeFlatVertexNormals()
+            
+        line = new THREE.Mesh tube, Materials.tube
+        line.castShadow = true
+                
+        # points = @tubePoints path        
+        # spline = new THREE.CatmullRomCurve3 points
+#         
+        # extrusionSegments = path.length*12
+        # radiusSegments = 4
+        # closed = false
+        # radius = 0.1
+#         
+        # geometry = new THREE.TubeBufferGeometry spline, extrusionSegments, radius, radiusSegments, closed
 #             
         # line = new THREE.Line geometry, material
-                
-        points = []
-        for faceIndex in path
-            [face, index] = @splitFaceIndex faceIndex
-            p = @posAtIndex index
-            points.push new THREE.Vector3 p.x, p.y, p.z
-        
-        spline = new THREE.CatmullRomCurve3 points
-        
-        extrusionSegments = path.length*4
-        radiusSegments = 4
-        closed = false
-        radius = 0.1
-        
-        geometry = new THREE.TubeBufferGeometry spline, extrusionSegments, radius, radiusSegments, closed
-            
-        line = new THREE.Line geometry, material
         
         @scene.add line
         line
@@ -259,16 +344,16 @@ class World
                 
         @botGeoms = [
             new THREE.Geometry
-            new THREE.BoxGeometry 0.6, 0.6, 0.6          # cube
-            new THREE.ConeGeometry 0.35, 0.6, 12         # cone
-            new THREE.SphereGeometry 0.35, 12, 12        # sphere
-            new THREE.TorusGeometry 0.3, 0.15, 8, 12     # torus
-            new THREE.IcosahedronGeometry 0.4, 0         # icosa
-            new THREE.DodecahedronGeometry 0.4, 0        # dodeca
+            new THREE.BoxGeometry 0.5, 0.5, 0.5          # cube
+            new THREE.ConeGeometry 0.25, 0.5, 12         # cone
+            new THREE.SphereGeometry 0.25, 12, 12        # sphere
+            new THREE.TorusGeometry 0.2, 0.125, 8, 12     # torus
+            new THREE.IcosahedronGeometry 0.3, 0         # icosa
+            new THREE.DodecahedronGeometry 0.3, 0        # dodeca
             new THREE.TetrahedronGeometry 0.5, 0         # tetra
-            new THREE.OctahedronGeometry 0.4, 0          # octa
-            new THREE.CylinderGeometry 0.3, 0.3, 0.5, 12 # cylinder
-            new THREE.TorusKnotGeometry 0.2, 0.1         # knot
+            new THREE.OctahedronGeometry 0.3, 0          # octa
+            new THREE.CylinderGeometry 0.25, 0.25, 0.5, 12 # cylinder
+            new THREE.TorusKnotGeometry 0.15, 0.1         # knot
         ]
         
         @botGeoms[Bot.cone].rotateX deg2rad 90
@@ -294,6 +379,7 @@ class World
             @scene.add mesh
             bot.mesh = mesh
             @colorBot bot
+            @orientBot bot
              
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       
@@ -318,9 +404,10 @@ class World
         else
             @addPathFromBotToBot @cube, bot
         
-        @orientFace bot.mesh, toFace
+        @orientBot bot
         @colorBot bot
         
+    orientBot: (bot) -> @orientFace bot.mesh, bot.face
     orientFace: (object, face) ->
         object.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), Vector.normals[face]
         
@@ -328,6 +415,10 @@ class World
         
     colorBot: (bot) ->
         
+        if bot == @cube
+            bot.mesh.material = Materials.botWhite
+            return
+            
         below = @posBelowBot bot
         if stone = @stoneAtPos below
             bot.mesh.material = Materials.bot[stone]
