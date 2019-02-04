@@ -29,7 +29,7 @@ class AStar
         
     neighborCost: (start, neighbor) -> 1
         
-    neighborsOf: (index) -> 
+    neighborsOfFaceIndex: (index) -> 
         p = @world.posAtIndex index
         [
             @world.indexAtPos p.x+1, p.y, p.z
@@ -43,9 +43,7 @@ class AStar
     lowestScore: (openSet, fScore) ->
         
         keys = Object.keys openSet
-        log "?", keys
         keys.sort (a,b) -> (fScore[a] ? Number.MAX_VALUE) - (fScore[b] ? Number.MAX_VALUE)
-        log "!", keys
         keys[0]
         
     findPath: (start, goal) ->
@@ -83,7 +81,7 @@ class AStar
             delete openSet[current]
             closedSet[current] = current
     
-            for neighbor in @neighborsOf current
+            for neighbor in @neighborsOfFaceIndex current
                 if closedSet[neighbor]?
                     continue # ignore the neighbor which is already evaluated.
     

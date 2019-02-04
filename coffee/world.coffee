@@ -42,8 +42,30 @@ Bot =
     cylinder:   9
     knot:       10
 
+Materials = 
+    highlight:  new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.BackSide
+    botGray:    new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5
+    stone: [   
+                new THREE.MeshPhongMaterial color:0x111111 # gray
+                new THREE.MeshPhongMaterial color:0xdd0000 # red
+                new THREE.MeshPhongMaterial color:0x008800 # green
+                new THREE.MeshPhongMaterial color:0x0000ff # blue
+                new THREE.MeshPhongMaterial color:0xffff00 # yellow
+                new THREE.MeshPhongMaterial color:0x000000 # black
+                new THREE.MeshPhongMaterial color:0xffffff # white
+    ]
+    bot: [   
+                new THREE.MeshStandardMaterial color:0x111111 # gray
+                new THREE.MeshStandardMaterial color:0xdd0000 # red
+                new THREE.MeshStandardMaterial color:0x008800 # green
+                new THREE.MeshStandardMaterial color:0x0000ff # blue
+                new THREE.MeshStandardMaterial color:0xffff00 # yellow
+                new THREE.MeshStandardMaterial color:0x000000 # black
+                new THREE.MeshStandardMaterial color:0xffffff # white
+    ]
+    
 class World
-
+    
     constructor: (@scene) ->
         
         @stones = {}
@@ -89,6 +111,7 @@ class World
                     
     delStone: (x,y,z) -> delete @stones[@indexAt x,y,z]
     addStone: (x,y,z, stone=Stone.gray) -> @stones[@indexAt x,y,z] = stone
+    stoneAtPos: (v) -> @stones[@indexAtPos v]
 
     addBot:   (x,y,z, type=Bot.cube, face=Face.PZ) -> 
         p = @roundPos new Vector x,y,z
@@ -112,18 +135,11 @@ class World
         if n.equals Vector.minusY then return 4
         if n.equals Vector.minusZ then return 5
         
-        # log 'normal:', n, v
         v = new Vector v 
         dir = v.to @roundPos(v)
         angles = [0..5].map (i) -> index:i, norm:Vector.normals[i], angle:Vector.normals[i].angle(norm) + Vector.normals[i].angle(dir)
         angles.sort (a,b) -> a.angle - b.angle
-        log angles
-        log dir
-        log @roundPos(v)
-        log 'face-> ', angles[0].index
         return angles[0].index
-        
-        # @indexAtPos(v) + (face<<28)
     
     indexAt: (x,y,z) -> (x+256)+((y+256)<<9)+((z+256)<<18)
     indexAtPos: (v) -> p = @roundPos(v); @indexAt p.x, p.y, p.z
@@ -140,6 +156,7 @@ class World
     # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
     removeHighlight: ->
+        
         @highlightBot?.highlight?.parent.remove @highlightBot?.highlight
         delete @highlightBot?.highlight
         delete @highlightBot
@@ -149,6 +166,8 @@ class World
         p = @roundPos v
         if bot = @botAtPos p
             if bot == @highlightBot
+                bot.highlight.position.set p.x, p.y, p.z
+                @orientFace bot.highlight, bot.face
                 return
             @removeHighlight()
             @highlightBot = bot
@@ -157,7 +176,7 @@ class World
             geom.fromGeometry @botGeoms[bot.type]
             geom.scale 1.1, 1.1, 1.1
             
-            mesh = new THREE.Mesh geom, @highlightMat
+            mesh = new THREE.Mesh geom, Materials.highlight
             mesh.position.set p.x, p.y, p.z
             @orientFace mesh, bot.face
             @scene.add mesh
@@ -173,9 +192,7 @@ class World
     # 0000000     0000000      000     0000000   
     
     initBotGeoms: ->
-        
-        @highlightMat = new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.BackSide
-        
+                
         @botGeoms = [
             new THREE.Geometry
             new THREE.BoxGeometry 0.6, 0.6, 0.6          # cube
@@ -202,48 +219,50 @@ class World
             @botGeoms[bot].computeFlatVertexNormals()
     
     constructBots: ->
-        
-        materials = [
-            new THREE.MeshStandardMaterial color:0x000000, metalness: 0.9, roughness: 0.5
-            new THREE.MeshPhongMaterial color:0xffffff  # cube
-            new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5 # cone
-            new THREE.MeshStandardMaterial color:0xffff00, metalness: 0.5, roughness: 0.5 # sphere
-            new THREE.MeshStandardMaterial color:0x0000ff, metalness: 0.5, roughness: 0.5 # torus
-            new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5 # icosa
-            new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5 # dodeca
-            new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5 # tetra
-            new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5 # octa
-            new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5 # cylinder
-            new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.5, roughness: 0.5 # knot
-        ]       
-                
+                        
         for index,bot of @bots
             p = @posAtIndex index
             
-            log bot.pos, bot.type
-        
-            mesh = new THREE.Mesh @botGeoms[bot.type], materials[bot.type]
+            mesh = new THREE.Mesh @botGeoms[bot.type], Materials.botGray
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.position.set p.x, p.y, p.z
             @scene.add mesh
             bot.mesh = mesh
+            @colorBot bot
              
+    # 00     00   0000000   000   000  00000000  
+    # 000   000  000   000  000   000  000       
+    # 000000000  000   000   000 000   0000000   
+    # 000 0 000  000   000     000     000       
+    # 000   000   0000000       0      00000000  
+    
     moveBot: (bot, toPos, toFace) ->
         
         fromIndex = bot.index
         toIndex = @indexAtPos toPos
-        @bots[toIndex] = bot
         delete @bots[fromIndex]
+        @bots[toIndex] = bot
         
         bot.face = toFace
         bot.index = toIndex
-        bot.pos = toPos
+        bot.pos = @roundPos toPos
         bot.mesh.position.set toPos.x, toPos.y, toPos.z
         @orientFace bot.mesh, toFace
+        @colorBot bot
         
     orientFace: (object, face) ->
         object.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), Vector.normals[face]
+        
+    posBelowBot: (bot) ->  bot.pos.minus Vector.normals[bot.face]
+        
+    colorBot: (bot) ->
+        
+        below = @posBelowBot bot
+        if stone = @stoneAtPos below
+            bot.mesh.material = Materials.bot[stone]
+        else
+            bot.mesh.material = Materials.botGray
         
     #  0000000  000   000  0000000    00000000   0000000    
     # 000       000   000  000   000  000       000         
@@ -252,17 +271,7 @@ class World
     #  0000000   0000000   0000000    00000000  0000000     
         
     constructCubes: ->
-        
-        materials = [
-            new THREE.MeshPhongMaterial color:0x111111 # gray
-            new THREE.MeshPhongMaterial color:0xdd0000 # red
-            new THREE.MeshPhongMaterial color:0x008800 # green
-            new THREE.MeshPhongMaterial color:0x0000ff # blue
-            new THREE.MeshPhongMaterial color:0xffff00 # yellow
-            new THREE.MeshPhongMaterial color:0x000000 # black
-            new THREE.MeshPhongMaterial color:0xffffff # white
-            ]
-            
+                    
         s = 0.5
         o = 0.55
         i = 0.45
@@ -338,7 +347,7 @@ class World
             bufgeo = new THREE.BufferGeometry()
             bufgeo.fromGeometry stonesides[stone]
             
-            mesh = new THREE.Mesh bufgeo, materials[stone]
+            mesh = new THREE.Mesh bufgeo, Materials.stone[stone]
             mesh.receiveShadow = true
             mesh.castShadow = true
             @scene.add mesh

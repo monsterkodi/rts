@@ -6,7 +6,7 @@
 000   000     000     0000000 
 ###
 
-{ elem, deg2rad, log, _ } = require 'kxk'
+{ elem, empty, valid, deg2rad, log, _ } = require 'kxk'
 
 FPS    = require './lib/fps'
 Info   = require './lib/info'
@@ -141,16 +141,21 @@ class RTS
         @calcMouse event
     
     onMouseMove: (event) =>
-        
-        hit = @castRay @calcMouse event
 
-        if hit and @dragBot
-            if not hit.bot and @dragBot != hit.bot
-                # log 'bot move', @dragBot, hit
-                @world.moveBot @dragBot, hit.pos, hit.face
-                
-                # log @world.astar.findPath @world.indexAtPos(0,0,1), @world.indexAtPos(0,3,1)
+        hit = @castRay @calcMouse event
         
+        if not @dragBot
+            if hit
+                @world.highlightPos hit.pos
+            return
+
+        if hit?.face? and not hit.bot
+            if @dragBot.face != hit.face or @dragBot.index != hit.index
+                @world.moveBot @dragBot, hit.pos, hit.face
+                @world.highlightPos @dragBot.pos
+
+                # log @world.astar.findPath @world.indexAtPos(0,0,1), @world.indexAtPos(0,3,1)
+                
     calcMouse: (event) ->
         
         br = @elem.getBoundingClientRect()
@@ -164,61 +169,66 @@ class RTS
     # 000       000   000       000     000     000   000  000   000     000     
     #  0000000  000   000  0000000      000     000   000  000   000     000     
     
+    filterHit: (intersects) ->
+        
+        intersects = intersects.filter (i) -> valid i.face
+        intersects = intersects.filter (i) => i.object != @world.highlightBot?.highlight
+        intersects = intersects.filter (i) => i.object != @world.highlightBot?.mesh
+        intersects[0]
+    
     castRay: (screenPos) ->
         
         @raycaster.setFromCamera screenPos, @camera
-        intersects = []
-        @raycaster.intersectObjects @scene.children, false, intersects
+        intersects = @raycaster.intersectObjects @scene.children, false 
         # log 'hits', intersects.length
 
-        if intersects.length
+        hit = @filterHit intersects
+
+        return if empty hit
+        
+        point = hit.point
+        # @world.highlightPos point     
+        
+        info = 
+            pos:    @world.roundPos point
+            index:  @world.indexAtPos @world.roundPos point
+            norm:   hit.face.normal
+            dist:   hit.distance
             
-            faceIndex = 0 # filter lines from hit results
-            hit = intersects[faceIndex]
-            while not hit.face?
-                hit = intersects[faceIndex++]
-                if not hit
-                    return
+        @scene.remove @cursor if @cursor
+        delete @cursor
             
-            point = hit.point
-            @world.highlightPos point     
-            
-            info = 
-                pos:    @world.roundPos point
-                norm:   hit.face.normal
-                dist:   hit.distance
-                
-            @scene.remove @cursor if @cursor
-            delete @cursor
-                
-            if bot = @world.botAtPos point
+        if bot = @world.botAtPos point
+            if bot != @world.highlightBot
                 info.bot = bot
-            else
-                info.face = @world.faceAtPosNorm point, hit.face.normal
-                
-                # if hit.face and not @world.highlightBot
-                #   geom = new THREE.CircleGeometry 0.1, 18
-                #   geom.translate 0,0,0.01
-                #   wire = new THREE.WireframeGeometry geom
-                #   @cursor = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
-                #   @cursor.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), hit.face.normal
-                #   @cursor.position.copy hit.point
-                
-                if info.face < 6
-                    log info.face
-                    geom = new THREE.ConeGeometry 0.5, 0.8
-                    geom.rotateX deg2rad 90
-                    wire = new THREE.WireframeGeometry geom
-                    @cursor = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
-                    @cursor.name = 'cursor'
-                    @cursor.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), Vector.normals[info.face]
-                    @cursor.position.copy info.pos
-                    
-                    @scene.add @cursor
+                return info
+
+        info.face = @world.faceAtPosNorm point, hit.face.normal
+        
+        # if hit.face and not @world.highlightBot
+        #   geom = new THREE.CircleGeometry 0.1, 18
+        #   geom.translate 0,0,0.01
+        #   wire = new THREE.WireframeGeometry geom
+        #   @cursor = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
+        #   @cursor.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), hit.face.normal
+        #   @cursor.position.copy hit.point
+        
+        if info.face < 6
+            # geom = new THREE.ConeGeometry 0.5, 0.8
+            # geom.rotateX deg2rad 90
+            # wire = new THREE.WireframeGeometry geom
+            # @cursor = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
+            # @cursor.name = 'cursor'
+            # @cursor.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), Vector.normals[info.face]
+            # @cursor.position.copy info.pos
+#                     
+            # @scene.add @cursor
+        else
+            log 'DAFUK?', info.face
+        
+        # log info
             
-            # log info
-                
-            return info
+        return info
         
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
