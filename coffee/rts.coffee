@@ -128,7 +128,8 @@ class RTS
         
         if event.buttons & 1
             
-            @castRay @calcMouse event
+            @calcMouse event
+            @castRay event
             
             if @world.highlightBot?
                 @dragBot = @world.highlightBot
@@ -142,7 +143,11 @@ class RTS
     
     onMouseMove: (event) =>
 
-        hit = @castRay @calcMouse event
+        @calcMouse event
+        
+        return if event.buttons > 1
+        
+        hit = @castRay event
         
         if not @dragBot
             if hit
@@ -172,20 +177,22 @@ class RTS
     # 000       000   000       000     000     000   000  000   000     000     
     #  0000000  000   000  0000000      000     000   000  000   000     000     
     
-    filterHit: (intersects) ->
+    filterHit: (intersects, event) ->
         
         intersects = intersects.filter (i) -> valid i.face
         intersects = intersects.filter (i) => i.object != @world.highlightBot?.highlight
-        intersects = intersects.filter (i) => i.object != @world.highlightBot?.mesh
+        if event.buttons == 1
+            intersects = intersects.filter (i) => i.object != @world.highlightBot?.mesh
+            
         intersects[0]
     
-    castRay: (screenPos) ->
+    castRay: (event) ->
         
-        @raycaster.setFromCamera screenPos, @camera
+        @raycaster.setFromCamera @mouse, @camera
         intersects = @raycaster.intersectObjects @scene.children, false 
         # log 'hits', intersects.length
 
-        hit = @filterHit intersects
+        hit = @filterHit intersects, event
 
         return if empty hit
         

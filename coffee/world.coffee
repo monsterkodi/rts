@@ -41,21 +41,24 @@ Bot =
     octa:       8
     cylinder:   9
     knot:       10
+    dodicos:    11
+    octacube:   12
+    toruscone:  13
+    tubecross:  14
 
 Materials = 
-    highlight:  new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.BackSide
-    botWhite:   new THREE.MeshStandardMaterial color:0xffaa88, metalness: 0.9, roughness: 0.5 
-    # tube:       new THREE.MeshLambertMaterial color:0xffffff, emissive:0xffffff, side:THREE.DoubleSide
-    tube:       new THREE.MeshStandardMaterial color:0xaa8866, metalness: 0.9, roughness: 0.5 
-    botGray:    new THREE.MeshStandardMaterial color:0xffaa88, metalness: 0.9, roughness: 0.5
+    highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide
+    botGray:    new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5
+    botWhite:   new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5 
+    path:       new THREE.MeshStandardMaterial color:0xbbbbbb, metalness: 0.9, roughness: 0.5 
     stone: [   
-                new THREE.MeshPhongMaterial color:0x111111 # gray
-                new THREE.MeshPhongMaterial color:0xdd0000 # red
-                new THREE.MeshPhongMaterial color:0x008800 # green
-                new THREE.MeshPhongMaterial color:0x0000ff # blue
-                new THREE.MeshPhongMaterial color:0xffff00 # yellow
-                new THREE.MeshPhongMaterial color:0x000000 # black
-                new THREE.MeshPhongMaterial color:0xffffff # white
+                new THREE.MeshPhongMaterial    color:0x111111 # gray
+                new THREE.MeshStandardMaterial color:0x880000 # red
+                new THREE.MeshStandardMaterial color:0x008800 # green
+                new THREE.MeshStandardMaterial color:0x000088 # blue
+                new THREE.MeshStandardMaterial color:0xffff00 # yellow
+                new THREE.MeshStandardMaterial color:0x000000 # black
+                new THREE.MeshStandardMaterial color:0xffffff # white
     ]
     bot: [   
                 new THREE.MeshStandardMaterial color:0x111111 # gray
@@ -85,30 +88,46 @@ class World
         
         @wall -2, 0, 0, 2, 0, 0
         @wall 0, -2, 0, 0, 2, 0
-        @wall 2, -2, 0, 2, 2, 0
-        @wall -2, -2, 0, -2, 2, 0
+        @addStone -1,-1,0
+        @addStone -1, 1,0
+        @addStone  1,-1,0
+        @addStone  1, 1,0
+        @delStone 0, 0, 0
                 
-        # @addStone -2,-2,0, Stone.yellow
-        # @addStone  2,-2,0, Stone.blue
-        # @addStone -2, 2,0, Stone.white
-        # @addStone  2, 2,0, Stone.red
+        @addStone -2,-2,0, Stone.yellow
+        @addStone  2,-2,0, Stone.blue
+        @addStone -2, 2,0, Stone.green
+        @addStone  2, 2,0, Stone.red
 
-        @cube = @addBot  0, 0,1,  Bot.cube
-        @addBot  1,-2,0,  Bot.cylinder, Face.PX
-        @addBot -2,-2,1,  Bot.sphere
-        @addBot  2,-2,1,  Bot.torus
-        @addBot -2, 2,1,  Bot.octa
-        @addBot  2, 2,1,  Bot.dodeca
-        @addBot  2, 0,1,  Bot.cone
-        @addBot -2, 0,1,  Bot.icosa
-        @addBot  0, 2,1,  Bot.knot
-#         
+        @cube = @addBot  0,0,0, Bot.dodicos, Face.NX
+        @addBot -2, 0,1,  Bot.octacube
+        @addBot  0, 2,1,  Bot.tubecross
+        @addBot  0,-2,1,  Bot.toruscone
+        @addBot  2, 0,1,  Bot.knot
+
+        sphere = new THREE.SphereGeometry 0.1, 6, 6
+        sphere.computeFaceNormals()
+        sphere.rotateX deg2rad 90
+        sphere.computeFlatVertexNormals()
+        
+        @baseDot = new THREE.Mesh sphere, Materials.path
+        @baseDot.castShadow = true
+        @baseDot.receiveShadow = true
+        @scene.add @baseDot 
+        @updateBaseDot()
+        
         @astar = new AStar @
         
         @initBotGeoms()
         @constructBots()
         @constructCubes()
         @constructPaths()
+        
+    updateBaseDot: ->
+        
+        dp = @cube.pos.minus Vector.normals[@cube.face].mul 0.35
+        @baseDot.position.set dp.x, dp.y, dp.z
+        @baseDot.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0, 0, 1), Vector.normals[@cube.face]
         
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  
@@ -202,8 +221,11 @@ class World
         tube.faces.push new THREE.Face3 6, 3, 0
         tube.faces.push new THREE.Face3 4, 0, 3
         tube.faces.push new THREE.Face3 3, 7, 4
-        tube.faces.push new THREE.Face3 5, 4,  6
-        tube.faces.push new THREE.Face3 7, 6,  4
+
+        tube.faces.push new THREE.Face3 5, 1, 2
+        tube.faces.push new THREE.Face3 5, 2, 6 
+        tube.faces.push new THREE.Face3 4, 7, 2
+        tube.faces.push new THREE.Face3 4, 2, 1
         
         tube
         
@@ -214,27 +236,26 @@ class World
         points = @tubePoints path    
         for i in [1...points.length]
             tube.merge @addTubeFaces points[i-1], points[i]
+            
+        sphere = new THREE.SphereGeometry 0.1, 6, 6
+        if points[0].face in [Face.PZ, Face.NZ]
+            sphere.rotateX deg2rad 90
+        else if points[0].face in [Face.PX, Face.NX]
+            sphere.rotateZ deg2rad 90
+        sphere.translate points[0].pos.x, points[0].pos.y, points[0].pos.z
+        sphere.faceVertexUvs = [[]]
+        tube.merge sphere
              
         tube.computeFaceNormals()
         tube.computeFlatVertexNormals()
-            
-        line = new THREE.Mesh tube, Materials.tube
-        line.castShadow = true
-                
-        # points = @tubePoints path        
-        # spline = new THREE.CatmullRomCurve3 points
-#         
-        # extrusionSegments = path.length*12
-        # radiusSegments = 4
-        # closed = false
-        # radius = 0.1
-#         
-        # geometry = new THREE.TubeBufferGeometry spline, extrusionSegments, radius, radiusSegments, closed
-#             
-        # line = new THREE.Line geometry, material
         
-        @scene.add line
-        line
+        tubeBuffer = new THREE.BufferGeometry
+        tubeBuffer.fromGeometry tube
+        mesh = new THREE.Mesh tubeBuffer, Materials.path
+        mesh.castShadow = true
+                        
+        @scene.add mesh
+        mesh
         
     wall: (xs, ys, zs, xe, ye, ze, stone=Stone.gray) ->
         
@@ -345,8 +366,7 @@ class World
                 
         @botGeoms = [
             new THREE.Geometry
-            # new THREE.BoxGeometry 0.33, 0.33, 0.33         # cube
-            new THREE.DodecahedronGeometry 0.3, 0         # cube
+            new THREE.BoxGeometry 0.5, 0.5, 0.5            # cube
             new THREE.ConeGeometry 0.25, 0.5, 12           # cone
             new THREE.SphereGeometry 0.25, 12, 12          # sphere
             new THREE.TorusGeometry 0.2, 0.125, 8, 12      # torus
@@ -356,15 +376,30 @@ class World
             new THREE.OctahedronGeometry 0.3, 0            # octa
             new THREE.CylinderGeometry 0.25, 0.25, 0.5, 12 # cylinder
             new THREE.TorusKnotGeometry 0.15, 0.1          # knot
+            new THREE.DodecahedronGeometry 0.275, 0        # dodicos
+            new THREE.BoxGeometry 0.25, 0.25, 0.25         # octacube
+            new THREE.TorusGeometry 0.2, 0.075, 8, 12      # toruscone
+            new THREE.CylinderGeometry 0.1, 0.1, 0.5, 12   # tubecross
         ]
         
-        # @botGeoms[Bot.cube].merge new THREE.OctahedronGeometry 0.33, 0
-        @botGeoms[Bot.cube].rotateX deg2rad 60
-        icos = new THREE.IcosahedronGeometry 0.3, 0
+        @botGeoms[Bot.dodicos].rotateX deg2rad 60
+        icos = new THREE.IcosahedronGeometry 0.275, 0
         icos.rotateY deg2rad 60
         icos.rotateZ deg2rad -18
-        @botGeoms[Bot.cube].merge icos
+        @botGeoms[Bot.dodicos].merge icos
+                
+        cone = new THREE.ConeGeometry 0.25, 0.5, 12
+        cone.rotateX deg2rad 90
+        @botGeoms[Bot.toruscone].merge cone
         
+        tube = new THREE.CylinderGeometry 0.1, 0.1, 0.5, 12
+        tube.rotateX deg2rad 90
+        @botGeoms[Bot.tubecross].merge tube
+        tube.rotateY deg2rad 90
+        @botGeoms[Bot.tubecross].merge tube
+        
+        @botGeoms[Bot.octacube].merge new THREE.OctahedronGeometry 0.25, 0
+                
         @botGeoms[Bot.cone].rotateX deg2rad 90
         @botGeoms[Bot.sphere].rotateX deg2rad 90
         @botGeoms[Bot.cylinder].rotateX deg2rad 90
@@ -372,7 +407,7 @@ class World
         @botGeoms[Bot.icosa].rotateY deg2rad 60
         @botGeoms[Bot.icosa].rotateZ deg2rad 18
 
-        for bot in [Bot.cube..Bot.knot]
+        for bot in [Bot.cube..Bot.tubecross]
             @botGeoms[bot].computeFaceNormals()
             @botGeoms[bot].computeFlatVertexNormals()
     
@@ -410,6 +445,7 @@ class World
         
         if bot == @cube
             @constructPaths()
+            @updateBaseDot()
         else
             @addPathFromBotToBot @cube, bot
         
@@ -424,15 +460,15 @@ class World
         
     colorBot: (bot) ->
         
-        if bot == @cube
-            bot.mesh.material = Materials.botWhite
-            return
+        # if bot == @cube
+            # bot.mesh.material = Materials.botWhite
+            # return
             
         below = @posBelowBot bot
         if stone = @stoneAtPos below
             bot.mesh.material = Materials.bot[stone]
         else
-            bot.mesh.material = Materials.botGray
+            bot.mesh.material = Materials.botWhite
         
     #  0000000  000   000  0000000    00000000   0000000    
     # 000       000   000  000   000  000       000         
