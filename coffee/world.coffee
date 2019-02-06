@@ -11,65 +11,9 @@
 THREE = require 'three'
 AStar  = require './astar'
 Vector = require './lib/vector'
+Materials = require './materials'
+{ Stone, Bot, Face } = require './constants'
 
-Stone = 
-    gray:   0
-    red:    1
-    green:  2
-    blue:   3
-    yellow: 4
-    black:  5
-    white:  6
-    max:    1000
-    
-Face = 
-    PX: 0
-    PY: 1
-    PZ: 2
-    NX: 3
-    NY: 4
-    NZ: 5
-    
-Bot =
-    cube:       1
-    cone:       2
-    sphere:     3
-    torus:      4
-    icosa:      5
-    dodeca:     6
-    tetra:      7
-    octa:       8
-    cylinder:   9
-    knot:       10
-    dodicos:    11
-    octacube:   12
-    toruscone:  13
-    tubecross:  14
-
-Materials = 
-    highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide
-    botGray:    new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5
-    botWhite:   new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5 
-    path:       new THREE.MeshStandardMaterial color:0xbbbbbb, metalness: 0.9, roughness: 0.5 
-    stone: [   
-                new THREE.MeshPhongMaterial    color:0x111111 # gray
-                new THREE.MeshStandardMaterial color:0x880000 # red
-                new THREE.MeshStandardMaterial color:0x008800 # green
-                new THREE.MeshStandardMaterial color:0x000088 # blue
-                new THREE.MeshStandardMaterial color:0xffff00 # yellow
-                new THREE.MeshStandardMaterial color:0x000000 # black
-                new THREE.MeshStandardMaterial color:0xffffff # white
-    ]
-    bot: [   
-                new THREE.MeshStandardMaterial color:0x111111 # gray
-                new THREE.MeshStandardMaterial color:0xdd0000 # red
-                new THREE.MeshStandardMaterial color:0x008800 # green
-                new THREE.MeshStandardMaterial color:0x0000ff # blue
-                new THREE.MeshStandardMaterial color:0xffff00 # yellow
-                new THREE.MeshStandardMaterial color:0x000000 # black
-                new THREE.MeshStandardMaterial color:0xffffff # white
-    ]
-    
 class World
     
     constructor: (@scene) ->
@@ -460,10 +404,6 @@ class World
         
     colorBot: (bot) ->
         
-        # if bot == @cube
-            # bot.mesh.material = Materials.botWhite
-            # return
-            
         below = @posBelowBot bot
         if stone = @stoneAtPos below
             bot.mesh.material = Materials.bot[stone]

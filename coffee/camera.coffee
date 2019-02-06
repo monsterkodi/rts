@@ -6,7 +6,7 @@
  0000000  000   000  000   000  00000000  000   000  000   000
 ###
 
-{ deg2rad, clamp, reduce, log } = require 'kxk'
+{ deg2rad, rad2deg, clamp, valid, reduce, log } = require 'kxk'
 
 Vector      = require './lib/vector'
 Quaternion  = require './lib/quaternion'
@@ -24,11 +24,9 @@ class Camera extends THREE.PerspectiveCamera
         @maxDist = @far/2
         @minDist = 0.4
         @center  = new Vector 0, 0, 0
-        @degree  = 40
-        @rotate  = 40
+        @degree  = 0
+        @rotate  = 0
         @wheelInert = 0
-        @rotateInert = 0
-        @degreeInert = 0
 
         @elem.addEventListener 'mousewheel', @onMouseWheel
         @elem.addEventListener 'mousedown',  @onMouseDown
@@ -66,22 +64,22 @@ class Camera extends THREE.PerspectiveCamera
         
         @downPos = new Vector @mouseX, @mouseY
         
-        window.addEventListener    'mousemove',  @onMouseDrag
-        window.addEventListener    'mouseup',    @onMouseUp
+        window.addEventListener 'mousemove', @onMouseDrag
+        window.addEventListener 'mouseup',   @onMouseUp
         
     onMouseUp: (event) => 
 
-        if @downButtons == 1
+        if @downButtons == 1 or @downButtons == 4
             if not @mouseMoved
                 @focusOnHit()
         
-        window.removeEventListener 'mousemove',  @onMouseDrag
-        window.removeEventListener 'mouseup',    @onMouseUp
+        window.removeEventListener 'mousemove', @onMouseDrag
+        window.removeEventListener 'mouseup',   @onMouseUp
         
-    onMouseDrag:  (event) =>
+    onMouseDrag: (event) =>
 
-        x = @mouseX-event.clientX
-        y = @mouseY-event.clientY
+        x = event.clientX-@mouseX
+        y = event.clientY-@mouseY
         
         @mouseX = event.clientX
         @mouseY = event.clientY
@@ -94,7 +92,7 @@ class Camera extends THREE.PerspectiveCamera
             @pan x*s, y*s
             
         if event.buttons & 2
-            @pivot x*0.001, y*0.001
+            @pivot x, y
             
     # 00000000   000  000   000   0000000   000000000  
     # 000   000  000  000   000  000   000     000     
@@ -104,31 +102,41 @@ class Camera extends THREE.PerspectiveCamera
     
     pivot: (x,y) ->
         
-        if @rotateInert > 0 and x < 0 or @rotateInert < 0 and x > 0
-            @rotateInert = 0
-            
-        if @degreeInert > 0 and y < 0 or @degreeInert < 0 and y > 0
-            @degreeInert = 0
-            return
+        # br = rts.elem.getBoundingClientRect()
+        # relMouse = new THREE.Vector2 ((@mouseX-br.left)/br.width)*2-1, -((@mouseY-br.top)/br.height)*2+1 # [-1..1] [-1..1] left to right, bottom to top
+        # rayDirection = new THREE.Vector3 relMouse.x, relMouse.y, 1 # point on far frustum
+        # rayDirection.unproject @ # point on far plane
+        # rayDirection.normalize()
+#         
+        # planeNormal = new THREE.Vector3(0,0,1).applyQuaternion @rotQuat()
+#         
+        # plane = new THREE.Plane 
+        # plane.setFromNormalAndCoplanarPoint planeNormal, @center
+        # ray = new THREE.Ray @position, rayDirection
+        # planeHit = new THREE.Vector3
+        # ray.intersectPlane plane, planeHit
+
+        # rayDirection = new THREE.Vector3 ((@mouseX-br.left-x)/br.width)*2-1, -((@mouseY-br.top-y)/br.height)*2+1, 1
+        # rayDirection.unproject @
+        # rayDirection.normalize()
+#         
+        # deltaHit = new THREE.Vector3
+        # ray = new THREE.Ray @position, rayDirection
+        # ray.intersectPlane plane, deltaHit 
+        # centerToOld = new THREE.Vector3().subVectors deltaHit, @center
+        # centerToNew = new THREE.Vector3().subVectors planeHit, @center
+        # angle = rad2deg centerToNew.angleTo centerToOld
+        # centerToOldNorm = centerToOld.clone().normalize()
+        # centerToNewNorm = centerToNew.clone().normalize()
+        # cross = centerToOld.clone().cross(planeNormal)
+        # dotp = cross.dot(centerToNewNorm)
+        # asign = dotp > 0 and 1 or -1
         
-        @rotateInert += x
-        @degreeInert += y
+        @rotate += -0.08*x
+        @degree += -0.1*y
         
-        rts.animate @inertPivot
-        
-    inertPivot: (deltaSeconds) =>
-        
-        @rotate += clamp -0.1, 0.1, @rotateInert
-        @degree += clamp -0.1, 0.1, @degreeInert
         @update()
-        @rotateInert = reduce @rotateInert, deltaSeconds*0.02
-        @degreeInert = reduce @degreeInert, deltaSeconds*0.02
-        if Math.abs(@rotateInert) > 0.0001 or Math.abs(@degreeInert) > 0.0001
-            rts.animate @inertPivot
-        else
-            @rotateInert = 0
-            @degreeInert = 0
-        
+               
     # 00000000    0000000   000   000  
     # 000   000  000   000  0000  000  
     # 00000000   000000000  000 0 000  
@@ -137,17 +145,15 @@ class Camera extends THREE.PerspectiveCamera
     
     pan: (x,y) ->
         
-        right = new THREE.Vector3 x, 0, 0 
+        right = new THREE.Vector3 -x, 0, 0 
         right.applyQuaternion @quaternion
 
-        up = new THREE.Vector3 0, -y, 0 
+        up = new THREE.Vector3 0, y, 0 
         up.applyQuaternion @quaternion
         
-        if not @centerTarget
-            @centerTarget = new Vector @center
-            
-        @centerTarget.add right.add up
-        @startFadeCenter()
+        @center.add right.add up
+        @centerTarget?.copy @center
+        @update()
             
     # 00000000   0000000    0000000  000   000   0000000  
     # 000       000   000  000       000   000  000       
@@ -161,24 +167,27 @@ class Camera extends THREE.PerspectiveCamera
         raycaster.setFromCamera rts.mouse, @
         intersects = raycaster.intersectObjects rts.scene.children, true
 
+        intersects = intersects.filter (i) -> valid i.face
+        
         if intersects.length
             @centerTarget = new Vector(intersects[0].point).round()
             @startFadeCenter()
             
-    # 00000000   0000000   0000000    00000000       0000000  00000000  000   000  000000000  00000000  00000000   
-    # 000       000   000  000   000  000           000       000       0000  000     000     000       000   000  
-    # 000000    000000000  000   000  0000000       000       0000000   000 0 000     000     0000000   0000000    
-    # 000       000   000  000   000  000           000       000       000  0000     000     000       000   000  
-    # 000       000   000  0000000    00000000       0000000  00000000  000   000     000     00000000  000   000  
-    
-    startFadeCenter: -> rts.animate @fadeCenter
+    startFadeCenter: -> 
+        
+        if not @fading
+            rts.animate @fadeCenter
+            @fading = true
             
     fadeCenter: (deltaSeconds) =>
         
         @center.fade @centerTarget, deltaSeconds
         @update()
+        
         if @center.dist(@centerTarget) > 0.00001
             rts.animate @fadeCenter
+        else
+            delete @fading
             
     # 000   000  000   000  00000000  00000000  000      
     # 000 0 000  000   000  000       000       000      
@@ -198,21 +207,29 @@ class Camera extends THREE.PerspectiveCamera
             
         @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.000005
         
-        rts.animate @inertZoom
+        @startZoom()
 
     # 0000000   0000000    0000000   00     00  
     #    000   000   000  000   000  000   000  
     #   000    000   000  000   000  000000000  
     #  000     000   000  000   000  000 0 000  
     # 0000000   0000000    0000000   000   000  
+
+    startZoom: -> 
+        
+        if not @zooming
+            rts.animate @inertZoom
+            @zoominging = true
     
     inertZoom: (deltaSeconds) =>
 
         @setDist 1 - clamp -0.005, 0.005, @wheelInert
-        @wheelInert = reduce @wheelInert, deltaSeconds*0.003*(1+(@dist/@maxDist)*3)
+        @wheelInert = reduce @wheelInert, deltaSeconds*0.003
+        
         if Math.abs(@wheelInert) > 0.00000001
             rts.animate @inertZoom
         else
+            delete @zooming
             @wheelInert = 0
     
     setDist: (factor) =>
@@ -228,12 +245,17 @@ class Camera extends THREE.PerspectiveCamera
     # 000   000  000        000   000  000   000     000     000       
     #  0000000   000        0000000    000   000     000     00000000  
     
-    update: -> 
-        
-        @degree = clamp 0, 180, @degree
+    rotQuat: ->
+
         q = new THREE.Quaternion()
         q.multiply new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 0, 1), deg2rad @rotate
         q.multiply new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(1, 0, 0), deg2rad @degree
+        q
+    
+    update: -> 
+        
+        @degree = clamp 0, 180, @degree
+        q = @rotQuat()
         @position.copy @center.plus new THREE.Vector3(0,0,@dist).applyQuaternion q
         @quaternion.copy q
 

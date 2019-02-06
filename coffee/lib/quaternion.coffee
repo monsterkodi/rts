@@ -7,6 +7,7 @@
 ###
 
 { deg2rad, rad2deg, log } = require 'kxk'
+
 Vector  = require './vector'
 THREE   = require 'three'
 

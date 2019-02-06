@@ -48,8 +48,16 @@ class RTS
         @elem.appendChild @renderer.domElement
         
         @camera = new Camera view:@view
-        
+                
         @scene = new THREE.Scene()
+        
+        # @scene.add new THREE.CameraHelper @camera 
+        
+        # gridHelper = new THREE.GridHelper 100, 100, 0x444444, 0x111111
+        # gridHelper.rotateX deg2rad 90
+        # gridHelper.position.set 0, 0,-0.001
+        # @scene.add gridHelper
+        # @scene.add new THREE.AxesHelper 50
         
         @sun = new THREE.PointLight 0xffffff, 0.5
         @sun.position.copy @player.camera.getPosition() if @player?
