@@ -11,34 +11,22 @@
 Vector  = require './vector'
 THREE   = require 'three'
 
-class Quaternion
+class Quaternion extends THREE.Quaternion
 
-    constructor: (w=1, x=0, y=0, z=0) ->
-        if w instanceof Vector
-            @x = w.x
-            @y = w.y
-            @z = w.z
-            @w = 0
-        else if w instanceof Quaternion or w instanceof THREE.Quaternion
-            @x = w.x
-            @y = w.y
-            @z = w.z
-            @w = w.w
+    constructor: (x=0, y=0, z=0, w=1) ->
+        if x instanceof Vector
+            super x.x, x.y, x.z, 0
+        else if x instanceof Quaternion or x instanceof THREE.Quaternion
+            super x.x, x.y, x.z, x.w
         else if Array.isArray w
-            @w = w[0]            
-            @x = w[1]
-            @y = w[2]
-            @z = w[3]
+            super w[0], w[1], w[2], w[3]
         else
-            @x = x
-            @y = y
-            @z = z
-            @w = w
+            super x, y, z, w
         if Number.isNaN @x
             throw new Error
             
     clone: -> new Quaternion @
-    copy: (q) -> 
+    copy: (q) ->
         @x = q.x
         @y = q.y
         @z = q.z
@@ -298,4 +286,4 @@ class Quaternion
     @minusZdownX.name = 'minusZdownX'
     @minusZdownY.name = 'minusZdownY'
     
-module.exports = Quaternion            
+module.exports = Quaternion  

@@ -115,7 +115,7 @@ class RTS
         
         if not @paused
             angle = -deltaSeconds*0.3
-            @light2.position.applyQuaternion new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 0, 1), angle
+            @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
         
         oldAnimations = @animations.clone()
         @animations = []
@@ -230,7 +230,7 @@ class RTS
             # wire = new THREE.WireframeGeometry geom
             # @cursor = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
             # @cursor.name = 'cursor'
-            # @cursor.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), Vector.normals[info.face]
+            # @cursor.quaternion.copy quat().setFromUnitVectors vec(0,0,1), Vector.normals[info.face]
             # @cursor.position.copy info.pos
             # @scene.add @cursor
         
@@ -263,6 +263,5 @@ class RTS
         @camera.aspect = w/h
         @camera.updateProjectionMatrix()
         @renderer.setSize w,h
-        @ssaoPass?.setSize w,h
         
 module.exports = RTS

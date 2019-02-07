@@ -58,11 +58,13 @@ class AStar
                 neighbors.push @world.faceIndex dir, @world.indexAtPos dpos
         
         neighbors
+        
+    getScore: (score, faceIndex) -> score.get(faceIndex) ? Number.MAX_VALUE
                 
     lowestScore: (openSet, fScore) ->
         
         keys = Array.from openSet.keys()
-        keys.sort (a,b) -> (fScore.get(a) ? Number.MAX_VALUE) - (fScore.get(b) ? Number.MAX_VALUE)
+        keys.sort (a,b) => @getScore(fScore, a) - @getScore(fScore, b)
         keys[0]
         
     findPath: (start, goal) ->
@@ -92,7 +94,7 @@ class AStar
     
         while valid openSet
             
-            current = @lowestScore openSet, fScore # the node in openSet having the lowest fScore[] value
+            current = @lowestScore openSet, fScore # the node in openSet having the lowest fScore value
             if current == goal
                 return @collectPath current
     
@@ -105,17 +107,17 @@ class AStar
                     continue # ignore the neighbor which is already evaluated.
     
                 # distance from start to a neighbor
-                tScore = (gScore.get(current) ? Number.MAX_VALUE) + @neighborCost current, neighbor
+                tScore = @getScore(gScore, current) + @neighborCost current, neighbor
     
                 if not openSet.get(neighbor)? # discover a new node
                     openSet.set neighbor, neighbor
-                else if tScore >= (gScore.get(neighbor) ? Number.MAX_VALUE)
+                else if tScore >= @getScore gScore, neighbor
                     continue
     
                 # path is the best until now
                 @cameFrom.set neighbor, current
                 gScore.set neighbor, tScore
-                fScore.set neighbor, gScore.get(neighbor)+@dist(neighbor, goal)
+                fScore.set neighbor, @getScore(gScore, neighbor)+@dist(neighbor, goal)
                 
     collectPath: (current) ->
         

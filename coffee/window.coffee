@@ -8,10 +8,15 @@
 
 { post, stopEvent, keyinfo, prefs, win, log, $ } = require 'kxk'
 
-RTS = require './rts'
+RTS    = require './rts'
+Vector = require './lib/Vector'
+Quaternion =require './lib/Quaternion'
 
 electron = require 'electron'
          
+window.vec  = (x,y,z)   -> new Vector x, y, z
+window.quat = (x,y,z,w) -> new Quaternion x, y, z, w
+
 w = new win
     dir:    __dirname
     pkg:    require '../package.json'

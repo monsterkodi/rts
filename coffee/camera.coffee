@@ -104,27 +104,27 @@ class Camera extends THREE.PerspectiveCamera
         
         # br = rts.elem.getBoundingClientRect()
         # relMouse = new THREE.Vector2 ((@mouseX-br.left)/br.width)*2-1, -((@mouseY-br.top)/br.height)*2+1 # [-1..1] [-1..1] left to right, bottom to top
-        # rayDirection = new THREE.Vector3 relMouse.x, relMouse.y, 1 # point on far frustum
+        # rayDirection = vec relMouse.x, relMouse.y, 1 # point on far frustum
         # rayDirection.unproject @ # point on far plane
         # rayDirection.normalize()
 #         
-        # planeNormal = new THREE.Vector3(0,0,1).applyQuaternion @rotQuat()
+        # planeNormal = vec(0,0,1).applyQuaternion @rotQuat()
 #         
         # plane = new THREE.Plane 
         # plane.setFromNormalAndCoplanarPoint planeNormal, @center
         # ray = new THREE.Ray @position, rayDirection
-        # planeHit = new THREE.Vector3
+        # planeHit = vec()
         # ray.intersectPlane plane, planeHit
 
-        # rayDirection = new THREE.Vector3 ((@mouseX-br.left-x)/br.width)*2-1, -((@mouseY-br.top-y)/br.height)*2+1, 1
+        # rayDirection = vec ((@mouseX-br.left-x)/br.width)*2-1, -((@mouseY-br.top-y)/br.height)*2+1, 1
         # rayDirection.unproject @
         # rayDirection.normalize()
 #         
-        # deltaHit = new THREE.Vector3
+        # deltaHit = vec()
         # ray = new THREE.Ray @position, rayDirection
         # ray.intersectPlane plane, deltaHit 
-        # centerToOld = new THREE.Vector3().subVectors deltaHit, @center
-        # centerToNew = new THREE.Vector3().subVectors planeHit, @center
+        # centerToOld = vec().subVectors deltaHit, @center
+        # centerToNew = vec().subVectors planeHit, @center
         # angle = rad2deg centerToNew.angleTo centerToOld
         # centerToOldNorm = centerToOld.clone().normalize()
         # centerToNewNorm = centerToNew.clone().normalize()
@@ -145,10 +145,10 @@ class Camera extends THREE.PerspectiveCamera
     
     pan: (x,y) ->
         
-        right = new THREE.Vector3 -x, 0, 0 
+        right = vec -x, 0, 0 
         right.applyQuaternion @quaternion
 
-        up = new THREE.Vector3 0, y, 0 
+        up = vec 0, y, 0 
         up.applyQuaternion @quaternion
         
         @center.add right.add up
@@ -247,16 +247,16 @@ class Camera extends THREE.PerspectiveCamera
     
     rotQuat: ->
 
-        q = new THREE.Quaternion()
-        q.multiply new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(0, 0, 1), deg2rad @rotate
-        q.multiply new THREE.Quaternion().setFromAxisAngle new THREE.Vector3(1, 0, 0), deg2rad @degree
+        q = quat()
+        q.multiply quat().setFromAxisAngle vec(0, 0, 1), deg2rad @rotate
+        q.multiply quat().setFromAxisAngle vec(1, 0, 0), deg2rad @degree
         q
     
     update: -> 
         
         @degree = clamp 0, 180, @degree
         q = @rotQuat()
-        @position.copy @center.plus new THREE.Vector3(0,0,@dist).applyQuaternion q
+        @position.copy @center.plus vec(0,0,@dist).applyQuaternion q
         @quaternion.copy q
 
 module.exports = Camera

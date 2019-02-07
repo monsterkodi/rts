@@ -8,19 +8,17 @@
 
 { rad2deg, log } = require 'kxk'
 
-class Vector
+THREE = require 'three'
+
+class Vector extends THREE.Vector3
 
     constructor: (x=0,y=0,z=0) ->
         if x.x? and x.y?
-            @copy x
+            super x.x, x.y, x.z ? 0
         else if Array.isArray x
-            @x = x[0]
-            @y = x[1]
-            @z = x[2] ? 0
+            super x[0], x[1], x[2] ? 0
         else
-            @x = x
-            @y = y
-            @z = z ? 0
+            super x, y, z ? 0
         if Number.isNaN @x
             throw new Error
             
@@ -31,7 +29,7 @@ class Vector
         @z = v.z ? 0
         @
 
-    normal: -> new Vector(@).normalize()
+    normal: -> @clone().normalize()
     
     parallel: (n) ->
         dot = @x*n.x + @y*n.y + @z*n.z
@@ -46,7 +44,7 @@ class Vector
         dot = 2*(@x*n.x + @y*n.y + @z*n.z)
         new Vector @x-dot*n.x, @y-dot*n.y, @z-dot*n.z
 
-    cross: (v) -> new Vector @y*v.z-@z*v.y, @z*v.x-@x*v.z, @x*v.y-@y*v.x
+    cross: (v) -> @clone().crossVectors(@,v)
     normalize: ->
         l = @length()
         if l
@@ -85,19 +83,7 @@ class Vector
     minus: (v) -> new Vector(v).neg().add @
     neg:       -> new Vector -@x, -@y, -@z
     to:    (v) -> new Vector(v).sub @
-     
-    add: (v) ->
-        @x += v.x 
-        @y += v.y 
-        @z += v.z ? 0
-        @
-    
-    sub: (v) ->
-        @x -= v.x 
-        @y -= v.y 
-        @z -= v.z ? 0
-        @
-    
+        
     scale: (f) ->
         @x *= f
         @y *= f
@@ -105,7 +91,7 @@ class Vector
         @
         
     reset: ->
-        @x = @y = @z =
+        @x = @y = @z = 0
         @
     
     isZero: -> @x == @y == @z == 0

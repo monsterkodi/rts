@@ -71,7 +71,7 @@ class World
         
         dp = @cube.pos.minus Vector.normals[@cube.face].mul 0.35
         @baseDot.position.set dp.x, dp.y, dp.z
-        @baseDot.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0, 0, 1), Vector.normals[@cube.face]
+        @baseDot.quaternion.copy quat().setFromUnitVectors vec(0, 0, 1), Vector.normals[@cube.face]
         
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  
@@ -163,15 +163,15 @@ class World
         
         tube = new THREE.Geometry
         
-        tube.vertices.push new THREE.Vector3 p1.pos.x+n1.x,  p1.pos.y+n1.y, p1.pos.z+n1.z
-        tube.vertices.push new THREE.Vector3 p1.pos.x-n2.x,  p1.pos.y-n2.y, p1.pos.z-n2.z
-        tube.vertices.push new THREE.Vector3 p2.pos.x-n3.x,  p2.pos.y-n3.y, p2.pos.z-n3.z
-        tube.vertices.push new THREE.Vector3 p2.pos.x+n4.x,  p2.pos.y+n4.y, p2.pos.z+n4.z
+        tube.vertices.push vec p1.pos.x+n1.x,  p1.pos.y+n1.y, p1.pos.z+n1.z
+        tube.vertices.push vec p1.pos.x-n2.x,  p1.pos.y-n2.y, p1.pos.z-n2.z
+        tube.vertices.push vec p2.pos.x-n3.x,  p2.pos.y-n3.y, p2.pos.z-n3.z
+        tube.vertices.push vec p2.pos.x+n4.x,  p2.pos.y+n4.y, p2.pos.z+n4.z
         
-        tube.vertices.push new THREE.Vector3 p1.pos.x+n5.x,  p1.pos.y+n5.y, p1.pos.z+n5.z
-        tube.vertices.push new THREE.Vector3 p1.pos.x-n6.x,  p1.pos.y-n6.y, p1.pos.z-n6.z
-        tube.vertices.push new THREE.Vector3 p2.pos.x-n7.x,  p2.pos.y-n7.y, p2.pos.z-n7.z
-        tube.vertices.push new THREE.Vector3 p2.pos.x+n8.x,  p2.pos.y+n8.y, p2.pos.z+n8.z
+        tube.vertices.push vec p1.pos.x+n5.x,  p1.pos.y+n5.y, p1.pos.z+n5.z
+        tube.vertices.push vec p1.pos.x-n6.x,  p1.pos.y-n6.y, p1.pos.z-n6.z
+        tube.vertices.push vec p2.pos.x-n7.x,  p2.pos.y-n7.y, p2.pos.z-n7.z
+        tube.vertices.push vec p2.pos.x+n8.x,  p2.pos.y+n8.y, p2.pos.z+n8.z
         
         tube.faces.push new THREE.Face3 0, 5, 6
         tube.faces.push new THREE.Face3 6, 3, 0
@@ -416,7 +416,7 @@ class World
         
     orientBot: (bot) -> @orientFace bot.mesh, bot.face
     orientFace: (object, face) ->
-        object.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), Vector.normals[face]
+        object.quaternion.copy quat().setFromUnitVectors vec(0,0,1), Vector.normals[face]
         
     posBelowBot: (bot) ->  bot.pos.minus Vector.normals[bot.face]
         
@@ -442,15 +442,15 @@ class World
         
         topside = new THREE.Geometry()
         
-        topside.vertices.push new THREE.Vector3  s,  s, s
-        topside.vertices.push new THREE.Vector3 -s,  s, s
-        topside.vertices.push new THREE.Vector3 -s, -s, s
-        topside.vertices.push new THREE.Vector3  s, -s, s
+        topside.vertices.push vec  s,  s, s
+        topside.vertices.push vec -s,  s, s
+        topside.vertices.push vec -s, -s, s
+        topside.vertices.push vec  s, -s, s
 
-        topside.vertices.push new THREE.Vector3  i,  i, o
-        topside.vertices.push new THREE.Vector3 -i,  i, o
-        topside.vertices.push new THREE.Vector3 -i, -i, o
-        topside.vertices.push new THREE.Vector3  i, -i, o
+        topside.vertices.push vec  i,  i, o
+        topside.vertices.push vec -i,  i, o
+        topside.vertices.push vec -i, -i, o
+        topside.vertices.push vec  i, -i, o
         
         topside.faces.push new THREE.Face3 4, 5, 6
         topside.faces.push new THREE.Face3 4, 6, 7
