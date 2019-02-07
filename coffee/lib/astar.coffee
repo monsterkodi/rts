@@ -8,7 +8,7 @@
 
 { valid, log, _ } = require 'kxk'
 
-Vector = require './lib/vector'
+Vector = require './vector'
 
 class AStar
 

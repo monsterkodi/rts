@@ -11,6 +11,7 @@
 FPS    = require './lib/fps'
 Info   = require './lib/info'
 World  = require './world'
+Map    = require './map'
 Camera = require './camera'
 Vector = require './lib/vector'
 THREE  = require 'three'
@@ -84,7 +85,8 @@ class RTS
         @ambient = new THREE.AmbientLight 0x333333
         @scene.add @ambient
             
-        @world = new World @scene    
+        # @world = new World @scene    
+        @world = new Map @scene    
         
         @mouse = new THREE.Vector2
         @raycaster = new THREE.Raycaster()
@@ -249,8 +251,8 @@ class RTS
         @sun.position.copy @camera.position
         @renderer.render @world.scene, @camera
         
-        @fps.draw()
-        @info.draw @renderer.info
+        # @fps.draw()
+        # @info.draw @renderer.info
 
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000

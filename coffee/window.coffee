@@ -83,14 +83,14 @@ reloadWin = ->
 
     prefs.save()
     clearListeners()
-    window.win.webContents.reloadIgnoringCache()
+    electron.remote.getCurrentWindow()?.webContents.reloadIgnoringCache()
 
 window.onresize = (event) => 
     
     saveBounds()
     main =$ "#main"
     br = main.getBoundingClientRect()
-    rts.resized br.width, br.height
+    rts?.resized br.width, br.height
     
 post.on 'menuAction', (action) ->
     

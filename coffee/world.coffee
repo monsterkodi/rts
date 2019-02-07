@@ -8,9 +8,9 @@
 
 { deg2rad, log, _ } = require 'kxk'
 
-THREE = require 'three'
-AStar  = require './astar'
-Vector = require './lib/vector'
+THREE     = require 'three'
+AStar     = require './lib/astar'
+Vector    = require './lib/vector'
 Materials = require './materials'
 { Stone, Bot, Face } = require './constants'
 
@@ -21,6 +21,28 @@ class World
         @stones = {}
         @bots = {}
         
+        @astar = new AStar @
+        
+        @build()
+        
+        sphere = new THREE.SphereGeometry 0.1, 6, 6
+        sphere.computeFaceNormals()
+        sphere.rotateX deg2rad 90
+        sphere.computeFlatVertexNormals()
+        
+        @baseDot = new THREE.Mesh sphere, Materials.path
+        @baseDot.castShadow = true
+        @baseDot.receiveShadow = true
+        @scene.add @baseDot 
+        @updateBaseDot()
+        
+        @initBotGeoms()
+        @constructBots()
+        @constructStones()
+        @constructPaths()
+        
+    build: ->
+        
         # # for z in [-5..0]
         # for z in [0..0]
             # for y in [-10..10]
@@ -29,6 +51,7 @@ class World
   
         # @wall -128, 0, 0, 128, 0, 0
         # @wall 0, -128, 0, 0, 128, 0
+        
         
         @wall -2, 0, 0, 2, 0, 0
         @wall 0, -2, 0, 0, 2, 0
@@ -48,24 +71,6 @@ class World
         @addBot  0, 2,1,  Bot.tubecross
         @addBot  0,-2,1,  Bot.toruscone
         @addBot  2, 0,1,  Bot.knot
-
-        sphere = new THREE.SphereGeometry 0.1, 6, 6
-        sphere.computeFaceNormals()
-        sphere.rotateX deg2rad 90
-        sphere.computeFlatVertexNormals()
-        
-        @baseDot = new THREE.Mesh sphere, Materials.path
-        @baseDot.castShadow = true
-        @baseDot.receiveShadow = true
-        @scene.add @baseDot 
-        @updateBaseDot()
-        
-        @astar = new AStar @
-        
-        @initBotGeoms()
-        @constructBots()
-        @constructStones()
-        @constructPaths()
         
     updateBaseDot: ->
         
