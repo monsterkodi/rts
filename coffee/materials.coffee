@@ -11,6 +11,7 @@ THREE = require 'three'
 Materials = 
     
     highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2
+    # highlight:  new THREE.MeshLambertMaterial  color:0x000000, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.5
     botGray:    new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5, dithering:false
     botWhite:   new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5, dithering:false
     path:       new THREE.MeshStandardMaterial color:0xbbbbbb, metalness: 0.9, roughness: 0.5, dithering:false

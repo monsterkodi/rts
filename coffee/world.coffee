@@ -64,7 +64,7 @@ class World
         
         @initBotGeoms()
         @constructBots()
-        @constructCubes()
+        @constructStones()
         @constructPaths()
         
     updateBaseDot: ->
@@ -111,19 +111,20 @@ class World
         [lastFace, lastIndex] = @splitFaceIndex path[0]
         lastPos = @posAtIndex lastIndex
         
-        aboveFace   = 0.35
+        aboveFace = 0.35
         
         lastPos.sub Vector.normals[lastFace].mul aboveFace
-        points.push face:lastFace, index:lastIndex, pos:new Vector lastPos.x, lastPos.y, lastPos.z
+        points.push i:0, face:lastFace, index:lastIndex, pos:new Vector lastPos.x, lastPos.y, lastPos.z
         for i in [1...path.length]
             [nextFace, nextIndex] = @splitFaceIndex path[i]
             nextPos = @posAtIndex nextIndex
             nextPos.sub Vector.normals[nextFace].mul aboveFace
-            pos1 = lastPos.plus @directionFaceToFace path[i-1], path[i]
-            pos2 = nextPos.plus @directionFaceToFace path[i], path[i-1]
-            points.push face:lastFace, index:lastIndex, pos:new Vector pos1.x, pos1.y, pos1.z
-            points.push face:nextFace, index:nextIndex, pos:new Vector pos2.x, pos2.y, pos2.z
-            points.push face:nextFace, index:nextIndex, pos:new Vector nextPos.x, nextPos.y, nextPos.z
+            if lastFace != nextFace
+                pos1 = lastPos.plus @directionFaceToFace path[i-1], path[i]
+                pos2 = nextPos.plus @directionFaceToFace path[i], path[i-1]
+                points.push i:1, face:lastFace, index:lastIndex, pos:new Vector pos1.x, pos1.y, pos1.z
+                points.push i:1, face:nextFace, index:nextIndex, pos:new Vector pos2.x, pos2.y, pos2.z
+            points.push i:0, face:nextFace, index:nextIndex, pos:new Vector nextPos.x, nextPos.y, nextPos.z
             [lastFace, lastIndex] = [nextFace, nextIndex]
             lastPos = nextPos
         points
@@ -149,13 +150,24 @@ class World
             
         n5 = n6 = n7 = n8 = Vector.normals[p1.face].cross(p1.pos.to(p2.pos)).normal().mul 0.025
         
+        if p1.i == 0
+            d = p2.pos.to p1.pos
+            d.normalize().scale 0.025
+            n5 = n5.plus d
+            n6 = n6.minus d
+        if p2.i == 0
+            d = p1.pos.to p2.pos
+            d.normalize().scale 0.025
+            n7 = n7.minus d
+            n8 = n8.plus d
+        
         tube = new THREE.Geometry
         
         tube.vertices.push new THREE.Vector3 p1.pos.x+n1.x,  p1.pos.y+n1.y, p1.pos.z+n1.z
         tube.vertices.push new THREE.Vector3 p1.pos.x-n2.x,  p1.pos.y-n2.y, p1.pos.z-n2.z
         tube.vertices.push new THREE.Vector3 p2.pos.x-n3.x,  p2.pos.y-n3.y, p2.pos.z-n3.z
         tube.vertices.push new THREE.Vector3 p2.pos.x+n4.x,  p2.pos.y+n4.y, p2.pos.z+n4.z
-
+        
         tube.vertices.push new THREE.Vector3 p1.pos.x+n5.x,  p1.pos.y+n5.y, p1.pos.z+n5.z
         tube.vertices.push new THREE.Vector3 p1.pos.x-n6.x,  p1.pos.y-n6.y, p1.pos.z-n6.z
         tube.vertices.push new THREE.Vector3 p2.pos.x-n7.x,  p2.pos.y-n7.y, p2.pos.z-n7.z
@@ -289,7 +301,8 @@ class World
         
             geom = new THREE.BufferGeometry 
             geom.fromGeometry @botGeoms[bot.type]
-            geom.scale 1.1, 1.1, 1.1
+            s = 1.05
+            geom.scale s,s,s
             
             mesh = new THREE.Mesh geom, Materials.highlight
             mesh.position.set p.x, p.y, p.z
@@ -343,7 +356,11 @@ class World
         @botGeoms[Bot.tubecross].merge tube
         
         @botGeoms[Bot.octacube].merge new THREE.OctahedronGeometry 0.25, 0
-                
+        
+        knot = new THREE.TorusKnotGeometry 0.1, 0.075
+        knot.translate 0,0,-0.175
+        @botGeoms[Bot.knot].merge knot
+        
         @botGeoms[Bot.cone].rotateX deg2rad 90
         @botGeoms[Bot.sphere].rotateX deg2rad 90
         @botGeoms[Bot.cylinder].rotateX deg2rad 90
@@ -364,6 +381,7 @@ class World
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.position.set p.x, p.y, p.z
+            mesh.bot = bot.type
             @scene.add mesh
             bot.mesh = mesh
             @colorBot bot
@@ -409,14 +427,14 @@ class World
             bot.mesh.material = Materials.bot[stone]
         else
             bot.mesh.material = Materials.botWhite
-        
-    #  0000000  000   000  0000000    00000000   0000000    
-    # 000       000   000  000   000  000       000         
-    # 000       000   000  0000000    0000000   0000000     
-    # 000       000   000  000   000  000            000    
-    #  0000000   0000000   0000000    00000000  0000000     
-        
-    constructCubes: ->
+
+    #  0000000  000000000   0000000   000   000  00000000   0000000    
+    # 000          000     000   000  0000  000  000       000         
+    # 0000000      000     000   000  000 0 000  0000000   0000000     
+    #      000     000     000   000  000  0000  000            000    
+    # 0000000      000      0000000   000   000  00000000  0000000     
+    
+    constructStones: ->
                     
         s = 0.5
         o = 0.55
@@ -496,6 +514,7 @@ class World
             mesh = new THREE.Mesh bufgeo, Materials.stone[stone]
             mesh.receiveShadow = true
             mesh.castShadow = true
+            mesh.stone = stone
             @scene.add mesh
             
 module.exports = World

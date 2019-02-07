@@ -134,19 +134,24 @@ class RTS
     
     onMouseDown: (event) =>
         
-        if event.buttons & 1
+        if event.buttons == 1
             
             @calcMouse event
-            @castRay event
             
             if @world.highlightBot?
                 @dragBot = @world.highlightBot
             else
                 delete @dragBot
+                
+        else
+            @camMove = true
         
     onMouseUp: (event) =>
 
-        delete @dragBot
+        if not @camMove
+            delete @dragBot
+        delete @camMove
+            
         @calcMouse event
     
     onMouseMove: (event) =>
@@ -155,29 +160,27 @@ class RTS
         
         return if event.buttons > 1
         
-        hit = @castRay event
+        hit = @castRay event.buttons == 1
         
         if not @dragBot
-            if hit
+            
+            if hit and hit.bot?
                 @world.highlightPos hit.pos
-            return
-
-        if hit?.face? and not hit.bot
-            if @dragBot.face != hit.face or @dragBot.index != hit.index
-                @world.moveBot @dragBot, hit.pos, hit.face
-                @world.highlightPos @dragBot.pos
-
-                # sourceFaceIndex = @world.faceIndex Vector.PZ, @world.indexAt(0,0,1)
-                # targetFaceIndex = @world.faceIndex @dragBot.face, @dragBot.index
-                # log @world.stringForFaceIndex(sourceFaceIndex), @world.stringForFaceIndex(targetFaceIndex)
-                # log @world.astar.findPath sourceFaceIndex, targetFaceIndex
+            else
+                @world.removeHighlight()
                 
+        else 
+            if hit?.face? and (not @world.botAtPos(hit.pos) or @world.botAtPos(hit.pos) == @dragBot)
+                if @dragBot.face != hit.face or @dragBot.index != hit.index
+                    @world.moveBot @dragBot, hit.pos, hit.face
+                    @world.highlightPos @dragBot.pos
+
     calcMouse: (event) ->
         
         br = @elem.getBoundingClientRect()
         @mouse.x = ((event.clientX-br.left) / br.width) * 2 - 1
         @mouse.y = -((event.clientY-br.top) / br.height ) * 2 + 1
-        return @mouse
+        @mouse
 
     #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
     # 000       000   000  000          000     000   000  000   000   000 000   
@@ -185,53 +188,43 @@ class RTS
     # 000       000   000       000     000     000   000  000   000     000     
     #  0000000  000   000  0000000      000     000   000  000   000     000     
     
-    filterHit: (intersects, event) ->
+    filterHit: (intersects, ignoreHighlight) ->
         
-        intersects = intersects.filter (i) -> valid i.face
-        intersects = intersects.filter (i) => i.object != @world.highlightBot?.highlight
-        if event.buttons == 1
+        intersects = intersects.filter (i) => i.object.stone? or i.object.bot
+        if ignoreHighlight
             intersects = intersects.filter (i) => i.object != @world.highlightBot?.mesh
             
         intersects[0]
     
-    castRay: (event) ->
+    castRay: (ignoreHighlight) ->
         
         @raycaster.setFromCamera @mouse, @camera
         intersects = @raycaster.intersectObjects @scene.children, false 
         # log 'hits', intersects.length
 
-        hit = @filterHit intersects, event
+        intersect = @filterHit intersects, ignoreHighlight
 
-        return if empty hit
+        return if empty intersect
         
-        point = hit.point
-        # @world.highlightPos point     
+        point = intersect.point
         
         info = 
             pos:    @world.roundPos point
             index:  @world.indexAtPos @world.roundPos point
-            norm:   hit.face.normal
-            dist:   hit.distance
+            norm:   intersect.face.normal
+            dist:   intersect.distance
             
         @scene.remove @cursor if @cursor
         delete @cursor
             
-        if bot = @world.botAtPos point
-            if bot != @world.highlightBot
-                info.bot = bot
-                return info
-
-        info.face = @world.faceAtPosNorm point, hit.face.normal
+        if intersect.object.bot
+            info.bot = @world.botAtPos point
         
-        # if hit.face and not @world.highlightBot
-        #   geom = new THREE.CircleGeometry 0.1, 18
-        #   geom.translate 0,0,0.01
-        #   wire = new THREE.WireframeGeometry geom
-        #   @cursor = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
-        #   @cursor.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), hit.face.normal
-        #   @cursor.position.copy hit.point
+        stones = intersects.filter (i) => i.object.stone?
+        if valid stones
+            info.face = @world.faceAtPosNorm stones[0].point, stones[0].face.normal
         
-        if info.face < 6
+        # if info.face < 6
             # geom = new THREE.ConeGeometry 0.5, 0.8
             # geom.rotateX deg2rad 90
             # wire = new THREE.WireframeGeometry geom
@@ -239,10 +232,7 @@ class RTS
             # @cursor.name = 'cursor'
             # @cursor.quaternion.copy new THREE.Quaternion().setFromUnitVectors new THREE.Vector3(0,0,1), Vector.normals[info.face]
             # @cursor.position.copy info.pos
-#                     
             # @scene.add @cursor
-        else
-            log 'DAFUK?', info.face
         
         # log info
             

@@ -69,7 +69,7 @@ class Camera extends THREE.PerspectiveCamera
         
     onMouseUp: (event) => 
 
-        if @downButtons == 1 or @downButtons == 4
+        if @downButtons & 1 or @downButtons & 4
             if not @mouseMoved
                 @focusOnHit()
         
