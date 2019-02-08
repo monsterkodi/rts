@@ -11,9 +11,7 @@ THREE = require 'three'
 Materials = 
     
     highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2
-    # highlight:  new THREE.MeshLambertMaterial  color:0x000000, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.5
-    botGray:    new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5, dithering:false
-    botWhite:   new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5, dithering:false
+    packet:     new THREE.MeshStandardMaterial color:0xbbbbbb, metalness: 0.9, roughness: 0.5, dithering:false
     path:       new THREE.MeshStandardMaterial color:0xbbbbbb, metalness: 0.9, roughness: 0.5, dithering:false
     stone: [   
                 new THREE.MeshPhongMaterial    color:0x111111, dithering:true # gray
@@ -25,7 +23,7 @@ Materials =
                 new THREE.MeshStandardMaterial color:0xffffff, dithering:true # white
     ]
     bot: [   
-                new THREE.MeshStandardMaterial color:0x111111, dithering:false # gray
+                new THREE.MeshStandardMaterial color:0xccccdd, metalness: 0.9, roughness: 0.5, dithering:false # gray
                 new THREE.MeshStandardMaterial color:0xdd0000, dithering:false # red
                 new THREE.MeshStandardMaterial color:0x008800, dithering:false # green
                 new THREE.MeshStandardMaterial color:0x0000ff, dithering:false # blue

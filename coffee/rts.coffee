@@ -25,8 +25,8 @@ class RTS
         window.rts = @
         @fps = new FPS
         @info = new Info
-        
         @paused = false
+        @animations = []
         
         @renderer = new THREE.WebGLRenderer antialias: true
 
@@ -95,7 +95,6 @@ class RTS
         document.addEventListener 'mousedown', @onMouseDown
         document.addEventListener 'mouseup',   @onMouseUp
         
-        @animations = []
         @lastAnimationTime = window.performance.now()
         @animationStep()
 
@@ -112,18 +111,20 @@ class RTS
     animationStep: =>
         
         now = window.performance.now()
-        deltaSeconds = (now - @lastAnimationTime) * 0.001
+        delta = (now - @lastAnimationTime) * 0.001
         @lastAnimationTime = now
         
         if not @paused
-            angle = -deltaSeconds*0.3
+            angle = -delta*0.3
             @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
         
         oldAnimations = @animations.clone()
         @animations = []
         
         for animation in oldAnimations
-            animation deltaSeconds
+            animation delta
+            
+        @world.animate delta
             
         @render()
         setTimeout @animationStep, 1000/60
@@ -251,8 +252,8 @@ class RTS
         @sun.position.copy @camera.position
         @renderer.render @world.scene, @camera
         
-        # @fps.draw()
-        # @info.draw @renderer.info
+        @fps.draw()
+        @info.draw @renderer.info
 
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000

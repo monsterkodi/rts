@@ -30,37 +30,33 @@ class Construct
     paths: ->
         
         for index, bot of @world.bots
-            continue if bot == @world.cube
-            @pathFromTo @world.cube, bot
-            
-        @updateBaseDot()
+            continue if bot == @world.base
+            @pathFromTo @world.base, bot
             
     pathFromTo: (from, to) ->
         
-        to.path?.parent?.remove to.path
+        to.path?.mesh?.parent?.remove to.path.mesh
         path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
         if path
-            to.path = @addPath path
+            to.path = 
+                points: @pathPoints path
+                length: path.length
+            to.path.mesh = @pathMesh to.path
+            to.path.pind = []
+            for pi in [0...to.path.points.length]
+                if to.path.points[pi].i == 0
+                    to.path.pind.push pi
         else
-            delete to.path
+            delete to.path # no proper remove?
                         
-    addPath: (path) ->
+    pathMesh: (path) ->
         
         tube = new THREE.Geometry
         
-        points = @tubePoints path    
+        points = path.points
         for i in [1...points.length]
             tube.merge @tubeFaces points[i-1], points[i]
             
-        sphere = new THREE.SphereGeometry 0.1, 6, 6
-        if points[0].face in [Face.PZ, Face.NZ]
-            sphere.rotateX deg2rad 90
-        else if points[0].face in [Face.PX, Face.NX]
-            sphere.rotateZ deg2rad 90
-        sphere.translate points[0].pos.x, points[0].pos.y, points[0].pos.z
-        sphere.faceVertexUvs = [[]]
-        tube.merge sphere
-             
         tube.computeFaceNormals()
         tube.computeFlatVertexNormals()
         
@@ -72,13 +68,13 @@ class Construct
         @world.scene.add mesh
         mesh
             
-    # 000000000  000   000  0000000    00000000  
-    #    000     000   000  000   000  000       
-    #    000     000   000  0000000    0000000   
-    #    000     000   000  000   000  000       
-    #    000      0000000   0000000    00000000  
+    # 00000000    0000000   000  000   000  000000000   0000000  
+    # 000   000  000   000  000  0000  000     000     000       
+    # 00000000   000   000  000  000 0 000     000     0000000   
+    # 000        000   000  000  000  0000     000          000  
+    # 000         0000000   000  000   000     000     0000000   
     
-    tubePoints: (path) ->
+    pathPoints: (path) ->
         
         points = []
         [lastFace, lastIndex] = @world.splitFaceIndex path[0]
@@ -95,12 +91,21 @@ class Construct
             if lastFace != nextFace
                 pos1 = lastPos.plus @world.directionFaceToFace path[i-1], path[i]
                 pos2 = nextPos.plus @world.directionFaceToFace path[i], path[i-1]
-                points.push i:1, face:lastFace, index:lastIndex, pos:new Vector pos1.x, pos1.y, pos1.z
-                points.push i:1, face:nextFace, index:nextIndex, pos:new Vector pos2.x, pos2.y, pos2.z
+                lm = pos1.to(pos2).length()
+                l1 = (1-lm)/2
+                l2 = 1-l1
+                points.push i:l1, face:lastFace, index:lastIndex, pos:new Vector pos1.x, pos1.y, pos1.z
+                points.push i:l2, face:nextFace, index:nextIndex, pos:new Vector pos2.x, pos2.y, pos2.z
             points.push i:0, face:nextFace, index:nextIndex, pos:new Vector nextPos.x, nextPos.y, nextPos.z
             [lastFace, lastIndex] = [nextFace, nextIndex]
             lastPos = nextPos
         points
+        
+    # 000000000  000   000  0000000    00000000  
+    #    000     000   000  000   000  000       
+    #    000     000   000  0000000    0000000   
+    #    000     000   000  000   000  000       
+    #    000      0000000   0000000    00000000  
             
     tubeFaces: (p1, p2) -> 
         
@@ -112,7 +117,7 @@ class Construct
                 
                 n1 = n2.plus Vector.normals[p2.face].mul(0.02)
                 n4 = n3.plus Vector.normals[p1.face].mul(0.02)
-            else
+            else # concave
                 n1 = Vector.normals[p1.face].mul(0.025)
                 n4 = Vector.normals[p2.face].mul(0.025)
                 
@@ -128,6 +133,7 @@ class Construct
             d.normalize().scale 0.025
             n5 = n5.plus d
             n6 = n6.minus d
+            
         if p2.i == 0
             d = p1.pos.to p2.pos
             d.normalize().scale 0.025
@@ -228,16 +234,16 @@ class Construct
         for index,bot of @world.bots
             p = @world.posAtIndex index
             
-            mesh = new THREE.Mesh @botGeoms[bot.type], Materials.botGray
+            mesh = new THREE.Mesh @botGeoms[bot.type], Materials.bot[Stone.gray]
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.position.set p.x, p.y, p.z
             mesh.bot = bot.type
             @world.scene.add mesh
             bot.mesh = mesh
-            @colorBot bot
-            @orientBot bot
-
+            
+            @dot bot
+            @updateBot bot
 
     updateBot: (bot) ->
         
@@ -245,41 +251,39 @@ class Construct
         @orientBot bot
         @colorBot bot
         
-    orientBot: (bot) -> @orientFace bot.mesh, bot.face
     orientFace: (obj, face) -> obj.quaternion.copy quat().setFromUnitVectors vec(0,0,1), Vector.normals[face]
+    
+    orientBot: (bot) -> 
+        
+        @orientFace bot.mesh, bot.face
+        @orientFace bot.dot,  bot.face
+        bot.dot.position.copy bot.pos.minus Vector.normals[bot.face].mul 0.35
         
     colorBot: (bot) ->
         
-        below = @world.posBelowBot bot
-        if stone = @world.stoneAtPos below
+        if stone = @world.stoneBelowBot bot
             bot.mesh.material = Materials.bot[stone]
         else
-            bot.mesh.material = Materials.botWhite
+            bot.mesh.material = Materials.bot[Stone.gray]
             
-    # 0000000     0000000    0000000  00000000  0000000     0000000   000000000  
-    # 000   000  000   000  000       000       000   000  000   000     000     
-    # 0000000    000000000  0000000   0000000   000   000  000   000     000     
-    # 000   000  000   000       000  000       000   000  000   000     000     
-    # 0000000    000   000  0000000   00000000  0000000     0000000      000     
+    # 0000000     0000000   000000000  
+    # 000   000  000   000     000     
+    # 000   000  000   000     000     
+    # 000   000  000   000     000     
+    # 0000000     0000000      000     
     
-    baseDot: ->
+    dot: (bot) ->
         
         sphere = new THREE.SphereGeometry 0.1, 6, 6
         sphere.computeFaceNormals()
         sphere.rotateX deg2rad 90
         sphere.computeFlatVertexNormals()
         
-        @bdot = new THREE.Mesh sphere, Materials.path
-        @bdot.castShadow = true
-        @bdot.receiveShadow = true
-        @world.scene.add @bdot
+        bot.dot = new THREE.Mesh sphere, Materials.path
+        bot.dot.castShadow = true
+        bot.dot.receiveShadow = true
+        @world.scene.add bot.dot
         
-    updateBaseDot: ->
-        
-        dp = @world.cube.pos.minus Vector.normals[@world.cube.face].mul 0.35
-        @bdot.position.set dp.x, dp.y, dp.z
-        @bdot.quaternion.copy quat().setFromUnitVectors vec(0, 0, 1), Vector.normals[@world.cube.face]
-            
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
     # 000000000  000  000  0000  000000000  000      000  000  0000  000000000     000     
