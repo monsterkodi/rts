@@ -8,13 +8,13 @@
 
 { elem, empty, valid, deg2rad, log, _ } = require 'kxk'
 
+THREE  = require 'three'
 FPS    = require './lib/fps'
 Info   = require './lib/info'
 World  = require './world'
 Map    = require './map'
 Camera = require './camera'
 Vector = require './lib/vector'
-THREE  = require 'three'
 
 window.THREE = THREE
 

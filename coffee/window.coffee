@@ -9,8 +9,8 @@
 { post, stopEvent, keyinfo, prefs, win, log, $ } = require 'kxk'
 
 RTS    = require './rts'
-Vector = require './lib/Vector'
-Quaternion =require './lib/Quaternion'
+Vector = require './lib/vector'
+Quaternion =require './lib/quaternion'
 
 electron = require 'electron'
          
