@@ -8,10 +8,7 @@
 
 { deg2rad, log, _ } = require 'kxk'
 
-THREE     = require 'three'
-AStar     = require './lib/astar'
 Vector    = require './lib/vector'
-Materials = require './materials'
 Construct = require './construct'
 
 { Stone, Bot, Face } = require './constants'
@@ -21,10 +18,8 @@ class World
     constructor: (@scene) ->
         
         @stones = {}
-        @bots = {}
-        
-        @astar = new AStar @
-        
+        @bots   = {}
+                
         @build()
                         
         @construct = new Construct @
@@ -117,19 +112,6 @@ class World
     
     faceIndex: (face,index) -> (face<<28) | index
     splitFaceIndex: (faceIndex) -> [faceIndex >> 28, faceIndex & ((Math.pow 2, 27)-1)]
-    stringForFace: (face) ->
-        switch face
-            when Face.PX then return "PX"
-            when Face.PY then return "PY"
-            when Face.PZ then return "PZ"
-            when Face.NX then return "NX"
-            when Face.NY then return "NY"
-            when Face.NZ then return "NZ"
-            
-    stringForFaceIndex: (faceIndex) ->
-        [face,index] = @splitFaceIndex faceIndex
-        pos = @posAtIndex index
-        "#{pos.x} #{pos.y} #{pos.z} #{@stringForFace(face)}"
     
     indexAt: (x,y,z) -> (x+256)+((y+256)<<9)+((z+256)<<18)
     indexAtPos: (v) -> p = @roundPos(v); @indexAt p.x, p.y, p.z
@@ -157,7 +139,7 @@ class World
         if bot = @botAtPos p
             if bot == @highlightBot
                 bot.highlight.position.set p.x, p.y, p.z
-                @orientFace bot.highlight, bot.face
+                @construct.orientFace bot.highlight, bot.face
                 return
             @removeHighlight()
             @highlightBot = bot
@@ -182,28 +164,34 @@ class World
         bot.face = toFace
         bot.index = toIndex
         bot.pos = @roundPos toPos
-        bot.mesh.position.set toPos.x, toPos.y, toPos.z
         
         if bot == @cube
             @construct.paths()
         else
-            @construct.addPathFromBotToBot @cube, bot
+            @construct.pathFromTo @cube, bot
         
-        @orientBot bot
-        @colorBot bot
-        
-    orientBot: (bot) -> @orientFace bot.mesh, bot.face
-    orientFace: (object, face) ->
-        object.quaternion.copy quat().setFromUnitVectors vec(0,0,1), Vector.normals[face]
+        @construct.updateBot bot
         
     posBelowBot: (bot) ->  bot.pos.minus Vector.normals[bot.face]
-        
-    colorBot: (bot) ->
-        
-        below = @posBelowBot bot
-        if stone = @stoneAtPos below
-            bot.mesh.material = Materials.bot[stone]
-        else
-            bot.mesh.material = Materials.botWhite
+                
+    #  0000000  000000000  00000000   000  000   000   0000000   
+    # 000          000     000   000  000  0000  000  000        
+    # 0000000      000     0000000    000  000 0 000  000  0000  
+    #      000     000     000   000  000  000  0000  000   000  
+    # 0000000      000     000   000  000  000   000   0000000   
+    
+    stringForFace: (face) ->
+        switch face
+            when Face.PX then return "PX"
+            when Face.PY then return "PY"
+            when Face.PZ then return "PZ"
+            when Face.NX then return "NX"
+            when Face.NY then return "NY"
+            when Face.NZ then return "NZ"
+            
+    stringForFaceIndex: (faceIndex) ->
+        [face,index] = @splitFaceIndex faceIndex
+        pos = @posAtIndex index
+        "#{pos.x} #{pos.y} #{pos.z} #{@stringForFace(face)}"
             
 module.exports = World

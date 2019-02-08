@@ -1,14 +1,15 @@
 ###
- 0000000   0000000   000   000   0000000  000000000  00000000   000   000   0000000  000000000   0000000   00000000 
-000       000   000  0000  000  000          000     000   000  000   000  000          000     000   000  000   000
-000       000   000  000 0 000  0000000      000     0000000    000   000  000          000     000   000  0000000  
-000       000   000  000  0000       000     000     000   000  000   000  000          000     000   000  000   000
- 0000000   0000000   000   000  0000000      000     000   000   0000000    0000000     000      0000000   000   000
+ 0000000   0000000   000   000   0000000  000000000  00000000   000   000   0000000  000000000
+000       000   000  0000  000  000          000     000   000  000   000  000          000   
+000       000   000  000 0 000  0000000      000     0000000    000   000  000          000   
+000       000   000  000  0000       000     000     000   000  000   000  000          000   
+ 0000000   0000000   000   000  0000000      000     000   000   0000000    0000000     000   
 ###
 
 { deg2rad, log, _ } = require 'kxk'
 
 THREE     = require 'three'
+AStar     = require './lib/astar'
 Vector    = require './lib/vector'
 Materials = require './materials'
 
@@ -17,6 +18,8 @@ Materials = require './materials'
 class Construct
 
     constructor: (@world) ->
+        
+        @astar = new AStar @world
                 
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  
@@ -28,18 +31,53 @@ class Construct
         
         for index, bot of @world.bots
             continue if bot == @world.cube
-            @addPathFromBotToBot @world.cube, bot
+            @pathFromTo @world.cube, bot
+            
         @updateBaseDot()
             
-    addPathFromBotToBot: (from, to) ->
+    pathFromTo: (from, to) ->
         
         to.path?.parent?.remove to.path
-        path = @world.astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
+        path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
         if path
             to.path = @addPath path
         else
             delete to.path
                         
+    addPath: (path) ->
+        
+        tube = new THREE.Geometry
+        
+        points = @tubePoints path    
+        for i in [1...points.length]
+            tube.merge @tubeFaces points[i-1], points[i]
+            
+        sphere = new THREE.SphereGeometry 0.1, 6, 6
+        if points[0].face in [Face.PZ, Face.NZ]
+            sphere.rotateX deg2rad 90
+        else if points[0].face in [Face.PX, Face.NX]
+            sphere.rotateZ deg2rad 90
+        sphere.translate points[0].pos.x, points[0].pos.y, points[0].pos.z
+        sphere.faceVertexUvs = [[]]
+        tube.merge sphere
+             
+        tube.computeFaceNormals()
+        tube.computeFlatVertexNormals()
+        
+        tubeBuffer = new THREE.BufferGeometry
+        tubeBuffer.fromGeometry tube
+        mesh = new THREE.Mesh tubeBuffer, Materials.path
+        mesh.castShadow = true
+                        
+        @world.scene.add mesh
+        mesh
+            
+    # 000000000  000   000  0000000    00000000  
+    #    000     000   000  000   000  000       
+    #    000     000   000  0000000    0000000   
+    #    000     000   000  000   000  000       
+    #    000      0000000   0000000    00000000  
+    
     tubePoints: (path) ->
         
         points = []
@@ -64,7 +102,7 @@ class Construct
             lastPos = nextPos
         points
             
-    addTubeFaces: (p1, p2) -> 
+    tubeFaces: (p1, p2) -> 
         
         if p1.face != p2.face
             
@@ -119,35 +157,7 @@ class Construct
         tube.faces.push new THREE.Face3 4, 2, 1
         
         tube
-        
-    addPath: (path) ->
-        
-        tube = new THREE.Geometry
-        
-        points = @tubePoints path    
-        for i in [1...points.length]
-            tube.merge @addTubeFaces points[i-1], points[i]
-            
-        sphere = new THREE.SphereGeometry 0.1, 6, 6
-        if points[0].face in [Face.PZ, Face.NZ]
-            sphere.rotateX deg2rad 90
-        else if points[0].face in [Face.PX, Face.NX]
-            sphere.rotateZ deg2rad 90
-        sphere.translate points[0].pos.x, points[0].pos.y, points[0].pos.z
-        sphere.faceVertexUvs = [[]]
-        tube.merge sphere
-             
-        tube.computeFaceNormals()
-        tube.computeFlatVertexNormals()
-        
-        tubeBuffer = new THREE.BufferGeometry
-        tubeBuffer.fromGeometry tube
-        mesh = new THREE.Mesh tubeBuffer, Materials.path
-        mesh.castShadow = true
-                        
-        @world.scene.add mesh
-        mesh
-        
+                
 # 0000000     0000000   000000000   0000000   00000000   0000000   00     00   0000000  
 # 000   000  000   000     000     000        000       000   000  000   000  000       
 # 0000000    000   000     000     000  0000  0000000   000   000  000000000  0000000   
@@ -225,9 +235,33 @@ class Construct
             mesh.bot = bot.type
             @world.scene.add mesh
             bot.mesh = mesh
-            @world.colorBot bot
-            @world.orientBot bot
+            @colorBot bot
+            @orientBot bot
 
+
+    updateBot: (bot) ->
+        
+        bot.mesh.position.set bot.pos.x, bot.pos.y, bot.pos.z
+        @orientBot bot
+        @colorBot bot
+        
+    orientBot: (bot) -> @orientFace bot.mesh, bot.face
+    orientFace: (obj, face) -> obj.quaternion.copy quat().setFromUnitVectors vec(0,0,1), Vector.normals[face]
+        
+    colorBot: (bot) ->
+        
+        below = @world.posBelowBot bot
+        if stone = @world.stoneAtPos below
+            bot.mesh.material = Materials.bot[stone]
+        else
+            bot.mesh.material = Materials.botWhite
+            
+    # 0000000     0000000    0000000  00000000  0000000     0000000   000000000  
+    # 000   000  000   000  000       000       000   000  000   000     000     
+    # 0000000    000000000  0000000   0000000   000   000  000   000     000     
+    # 000   000  000   000       000  000       000   000  000   000     000     
+    # 0000000    000   000  0000000   00000000  0000000     0000000      000     
+    
     baseDot: ->
         
         sphere = new THREE.SphereGeometry 0.1, 6, 6
@@ -235,18 +269,16 @@ class Construct
         sphere.rotateX deg2rad 90
         sphere.computeFlatVertexNormals()
         
-        @baseDot = new THREE.Mesh sphere, Materials.path
-        @baseDot.castShadow = true
-        @baseDot.receiveShadow = true
-        @world.scene.add @baseDot 
-        
-        @updateBaseDot()
+        @bdot = new THREE.Mesh sphere, Materials.path
+        @bdot.castShadow = true
+        @bdot.receiveShadow = true
+        @world.scene.add @bdot
         
     updateBaseDot: ->
         
         dp = @world.cube.pos.minus Vector.normals[@world.cube.face].mul 0.35
-        @baseDot.position.set dp.x, dp.y, dp.z
-        @baseDot.quaternion.copy quat().setFromUnitVectors vec(0, 0, 1), Vector.normals[@world.cube.face]
+        @bdot.position.set dp.x, dp.y, dp.z
+        @bdot.quaternion.copy quat().setFromUnitVectors vec(0, 0, 1), Vector.normals[@world.cube.face]
             
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
@@ -264,7 +296,7 @@ class Construct
         mesh = new THREE.Mesh geom, Materials.highlight
         p = bot.pos
         mesh.position.set p.x, p.y, p.z
-        @world.orientFace mesh, bot.face
+        @orientFace mesh, bot.face
         @world.scene.add mesh
         mesh
             
