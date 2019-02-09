@@ -10,9 +10,10 @@
 
 Vector    = require './lib/vector'
 Packet    = require './packet'
+Tubes     = require './tubes'
 Construct = require './construct'
 
-{ Stone, Bot, Face } = require './constants'
+{ Stone, Bot, Face, Edge } = require './constants'
 
 class World
     
@@ -20,18 +21,41 @@ class World
         
         @stones = {}
         @bots   = {}
+        @tubes  = new Tubes @
                 
         @build()
-                        
+        
+        @tubes.build()
+        
+        # ei = @edgeIndex Edge.E0,Face.NX,@indexAtPos(1,0,1)
+        # @segment.set ei, ei
+        # ei = @edgeIndex Edge.E1,Face.NX,@indexAtPos(1,0,1)
+        # @segment.set ei, ei
+        # ei = @edgeIndex Edge.E2,Face.PX,@indexAtPos(1,0,1)
+        # @segment.set ei, ei
+        # ei = @edgeIndex Edge.E3,Face.PX,@indexAtPos(1,0,1)
+        # @segment.set ei, ei
+
+        # for edgeIndex in Array.from @segment.keys()
+            # log @stringForEdgeIndex edgeIndex
+            
         @construct = new Construct @
         @construct.initBotGeoms()
         @construct.stones()
         @construct.bots()
-        @construct.paths()
+        @construct.tubes()
         
+    #  0000000   000   000  000  00     00   0000000   000000000  00000000  
+    # 000   000  0000  000  000  000   000  000   000     000     000       
+    # 000000000  000 0 000  000  000000000  000000000     000     0000000   
+    # 000   000  000  0000  000  000 0 000  000   000     000     000       
+    # 000   000  000   000  000  000   000  000   000     000     00000000  
+    
     animate: (delta) ->
         
-        for index,bot of @bots
+        @tubes.animate delta
+        
+        for bot in @getBots()
             bot.delay -= delta
             if bot.delay < 0
                 bot.delay = 1/bot.speed
@@ -40,7 +64,7 @@ class World
     send: (bot) ->
         
         if bot.path? and @stoneBelowBot(bot) != Stone.gray
-            new Packet bot, @
+            @tubes.insertPacket bot
         
     # 0000000    000   000  000  000      0000000    
     # 000   000  000   000  000  000      000   000  
@@ -88,12 +112,44 @@ class World
     delStone: (x,y,z) -> delete @stones[@indexAt x,y,z]
     addStone: (x,y,z, stone=Stone.gray) -> @stones[@indexAt x,y,z] = stone
 
-    addBot:   (x,y,z, type=Bot.cube, face=Face.PZ) -> 
+    # 0000000     0000000   000000000  
+    # 000   000  000   000     000     
+    # 0000000    000   000     000     
+    # 000   000  000   000     000     
+    # 0000000     0000000      000     
+    
+    addBot: (x,y,z, type=Bot.cube, face=Face.PZ) -> 
+        
         p = @roundPos new Vector x,y,z
         index = @indexAtPos p
-        @bots[index] = type:type, pos:p, face:face, index:index, delay:0, speed:5
+        @bots[index] = type:type, pos:p, face:face, index:index, delay:0, speed:10
         @bots[index]
+
+    getBots: -> Object.values @bots
+        
+    # 00     00   0000000   000   000  00000000  
+    # 000   000  000   000  000   000  000       
+    # 000000000  000   000   000 000   0000000   
+    # 000 0 000  000   000     000     000       
+    # 000   000   0000000       0      00000000  
     
+    moveBot: (bot, toPos, toFace) ->
+        
+        fromIndex = bot.index
+        toIndex = @indexAtPos toPos
+        delete @bots[fromIndex]
+        @bots[toIndex] = bot
+        
+        bot.face  = toFace
+        bot.index = toIndex
+        bot.delay = 1/bot.speed
+        bot.pos = @roundPos toPos
+        
+        @tubes.build()
+        @construct.tubes()
+        
+        @construct.updateBot bot
+        
     botAt:      (x,y,z) -> @bots[@indexAt x,y,z]
     botAtPos:   (v)     -> @bots[@indexAtPos v]
     stoneAtPos: (v)     -> @stones[@indexAtPos v]
@@ -133,7 +189,7 @@ class World
         angles = [0..5].map (i) -> index:i, norm:Vector.normals[i], angle:Vector.normals[i].angle(norm) + Vector.normals[i].angle(dir)
         angles.sort (a,b) -> a.angle - b.angle
         return angles[0].index
-    
+            
     faceIndex: (face,index) -> (face<<28) | index
     splitFaceIndex: (faceIndex) -> [faceIndex >> 28, faceIndex & ((Math.pow 2, 27)-1)]
     
@@ -157,6 +213,10 @@ class World
             x:( index      & 0b111111111)-256
             y:((index>>9 ) & 0b111111111)-256
             z:((index>>18) & 0b111111111)-256
+            
+    posAtFaceIndex: (faceIndex) -> 
+        [face,index] = @splitFaceIndex faceIndex
+        @posAtIndex index
     
     stoneBelowBot: (bot) -> @stoneAtPos @posBelowBot bot
     posBelowBot: (bot) -> bot.pos.minus Vector.normals[bot.face]            
@@ -188,32 +248,7 @@ class World
             bot.highlight = @construct.highlight bot
         else
             @removeHighlight()
-        
-    # 00     00   0000000   000   000  00000000  
-    # 000   000  000   000  000   000  000       
-    # 000000000  000   000   000 000   0000000   
-    # 000 0 000  000   000     000     000       
-    # 000   000   0000000       0      00000000  
-    
-    moveBot: (bot, toPos, toFace) ->
-        
-        fromIndex = bot.index
-        toIndex = @indexAtPos toPos
-        delete @bots[fromIndex]
-        @bots[toIndex] = bot
-        
-        bot.face  = toFace
-        bot.index = toIndex
-        bot.delay = 1/bot.speed
-        bot.pos = @roundPos toPos
-        
-        if bot == @base
-            @construct.paths()
-        else
-            @construct.pathFromTo @base, bot
-        
-        @construct.updateBot bot
-                        
+                                
     #  0000000  000000000  00000000   000  000   000   0000000   
     # 000          000     000   000  000  0000  000  000        
     # 0000000      000     0000000    000  000 0 000  000  0000  
@@ -229,9 +264,17 @@ class World
             when Face.NY then return "NY"
             when Face.NZ then return "NZ"
             
+    stringForEdge: (edge) ->
+        switch edge
+            when Edge.E0 then return "E0"
+            when Edge.E1 then return "E1"
+            when Edge.E2 then return "E2"
+            when Edge.E3 then return "E3"
+            
     stringForFaceIndex: (faceIndex) ->
+        
         [face,index] = @splitFaceIndex faceIndex
         pos = @posAtIndex index
         "#{pos.x} #{pos.y} #{pos.z} #{@stringForFace(face)}"
-            
+        
 module.exports = World

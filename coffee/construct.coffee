@@ -9,7 +9,6 @@
 { deg2rad, log, _ } = require 'kxk'
 
 THREE     = require 'three'
-AStar     = require './lib/astar'
 Vector    = require './lib/vector'
 Materials = require './materials'
 
@@ -19,43 +18,24 @@ class Construct
 
     constructor: (@world) ->
         
-        @astar = new AStar @world
-                
-    # 00000000    0000000   000000000  000   000  
-    # 000   000  000   000     000     000   000  
-    # 00000000   000000000     000     000000000  
-    # 000        000   000     000     000   000  
-    # 000        000   000     000     000   000  
-    
-    paths: ->
-        
-        for index, bot of @world.bots
-            continue if bot == @world.base
-            @pathFromTo @world.base, bot
-            
-    pathFromTo: (from, to) ->
-        
-        to.path?.mesh?.parent?.remove to.path.mesh
-        path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
-        if path
-            to.path = 
-                points: @pathPoints path
-                length: path.length
-            to.path.mesh = @pathMesh to.path
-            to.path.pind = []
-            for pi in [0...to.path.points.length]
-                if to.path.points[pi].i == 0
-                    to.path.pind.push pi
-        else
-            delete to.path # no proper remove?
+        @segmentMesh = null
                         
-    pathMesh: (path) ->
+    # 000000000  000   000  0000000    00000000  
+    #    000     000   000  000   000  000       
+    #    000     000   000  0000000    0000000   
+    #    000     000   000  000   000  000       
+    #    000      0000000   0000000    00000000  
+         
+    tubes: ->
+        
+        @segmentMesh?.parent?.remove @segmentMesh
         
         tube = new THREE.Geometry
         
-        points = path.points
-        for i in [1...points.length]
-            tube.merge @tubeFaces points[i-1], points[i]
+        for segment in @world.tubes.getSegments()
+            points = segment.points
+            for i in [1...points.length]
+                tube.merge @tubeFaces points[i-1], points[i]
             
         tube.computeFaceNormals()
         tube.computeFlatVertexNormals()
@@ -66,47 +46,11 @@ class Construct
         mesh.castShadow = true
                         
         @world.scene.add mesh
+        
+        @segmentMesh = mesh
+        
         mesh
-            
-    # 00000000    0000000   000  000   000  000000000   0000000  
-    # 000   000  000   000  000  0000  000     000     000       
-    # 00000000   000   000  000  000 0 000     000     0000000   
-    # 000        000   000  000  000  0000     000          000  
-    # 000         0000000   000  000   000     000     0000000   
-    
-    pathPoints: (path) ->
-        
-        points = []
-        [lastFace, lastIndex] = @world.splitFaceIndex path[0]
-        lastPos = @world.posAtIndex lastIndex
-        
-        aboveFace = 0.35
-        
-        lastPos.sub Vector.normals[lastFace].mul aboveFace
-        points.push i:0, face:lastFace, index:lastIndex, pos:new Vector lastPos.x, lastPos.y, lastPos.z
-        for i in [1...path.length]
-            [nextFace, nextIndex] = @world.splitFaceIndex path[i]
-            nextPos = @world.posAtIndex nextIndex
-            nextPos.sub Vector.normals[nextFace].mul aboveFace
-            if lastFace != nextFace
-                pos1 = lastPos.plus @world.directionFaceToFace path[i-1], path[i]
-                pos2 = nextPos.plus @world.directionFaceToFace path[i], path[i-1]
-                lm = pos1.to(pos2).length()
-                l1 = (1-lm)/2
-                l2 = 1-l1
-                points.push i:l1, face:lastFace, index:lastIndex, pos:new Vector pos1.x, pos1.y, pos1.z
-                points.push i:l2, face:nextFace, index:nextIndex, pos:new Vector pos2.x, pos2.y, pos2.z
-            points.push i:0, face:nextFace, index:nextIndex, pos:new Vector nextPos.x, nextPos.y, nextPos.z
-            [lastFace, lastIndex] = [nextFace, nextIndex]
-            lastPos = nextPos
-        points
-        
-    # 000000000  000   000  0000000    00000000  
-    #    000     000   000  000   000  000       
-    #    000     000   000  0000000    0000000   
-    #    000     000   000  000   000  000       
-    #    000      0000000   0000000    00000000  
-            
+                
     tubeFaces: (p1, p2) -> 
         
         if p1.face != p2.face
@@ -232,8 +176,8 @@ class Construct
     bots: ->
                         
         for index,bot of @world.bots
-            p = @world.posAtIndex index
             
+            p = @world.posAtIndex index
             mesh = new THREE.Mesh @botGeoms[bot.type], Materials.bot[Stone.gray]
             mesh.receiveShadow = true
             mesh.castShadow = true

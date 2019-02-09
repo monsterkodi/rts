@@ -25,16 +25,18 @@ class Map extends World
         @addStone -2, 0,0
         @addStone -3, 0,0
                 
-        @base = @addBot  0, 0, 0, Bot.dodicos
         @addStone  1, 0, 0, Stone.red
         @addStone  0, 1, 0, Stone.green
         @addStone  0, 0, 1, Stone.blue
         @addStone -1, 0, 0, Stone.yellow
-        @addStone -4, 0, 0, Stone.white
+        @addStone -2, 0, 0, Stone.white
+        @addStone -3, 0, 0, Stone.blue
+        
+        @base = @addBot 0, 0, 0, Bot.dodicos, Face.PX
 
         @addBot -1, 0, 1, Bot.octacube
         @addBot  0, 1, 1, Bot.tubecross
         @addBot  0, 0, 2, Bot.toruscone
-        @addBot  1, 0, 1, Bot.knot
+        @addBot  -2, -1, 0, Bot.knot, Face.NY
         
 module.exports = Map

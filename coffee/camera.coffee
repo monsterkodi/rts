@@ -24,7 +24,7 @@ class Camera extends THREE.PerspectiveCamera
         @maxDist = @far/2
         @minDist = 0.4
         @center  = new Vector 0, 0, 0
-        @degree  = 0
+        @degree  = 60
         @rotate  = 0
         @wheelInert = 0
 

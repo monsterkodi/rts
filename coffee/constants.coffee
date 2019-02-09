@@ -25,6 +25,12 @@ module.exports =
         NX: 3
         NY: 4
         NZ: 5
+        
+    Edge: 
+        E0: 0
+        E1: 1
+        E2: 2
+        E3: 3
     
     Bot:
         cube:       1

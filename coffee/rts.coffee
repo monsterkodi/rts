@@ -253,7 +253,10 @@ class RTS
         @renderer.render @world.scene, @camera
         
         @fps.draw()
-        @info.draw @renderer.info
+        info = _.clone @renderer.info.render
+        info.segments = @world.tubes.getSegments().length
+        info.packets  = @world.tubes.getPackets().length
+        @info.draw info
 
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000
