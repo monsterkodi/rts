@@ -270,6 +270,16 @@ class World
             when Edge.E1 then return "E1"
             when Edge.E2 then return "E2"
             when Edge.E3 then return "E3"
+
+    stringForStone: (stone) ->
+        switch stone
+            when Stone.gray   then return "gray"
+            when Stone.red    then return "red"
+            when Stone.green  then return "green"
+            when Stone.blue   then return "blue"
+            when Stone.yellow then return "yellow"
+            when Stone.black  then return "black"
+            when Stone.white  then return "white"
             
     stringForFaceIndex: (faceIndex) ->
         

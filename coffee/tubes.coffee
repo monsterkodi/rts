@@ -6,7 +6,7 @@
    000      0000000   0000000    00000000  0000000 
 ###
 
-{ valid, empty, last, log, _ } = require 'kxk'
+{ valid, empty, first, last, log, _ } = require 'kxk'
 
 AStar  = require './lib/astar'
 Vector = require './lib/vector'
@@ -16,10 +16,8 @@ class Tubes
 
     constructor: (@world) ->
         
-        @astar       = new AStar @world
-        @segments    = {}
-        @minMoveDist = 0.2
-        @blockDist   = 0.12
+        @astar    = new AStar @world
+        @segments = {}
 
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
@@ -30,10 +28,34 @@ class Tubes
     insertPacket: (bot) ->
         
         if seg = @segmentBelowBot bot
-            if not @isBlocked seg, 0
-                seg.packets.push new Packet bot, @world
+            if not @isInputBlocked seg
+                stone = @world.stoneBelowBot bot
+                pck = new Packet stone, @world
+                @insertPacketIntoSegment pck, seg
+                pck.moveOnSegment seg
+                return true
+        false
+        
+    insertPacketIntoSegment: (pck, seg) -> seg.packets.unshift pck
+        
+    isInputBlocked: (seg) -> first(seg.packets)?.moved < 0.12
                 
-    isBlocked: (seg, fct) -> last(seg.packets)?.moved < @minMoveDist
+    isCrossingBlocked: (seg, pck) -> 
+        
+        if first(seg.packets)?.moved < 0.01 
+            return true
+            
+        if seg.in.length == 1
+            return false
+            
+        waiting = 0
+        for index in seg.in
+            inSeg = @segments[index]
+            if last(inSeg.packets) == pck
+                continue
+            if last(inSeg.packets)?.moved > 0.88
+                waiting += 1
+        return waiting > 0
 
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -41,64 +63,52 @@ class Tubes
     # 000   000  000  0000  000  000 0 000  000   000     000     000       
     # 000   000  000   000  000  000   000  000   000     000     00000000  
     
-    distToNext: (seg, pckIndex) ->
-        
-        moved = seg.packets[pckIndex].moved
-        if pckIndex > 0
-            # log 'toNext', seg.packets[pckIndex-1].moved-moved
-            seg.packets[pckIndex-1].moved-@blockDist-moved
-        else
-            if moved < 1-@minMoveDist
-                # log 'first is far', 1-moved
-                1-moved
-            else if seg.out
-                minDist = Number.MAX_VALUE
-                out = @segments[seg.out]
-                if valid out.packets
-                    minDist = Math.min minDist, (1-moved)+out.packets[0].moved
-                for index in out.in
-                    inSeg = @segments[index]
-                    if index != seg.index and valid inSeg.packets
-                        if 1-inSeg.packets[0].moved < @blockDist
-                            log 'out', index, seg.index, 1-inSeg.packets[0].moved, minDist
-                            minDist = Math.min minDist, Math.max 0, 1-@blockDist-moved
-                minDist
-            else
-                Number.MAX_VALUE
-    
     animate: (delta) ->
-        # log 'animate'
+
         segs = @getSegments()
         segs.sort (a,b) -> a.dist - b.dist
         
         for seg in segs
             
+            if seg.blockDelay > 0
+                seg.blockDelay = Math.max 0, seg.blockDelay-delta
+            
             continue if empty seg.packets
             
-            for pckIndex in [0...seg.packets.length]
-                
-                pck = seg.packets[pckIndex]
-                dst = @distToNext seg, pckIndex
-                pck.moved += Math.min dst, delta #* 0.1
-                
             for pckIndex in [seg.packets.length-1..0]
                 
                 pck = seg.packets[pckIndex]
-                if pck.moved >= 1
-                    # log 'next segment', seg.out
-                    if seg.out
-                        pck.moved -= 1
-                        # log 'next', pck.moved
-                        # log seg.packets.length, @segments[seg.out].packets.length
-                        @segments[seg.out].packets.push seg.packets.shift()
-                        # log seg.packets.length, @segments[seg.out].packets.length
-                        pck.moveOnSegment @segments[seg.out]
+                pck.moved += delta * 0.1
+                
+                if seg.out
+                    outSeg = @segments[seg.out]
+                    if pckIndex == seg.packets.length-1
+                        if pck.moved >= 0.88
+                            if @isCrossingBlocked outSeg, pck
+                                # log 'blocked', @world.stringForStone pck.stone
+                                pck.moved = 0.88
+                                pck.moveOnSegment seg
+                            else if pck.moved >= 1
+                                # log 'move to next', @world.stringForStone pck.stone
+                                @insertPacketIntoSegment pck, outSeg
+                                seg.packets.pop()
+                                pck.moved -= 1
+                                pck.moveOnSegment outSeg
+                            else
+                                # log 'to exit', @world.stringForStone pck.stone
+                                pck.moveOnSegment seg
+                        else
+                            pck.moveOnSegment seg
                     else
-                        log 'base!'
-                        pck = seg.packets.shift()
-                        pck.del()
+                        pck.moved = Math.min pck.moved, seg.packets[pckIndex+1].moved - 0.12
+                        pck.moveOnSegment seg
                 else
-                    pck.moveOnSegment seg
+                    if pck.moved >= 1
+                        log 'base!'
+                        pck = seg.packets.pop()
+                        pck.del()
+                    else
+                        pck.moveOnSegment seg
                 
     segmentBelowBot: (bot) ->
         
@@ -124,6 +134,23 @@ class Tubes
             else
                 for pck in segment.packets
                     pck.del()
+                 
+        segs = @getSegments()
+        segs.sort (a,b) -> a.dist - b.dist
+                    
+        for index in [0...segs.length]
+            seg = segs[index]
+            nextIndex = index+1
+            while nextIndex < segs.length
+                next = segs[nextIndex]
+                if next.dist > seg.dist+1
+                    break
+                if next.to == seg.from
+                    next.out = seg.index
+                    seg.in.push next.index
+                nextIndex += 1
+        
+        log 'build', segs.map (s) -> dist:s.dist, in:s.in, out:s.out
                     
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  
@@ -159,7 +186,6 @@ class Tubes
         lastPos = @world.posAtIndex lastIndex
         
         aboveFace = 0.35
-        lastSegmentIndex = null
         
         lastPos.sub Vector.normals[lastFace].mul aboveFace
         points.push i:0, face:lastFace, index:lastIndex, pos:new Vector lastPos.x, lastPos.y, lastPos.z
@@ -184,17 +210,7 @@ class Tubes
                 if lastFace != nextFace
                     p = 4
                 segPoints = points.slice points.length-p, points.length
-                @segments[si] = index:si, packets:[], points:segPoints, dist:path.length-i, in:[], out:null
-                if lastSegmentIndex?
-                    @segments[lastSegmentIndex].out = si
-                    @segments[si].in.push lastSegmentIndex
-                else if i < path.length-1
-                    ni = @segIndex path[i], path[i+1]
-                    if @segments[ni]?
-                        @segments[si].out = ni
-            else if lastSegmentIndex
-                @segments[si].in.push lastSegmentIndex
-            lastSegmentIndex = si
+                @segments[si] = index:si, from:path[i-1], to:path[i], packets:[], points:segPoints, dist:path.length-i, in:[], out:null
             
             [lastFace, lastIndex] = [nextFace, nextIndex]
             lastPos = nextPos

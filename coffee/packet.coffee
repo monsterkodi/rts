@@ -14,9 +14,8 @@ Materials = require './materials'
 
 class Packet
 
-    constructor: (bot, world) ->
+    constructor: (@stone, world) ->
         
-        @stone = world.stoneBelowBot bot
         @moved = 0
         
         s = 0.1
