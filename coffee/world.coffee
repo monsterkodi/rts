@@ -19,10 +19,11 @@ class World
     
     constructor: (@scene) ->
         
-        @stones = {}
-        @bots   = {}
-        @tubes  = new Tubes @
-        @botSpeed = 20
+        @stones   = {}
+        @bots     = {}
+        @tubes    = new Tubes @
+        @speed    = 1
+        @botSpeed = 1
                 
         @build()
         
@@ -42,10 +43,10 @@ class World
     
     animate: (delta) ->
         
-        @tubes.animate delta
+        @tubes.animate delta * @speed
         
         for bot in @getBots()
-            bot.delay -= delta
+            bot.delay -= delta * @speed
             if bot.delay < 0
                 bot.delay = 1/bot.speed
                 @send bot

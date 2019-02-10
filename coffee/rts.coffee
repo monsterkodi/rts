@@ -11,6 +11,7 @@
 THREE  = require 'three'
 FPS    = require './lib/fps'
 Info   = require './lib/info'
+Debug  = require './lib/debug'
 World  = require './world'
 Map    = require './map'
 Camera = require './camera'
@@ -24,7 +25,6 @@ class RTS
         
         window.rts = @
         @fps = new FPS
-        @info = new Info
         @paused = false
         @animations = []
         
@@ -85,7 +85,6 @@ class RTS
         @ambient = new THREE.AmbientLight 0x333333
         @scene.add @ambient
             
-        # @world = new World @scene    
         @world = new Map @scene    
         
         @mouse = new THREE.Vector2
@@ -94,6 +93,9 @@ class RTS
         document.addEventListener 'mousemove', @onMouseMove
         document.addEventListener 'mousedown', @onMouseDown
         document.addEventListener 'mouseup',   @onMouseUp
+        
+        @info  = new Info
+        @debug = new Debug
         
         @lastAnimationTime = window.performance.now()
         @animationStep()
@@ -115,7 +117,7 @@ class RTS
         @lastAnimationTime = now
         
         if not @paused
-            angle = -delta*0.3
+            angle = -delta*0.3*@world.speed
             @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
         
         oldAnimations = @animations.clone()

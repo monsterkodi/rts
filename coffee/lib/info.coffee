@@ -9,9 +9,9 @@
 
 class Info
 
-    constructor: () ->
+    constructor: ->
                     
-        @elem = elem class:'info', style:'position:absolute; z-index:1'
+        @elem = elem class:'info', style:'position:relative; z-index:1'
 
         @trias = elem class:'infotext', parent:@elem
         @lines = elem class:'infotext', parent:@elem
