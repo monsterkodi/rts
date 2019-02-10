@@ -18,7 +18,7 @@ class Tubes
         
         @astar    = new AStar @world
         @segments = {}
-        @speed    = 1.0
+        @speed    = 4.0
 
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
