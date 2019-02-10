@@ -119,6 +119,7 @@ class Tubes
                     pck.moved += delta * @speed
                     if pck.moved >= seg.moves
                         pck = seg.packets.pop()
+                        @world.storage.add pck.stone
                         pck.del()
                     else
                         pck.moveOnSegment seg

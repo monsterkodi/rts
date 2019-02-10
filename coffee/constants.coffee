@@ -6,38 +6,46 @@
  0000000   0000000   000   000  0000000      000     000   000  000   000     000     0000000 
 ###
 
+class Enum
+    
+    constructor: (e) ->
+        
+        for k,v of e
+            @[k] = v
+
+enum = (e) -> new Enum e
+
 module.exports = 
     
-    Bend:
-        flat:     0
-        concave:  1
-        convex:   2
-    
-    Stone:
-        gray:   0
-        red:    1
-        green:  2
-        blue:   3
-        yellow: 4
-        black:  5
-        white:  6
-        max:    1000
+    Bend: enum
+        flat:       0
+        concave:    1
+        convex:     2
     
     Face: 
-        PX: 0
-        PY: 1
-        PZ: 2
-        NX: 3
-        NY: 4
-        NZ: 5
+        PX:         0
+        PY:         1
+        PZ:         2
+        NX:         3
+        NY:         4
+        NZ:         5
+                
+    Stone:
+        gray:       0
+        red:        1
+        gelb:       2
+        blue:       3
+        white:      4
+        resources:  [1,2,3,4]
         
-    Edge: 
-        E0: 0
-        E1: 1
-        E2: 2
-        E3: 3
-    
     Bot:
+        base:       1
+        mine:       2
+        trade:      3
+        build:      4
+        science:    5
+        
+    Geom:
         cube:       1
         cone:       2
         sphere:     3

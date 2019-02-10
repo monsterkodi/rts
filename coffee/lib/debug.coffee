@@ -10,7 +10,7 @@
 
 value = (cfg) ->
     
-    lbl = elem class:'label', text:cfg.text 
+    lbl = elem class:'label', text:cfg.text, 
     val = elem class:'value', text:cfg.value, click:cfg.reset
     inc = elem class:'incr',  text:'>', click:cfg.incr
     dec = elem class:'decr',  text:'<', click:cfg.decr
@@ -29,10 +29,10 @@ class Debug
 
         @elem = elem class:'debug', style:'position:relative; z-index:1'
 
-        @elem.appendChild @tubesGap   = value text:'gap',   value: rts.world.tubes.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
         @elem.appendChild @worldSpeed = value text:'world', value: rts.world.speed.toFixed(1),       reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
-        @elem.appendChild @tubeSpeed  = value text:'tube',  value: rts.world.tubes.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
-        @elem.appendChild @botSpeed   = value text:'bots',  value: rts.world.botSpeed.toFixed(1),    reset:@resetBotSpeed,   incr:@incrBotSpeed,   decr:@decrBotSpeed
+        @elem.appendChild @tubeSpeed  = value text:'tube ', value: rts.world.tubes.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
+        @elem.appendChild @botSpeed   = value text:'bots ', value: rts.world.botSpeed.toFixed(1),    reset:@resetBotSpeed,   incr:@incrBotSpeed,   decr:@decrBotSpeed
+        @elem.appendChild @tubesGap   = value text:'gap  ', value: rts.world.tubes.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
 
         document.body.appendChild @elem
 

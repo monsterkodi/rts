@@ -5,6 +5,7 @@
   000       000             000
   000       000        0000000 
 ###
+
 { elem, clamp, first, last, log, $}  = require 'kxk'
 
 class FPS
@@ -12,23 +13,24 @@ class FPS
     constructor: () ->
                     
         @elem = elem class:'fps'
-        # @elem.style.display = 'none'
 
+        @width = 180
+        @height = 60
+        
         @canvas = elem 'canvas', 
             class:"fpsCanvas"
-            height: 30*2
-            width:  130*2
+            height: 2*@height
+            width:  2*@width
         @elem.appendChild @canvas
 
-        y = parseInt  -30/2
-        x = parseInt -130/2
-        t = "translate3d(#{x}px, #{y}px, 0px) scale3d(0.5, 0.5, 1)"
-        @canvas.style.transform = t
+        y = parseInt -@height/2
+        x = parseInt  @width/2
+        @canvas.style.transform = "translate3d(#{x}px, #{y}px, 0px) scale3d(0.5, 0.5, 1)"
         
         @history = []
         @last = window.performance.now()
             
-        document.body.appendChild @elem
+        $("#main").appendChild @elem
             
     # 0000000    00000000    0000000   000   000
     # 000   000  000   000  000   000  000 0 000
@@ -40,7 +42,7 @@ class FPS
         
         time = window.performance.now()
         @history.push time-@last
-        @history.shift() while @history.length > 260
+        @history.shift() while @history.length > 2*@width
         @canvas.height = @canvas.height
         ctx = @canvas.getContext '2d'        
         for i in [0...@history.length]  
@@ -49,7 +51,8 @@ class FPS
             green = parseInt 32 + (255-32)*clamp 0,1, (ms-32)/32
             ctx.fillStyle = "rgb(#{red}, #{green}, 32)"
             h = Math.min ms, 60
-            ctx.fillRect 260-@history.length+i, 60-h, 2, h
+            # ctx.fillRect 2*@width-@history.length+i, 2*@height-h, 2, h
+            ctx.fillRect 2*@width-@history.length+i, 0, 2, h
         @last = time
 
     toggle: -> 

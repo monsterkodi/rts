@@ -32,6 +32,7 @@ class Camera extends THREE.PerspectiveCamera
         @elem.addEventListener 'mousedown',  @onMouseDown
         @elem.addEventListener 'keypress',   @onKeyPress
         @elem.addEventListener 'keyrelease', @onKeyRelease
+        @elem.addEventListener 'dblclick',   @onDblClick
         
         @update()
 
@@ -45,6 +46,7 @@ class Camera extends THREE.PerspectiveCamera
         @elem.removeEventListener  'keyrelease', @onKeyRelease
         @elem.removeEventListener  'mousewheel', @onMouseWheel
         @elem.removeEventListener  'mousedown',  @onMouseDown
+        @elem.removeEventListener  'dblclick',   @onDblClick
         window.removeEventListener 'mouseup',    @onMouseUp
         window.removeEventListener 'mousemove',  @onMouseDrag 
         
@@ -69,12 +71,16 @@ class Camera extends THREE.PerspectiveCamera
         
     onMouseUp: (event) => 
 
-        if @downButtons & 1 or @downButtons & 4
+        if @downButtons & 4
             if not @mouseMoved
                 @focusOnHit()
         
         window.removeEventListener 'mousemove', @onMouseDrag
         window.removeEventListener 'mouseup',   @onMouseUp
+        
+    onDblClick: (event) =>
+        
+        @focusOnHit()
         
     onMouseDrag: (event) =>
 

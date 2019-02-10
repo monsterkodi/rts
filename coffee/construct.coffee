@@ -12,13 +12,14 @@ THREE     = require 'three'
 Vector    = require './lib/vector'
 Materials = require './materials'
 
-{ Stone, Bot, Face } = require './constants'
+{ Stone, Bot, Geom, Face } = require './constants'
 
 class Construct
 
     constructor: (@world) ->
         
         @segmentMesh = null
+        @stoneMeshes = {}
                         
     # 000000000  000   000  0000000    00000000  
     #    000     000   000  000   000  000       
@@ -134,36 +135,36 @@ class Construct
             new THREE.CylinderGeometry 0.1, 0.1, 0.5, 12   # tubecross
         ]
         
-        @botGeoms[Bot.dodicos].rotateX deg2rad 60
+        @botGeoms[Geom.dodicos].rotateX deg2rad 60
         icos = new THREE.IcosahedronGeometry 0.275, 0
         icos.rotateY deg2rad 60
         icos.rotateZ deg2rad -18
-        @botGeoms[Bot.dodicos].merge icos
+        @botGeoms[Geom.dodicos].merge icos
                 
         cone = new THREE.ConeGeometry 0.25, 0.5, 12
         cone.rotateX deg2rad 90
-        @botGeoms[Bot.toruscone].merge cone
+        @botGeoms[Geom.toruscone].merge cone
         
         tube = new THREE.CylinderGeometry 0.1, 0.1, 0.5, 12
         tube.rotateX deg2rad 90
-        @botGeoms[Bot.tubecross].merge tube
+        @botGeoms[Geom.tubecross].merge tube
         tube.rotateY deg2rad 90
-        @botGeoms[Bot.tubecross].merge tube
+        @botGeoms[Geom.tubecross].merge tube
         
-        @botGeoms[Bot.octacube].merge new THREE.OctahedronGeometry 0.25, 0
+        @botGeoms[Geom.octacube].merge new THREE.OctahedronGeometry 0.25, 0
         
         knot = new THREE.TorusKnotGeometry 0.1, 0.075
         knot.translate 0,0,-0.175
-        @botGeoms[Bot.knot].merge knot
+        @botGeoms[Geom.knot].merge knot
         
-        @botGeoms[Bot.cone].rotateX deg2rad 90
-        @botGeoms[Bot.sphere].rotateX deg2rad 90
-        @botGeoms[Bot.cylinder].rotateX deg2rad 90
-        @botGeoms[Bot.dodeca].rotateX deg2rad 60
-        @botGeoms[Bot.icosa].rotateY deg2rad 60
-        @botGeoms[Bot.icosa].rotateZ deg2rad 18
+        @botGeoms[Geom.cone].rotateX deg2rad 90
+        @botGeoms[Geom.sphere].rotateX deg2rad 90
+        @botGeoms[Geom.cylinder].rotateX deg2rad 90
+        @botGeoms[Geom.dodeca].rotateX deg2rad 60
+        @botGeoms[Geom.icosa].rotateY deg2rad 60
+        @botGeoms[Geom.icosa].rotateZ deg2rad 18
 
-        for bot in [Bot.cube..Bot.tubecross]
+        for bot in [Geom.cube..Geom.tubecross]
             @botGeoms[bot].computeFaceNormals()
             @botGeoms[bot].computeFlatVertexNormals()
     
@@ -173,16 +174,25 @@ class Construct
     # 000   000  000   000     000          000  
     # 0000000     0000000      000     0000000   
     
+    geomForBot: (bot) ->
+        
+        switch bot.type
+            when Bot.base    then Geom.dodicos
+            when Bot.mine    then Geom.octacube
+            when Bot.build   then Geom.tubecross
+            when Bot.trade   then Geom.toruscone
+            when Bot.science then Geom.knot
+    
     bots: ->
                         
         for index,bot of @world.bots
             
             p = @world.posAtIndex index
-            mesh = new THREE.Mesh @botGeoms[bot.type], Materials.bot[Stone.gray]
+            mesh = new THREE.Mesh @botGeoms[@geomForBot bot], Materials.bot[Stone.gray]
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.position.set p.x, p.y, p.z
-            mesh.bot = bot.type
+            mesh.bot = bot.type # needed for intersection test
             @world.scene.add mesh
             bot.mesh = mesh
             
@@ -235,9 +245,9 @@ class Construct
     # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
     highlight: (bot) ->
-        
+        # log 'highlight'
         geom = new THREE.BufferGeometry 
-        geom.fromGeometry @botGeoms[bot.type]
+        geom.fromGeometry @botGeoms[@geomForBot bot]
         s = 1.05
         geom.scale s,s,s
         
@@ -326,8 +336,10 @@ class Construct
             cube.translate p.x, p.y, p.z
             stonesides[stone].merge cube
             
+            
         for stone in [Stone.gray..Stone.white]            
             
+            @stoneMeshes[stone]?.parent.remove @stoneMeshes[stone] 
             bufgeo = new THREE.BufferGeometry()
             bufgeo.fromGeometry stonesides[stone]
             
@@ -335,6 +347,7 @@ class Construct
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.stone = stone
-            @world.scene.add mesh
+            @world.scene.add mesh            
+            @stoneMeshes[stone] = mesh
 
 module.exports = Construct

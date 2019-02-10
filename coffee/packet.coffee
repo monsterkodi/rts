@@ -54,6 +54,9 @@ class Packet
         
         @mesh.position.copy tgt
     
-    del: -> @mesh.parent.remove @mesh
+    del: -> 
+    
+        @mesh.parent.remove @mesh
+        rts.world.storage.temp[@stone] -= 1
             
 module.exports = Packet

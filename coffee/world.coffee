@@ -11,6 +11,7 @@
 Vector    = require './lib/vector'
 Packet    = require './packet'
 Tubes     = require './tubes'
+Storage   = require './storage'
 Construct = require './construct'
 
 { Stone, Bot, Face, Edge, Bend } = require './constants'
@@ -22,7 +23,8 @@ class World
         @stones   = {}
         @bots     = {}
         @tubes    = new Tubes @
-        @speed    = 1
+        @storage  = new Storage @
+        @speed    = 5
         @botSpeed = 1
                 
         @build()
@@ -48,12 +50,14 @@ class World
         for bot in @getBots()
             bot.delay -= delta * @speed
             if bot.delay < 0
-                bot.delay = 1/bot.speed
+                bot.delay = 0
                 @send bot
         
     send: (bot) ->
         
-        if bot.path? and @stoneBelowBot(bot) != Stone.gray
+        stone = @stoneBelowBot bot
+        if bot.path? and @storage.canTake stone
+            bot.delay = 1/bot.speed
             @tubes.insertPacket bot
         
     # 0000000    000   000  000  000      0000000    
@@ -80,11 +84,17 @@ class World
     # 000   000  000   000     000     
     # 0000000     0000000      000     
     
-    addBot: (x,y,z, type=Bot.cube, face=Face.PZ) -> 
+    addBot: (x,y,z, type=Bot.mine, face=Face.PZ) -> 
         
         p = @roundPos new Vector x,y,z
         index = @indexAtPos p
-        @bots[index] = type:type, pos:p, face:face, index:index, delay:0, speed:@botSpeed
+        @bots[index] = 
+            type:   type
+            pos:    p
+            face:   face
+            index:  index
+            delay:  0
+            speed:  @botSpeed
         @bots[index]
 
     getBots: -> Object.values @bots
@@ -95,7 +105,7 @@ class World
     # 000 0 000  000   000     000     000       
     # 000   000   0000000       0      00000000  
     
-    moveBot: (bot, toPos, toFace) ->
+    moveBot: (bot, toPos, toFace=bot.face) ->
         
         fromIndex = bot.index
         toIndex = @indexAtPos toPos
@@ -164,6 +174,7 @@ class World
         return angles[0].index
             
     faceIndex: (face,index) -> (face<<28) | index
+    faceIndexForBot: (bot) -> @faceIndex bot.face, bot.index
     splitFaceIndex: (faceIndex) -> [faceIndex >> 28, faceIndex & ((Math.pow 2, 27)-1)]
         
     # 000  000   000  0000000    00000000  000   000  
@@ -237,22 +248,21 @@ class World
             when Face.NY then return "NY"
             when Face.NZ then return "NZ"
             
-    stringForEdge: (edge) ->
-        switch edge
-            when Edge.E0 then return "E0"
-            when Edge.E1 then return "E1"
-            when Edge.E2 then return "E2"
-            when Edge.E3 then return "E3"
-
     stringForStone: (stone) ->
         switch stone
             when Stone.gray   then return "gray"
             when Stone.red    then return "red"
-            when Stone.green  then return "green"
+            when Stone.gelb   then return "gelb"
             when Stone.blue   then return "blue"
-            when Stone.yellow then return "yellow"
-            when Stone.black  then return "black"
             when Stone.white  then return "white"
+
+    stringForBot: (bot) ->
+        switch bot
+            when Bot.base    then return "base"
+            when Bot.mine    then return "mine"
+            when Bot.trade   then return "trade"
+            when Bot.build   then return "build"
+            when Bot.science then return "science"
             
     stringForFaceIndex: (faceIndex) ->
         

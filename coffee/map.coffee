@@ -35,17 +35,15 @@ class Map extends World
             for y in [-2..2]
                 
                 @addStone  x*8-1, y*8,   0, Stone.red
-                @addStone  x*8+1, y*8,   0, Stone.green
-                @addStone  x*8,   y*8,   0, Stone.blue
-                @addStone  x*8,   y*8-1, 0, Stone.yellow
+                @addStone  x*8+1, y*8,   0, Stone.blue
+                @addStone  x*8,   y*8-1, 0, Stone.gelb
                 @addStone  x*8,   y*8+1, 0, Stone.white
         
-        @base = @addBot 0, 0, 1, Bot.dodicos
+        @base = @addBot 0, 0, 1, Bot.base
 
-        @addBot -2, 0, 1, Bot.octacube
-        @addBot -1, 0, 1, Bot.octacube
-        @addBot  0, 2, 1, Bot.tubecross
-        @addBot  2, 0, 1, Bot.toruscone
-        @addBot  0,-2, 1, Bot.knot
+        @addBot -1, 0, 1, Bot.mine
+        @addBot  0, 2, 1, Bot.trade
+        @addBot  2, 0, 1, Bot.build
+        @addBot  0,-2, 1, Bot.science
         
 module.exports = Map

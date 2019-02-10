@@ -56,7 +56,8 @@ class Vector extends THREE.Vector3
 
     xyperp: -> new Vector -@y, @x
     round:  -> new Vector Math.round(@x), Math.round(@y), Math.round(@z)
-    equals: (o) -> @x==o.x and @y==o.y and z=o.z
+    equals: (o) -> @manhattan(o) < 0.001
+    same:   (o) -> @x==o.x and @y==o.y and z=o.z
 
     fade: (o, val) ->
         @x = @x * (1-val) + o.x * val

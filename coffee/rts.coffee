@@ -15,6 +15,7 @@ Debug  = require './lib/debug'
 World  = require './world'
 Map    = require './map'
 Camera = require './camera'
+Handle = require './handle'
 Vector = require './lib/vector'
 
 window.THREE = THREE
@@ -37,16 +38,7 @@ class RTS
         
         # log @renderer.capabilities
         
-        @elem = document.createElement 'div'
-        @elem.style.position = 'absolute'
-        @elem.style.top = '0'
-        @elem.style.left = '0'
-        @elem.style.right = '0'
-        @elem.style.bottom = '0'
-        @elem.style.background = "#004"
-        
-        @view.appendChild @elem
-        @elem.appendChild @renderer.domElement
+        @view.appendChild @renderer.domElement
         
         @camera = new Camera view:@view
                 
@@ -85,7 +77,8 @@ class RTS
         @ambient = new THREE.AmbientLight 0x333333
         @scene.add @ambient
             
-        @world = new Map @scene    
+        @world  = new Map @scene    
+        @handle = new Handle @world
         
         @mouse = new THREE.Vector2
         @raycaster = new THREE.Raycaster()
@@ -93,9 +86,10 @@ class RTS
         document.addEventListener 'mousemove', @onMouseMove
         document.addEventListener 'mousedown', @onMouseDown
         document.addEventListener 'mouseup',   @onMouseUp
+        document.addEventListener 'dblclick',  @onDblClick
         
-        @info  = new Info
         @debug = new Debug
+        @info  = new Info
         
         @lastAnimationTime = window.performance.now()
         @animationStep()
@@ -155,7 +149,11 @@ class RTS
 
         if not @camMove
             delete @dragBot
+            
         delete @camMove
+        
+        if bot = @world.highlightBot
+            @handle.botClicked bot
             
         @calcMouse event
     
@@ -180,9 +178,14 @@ class RTS
                     @world.moveBot @dragBot, hit.pos, hit.face
                     @world.highlightPos @dragBot.pos
 
+    onDblClick: (event) =>
+        
+        if bot = @world.highlightBot
+            log 'double', @world.stringForBot(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
+                    
     calcMouse: (event) ->
         
-        br = @elem.getBoundingClientRect()
+        br = @view.getBoundingClientRect()
         @mouse.x = ((event.clientX-br.left) / br.width) * 2 - 1
         @mouse.y = -((event.clientY-br.top) / br.height ) * 2 + 1
         @mouse
@@ -208,7 +211,7 @@ class RTS
         # log 'hits', intersects.length
 
         intersect = @filterHit intersects, ignoreHighlight
-
+        
         return if empty intersect
         
         point = intersect.point
@@ -216,7 +219,7 @@ class RTS
         info = 
             pos:    @world.roundPos point
             index:  @world.indexAtPos @world.roundPos point
-            norm:   intersect.face.normal
+            norm:   vec intersect.face.normal
             dist:   intersect.distance
             
         @scene.remove @cursor if @cursor
@@ -229,19 +232,7 @@ class RTS
         if valid stones
             info.face = @world.faceAtPosNorm stones[0].point, stones[0].face.normal
         
-        # if info.face < 6
-            # geom = new THREE.ConeGeometry 0.5, 0.8
-            # geom.rotateX deg2rad 90
-            # wire = new THREE.WireframeGeometry geom
-            # @cursor = new THREE.LineSegments wire, new THREE.LineBasicMaterial color:0xfff000
-            # @cursor.name = 'cursor'
-            # @cursor.quaternion.copy quat().setFromUnitVectors vec(0,0,1), Vector.normals[info.face]
-            # @cursor.position.copy info.pos
-            # @scene.add @cursor
-        
-        # log info
-            
-        return info
+        info
         
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
