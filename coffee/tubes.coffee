@@ -18,6 +18,7 @@ class Tubes
         
         @astar    = new AStar @world
         @segments = {}
+        @speed    = 0.5
 
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
@@ -28,8 +29,8 @@ class Tubes
     insertPacket: (bot) ->
         
         if seg = @segmentBelowBot bot
+            stone = @world.stoneBelowBot bot
             if not @isInputBlocked seg
-                stone = @world.stoneBelowBot bot
                 pck = new Packet stone, @world
                 @insertPacketIntoSegment pck, seg
                 pck.moveOnSegment seg
@@ -42,20 +43,34 @@ class Tubes
                 
     isCrossingBlocked: (seg, pck) -> 
         
-        if first(seg.packets)?.moved < 0.01 
-            return true
-            
-        if seg.in.length == 1
-            return false
-            
         waiting = 0
         for index in seg.in
             inSeg = @segments[index]
             if last(inSeg.packets) == pck
                 continue
-            if last(inSeg.packets)?.moved > 0.88
+            if last(inSeg.packets)?.moved >= 0.88
                 waiting += 1
+                
+        if waiting > 0
+            seg.queue = [] if not seg.queue
+            seg.queue.push pck if pck not in seg.queue
+            if pck == first seg.queue
+                return false
+                
         return waiting > 0
+        
+    distToNext: (pck, outSeg) ->
+        
+        if pck.moved < 1 - 0.12
+            return 0.12
+            
+        if @isCrossingBlocked outSeg, pck
+            return 0
+        
+        if valid outSeg.packets
+            return 1 - pck.moved + outSeg.packets[0].moved - 0.12
+            
+        return 0.12
 
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -70,41 +85,38 @@ class Tubes
         
         for seg in segs
             
-            if seg.blockDelay > 0
-                seg.blockDelay = Math.max 0, seg.blockDelay-delta
-            
             continue if empty seg.packets
+            
+            if seg.out
+                outSeg = @segments[seg.out]
             
             for pckIndex in [seg.packets.length-1..0]
                 
                 pck = seg.packets[pckIndex]
-                pck.moved += delta * 0.1
                 
-                if seg.out
-                    outSeg = @segments[seg.out]
+                if outSeg
+                    
                     if pckIndex == seg.packets.length-1
-                        if pck.moved >= 0.88
-                            if @isCrossingBlocked outSeg, pck
-                                # log 'blocked', @world.stringForStone pck.stone
-                                pck.moved = 0.88
-                                pck.moveOnSegment seg
-                            else if pck.moved >= 1
-                                # log 'move to next', @world.stringForStone pck.stone
-                                @insertPacketIntoSegment pck, outSeg
-                                seg.packets.pop()
-                                pck.moved -= 1
-                                pck.moveOnSegment outSeg
-                            else
-                                # log 'to exit', @world.stringForStone pck.stone
-                                pck.moveOnSegment seg
-                        else
-                            pck.moveOnSegment seg
+                        nextDist = @distToNext pck, outSeg
                     else
-                        pck.moved = Math.min pck.moved, seg.packets[pckIndex+1].moved - 0.12
+                        nextDist = (seg.packets[pckIndex+1].moved - 0.12) - pck.moved
+                        
+                    moveDist = Math.min delta * @speed, nextDist
+                    pck.moved += moveDist 
+                    
+                    if pck.moved >= 1
+                        if pck == first outSeg.queue
+                            outSeg.queue.shift()
+                        @insertPacketIntoSegment pck, outSeg
+                        seg.packets.pop()
+                        pck.moved -= 1
+                        pck.moveOnSegment outSeg
+                    else
                         pck.moveOnSegment seg
                 else
+                    
+                    pck.moved += delta * @speed
                     if pck.moved >= 1
-                        log 'base!'
                         pck = seg.packets.pop()
                         pck.del()
                     else
@@ -128,6 +140,9 @@ class Tubes
             continue if bot == @world.base
             @pathFromTo @world.base, bot
             
+            # si = @segIndex bot.face, bot.face
+            # @segments[si] = index:si, from:path[0], to:path[0], packets:[], points:[], dist:path.length, in:[], out:null
+            
         for index,segment of oldSegments
             if @segments[index]
                 @segments[index].packets = segment.packets
@@ -150,7 +165,7 @@ class Tubes
                     seg.in.push next.index
                 nextIndex += 1
         
-        log 'build', segs.map (s) -> dist:s.dist, in:s.in, out:s.out
+        # log 'build', segs.map (s) -> dist:s.dist, in:s.in, out:s.out
                     
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  

@@ -122,7 +122,7 @@ class World
         
         p = @roundPos new Vector x,y,z
         index = @indexAtPos p
-        @bots[index] = type:type, pos:p, face:face, index:index, delay:0, speed:10
+        @bots[index] = type:type, pos:p, face:face, index:index, delay:0, speed:1
         @bots[index]
 
     getBots: -> Object.values @bots

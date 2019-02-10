@@ -20,11 +20,11 @@ class Map extends World
         
     build: ->
 
-        @addStone 0, 0,-1
-        @addStone 3, 0, 0
-        @addStone -2, 0,0
-        @addStone -3, 0,0
-        @addStone 2, 0,0
+        @addStone  0, 0,-1
+        @addStone  3, 0, 0
+        @addStone -2, 0, 0
+        @addStone -3, 0, 0
+        @addStone  2, 0, 0
                 
         @addStone  1, 0, 0, Stone.red
         @addStone  0, 1, 0, Stone.green
@@ -36,8 +36,8 @@ class Map extends World
         @base = @addBot 0, 0, 0, Bot.dodicos, Face.PX
 
         @addBot -2, 0, 1, Bot.octacube
-        # @addBot  0, 1, 1, Bot.tubecross
-        # @addBot  0, 0, 2, Bot.toruscone
+        @addBot  0, 1, 1, Bot.tubecross
+        @addBot  0, 0, 2, Bot.toruscone
         @addBot  -2, 0, -1, Bot.knot, Face.NZ
         
 module.exports = Map

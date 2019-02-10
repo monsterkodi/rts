@@ -132,7 +132,7 @@ class Camera extends THREE.PerspectiveCamera
         # dotp = cross.dot(centerToNewNorm)
         # asign = dotp > 0 and 1 or -1
         
-        @rotate += -0.08*x
+        @rotate += -0.1*x
         @degree += -0.1*y
         
         @update()
