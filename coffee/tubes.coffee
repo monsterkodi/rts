@@ -140,8 +140,9 @@ class Tubes
             continue if bot == @world.base
             @pathFromTo @world.base, bot
             
-            # si = @segIndex bot.face, bot.face
-            # @segments[si] = index:si, from:path[0], to:path[0], packets:[], points:[], dist:path.length, in:[], out:null
+            if bot.path?
+                si = @segIndex bot.face, bot.face
+                @segments[si] = index:si, from:bot.path[0], to:bot.path[0], packets:[], points:[], dist:bot.path.length+1, in:[], out:null
             
         for index,segment of oldSegments
             if @segments[index]
