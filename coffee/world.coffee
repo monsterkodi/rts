@@ -22,23 +22,12 @@ class World
         @stones = {}
         @bots   = {}
         @tubes  = new Tubes @
+        @botSpeed = 10
                 
         @build()
         
         @tubes.build()
         
-        # ei = @edgeIndex Edge.E0,Face.NX,@indexAtPos(1,0,1)
-        # @segment.set ei, ei
-        # ei = @edgeIndex Edge.E1,Face.NX,@indexAtPos(1,0,1)
-        # @segment.set ei, ei
-        # ei = @edgeIndex Edge.E2,Face.PX,@indexAtPos(1,0,1)
-        # @segment.set ei, ei
-        # ei = @edgeIndex Edge.E3,Face.PX,@indexAtPos(1,0,1)
-        # @segment.set ei, ei
-
-        # for edgeIndex in Array.from @segment.keys()
-            # log @stringForEdgeIndex edgeIndex
-            
         @construct = new Construct @
         @construct.initBotGeoms()
         @construct.stones()
@@ -73,34 +62,6 @@ class World
     # 0000000     0000000   000  0000000  0000000    
     
     build: ->
-
-        # # # for z in [-5..0]
-        # # for z in [0..0]
-            # # for y in [-10..10]
-                # # @wall -40,y*4,z*2, 40,y*4,z*2
-                # # @wall y*4,-40,z*2, y*4,40,z*2
-
-        # # @wall -128, 0, 0, 128, 0, 0
-        # # @wall 0, -128, 0, 0, 128, 0
-
-        # @wall -2, 0, 0, 2, 0, 0
-        # @wall 0, -2, 0, 0, 2, 0
-        # @addStone -1,-1,0
-        # @addStone -1, 1,0
-        # @addStone  1,-1,0
-        # @addStone  1, 1,0
-        # @delStone 0, 0, 0
-
-        # @addStone -2,-2,0, Stone.yellow
-        # @addStone  2,-2,0, Stone.blue
-        # @addStone -2, 2,0, Stone.green
-        # @addStone  2, 2,0, Stone.red
-
-        # @base = @addBot  0,0,0, Bot.dodicos, Face.NX
-        # @addBot -2, 0,1,  Bot.octacube
-        # @addBot  0, 2,1,  Bot.tubecross
-        # @addBot  0,-2,1,  Bot.toruscone
-        # @addBot  2, 0,1,  Bot.knot
                         
     wall: (xs, ys, zs, xe, ye, ze, stone=Stone.gray) ->
         
@@ -122,7 +83,7 @@ class World
         
         p = @roundPos new Vector x,y,z
         index = @indexAtPos p
-        @bots[index] = type:type, pos:p, face:face, index:index, delay:0, speed:1
+        @bots[index] = type:type, pos:p, face:face, index:index, delay:0, speed:@botSpeed
         @bots[index]
 
     getBots: -> Object.values @bots

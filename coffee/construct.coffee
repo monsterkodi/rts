@@ -32,10 +32,10 @@ class Construct
         
         tube = new THREE.Geometry
         
-        for segment in @world.tubes.getSegments()
-            points = segment.points
-            for i in [1...points.length]
-                tube.merge @tubeFaces points[i-1], points[i]
+        for seg in @world.tubes.getSegments()
+            if seg.points.length >= 2
+                for i in [1...seg.points.length]
+                    tube.merge @tubeFaces seg.points[i-1], seg.points[i]
             
         tube.computeFaceNormals()
         tube.computeFlatVertexNormals()

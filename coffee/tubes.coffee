@@ -18,7 +18,7 @@ class Tubes
         
         @astar    = new AStar @world
         @segments = {}
-        @speed    = 0.5
+        @speed    = 1.0
 
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
@@ -27,7 +27,6 @@ class Tubes
     # 000  000   000  0000000   00000000  000   000     000     
     
     insertPacket: (bot) ->
-        
         if seg = @segmentBelowBot bot
             stone = @world.stoneBelowBot bot
             if not @isInputBlocked seg
@@ -126,12 +125,16 @@ class Tubes
         
         if bot.path?
             path = bot.path
-            i = path.pind[1]
-            f1 = @world.faceIndex path.points[0].face, path.points[0].index
-            f2 = @world.faceIndex path.points[i].face, path.points[i].index
-            si = @segIndex f1, f2
+            fi = @world.faceIndex path.points[0].face, path.points[0].index
+            si = @segIndex fi, fi
             @segments[si]
         
+    # 0000000    000   000  000  000      0000000    
+    # 000   000  000   000  000  000      000   000  
+    # 0000000    000   000  000  000      000   000  
+    # 000   000  000   000  000  000      000   000  
+    # 0000000     0000000   000  0000000  0000000    
+    
     build: ->
         
         oldSegments = _.clone @segments
@@ -141,8 +144,19 @@ class Tubes
             @pathFromTo @world.base, bot
             
             if bot.path?
-                si = @segIndex bot.face, bot.face
-                @segments[si] = index:si, from:bot.path[0], to:bot.path[0], packets:[], points:[], dist:bot.path.length+1, in:[], out:null
+                fi = @world.faceIndex bot.path.points[0].face, bot.path.points[0].index
+                si = @segIndex fi, fi
+                fakePoints = [_.cloneDeep(bot.path.points[0]), _.clone(bot.path.points[0])]
+                fakePoints[0].pos.add Vector.normals[bot.face].mul 1
+                @segments[si] = 
+                    index:si
+                    from:0
+                    to:fi
+                    packets:[]
+                    points:fakePoints
+                    dist:bot.path.length
+                    in:[]
+                    out:null
             
         for index,segment of oldSegments
             if @segments[index]
@@ -166,7 +180,7 @@ class Tubes
                     seg.in.push next.index
                 nextIndex += 1
         
-        # log 'build', segs.map (s) -> dist:s.dist, in:s.in, out:s.out
+        # log 'build', segs.map (s) -> dist:s.dist, in:s.in, out:s.out, index:s.index, from:s.from, to:s.to#, points:s.points
                     
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  

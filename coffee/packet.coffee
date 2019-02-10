@@ -6,7 +6,7 @@
 000        000   000   0000000  000   000  00000000     000   
 ###
 
-{ deg2rad, log, _ } = require 'kxk'
+{ deg2rad, empty, log, _ } = require 'kxk'
 
 THREE     = require 'three'
 Vector    = require './lib/vector'
@@ -29,6 +29,7 @@ class Packet
     moveOnSegment: (segment) ->
         
         points = segment.points
+        return if empty points
         ind = 0
         ths = points[ind]
         nxt = points[ind+1]
