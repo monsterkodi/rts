@@ -8,6 +8,11 @@
 
 module.exports = 
     
+    Bend:
+        flat:     0
+        concave:  1
+        convex:   2
+    
     Stone:
         gray:   0
         red:    1

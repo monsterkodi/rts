@@ -13,7 +13,7 @@ Packet    = require './packet'
 Tubes     = require './tubes'
 Construct = require './construct'
 
-{ Stone, Bot, Face, Edge } = require './constants'
+{ Stone, Bot, Face, Edge, Bend } = require './constants'
 
 class World
     
@@ -22,7 +22,7 @@ class World
         @stones = {}
         @bots   = {}
         @tubes  = new Tubes @
-        @botSpeed = 10
+        @botSpeed = 20
                 
         @build()
         
@@ -126,15 +126,26 @@ class World
     
     directionFaceToFace: (fromFaceIndex, toFaceIndex) ->
         
+        [toFace, toIndex] = @splitFaceIndex toFaceIndex
+        
+        switch @bendType fromFaceIndex, toFaceIndex
+            when Bend.flat  # vector to target
+                [fromFace, fromIndex] = @splitFaceIndex fromFaceIndex
+                @posAtIndex(fromIndex).to(@posAtIndex toIndex).mul 0.5
+            when Bend.concave # flip target face normal
+                Vector.normals[(toFace+3)%6].mul 0.3
+            when Bend.convex # target face normal
+                Vector.normals[toFace].mul 0.475 
+    
+    bendType: (fromFaceIndex, toFaceIndex) ->
+        
         [fromFace, fromIndex] = @splitFaceIndex fromFaceIndex
         [  toFace,   toIndex] = @splitFaceIndex toFaceIndex
-        if fromFace == toFace # flat case : vector to target
-            @posAtIndex(fromIndex).to(@posAtIndex toIndex).mul 0.5
-        else if fromIndex == toIndex # concave case : flip target face normal
-            Vector.normals[(toFace+3)%6].mul 0.3
-        else
-            Vector.normals[toFace].mul 0.475 # convex case : target face normal
-    
+        
+        return Bend.flat    if fromFace  == toFace
+        return Bend.concave if fromIndex == toIndex
+        Bend.convex
+                
     faceAtPosNorm: (v,n) -> 
         
         norm = new Vector n
@@ -153,7 +164,7 @@ class World
             
     faceIndex: (face,index) -> (face<<28) | index
     splitFaceIndex: (faceIndex) -> [faceIndex >> 28, faceIndex & ((Math.pow 2, 27)-1)]
-    
+        
     # 000  000   000  0000000    00000000  000   000  
     # 000  0000  000  000   000  000        000 000   
     # 000  000 0 000  000   000  0000000     00000    

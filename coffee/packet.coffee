@@ -26,27 +26,28 @@ class Packet
         @mesh.receiveShadow = true
         world.scene.add @mesh
         
-    moveOnSegment: (segment) ->
+    moveOnSegment: (seg) ->
         
-        points = segment.points
+        points = seg.points
         return if empty points
         ind = 0
         ths = points[ind]
         nxt = points[ind+1]
+        factor = @moved/seg.moves
         if nxt.i > 0 
-            if @moved < nxt.i
-                frc = @moved / nxt.i
+            if factor < nxt.i
+                frc = factor / nxt.i
             else 
                 ths = nxt
                 nxt = points[ind+2]
-                if @moved < nxt.i
-                    frc = (@moved-ths.i) / (nxt.i-ths.i)
+                if factor < nxt.i
+                    frc = (factor-ths.i) / (nxt.i-ths.i)
                 else
                     ths = nxt
                     nxt = points[ind+3]
-                    frc = (@moved-ths.i) / (1-ths.i)
+                    frc = (factor-ths.i) / (1-ths.i)
         else
-            frc = @moved
+            frc = factor
             
         dir = ths.pos.to nxt.pos
         tgt = ths.pos.plus dir.mul frc

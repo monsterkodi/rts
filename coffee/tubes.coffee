@@ -8,9 +8,10 @@
 
 { valid, empty, first, last, log, _ } = require 'kxk'
 
-AStar  = require './lib/astar'
-Vector = require './lib/vector'
-Packet = require './packet'
+AStar    = require './lib/astar'
+Vector   = require './lib/vector'
+Packet   = require './packet'
+{ Bend } = require './constants'
 
 class Tubes
 
@@ -18,7 +19,8 @@ class Tubes
         
         @astar    = new AStar @world
         @segments = {}
-        @speed    = 4.0
+        @speed    = 0.5
+        @gap      = 0.1
 
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
@@ -38,7 +40,7 @@ class Tubes
         
     insertPacketIntoSegment: (pck, seg) -> seg.packets.unshift pck
         
-    isInputBlocked: (seg) -> first(seg.packets)?.moved < 0.12
+    isInputBlocked: (seg) -> first(seg.packets)?.moved < @gap
                 
     isCrossingBlocked: (seg, pck) -> 
         
@@ -47,7 +49,7 @@ class Tubes
             inSeg = @segments[index]
             if last(inSeg.packets) == pck
                 continue
-            if last(inSeg.packets)?.moved >= 0.88
+            if last(inSeg.packets)?.moved >= inSeg.moves - @gap
                 waiting += 1
                 
         if waiting > 0
@@ -58,18 +60,18 @@ class Tubes
                 
         return waiting > 0
         
-    distToNext: (pck, outSeg) ->
+    distToNext: (pck, seg, outSeg) ->
         
-        if pck.moved < 1 - 0.12
-            return 0.12
+        if pck.moved < seg.moves - @gap
+            return @gap
             
         if @isCrossingBlocked outSeg, pck
             return 0
         
         if valid outSeg.packets
-            return 1 - pck.moved + outSeg.packets[0].moved - 0.12
+            return seg.moves - pck.moved + outSeg.packets[0].moved - @gap
             
-        return 0.12
+        return @gap
 
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -96,26 +98,26 @@ class Tubes
                 if outSeg
                     
                     if pckIndex == seg.packets.length-1
-                        nextDist = @distToNext pck, outSeg
+                        nextDist = @distToNext pck, seg, outSeg
                     else
-                        nextDist = (seg.packets[pckIndex+1].moved - 0.12) - pck.moved
+                        nextDist = (seg.packets[pckIndex+1].moved - @gap) - pck.moved
                         
                     moveDist = Math.min delta * @speed, nextDist
                     pck.moved += moveDist 
                     
-                    if pck.moved >= 1
+                    if pck.moved >= seg.moves
                         if pck == first outSeg.queue
                             outSeg.queue.shift()
                         @insertPacketIntoSegment pck, outSeg
                         seg.packets.pop()
-                        pck.moved -= 1
+                        pck.moved -= seg.moves
                         pck.moveOnSegment outSeg
                     else
                         pck.moveOnSegment seg
                 else
                     
                     pck.moved += delta * @speed
-                    if pck.moved >= 1
+                    if pck.moved >= seg.moves
                         pck = seg.packets.pop()
                         pck.del()
                     else
@@ -147,11 +149,12 @@ class Tubes
                 fi = @world.faceIndex bot.path.points[0].face, bot.path.points[0].index
                 si = @segIndex fi, fi
                 fakePoints = [_.cloneDeep(bot.path.points[0]), _.clone(bot.path.points[0])]
-                fakePoints[0].pos.add Vector.normals[bot.face].mul 1
+                fakePoints[0].pos.add Vector.normals[bot.face].mul 0.6
                 @segments[si] = 
                     index:si
                     from:0
                     to:fi
+                    moves:1
                     packets:[]
                     points:fakePoints
                     dist:bot.path.length
@@ -218,9 +221,10 @@ class Tubes
         aboveFace = 0.35
         
         lastPos.sub Vector.normals[lastFace].mul aboveFace
-        points.push i:0, face:lastFace, index:lastIndex, pos:new Vector lastPos.x, lastPos.y, lastPos.z
+        points.push i:0, face:lastFace, index:lastIndex, pos:lastPos
         
         for i in [1...path.length]
+            moves = 1
             [nextFace, nextIndex] = @world.splitFaceIndex path[i]
             nextPos = @world.posAtIndex nextIndex
             nextPos.sub Vector.normals[nextFace].mul aboveFace
@@ -230,9 +234,13 @@ class Tubes
                 lm = pos1.to(pos2).length()
                 l1 = (1-lm)/2
                 l2 = 1-l1
-                points.push i:l1, face:lastFace, index:lastIndex, pos:new Vector pos1.x, pos1.y, pos1.z
-                points.push i:l2, face:nextFace, index:nextIndex, pos:new Vector pos2.x, pos2.y, pos2.z
-            points.push i:0, face:nextFace, index:nextIndex, pos:new Vector nextPos.x, nextPos.y, nextPos.z
+                points.push i:l1, face:lastFace, index:lastIndex, pos:pos1
+                points.push i:l2, face:nextFace, index:nextIndex, pos:pos2
+                if Bend.convex == @world.bendType path[i-1], path[i]
+                    moves = 1.275
+                else
+                    moves = 0.66
+            points.push i:0, face:nextFace, index:nextIndex, pos:nextPos
             
             si = @segIndex path[i-1], path[i]
             if not @segments[si]
@@ -240,7 +248,16 @@ class Tubes
                 if lastFace != nextFace
                     p = 4
                 segPoints = points.slice points.length-p, points.length
-                @segments[si] = index:si, from:path[i-1], to:path[i], packets:[], points:segPoints, dist:path.length-i, in:[], out:null
+                @segments[si] = 
+                    index:si 
+                    from:path[i-1] 
+                    to:path[i] 
+                    packets:[] 
+                    points:segPoints
+                    dist:path.length-i
+                    moves:moves
+                    in:[]
+                    out:null
             
             [lastFace, lastIndex] = [nextFace, nextIndex]
             lastPos = nextPos
