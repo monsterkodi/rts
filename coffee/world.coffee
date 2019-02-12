@@ -23,7 +23,6 @@ class World
         @stones   = {}
         @bots     = {}
         @tubes    = new Tubes @
-        @storage  = new Storage @
         @speed    = 5
         @botSpeed = 1
         

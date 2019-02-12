@@ -14,13 +14,13 @@ Materials = require './materials'
 
 class Button
 
-    constructor: (@bot,x,y) ->
+    constructor: (@bot,div) ->
 
         @width  = 100
         @height = 100
         
-        @canvas = elem 'canvas', class:'buttonCanvas', width:@width, height:@height, style:"left:#{x}px; top:#{y}px"
-        $("#main").appendChild @canvas
+        @canvas = elem 'canvas', class:'buttonCanvas', width:@width, height:@height
+        div.appendChild @canvas
         
         @renderer = new THREE.WebGLRenderer antialias:true, canvas:@canvas
         @renderer.setPixelRatio window.devicePixelRatio
@@ -56,6 +56,12 @@ class Button
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,0
         
+        @renderer.render @scene, @camera
+        
+    highlight: ->
+        
+        log 'highlight'
+        @mesh.material = new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.5
         @renderer.render @scene, @camera
         
 module.exports = Button

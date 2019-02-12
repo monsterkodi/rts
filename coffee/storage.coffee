@@ -54,7 +54,7 @@ class Storage
         
         y = 0
         canvas = elem 'canvas', class:'buttonCanvas', width:@width, height:@height, style:"left:0px; top:#{y}px"
-        $("#main").appendChild canvas
+        $(".buttons").appendChild canvas
         
         @renderer = new THREE.WebGLRenderer antialias:true, canvas:canvas
         @renderer.setPixelRatio window.devicePixelRatio
