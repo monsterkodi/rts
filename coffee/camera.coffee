@@ -23,7 +23,7 @@ class Camera extends THREE.PerspectiveCamera
         @dist    = @far/64
         @maxDist = @far/2
         @minDist = 0.4
-        @center  = new Vector 0, 0, 0
+        @center  = vec 0, 0, 0
         @degree  = 60
         @rotate  = 0
         @wheelInert = 0
@@ -36,9 +36,9 @@ class Camera extends THREE.PerspectiveCamera
         
         @update()
 
-    getPosition:  -> new Vector @position
-    getDirection: -> new Quaternion(@quaternion).rotate Vector.minusZ
-    getUp:        -> new Quaternion(@quaternion).rotate Vector.unitY
+    getPosition:  -> vec @position
+    getDirection: -> quat(@quaternion).rotate Vector.minusZ
+    getUp:        -> quat(@quaternion).rotate Vector.unitY
 
     del: =>
         
@@ -64,7 +64,7 @@ class Camera extends THREE.PerspectiveCamera
         @mouseX = event.clientX
         @mouseY = event.clientY
         
-        @downPos = new Vector @mouseX, @mouseY
+        @downPos = vec @mouseX, @mouseY
         
         window.addEventListener 'mousemove', @onMouseDrag
         window.addEventListener 'mouseup',   @onMouseUp
@@ -80,8 +80,6 @@ class Camera extends THREE.PerspectiveCamera
         
     onDblClick: (event) =>
         
-        @focusOnHit()
-        
     onMouseDrag: (event) =>
 
         x = event.clientX-@mouseX
@@ -90,7 +88,7 @@ class Camera extends THREE.PerspectiveCamera
         @mouseX = event.clientX
         @mouseY = event.clientY
         
-        if @downPos.dist(new Vector @mouseX, @mouseY) > 60
+        if @downPos.dist(vec @mouseX, @mouseY) > 60
             @mouseMoved = true
         
         if event.buttons & 4
@@ -172,12 +170,17 @@ class Camera extends THREE.PerspectiveCamera
         raycaster = new THREE.Raycaster
         raycaster.setFromCamera rts.mouse, @
         intersects = raycaster.intersectObjects rts.scene.children, true
-
         intersects = intersects.filter (i) -> valid i.face
         
         if intersects.length
-            @centerTarget = new Vector(intersects[0].point).round()
+            @centerTarget = vec(intersects[0].point).round()
             @startFadeCenter()
+            
+    focusOnPos: (v) ->
+        
+        @centerTarget = v
+        @center = v
+        @update()
             
     startFadeCenter: -> 
         

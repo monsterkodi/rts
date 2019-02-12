@@ -196,7 +196,7 @@ class Tubes
         
         path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
         
-        if path
+        if path and path.length <= @world.science.maxPathLength+1
             to.path = 
                 points: @pathPoints path
                 length: path.length

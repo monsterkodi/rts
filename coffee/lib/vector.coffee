@@ -85,6 +85,7 @@ class Vector extends THREE.Vector3
     neg:       -> new Vector -@x, -@y, -@z
     to:    (v) -> new Vector(v).sub @
         
+    negate:  -> @scale -1
     scale: (f) ->
         @x *= f
         @y *= f
@@ -133,5 +134,16 @@ class Vector extends THREE.Vector3
     @minusZ = new Vector 0,0,-1
     
     @normals = [Vector.unitX, Vector.unitY, Vector.unitZ, Vector.minusX, Vector.minusY, Vector.minusZ]
+    
+    @closestNormal: (v) ->
+        vn = v.normal()
+        angles = []
+        for n in Vector.normals
+            if n.equals vn
+                return n
+            angles.push [n.angle(vn), n]
+                
+        angles.sort (a,b) -> a[0]-b[0]
+        angles[0][1]
     
 module.exports = Vector

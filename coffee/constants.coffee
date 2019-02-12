@@ -10,19 +10,26 @@ class Enum
     
     constructor: (e) ->
         
-        for k,v of e
-            @[k] = v
-
-enum = (e) -> new Enum e
+        @keys = Object.keys e
+        @values = []
+        for key in @keys
+            @[key] = e[key]
+            @values.push e[key]
+            
+    toString: (v) ->
+        
+        for k in @keys
+            if @[k] == v
+                return k
 
 module.exports = 
     
-    Bend: enum
+    Bend: new Enum
         flat:       0
         concave:    1
         convex:     2
     
-    Face: 
+    Face: new Enum
         PX:         0
         PY:         1
         PZ:         2
@@ -30,7 +37,7 @@ module.exports =
         NY:         4
         NZ:         5
                 
-    Stone:
+    Stone: new Enum
         gray:       0
         red:        1
         gelb:       2
@@ -38,14 +45,14 @@ module.exports =
         white:      4
         resources:  [1,2,3,4]
         
-    Bot:
+    Bot: new Enum
         base:       1
         mine:       2
         trade:      3
         build:      4
         science:    5
         
-    Geom:
+    Geom: new Enum
         cube:       1
         cone:       2
         sphere:     3

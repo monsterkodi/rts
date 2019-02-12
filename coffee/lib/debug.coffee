@@ -27,11 +27,12 @@ class Debug
 
     constructor: () ->
 
-        @elem = elem class:'debug', style:'position:relative; z-index:1'
+        @elem = elem class:'debug', style:'position:absolute; z-index:1; bottom:0px'
 
         @elem.appendChild @worldSpeed = value text:'world', value: rts.world.speed.toFixed(1),       reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         @elem.appendChild @tubeSpeed  = value text:'tube ', value: rts.world.tubes.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
         @elem.appendChild @botSpeed   = value text:'bots ', value: rts.world.botSpeed.toFixed(1),    reset:@resetBotSpeed,   incr:@incrBotSpeed,   decr:@decrBotSpeed
+        @elem.appendChild @pathLength = value text:'path ', value: rts.world.science.maxPathLength,  reset:@resetPath,       incr:@incrPath,       decr:@decrPath
         @elem.appendChild @tubesGap   = value text:'gap  ', value: rts.world.tubes.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
 
         document.body.appendChild @elem
@@ -39,7 +40,8 @@ class Debug
     resetWorldSpeed: => @modWorldSpeed 1-rts.world.speed
     resetTubeSpeed: => @modTubeSpeed 0.5-rts.world.tubes.speed
     resetBotSpeed: => @modBotSpeed 1-rts.world.botSpeed
-    resetGap:     => @modGap 0.12-rts.world.tubes.gap
+    resetPath:     => @modPath 10-rts.world.science.maxPathLength
+    resetGap:      => @modGap 0.12-rts.world.tubes.gap
     incrTubeSpeed: => @modTubeSpeed  0.1 
     decrTubeSpeed: => @modTubeSpeed -0.1
     modTubeSpeed: (d) -> 
@@ -66,5 +68,14 @@ class Debug
         rts.world.tubes.gap += d
         rts.world.tubes.gap = clamp 0.1, 0.5, rts.world.tubes.gap
         @tubesGap.children[2].innerHTML = rts.world.tubes.gap.toFixed 2
+
+    incrPath: => @modPath  1 
+    decrPath: => @modPath -1
+    modPath: (d) -> 
+        rts.world.science.maxPathLength += d
+        rts.world.science.maxPathLength = clamp 1, 40, rts.world.science.maxPathLength
+        @pathLength.children[2].innerHTML = rts.world.science.maxPathLength
+        rts.world.tubes.build()
+        rts.world.construct.tubes()
         
 module.exports = Debug

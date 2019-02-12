@@ -8,10 +8,13 @@
 
 { elem, empty, valid, deg2rad, log, _ } = require 'kxk'
 
+{ Bot } = require './constants'
+
 THREE  = require 'three'
 FPS    = require './lib/fps'
 Info   = require './lib/info'
 Debug  = require './lib/debug'
+Menu   = require './menu'
 World  = require './world'
 Map    = require './map'
 Camera = require './camera'
@@ -80,7 +83,7 @@ class RTS
         @world  = new Map @scene    
         @handle = new Handle @world
         
-        @mouse = new THREE.Vector2
+        @mouse = vec()
         @raycaster = new THREE.Raycaster()
         
         document.addEventListener 'mousemove', @onMouseMove
@@ -90,6 +93,7 @@ class RTS
         
         @debug = new Debug
         @info  = new Info
+        @menu  = new Menu
         
         @lastAnimationTime = window.performance.now()
         @animationStep()
@@ -137,6 +141,8 @@ class RTS
             
             @calcMouse event
             
+            @downPos = @mouse.clone()
+            
             if @world.highlightBot?
                 @dragBot = @world.highlightBot
             else
@@ -152,10 +158,13 @@ class RTS
             
         delete @camMove
         
-        if bot = @world.highlightBot
-            @handle.botClicked bot
-            
         @calcMouse event
+        
+        moved = @downPos?.dist @mouse
+        if moved < 0.01
+            
+            if bot = @world.highlightBot
+                @handle.botClicked bot
     
     onMouseMove: (event) =>
 
@@ -173,15 +182,17 @@ class RTS
                 @world.removeHighlight()
                 
         else 
-            if hit?.face? and (not @world.botAtPos(hit.pos) or @world.botAtPos(hit.pos) == @dragBot)
-                if @dragBot.face != hit.face or @dragBot.index != hit.index
-                    @world.moveBot @dragBot, hit.pos, hit.face
-                    @world.highlightPos @dragBot.pos
+            moved = @downPos?.dist @mouse
+            if moved < 0.01
+                return
+            
+            if hit?.face? 
+                @handle.moveBot @dragBot, hit.pos, hit.face
 
     onDblClick: (event) =>
         
         if bot = @world.highlightBot
-            log 'double', @world.stringForBot(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
+            log 'double', Bot.toString(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
                     
     calcMouse: (event) ->
         
@@ -220,6 +231,7 @@ class RTS
             pos:    @world.roundPos point
             index:  @world.indexAtPos @world.roundPos point
             norm:   vec intersect.face.normal
+            point:  point
             dist:   intersect.distance
             
         @scene.remove @cursor if @cursor
@@ -246,10 +258,11 @@ class RTS
         @renderer.render @world.scene, @camera
         
         @fps.draw()
-        info = _.clone @renderer.info.render
-        info.segments = @world.tubes.getSegments().length
-        info.packets  = @world.tubes.getPackets().length
-        @info.draw info
+
+        # info = _.clone @renderer.info.render
+        # info.segments = @world.tubes.getSegments().length
+        # info.packets  = @world.tubes.getPackets().length
+        # @info.draw info
 
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000

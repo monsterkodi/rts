@@ -8,7 +8,7 @@
 
 { log, _ } = require 'kxk'
 
-{ Bot } = require './constants'
+{ Face, Bot } = require './constants'
 
 Vector = require './lib/vector'
 
@@ -18,26 +18,45 @@ class Handle
         
     botClicked: (bot) -> 
     
-        # log 'botClicked', rts.mouse
         hit = rts.castRay()
-        # log 'hit', @world.stringForBot(hit.bot?.type), hit.norm
         
-        switch hit.bot?.type 
+        switch hit?.bot?.type 
             when Bot.build then @buildBotHit bot, hit
 
     buildBotHit: (bot, hit) ->
         
-        for n in Vector.normals
-            if hit.norm.equals n
-                if @world.storage.canBuild()
-                    log 'build', n
-                    @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
-                    @world.moveBot bot, bot.pos.plus n
-                    @world.construct.stones()
-                else
-                    log 'cant build'
-                return        
-            else
-                log hit.norm.manhattan n
+        normal = hit.norm.applyQuaternion bot.mesh.quaternion
+        hitpos = bot.pos.to hit.point
+
+        n = Vector.closestNormal hitpos
+        newFace = Vector.normals.indexOf n
+        newPos = bot.pos.plus n
+        if @world.stoneAtPos(newPos)?
+            log 'occupied negate'
+            n.negate()
+            newFace = (newFace+3) % 6
+            newPos = bot.pos.plus n
+            
+        if @world.stoneAtPos(newPos)? or @world.botAtPos(newPos)?
+            log 'target occupied'
+            return
+        
+        if @world.storage.canBuild()
+            log newPos, Face.toString newFace
+            rts.camera.focusOnPos rts.camera.center.plus n
+            @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
+            @world.moveBot bot, newPos, newFace
+            @world.construct.stones()
+        else
+            log 'cant build'
+
+    moveBot: (bot, pos, face) ->
+        
+        wbot = @world.botAtPos(pos)
+        if not wbot or wbot == bot
+            index = @world.indexAtPos pos
+            if bot.face != face or bot.index != index
+                @world.moveBot bot, pos, face
+                @world.highlightPos bot.pos
             
 module.exports = Handle

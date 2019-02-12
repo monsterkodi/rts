@@ -174,9 +174,9 @@ class Construct
     # 000   000  000   000     000          000  
     # 0000000     0000000      000     0000000   
     
-    geomForBot: (bot) ->
-        
-        switch bot.type
+    geomForBot: (bot) -> @geomForBotType bot.type
+    geomForBotType: (type) ->
+        switch type
             when Bot.base    then Geom.dodicos
             when Bot.mine    then Geom.octacube
             when Bot.build   then Geom.tubecross

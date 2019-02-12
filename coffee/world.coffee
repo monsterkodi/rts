@@ -26,7 +26,10 @@ class World
         @storage  = new Storage @
         @speed    = 5
         @botSpeed = 1
-                
+        
+        @science = 
+            maxPathLength: 4
+            
         @build()
         
         @tubes.build()
@@ -239,35 +242,12 @@ class World
     #      000     000     000   000  000  000  0000  000   000  
     # 0000000      000     000   000  000  000   000   0000000   
     
-    stringForFace: (face) ->
-        switch face
-            when Face.PX then return "PX"
-            when Face.PY then return "PY"
-            when Face.PZ then return "PZ"
-            when Face.NX then return "NX"
-            when Face.NY then return "NY"
-            when Face.NZ then return "NZ"
-            
-    stringForStone: (stone) ->
-        switch stone
-            when Stone.gray   then return "gray"
-            when Stone.red    then return "red"
-            when Stone.gelb   then return "gelb"
-            when Stone.blue   then return "blue"
-            when Stone.white  then return "white"
-
-    stringForBot: (bot) ->
-        switch bot
-            when Bot.base    then return "base"
-            when Bot.mine    then return "mine"
-            when Bot.trade   then return "trade"
-            when Bot.build   then return "build"
-            when Bot.science then return "science"
+    stringForBot: (bot) -> Bot.toString bot
             
     stringForFaceIndex: (faceIndex) ->
         
         [face,index] = @splitFaceIndex faceIndex
         pos = @posAtIndex index
-        "#{pos.x} #{pos.y} #{pos.z} #{@stringForFace(face)}"
+        "#{pos.x} #{pos.y} #{pos.z} #{Face.toString(face)}"
         
 module.exports = World
