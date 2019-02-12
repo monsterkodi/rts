@@ -8,10 +8,10 @@
 
 { elem, log, $, _ } = require 'kxk'
 
-{ Bot } = require './constants'
+{ Bot }   = require '../constants'
 
-Storage = require './storage'
-Button = require './button'
+Storage   = require '../storage'
+BotButton = require './botbutton'
 
 class Menu
 
@@ -25,19 +25,15 @@ class Menu
         @buttons = [rts.world.storage]
                 
         for bot in Bot.values
-            @buttons.push new Button bot, @div
+            @buttons.push new BotButton bot, @div
             
-        @div.addEventListener 'mouseenter', @onMouseEnter
-        @div.addEventListener 'mouseleave', @onMouseLeave
+        @div.addEventListener 'mouseover',  @onMouseOver
         @div.addEventListener 'mouseout',   @onMouseOut
-
-    onMouseLeave: => #log 'onMouseLeave'
-    onMouseOut: => #log 'onMouseOut'
-    onMouseEnter: (event) => 
-        log event
-        button = @buttonForEvent event
-        log 'onMouseEnter', button?
-        button?.highlight?()
+        @div.addEventListener 'click',      @onClick
+        
+    onClick:     (event) => @buttonForEvent(event)?.click()
+    onMouseOut:  (event) => @buttonForEvent(event)?.unhighlight?()
+    onMouseOver: (event) => @buttonForEvent(event)?.highlight?()
         
     buttonForEvent: (event) ->
         

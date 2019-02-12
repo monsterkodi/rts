@@ -100,6 +100,8 @@ class World
         @bots[index]
 
     getBots: -> Object.values @bots
+    
+    botsOfType: (type) -> @getBots().filter (b) -> b.type == type
         
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       
@@ -216,20 +218,23 @@ class World
     
     removeHighlight: ->
         
-        @highlightBot?.highlight?.parent.remove @highlightBot?.highlight
-        delete @highlightBot?.highlight
-        delete @highlightBot
+        @highBot?.highlight?.parent.remove @highBot?.highlight
+        delete @highBot?.highlight
+        delete @highBot
     
     highlightPos: (v) -> 
         
         p = @roundPos v
-        if bot = @botAtPos p
-            if bot == @highlightBot
-                bot.highlight.position.set p.x, p.y, p.z
+        @highlightBot @botAtPos p
+        
+    highlightBot: (bot) ->
+        
+        if bot
+            if bot == @highBot
                 @construct.orientFace bot.highlight, bot.face
                 return
             @removeHighlight()
-            @highlightBot = bot
+            @highBot = bot
                     
             bot.highlight = @construct.highlight bot
         else

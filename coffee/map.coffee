@@ -44,8 +44,8 @@ class Map extends World
         @base = @addBot 0, 0, 1, Bot.base
 
         @addBot -1, 0, 1, Bot.mine
-        @addBot  0, 2, 1, Bot.trade
+        @addBot  0, 2, 1, Bot.mine
         @addBot  2, 0, 1, Bot.build
-        @addBot  0,-2, 1, Bot.science
+        @addBot  0,-2, 1, Bot.build
         
 module.exports = Map

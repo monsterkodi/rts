@@ -201,7 +201,8 @@ class Construct
 
     updateBot: (bot) ->
         
-        bot.mesh.position.set bot.pos.x, bot.pos.y, bot.pos.z
+        bot.mesh.position.copy bot.pos
+        bot.highlight?.position.copy bot.pos
         @orientBot bot
         @colorBot bot
         

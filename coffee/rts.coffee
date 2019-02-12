@@ -14,7 +14,7 @@ THREE  = require 'three'
 FPS    = require './lib/fps'
 Info   = require './lib/info'
 Debug  = require './lib/debug'
-Menu   = require './menu'
+Menu   = require './menu/menu'
 World  = require './world'
 Map    = require './map'
 Camera = require './camera'
@@ -143,8 +143,8 @@ class RTS
             
             @downPos = @mouse.clone()
             
-            if @world.highlightBot?
-                @dragBot = @world.highlightBot
+            if @world.highBot?
+                @dragBot = @world.highBot
             else
                 delete @dragBot
                 
@@ -163,7 +163,7 @@ class RTS
         moved = @downPos?.dist @mouse
         if moved < 0.01
             
-            if bot = @world.highlightBot
+            if bot = @world.highBot
                 @handle.botClicked bot
     
     onMouseMove: (event) =>
@@ -191,7 +191,7 @@ class RTS
 
     onDblClick: (event) =>
         
-        if bot = @world.highlightBot
+        if bot = @world.highBot
             log 'double', Bot.toString(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
                     
     calcMouse: (event) ->
@@ -211,7 +211,7 @@ class RTS
         
         intersects = intersects.filter (i) => i.object.stone? or i.object.bot
         if ignoreHighlight
-            intersects = intersects.filter (i) => i.object != @world.highlightBot?.mesh
+            intersects = intersects.filter (i) => i.object != @world.highBot?.mesh
             
         intersects[0]
     

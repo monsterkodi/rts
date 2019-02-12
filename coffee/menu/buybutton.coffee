@@ -1,55 +1,37 @@
 ###
- 0000000  000000000   0000000   00000000    0000000    0000000   00000000
-000          000     000   000  000   000  000   000  000        000     
-0000000      000     000   000  0000000    000000000  000  0000  0000000 
-     000     000     000   000  000   000  000   000  000   000  000     
-0000000      000      0000000   000   000  000   000   0000000   00000000
+0000000    000   000  000   000 
+000   000  000   000   000 000  
+0000000    000   000    00000   
+000   000  000   000     000    
+0000000     0000000      000    
 ###
 
-{ deg2rad, elem, log, _ } = require 'kxk'
+{ elem, log, _ } = require 'kxk'
 
-{ Stone } = require './constants'
+{ Stone } = require '../constants'
 
-Materials = require './materials'
+Materials = require '../materials'
 
-class Storage
+class BuyButton
 
-    constructor: (@menu) ->
+    constructor: (@botButton) ->
         
-        @width     = 100
-        @height    = 100
+        @stones = [0,100,50,0,0]
         
-        @meshes    = {}
-        @stones    = [0,100,200,300,400]
-        @temp      = [0,0,0,0,0]
-        @maxStones = 1000
-                            
+        @width  = 100
+        @height = 100
+        
+        @meshes = {}
+        
         @initScene()
         @render()
-                
-    canTake: (stone) -> 
         
-        return false if stone == Stone.gray
-        if @stones[stone] + @temp[stone] < @maxStones
-            @temp[stone] += 1
-            return true
-        false
+        @canvas.addEventListener 'mouseout', @onMouseOut
         
-    canBuild: -> 
-        
-        if @stones[Stone.white] >= 20
-            @stones[Stone.white] -= 20
-            @render()
-            return true
-        false
-        
-    add: (stone) ->
-        
-        oldStones = @stones[stone]
-        @stones[stone] += 1
-        if Math.floor(oldStones)/10 != Math.floor(@stones[stone])
-            @render()
+    onMouseOut: => 
     
+        @canvas.remove()
+        
     #  0000000   0000000  00000000  000   000  00000000  
     # 000       000       000       0000  000  000       
     # 0000000   000       0000000   000 0 000  0000000   
@@ -58,11 +40,11 @@ class Storage
     
     initScene: ->
         
-        y = 0
-        canvas = elem 'canvas', class:'buttonCanvas', width:@width, height:@height, style:"left:0px; top:#{y}px"
-        @menu.div.appendChild canvas
+        y = @botButton.canvas.offsetTop
+        @canvas = elem 'canvas', class:'buyButton', width:@width, height:@height, style:"left:100px; top:#{y}px"
+        @botButton.canvas.parentElement.appendChild @canvas
         
-        @renderer = new THREE.WebGLRenderer antialias:true, canvas:canvas
+        @renderer = new THREE.WebGLRenderer antialias:true, canvas:@canvas
         @renderer.setPixelRatio window.devicePixelRatio
         @renderer.setSize @width, @height
         
@@ -87,7 +69,7 @@ class Storage
     
     render: ->
 
-        pos = vec -2.3, 0, 0
+        pos = vec -2.3,0,0
         for stone in Stone.resources
 
             merg = new THREE.Geometry 
@@ -98,6 +80,7 @@ class Storage
                 geom.translate 0,(y*1.2)+0.5,0
                 merg.merge geom
                 
+            log '----', @stones[stone], Math.floor(@stones[stone]/10), Math.floor(@stones[stone]/10)%10
             for y in [0...Math.floor(@stones[stone]/10)%10]
                 break if y == 9
                 geom = new THREE.BoxGeometry 0.5,0.5,0.5
@@ -115,5 +98,5 @@ class Storage
             pos.add vec 1.5, 0, 0
                 
         @renderer.render @scene, @camera
-            
-module.exports = Storage
+
+module.exports = BuyButton

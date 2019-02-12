@@ -173,8 +173,12 @@ class Camera extends THREE.PerspectiveCamera
         intersects = intersects.filter (i) -> valid i.face
         
         if intersects.length
-            @centerTarget = vec(intersects[0].point).round()
-            @startFadeCenter()
+            @fadeToPos vec(intersects[0].point).round()
+     
+    fadeToPos: (v) -> 
+        
+        @centerTarget = v
+        @startFadeCenter()
             
     focusOnPos: (v) ->
         
