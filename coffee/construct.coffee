@@ -322,7 +322,7 @@ class Construct
         bottomside.rotateX deg2rad -180
         
         stonesides = []
-        for stone in [Stone.gray..Stone.white]
+        for stone in Stone.all
             stonesides.push new THREE.Geometry
         
         for index,stone of @world.stones
@@ -338,7 +338,7 @@ class Construct
             stonesides[stone].merge cube
             
             
-        for stone in [Stone.gray..Stone.white]            
+        for stone in Stone.all
             
             @stoneMeshes[stone]?.parent.remove @stoneMeshes[stone] 
             bufgeo = new THREE.BufferGeometry()

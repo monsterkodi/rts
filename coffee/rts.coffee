@@ -19,6 +19,7 @@ World  = require './world'
 Map    = require './map'
 Camera = require './camera'
 Handle = require './handle'
+Market = require './market'
 Vector = require './lib/vector'
 
 window.THREE = THREE
@@ -31,6 +32,8 @@ class RTS
         @fps = new FPS
         @paused = false
         @animations = []
+        
+        @market = new Market
         
         @renderer = new THREE.WebGLRenderer antialias: true
 

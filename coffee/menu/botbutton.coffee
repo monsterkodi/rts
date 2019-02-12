@@ -10,41 +10,28 @@
 
 { Stone, Bot } = require '../constants'
 
-BuyButton = require './buybutton'
-Materials = require '../materials'
+CanvasButton = require './canvasbutton'
+BuyButton    = require './buybutton'
+Materials    = require '../materials'
 
-class BotButton
+class BotButton extends CanvasButton
 
-    constructor: (@bot,div) ->
+    constructor: (bot,div) ->
 
+        super div
+        
+        @bot = bot
         @world = rts.world
         
-        @width  = 100
-        @height = 100
-        
-        @canvas = elem 'canvas', class:'buttonCanvas', width:@width, height:@height, id:@bot
-        div.appendChild @canvas
-        
-        @renderer = new THREE.WebGLRenderer antialias:true, canvas:@canvas
-        @renderer.setPixelRatio window.devicePixelRatio
-        @renderer.setSize @width, @height
-        
-        @scene = new THREE.Scene()
-        @scene.background = new THREE.Color 0x181818
-        
-        @light = new THREE.DirectionalLight 0xffffff
-        @light.position.set -2,-2,2
-        @scene.add @light
+        @canvas.id = @bot
         
         construct = @world.construct
-        
         @mesh = new THREE.Mesh construct.botGeoms[construct.geomForBotType @bot], @botMat()
         @mesh.receiveShadow = true
         @mesh.castShadow = true
         @mesh.rotateZ deg2rad 45
         @scene.add @mesh
-        
-        @camera = new THREE.PerspectiveCamera 30, @width/@height, 0.01, 10
+                
         switch @bot
             when Bot.mine
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.1
@@ -59,8 +46,19 @@ class BotButton
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,0
         
-        @renderer.render @scene, @camera
-
+        @camera.updateProjectionMatrix()                
+        @render()
+        
+    initScene: ->
+        
+        @light = new THREE.DirectionalLight 0xffffff
+        @light.position.set -2,-2,2
+        @scene.add @light
+                
+        @camera.near = 0.01
+        @camera.far = 10
+        @camera.fov = 30
+        
     focusNextBot: ->
         
         bots = @world.botsOfType @bot
@@ -74,18 +72,19 @@ class BotButton
     
     highlight: ->
         
-        # new BuyButton @
+        BuyButton.button?.del()
+        BuyButton.button = new BuyButton @ if @bot != Bot.base
         @camera.fov = 28
         @camera.updateProjectionMatrix()
         @mesh.material = @botMat true
-        @renderer.render @scene, @camera
+        @render()
         
     unhighlight: ->
         
         @camera.fov = 30
         @camera.updateProjectionMatrix()
         @mesh.material = @botMat false
-        @renderer.render @scene, @camera
+        @render()
         
     botMat: (highlight=false) ->
         

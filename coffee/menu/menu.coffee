@@ -12,6 +12,7 @@
 
 Storage   = require '../storage'
 BotButton = require './botbutton'
+BuyButton = require './buybutton'
 
 class Menu
 
@@ -27,18 +28,23 @@ class Menu
         for bot in Bot.values
             @buttons.push new BotButton bot, @div
             
+        @div.addEventListener 'mouseleave', @onMouseLeave
         @div.addEventListener 'mouseover',  @onMouseOver
         @div.addEventListener 'mouseout',   @onMouseOut
         @div.addEventListener 'click',      @onClick
         
-    onClick:     (event) => @buttonForEvent(event)?.click()
-    onMouseOut:  (event) => @buttonForEvent(event)?.unhighlight?()
-    onMouseOver: (event) => @buttonForEvent(event)?.highlight?()
+    onClick:      (event) => @buttonForEvent(event)?.click()
+    onMouseOver:  (event) => @buttonForEvent(event)?.highlight?()
+    onMouseOut:   (event) => @buttonForEvent(event)?.unhighlight?()
+    onMouseLeave: (event) => BuyButton.button?.del()
         
     buttonForEvent: (event) ->
         
         for button in @buttons
-            if (event.target == button.canvas)
+            if event.target == button.canvas
                 return button
+                
+        if event.target == BuyButton.button?.canvas
+            return BuyButton.button
         
 module.exports = Menu

@@ -6,25 +6,24 @@
 0000000      000      0000000   000   000  000   000   0000000   00000000
 ###
 
-{ deg2rad, elem, log, _ } = require 'kxk'
+{ post, deg2rad, elem, log, _ } = require 'kxk'
 
 { Stone } = require './constants'
 
-Materials = require './materials'
+CanvasButton = require './menu/canvasbutton'
+Materials    = require './materials'
 
-class Storage
+class Storage extends CanvasButton
 
-    constructor: (@menu) ->
+    constructor: (menu) ->
         
-        @width     = 100
-        @height    = 100
+        super menu.div
         
-        @meshes    = {}
-        @stones    = [0,100,200,300,400]
-        @temp      = [0,0,0,0,0]
+        @stones    = [800,800,300,400]
+        @temp      = [0,0,0,0]
         @maxStones = 1000
-                            
-        @initScene()
+              
+        @camera.updateProjectionMatrix()    
         @render()
                 
     canTake: (stone) -> 
@@ -43,11 +42,25 @@ class Storage
             return true
         false
         
+    canAfford: (cost) ->
+        
+        for stone in Stone.resources
+            if @stones[stone] < cost[stone]
+                return false
+        true
+        
+    deduct: (cost) ->
+        
+        for stone in Stone.resources
+            @stones[stone] -= cost[stone]
+        @render()
+        
     add: (stone) ->
         
         oldStones = @stones[stone]
         @stones[stone] += 1
         if Math.floor(oldStones)/10 != Math.floor(@stones[stone])
+            post.emit 'storageChanged'
             @render()
     
     #  0000000   0000000  00000000  000   000  00000000  
@@ -57,25 +70,13 @@ class Storage
     # 0000000    0000000  00000000  000   000  00000000  
     
     initScene: ->
-        
-        y = 0
-        canvas = elem 'canvas', class:'buttonCanvas', width:@width, height:@height, style:"left:0px; top:#{y}px"
-        @menu.div.appendChild canvas
-        
-        @renderer = new THREE.WebGLRenderer antialias:true, canvas:canvas
-        @renderer.setPixelRatio window.devicePixelRatio
-        @renderer.setSize @width, @height
-        
-        @scene = new THREE.Scene()
-        @scene.background = new THREE.Color 0x181818
-        
+                
         @light = new THREE.DirectionalLight 0xffffff
         @light.position.set 0,10,6
         @scene.add @light
         
         @scene.add new THREE.AmbientLight 0xffffff
         
-        @camera = new THREE.PerspectiveCamera 30, @width/@height, 0.01, 1000
         @camera.position.copy vec(0,2,1).normal().mul 22
         @camera.lookAt vec 0,7.6,0
         
@@ -105,7 +106,7 @@ class Storage
                 merg.merge geom
             
             bufg = new THREE.BufferGeometry().fromGeometry merg
-            mesh = new THREE.Mesh bufg, Materials.stone[stone]
+            mesh = new THREE.Mesh bufg, Materials.cost[stone]
             mesh.position.copy pos
             @scene.add mesh
             
@@ -113,7 +114,7 @@ class Storage
             @meshes[stone] = mesh
                 
             pos.add vec 1.5, 0, 0
-                
-        @renderer.render @scene, @camera
+            
+        super()
             
 module.exports = Storage

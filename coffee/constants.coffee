@@ -38,12 +38,13 @@ module.exports =
         NZ:         5
                 
     Stone: new Enum
-        gray:       0
-        red:        1
-        gelb:       2
-        blue:       3
-        white:      4
-        resources:  [1,2,3,4]
+        red:        0
+        gelb:       1
+        blue:       2
+        white:      3
+        gray:       4
+        resources:  [0,1,2,3]
+        all:        [0..4]
         
     Bot: new Enum
         base:       1
