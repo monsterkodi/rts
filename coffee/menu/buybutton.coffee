@@ -90,124 +90,60 @@ class BuyButton extends CanvasButton
     
     render: ->
 
-        if @canAfford()
-            @renderActive @cost()
-        else 
-            @renderInactive @cost(), rts.world.storage.stones
-            
-        super()
-            
-    renderActive: (cost) ->
+        cost = @cost()
+        have = rts.world.storage.stones
         
-        pos = vec -2.3,0,0
         for stone in Stone.resources
-
-            merg = new THREE.Geometry 
             
-            h = Math.floor cost[stone]/100
-            for y in [0...h]
-                geom = new THREE.BoxGeometry 1,1,1
-                geom.translate 0,(y*1.2)+0.5,0
-                merg.merge geom
-                
-            for y in [0...Math.floor(cost[stone]/10)%10]
-                break if y == 9
-                geom = new THREE.BoxGeometry 0.5,0.5,0.5
-                geom.translate -0.25 + (y%2 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
-                merg.merge geom
-            
-            bufg = new THREE.BufferGeometry().fromGeometry merg
+            bufg = @geomForCostRange stone, 0, Math.min have[stone], cost[stone]
             mesh = new THREE.Mesh bufg, Materials.cost[stone]
-            mesh.position.copy pos
             @scene.add mesh
-            
             @meshes[stone]?.parent.remove @meshes[stone]
             @meshes[stone] = mesh
-                
-            pos.add vec 1.5, 0, 0
+            
+            @meshes[stone+4]?.parent.remove @meshes[stone+4]
+            delete @meshes[stone+4]
+            
+            if cost[stone] > have[stone]
+                bufg = @geomForCostRange stone, have[stone], cost[stone]
+                mesh = new THREE.Mesh bufg, Materials.cost[4]
+                @scene.add mesh
+                @meshes[stone+4] = mesh
+        
+        super()
             
     geomForCostRange: (stone, from, to) ->
         
         merg = new THREE.Geometry 
         
-        h = Math.floor Math.min(have[stone], cost[stone])/100
-        for y in [0...h]
+        if from > 0
+            
+            l = Math.ceil from/100
+            
+            if Math.floor(from/10)%10 > 0
+                for y in [((Math.floor(from/10))%10)...9]
+                    geom = new THREE.BoxGeometry 0.5,0.5,0.5
+                    geom.translate -0.25 + (y%2 and 0.5 or 0),((l-1)*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
+                    merg.merge geom
+            
+        else
+            l = Math.floor from/100
+        
+        h = Math.floor to/100
+        
+        for y in [l...h]
             geom = new THREE.BoxGeometry 1,1,1
             geom.translate 0,(y*1.2)+0.5,0
             merg.merge geom
                        
-        if cost[stone] <= have[stone]
-            for y in [0...Math.floor(Math.min(have[stone], cost[stone])/10)%10]
-                break if y == 9
-                geom = new THREE.BoxGeometry 0.5,0.5,0.5
-                geom.translate -0.25 + (y%2 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
-                merg.merge geom
+        for y in [0...(Math.floor(to/10))%10]
+            break if y == 9
+            geom = new THREE.BoxGeometry 0.5,0.5,0.5
+            geom.translate -0.25 + (y%2 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
+            merg.merge geom
                 
         merg.translate stone*1.5-2.3, 0, 0 
             
         new THREE.BufferGeometry().fromGeometry merg
-        
-    renderInactive: (cost, have) ->
-        
-        for stone in Stone.resources
-            bufg = @geomForCostRange stone, 0, Math.min have[stone], cost[stone]
-            
-            mesh = new THREE.Mesh bufg, Materials.cost[stone]
-            @scene.add mesh
-            @meshes[stone]?.parent.remove @meshes[stone]
-            @meshes[stone] = mesh
-        
-    renderInactiveOld: (cost, have) ->
-        
-        pos = vec -2.3,0,0
-        for stone in Stone.resources
-
-            merg = new THREE.Geometry 
-            
-            h = Math.floor Math.min(have[stone], cost[stone])/100
-            for y in [0...h]
-                geom = new THREE.BoxGeometry 1,1,1
-                geom.translate 0,(y*1.2)+0.5,0
-                merg.merge geom
-                           
-            if cost[stone] <= have[stone]
-                for y in [0...Math.floor(Math.min(have[stone], cost[stone])/10)%10]
-                    break if y == 9
-                    geom = new THREE.BoxGeometry 0.5,0.5,0.5
-                    geom.translate -0.25 + (y%2 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
-                    merg.merge geom
-            
-            bufg = new THREE.BufferGeometry().fromGeometry merg
-            mesh = new THREE.Mesh bufg, Materials.cost[stone]
-            mesh.position.copy pos
-            @scene.add mesh
-            @meshes[stone]?.parent.remove @meshes[stone]
-            @meshes[stone] = mesh
-            
-            if cost[stone] > have[stone]
-                
-                merg = new THREE.Geometry 
-                
-                l = h
-                h = Math.floor(cost[stone])/100
-                for y in [l...h]
-                    geom = new THREE.BoxGeometry 1,1,1
-                    geom.translate 0,(y*1.2)+0.5,0
-                    merg.merge geom
-                         
-                for y in [0...Math.floor(cost[stone]/10)%10]
-                    break if y == 9
-                    geom = new THREE.BoxGeometry 0.5,0.5,0.5
-                    geom.translate -0.25 + (y%2 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
-                    merg.merge geom
-                    
-                bufg = new THREE.BufferGeometry().fromGeometry merg
-                mesh = new THREE.Mesh bufg, Materials.cost[4]
-                mesh.position.copy pos
-                @scene.add mesh
-                @meshes[stone+4]?.parent.remove @meshes[stone+4]
-                @meshes[stone+4] = mesh
-                        
-            pos.add vec 1.5, 0, 0
                 
 module.exports = BuyButton
