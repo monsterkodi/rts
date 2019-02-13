@@ -95,7 +95,7 @@ class BuyButton extends CanvasButton
         
         for stone in Stone.resources
             
-            bufg = @geomForCostRange stone, 0, Math.min have[stone], cost[stone]
+            bufg = @geomForCostRange stone, 0, Math.floor Math.min(have[stone], cost[stone])/10
             mesh = new THREE.Mesh bufg, Materials.cost[stone]
             @scene.add mesh
             @meshes[stone]?.parent.remove @meshes[stone]
@@ -105,45 +105,11 @@ class BuyButton extends CanvasButton
             delete @meshes[stone+4]
             
             if cost[stone] > have[stone]
-                bufg = @geomForCostRange stone, have[stone], cost[stone]
+                bufg = @geomForCostRange stone, Math.floor(have[stone]/10)+1, Math.floor(cost[stone]/10)
                 mesh = new THREE.Mesh bufg, Materials.cost[4]
                 @scene.add mesh
                 @meshes[stone+4] = mesh
         
         super()
-            
-    geomForCostRange: (stone, from, to) ->
-        
-        merg = new THREE.Geometry 
-        
-        if from > 0
-            
-            l = Math.ceil from/100
-            
-            if Math.floor(from/10)%10 > 0
-                for y in [((Math.floor(from/10))%10)...9]
-                    geom = new THREE.BoxGeometry 0.5,0.5,0.5
-                    geom.translate -0.25 + (y%2 and 0.5 or 0),((l-1)*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
-                    merg.merge geom
-            
-        else
-            l = Math.floor from/100
-        
-        h = Math.floor to/100
-        
-        for y in [l...h]
-            geom = new THREE.BoxGeometry 1,1,1
-            geom.translate 0,(y*1.2)+0.5,0
-            merg.merge geom
-                       
-        for y in [0...(Math.floor(to/10))%10]
-            break if y == 9
-            geom = new THREE.BoxGeometry 0.5,0.5,0.5
-            geom.translate -0.25 + (y%2 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
-            merg.merge geom
-                
-        merg.translate stone*1.5-2.3, 0, 0 
-            
-        new THREE.BufferGeometry().fromGeometry merg
-                
+                            
 module.exports = BuyButton

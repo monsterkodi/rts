@@ -17,10 +17,10 @@ class Market
     costForBot: (botType) ->
         
         cost = switch botType
-            when Bot.mine    then [500,500,0,0]
-            when Bot.trade   then [500,800,200,200]
-            when Bot.build   then [500,600,700,800]
-            when Bot.science then [800,600,0,0]
+            when Bot.mine    then [10,20,30,40]
+            when Bot.trade   then [50,60,70,80]
+            when Bot.build   then [90,100,111,122]
+            when Bot.science then [1000,1000,1000,1000]
         cost
 
 module.exports = Market
