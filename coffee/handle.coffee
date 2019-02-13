@@ -6,7 +6,7 @@
 000   000  000   000  000   000  0000000    0000000  00000000
 ###
 
-{ log, str, _ } = require 'kxk'
+{ post, log, str, _ } = require 'kxk'
 
 { Face, Bot, Stone } = require './constants'
 
@@ -46,7 +46,18 @@ class Handle
         
     buyBot: (type) ->
         
+        [p, face] = @world.emptyPosFaceNearBot @world.base
+        if not p?
+            log 'WARNING handle.buyBot -- no space for new bot!'
+            return
         log "handle.buyBot #{Bot.string type}"
+        @world.storage.deduct rts.market.costForBot type
+        bot = @world.addBot p.x,p.y,p.z, type, face
+        @world.construct.botAtPos bot, p
+        rts.camera.focusOnPos p
+        @world.highlightBot bot
+        @world.updateTubes()
+        post.emit 'botCreated', bot
                 
     sendPacket: (bot) =>
         

@@ -76,7 +76,6 @@ class BuyButton extends CanvasButton
     click: -> 
         
         if @canAfford()
-            rts.world.storage.deduct rts.market.costForBot @bot
             rts.handle.buyBot @bot
             
     cost: -> rts.market.costForBot @bot

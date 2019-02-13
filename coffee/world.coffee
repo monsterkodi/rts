@@ -6,7 +6,7 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ deg2rad, log, _ } = require 'kxk'
+{ deg2rad, valid, empty, log, _ } = require 'kxk'
 
 Vector    = require './lib/vector'
 Packet    = require './packet'
@@ -45,13 +45,13 @@ class World
                     
         @build()
         
-        @tubes.build()
         
         @construct = new Construct @
         @construct.initBotGeoms()
         @construct.stones()
         @construct.bots()
-        @construct.tubes()
+        
+        @updateTubes()
         
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -90,6 +90,7 @@ class World
                 speed: @cfg[Bot.string type].mine.speed
             
         if type == Bot.base
+            @base = bot
             bot.prod =
                 delay: 0
                 speed: @cfg.base.prod.speed
@@ -119,10 +120,13 @@ class World
         bot.delay = 1/bot.speed
         bot.pos = @roundPos toPos
         
+        @updateTubes()
+        @construct.updateBot bot
+        
+    updateTubes: ->
+        
         @tubes.build()
         @construct.tubes()
-        
-        @construct.updateBot bot
         
     # 0000000    000   000  000  000      0000000    
     # 000   000  000   000  000  000      000   000  
@@ -148,7 +152,7 @@ class World
         
     isStoneAt: (x,y,z) -> @stones[@indexAt x,y,z] != undefined
     isItemAt:  (x,y,z) -> @isStoneAt(x,y,z) or @botAt(x,y,z) 
-            
+                
     # 00000000   0000000    0000000  00000000  
     # 000       000   000  000       000       
     # 000000    000000000  000       0000000   
@@ -196,6 +200,82 @@ class World
     faceIndex: (face,index) -> (face<<28) | index
     faceIndexForBot: (bot) -> @faceIndex bot.face, bot.index
     splitFaceIndex: (faceIndex) -> [faceIndex >> 28, faceIndex & ((Math.pow 2, 27)-1)]
+        
+    # 00000000  00     00  00000000   000000000  000   000  00000000    0000000    0000000  
+    # 000       000   000  000   000     000      000 000   000   000  000   000  000       
+    # 0000000   000000000  00000000      000       00000    00000000   000   000  0000000   
+    # 000       000 0 000  000           000        000     000        000   000       000  
+    # 00000000  000   000  000           000        000     000         0000000   0000000   
+    
+    emptyFaceIndex: (faceIndex) -> 
+        
+        [face,index] = @splitFaceIndex faceIndex
+        not @bots[index] and not @stones[index]
+    
+    emptyPosFaceNearBot: (bot) ->
+        
+        fi = @faceIndexForBot bot
+        
+        # log 'emptyPosFaceNearBot', fi
+        
+        check = [fi]
+        known = new Set
+        
+        while valid check
+            ci = check.shift()
+            # log 'emptyPosFaceNearBot check', ci
+            if @emptyFaceIndex ci
+                [face,index] = @splitFaceIndex ci
+                pos = @posAtIndex index
+                # log 'emptyPosFaceNearBot found', pos, Face.string face
+                return [pos,face]
+            else
+                known.add ci
+                for neighbor in @neighborsOfFaceIndex ci
+                    if not known.has neighbor
+                        check.push neighbor
+        [null,null]
+    
+    # 000   000  00000000  000   0000000   000   000  0000000     0000000   00000000    0000000  
+    # 0000  000  000       000  000        000   000  000   000  000   000  000   000  000       
+    # 000 0 000  0000000   000  000  0000  000000000  0000000    000   000  0000000    0000000   
+    # 000  0000  000       000  000   000  000   000  000   000  000   000  000   000       000  
+    # 000   000  00000000  000   0000000   000   000  0000000     0000000   000   000  0000000   
+    
+    neighborsOfFaceIndex: (faceIndex) -> 
+        
+        faceDirections = [
+            [Vector.PY, Vector.PZ, Vector.NY, Vector.NZ]
+            [Vector.PZ, Vector.PX, Vector.NZ, Vector.NX]
+            [Vector.PX, Vector.PY, Vector.NX, Vector.NY]
+        ]
+
+        [face, index] = @splitFaceIndex faceIndex
+        pos = @posAtIndex index
+        
+        neighbors = []
+
+        if @stoneAtPos(pos)?
+            log 'stone above face!'
+            return neighbors
+        
+        if not @stoneAtPos(pos.minus Vector.normals[face])?
+            log 'no stone below face!'
+            return neighbors
+            
+        for dir in faceDirections[face%3]
+
+            unit = Vector.normals[dir]
+            fpos = pos.plus unit
+            dpos = fpos.minus Vector.normals[face]
+            if @stoneAtPos(fpos)?
+                neighbors.push @faceIndex (dir+3)%6, index
+            else if @stoneAtPos(dpos)?
+                neighbors.push @faceIndex face, @indexAtPos fpos
+            else
+                neighbors.push @faceIndex dir, @indexAtPos dpos
+        
+        neighbors
         
     # 000  000   000  0000000    00000000  000   000  
     # 000  0000  000  000   000  000        000 000   

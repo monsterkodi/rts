@@ -88,6 +88,11 @@ class BotButton extends CanvasButton
         @mesh.material = @botMat false
         @render()
         
+    update: ->
+        
+        @mesh.material = @botMat false
+        @render()
+        
     botMat: (highlight=false) ->
         
         if empty @world.botsOfType @bot

@@ -6,7 +6,7 @@
 000   000  00000000  000   000   0000000 
 ###
 
-{ elem, log, $, _ } = require 'kxk'
+{ post, elem, log, $, _ } = require 'kxk'
 
 { Bot }   = require '../constants'
 
@@ -23,15 +23,22 @@ class Menu
         
         rts.world.storage = new Storage @
         
-        @buttons = [rts.world.storage]
+        @buttons = storage:rts.world.storage
                 
         for bot in Bot.values
-            @buttons.push new BotButton bot, @div
+            @buttons[Bot.string bot] = new BotButton bot, @div
             
         @div.addEventListener 'mouseleave', @onMouseLeave
         @div.addEventListener 'mouseover',  @onMouseOver
         @div.addEventListener 'mouseout',   @onMouseOut
         @div.addEventListener 'click',      @onClick
+        
+        post.on 'botCreated', @onBotCreated
+        
+    onBotCreated: (bot) => 
+        
+        log "menu.onBotCreated #{Bot.string bot.type}"
+        @buttons[Bot.string bot.type].update()
         
     onClick:      (event) => @buttonForEvent(event)?.click()
     onMouseOver:  (event) => @buttonForEvent(event)?.highlight?()
@@ -40,7 +47,7 @@ class Menu
         
     buttonForEvent: (event) ->
         
-        for button in @buttons
+        for key,button of @buttons
             if event.target == button.canvas
                 return button
                 

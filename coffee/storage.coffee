@@ -22,7 +22,8 @@ class Storage extends CanvasButton
         @name = 'Storage'
         
         @dirty     = true
-        @stones    = [500,500,0,0]
+        # @stones    = [500,500,0,0]
+        @stones    = [1000,1000,1000,1000]
         @temp      = [0,0,0,0]
         @maxStones = 1000
               

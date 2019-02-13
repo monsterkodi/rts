@@ -65,7 +65,6 @@ class Debug
         rts.world.cfg.science.path.length += d
         rts.world.cfg.science.path.length = clamp 1, 40, rts.world.cfg.science.path.length
         @pathLength.children[2].innerHTML = rts.world.cfg.science.path.length
-        rts.world.tubes.build()
-        rts.world.construct.tubes()
+        rts.world.updateTubes()
         
 module.exports = Debug

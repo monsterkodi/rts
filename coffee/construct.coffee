@@ -187,17 +187,20 @@ class Construct
                         
         for index,bot of @world.bots
             
-            p = @world.posAtIndex index
-            mesh = new THREE.Mesh @botGeoms[@geomForBot bot], Materials.bot[Stone.gray]
-            mesh.receiveShadow = true
-            mesh.castShadow = true
-            mesh.position.set p.x, p.y, p.z
-            mesh.bot = bot.type # needed for intersection test
-            @world.scene.add mesh
-            bot.mesh = mesh
+            @botAtPos bot, @world.posAtIndex index
             
-            @dot bot
-            @updateBot bot
+    botAtPos: (bot, pos) ->
+        
+        mesh = new THREE.Mesh @botGeoms[@geomForBot bot], Materials.bot[Stone.gray]
+        mesh.receiveShadow = true
+        mesh.castShadow = true
+        mesh.position.copy pos
+        mesh.bot = bot.type # needed for intersection test
+        @world.scene.add mesh
+        bot.mesh = mesh
+        
+        @dot bot
+        @updateBot bot
 
     updateBot: (bot) ->
         

@@ -20,16 +20,16 @@ class Map extends World
         
     build: ->
 
-        @addStone  0, 0,-1
-        @addStone  3, 0, 0
-        @addStone -2, 0, 0
-        @addStone -3, 0, 0
-        @addStone  2, 0, 0
+        # @addStone  0, 0,-1
+        # @addStone  3, 0, 0
+        # @addStone -2, 0, 0
+        # @addStone -3, 0, 0
+        # @addStone  2, 0, 0
                 
-        for z in [0..0]
-            for y in [-5..5]
-                @wall -20,y*4,z*2, 20,y*4,z*2
-                @wall y*4,-20,z*2, y*4,20,z*2
+        # for z in [0..0]
+            # for y in [-5..5]
+                # @wall -20,y*4,z*2, 20,y*4,z*2
+                # @wall y*4,-20,z*2, y*4,20,z*2
 
         # for x in [-2..2]
             # for y in [-2..2]
@@ -42,13 +42,10 @@ class Map extends World
                 # @addStone  0,-2, 0, Stone.white
                 
         @addStone  0,0,0, Stone.white
-        @addStone  0,1,0, Stone.white
+        # @addStone  0,1,0, Stone.white
         
-        @base = @addBot 0, 0, 1, Bot.base
-
-        @addBot -1, 0, 1, Bot.mine
-        @addBot  0, 2, 1, Bot.mine
-        @addBot  2, 0, 1, Bot.build
-        @addBot  0,-2, 1, Bot.build
+        @addBot  0, 0, 1, Bot.base
+        # @addBot -1, 0, 1, Bot.mine
+        # @addBot  0, 2, 1, Bot.mine
         
 module.exports = Map

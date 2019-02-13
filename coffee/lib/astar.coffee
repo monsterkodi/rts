@@ -23,42 +23,7 @@ class AStar
         1 + s.manhattan g 
         
     neighborCost: (start, neighbor) -> 1
-        
-    neighborsOfFaceIndex: (faceIndex) -> 
-        
-        faceDirections = [
-            [Vector.PY, Vector.PZ, Vector.NY, Vector.NZ]
-            [Vector.PZ, Vector.PX, Vector.NZ, Vector.NX]
-            [Vector.PX, Vector.PY, Vector.NX, Vector.NY]
-        ]
-
-        [face, index] = @world.splitFaceIndex faceIndex
-        pos = @world.posAtIndex index
-        
-        neighbors = []
-
-        if @world.stoneAtPos(pos)?
-            log 'stone above face!'
-            return neighbors
-        
-        if not @world.stoneAtPos(pos.minus Vector.normals[face])?
-            log 'no stone below face!'
-            return neighbors
-            
-        for dir in faceDirections[face%3]
-
-            unit = Vector.normals[dir]
-            fpos = pos.plus unit
-            dpos = fpos.minus Vector.normals[face]
-            if @world.stoneAtPos(fpos)?
-                neighbors.push @world.faceIndex (dir+3)%6, index
-            else if @world.stoneAtPos(dpos)?
-                neighbors.push @world.faceIndex face, @world.indexAtPos fpos
-            else
-                neighbors.push @world.faceIndex dir, @world.indexAtPos dpos
-        
-        neighbors
-        
+                
     getScore: (score, faceIndex) -> score.get(faceIndex) ? Number.MAX_VALUE
                 
     lowestScore: (openSet, fScore) ->
@@ -101,7 +66,7 @@ class AStar
             openSet.delete current
             closedSet.set current, current
     
-            for neighbor in @neighborsOfFaceIndex current
+            for neighbor in @world.neighborsOfFaceIndex current
                 
                 if closedSet.get(neighbor) != undefined
                     continue # ignore the neighbor which is already evaluated.
