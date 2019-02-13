@@ -6,9 +6,9 @@
 000   000  000   000  000   000  0000000    0000000  00000000
 ###
 
-{ log, _ } = require 'kxk'
+{ log, str, _ } = require 'kxk'
 
-{ Face, Bot } = require './constants'
+{ Face, Bot, Stone } = require './constants'
 
 Vector = require './lib/vector'
 
@@ -23,6 +23,31 @@ class Handle
         switch hit?.bot?.type 
             when Bot.build then @buildBotHit bot, hit
 
+    delay: (delta, bot, prop, func) ->
+
+        prop.delay -= delta
+        if prop.delay < 0
+            func bot
+            prop.delay += 1/prop.speed
+            
+    tickBot: (delta, bot) ->
+        
+        @delay delta, bot, bot.mine, @sendPacket
+            
+        if bot.type == Bot.base
+            @delay delta, bot, bot.prod, =>
+                @world.storage.add Stone.red
+                @world.storage.add Stone.gelb
+        
+    sendPacket: (bot) =>
+        
+        stone = @world.stoneBelowBot bot
+        if @world.storage.canTake stone
+            if bot.path?
+                @world.tubes.insertPacket bot
+            else if bot.type == Bot.base
+                @world.storage.add stone
+                        
     buildBotHit: (bot, hit) ->
         
         normal = hit.norm.applyQuaternion bot.mesh.quaternion

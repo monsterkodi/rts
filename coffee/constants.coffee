@@ -51,7 +51,7 @@ module.exports =
         mine:       2
         trade:      3
         build:      4
-        science:    5
+        brain:      5
         
     Geom: new Enum
         cube:       1

@@ -31,15 +31,18 @@ class Map extends World
                 @wall -20,y*4,z*2, 20,y*4,z*2
                 @wall y*4,-20,z*2, y*4,20,z*2
 
-        for x in [-2..2]
-            for y in [-2..2]
+        # for x in [-2..2]
+            # for y in [-2..2]
+#                 
+                # @addStone  x*8-1, y*8,   0, Stone.red
+                # @addStone  x*8,   y*8-1, 0, Stone.gelb
+                # @addStone  x*8,   y*8+1, 0, Stone.white
+                # @addStone  x*8+1, y*8,   0, Stone.blue
+                # @addStone  0, 2, 0, Stone.white
+                # @addStone  0,-2, 0, Stone.white
                 
-                @addStone  x*8-1, y*8,   0, Stone.red
-                @addStone  x*8,   y*8-1, 0, Stone.gelb
-                @addStone  x*8,   y*8+1, 0, Stone.white
-                @addStone  x*8+1, y*8,   0, Stone.blue
-                @addStone  0, 2, 0, Stone.white
-                @addStone  0,-2, 0, Stone.white
+        @addStone  0,0,0, Stone.white
+        @addStone  0,1,0, Stone.white
         
         @base = @addBot 0, 0, 1, Bot.base
 

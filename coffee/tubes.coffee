@@ -19,9 +19,10 @@ class Tubes
         
         @astar    = new AStar @world
         @segments = {}
-        @speed    = 0.5
-        @gap      = 0.1
 
+    speed: -> @world.cfg.science.path.speed
+    gap:   -> @world.cfg.science.path.gap
+        
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
     # 000  000 0 000  0000000   0000000   0000000       000     
@@ -40,7 +41,7 @@ class Tubes
         
     insertPacketIntoSegment: (pck, seg) -> seg.packets.unshift pck
         
-    isInputBlocked: (seg) -> first(seg.packets)?.moved < @gap
+    isInputBlocked: (seg) -> first(seg.packets)?.moved < @gap()
                 
     isCrossingBlocked: (seg, pck) -> 
         
@@ -49,7 +50,7 @@ class Tubes
             inSeg = @segments[index]
             if last(inSeg.packets) == pck
                 continue
-            if last(inSeg.packets)?.moved >= inSeg.moves - @gap
+            if last(inSeg.packets)?.moved >= inSeg.moves - @gap()
                 waiting += 1
                 
         if waiting > 0
@@ -62,23 +63,23 @@ class Tubes
         
     distToNext: (pck, seg, outSeg) ->
         
-        if pck.moved < seg.moves - @gap
-            return @gap
+        if pck.moved < seg.moves - @gap()
+            return @gap()
             
         if @isCrossingBlocked outSeg, pck
             return 0
         
         if valid outSeg.packets
-            return seg.moves - pck.moved + outSeg.packets[0].moved - @gap
+            return seg.moves - pck.moved + outSeg.packets[0].moved - @gap()
             
-        return @gap
+        return @gap()
 
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
     # 000000000  000 0 000  000  000000000  000000000     000     0000000   
     # 000   000  000  0000  000  000 0 000  000   000     000     000       
     # 000   000  000   000  000  000   000  000   000     000     00000000  
-    
+        
     animate: (delta) ->
 
         segs = @getSegments()
@@ -100,9 +101,9 @@ class Tubes
                     if pckIndex == seg.packets.length-1
                         nextDist = @distToNext pck, seg, outSeg
                     else
-                        nextDist = (seg.packets[pckIndex+1].moved - @gap) - pck.moved
+                        nextDist = (seg.packets[pckIndex+1].moved - @gap()) - pck.moved
                         
-                    moveDist = Math.min delta * @speed, nextDist
+                    moveDist = Math.min delta * @speed(), nextDist
                     pck.moved += moveDist 
                     
                     if pck.moved >= seg.moves
@@ -116,7 +117,7 @@ class Tubes
                         pck.moveOnSegment seg
                 else
                     
-                    pck.moved += delta * @speed
+                    pck.moved += delta * @speed()
                     if pck.moved >= seg.moves
                         pck = seg.packets.pop()
                         @world.storage.add pck.stone
@@ -196,7 +197,7 @@ class Tubes
         
         path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
         
-        if path and path.length <= @world.science.maxPathLength+1
+        if path and path.length <= @world.cfg.science.path.length+1
             to.path = 
                 points: @pathPoints path
                 length: path.length

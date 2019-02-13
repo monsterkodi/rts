@@ -177,11 +177,11 @@ class Construct
     geomForBot: (bot) -> @geomForBotType bot.type
     geomForBotType: (type) ->
         switch type
-            when Bot.base    then Geom.dodicos
-            when Bot.mine    then Geom.octacube
-            when Bot.build   then Geom.tubecross
-            when Bot.trade   then Geom.toruscone
-            when Bot.science then Geom.knot
+            when Bot.base  then Geom.dodicos
+            when Bot.mine  then Geom.octacube
+            when Bot.build then Geom.tubecross
+            when Bot.trade then Geom.toruscone
+            when Bot.brain then Geom.knot
     
     bots: ->
                         

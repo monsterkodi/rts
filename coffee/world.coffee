@@ -20,15 +20,29 @@ class World
     
     constructor: (@scene) ->
         
-        @stones   = {}
-        @bots     = {}
-        @tubes    = new Tubes @
-        @speed    = 5
-        @botSpeed = 1
+        @stones = {}
+        @bots   = {}
+        @tubes  = new Tubes @
+        @speed  = 1
         
-        @science = 
-            maxPathLength: 4
-            
+        @cfg = 
+            base:
+                prod: speed: 1
+                mine: speed: 0.5
+            mine:
+                mine: speed: 2
+            brain:
+                mine: speed: 0.5
+            build:
+                mine: speed: 0.5
+            trade:
+                mine: speed: 0.5
+            science:
+                path: 
+                    length: 4
+                    speed:  1
+                    gap:    0.2
+                    
         @build()
         
         @tubes.build()
@@ -50,36 +64,8 @@ class World
         @tubes.animate delta * @speed
         
         for bot in @getBots()
-            bot.delay -= delta * @speed
-            if bot.delay < 0
-                bot.delay = 0
-                @send bot
-        
-    send: (bot) ->
-        
-        stone = @stoneBelowBot bot
-        if bot.path? and @storage.canTake stone
-            bot.delay = 1/bot.speed
-            @tubes.insertPacket bot
-        
-    # 0000000    000   000  000  000      0000000    
-    # 000   000  000   000  000  000      000   000  
-    # 0000000    000   000  000  000      000   000  
-    # 000   000  000   000  000  000      000   000  
-    # 0000000     0000000   000  0000000  0000000    
-    
-    build: ->
-                        
-    wall: (xs, ys, zs, xe, ye, ze, stone=Stone.gray) ->
-        
-        for x in [xs..xe]
-            for y in [ys..ye]
-                for z in [zs..ze]
-                    @addStone x, y, z, stone
+            rts.handle.tickBot delta * @speed, bot
                     
-    delStone: (x,y,z) -> delete @stones[@indexAt x,y,z]
-    addStone: (x,y,z, stone=Stone.gray) -> @stones[@indexAt x,y,z] = stone
-
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
     # 0000000    000   000     000     
@@ -90,14 +76,22 @@ class World
         
         p = @roundPos new Vector x,y,z
         index = @indexAtPos p
-        @bots[index] = 
-            type:   type
-            pos:    p
-            face:   face
-            index:  index
-            delay:  0
-            speed:  @botSpeed
-        @bots[index]
+        bot = 
+            type:      type
+            pos:       p
+            face:      face
+            index:     index
+            mine:
+                delay: 0
+                speed: @cfg[Bot.toString type].mine.speed
+            
+        if type == Bot.base
+            bot.prod =
+                delay: 0
+                speed: @cfg.base.prod.speed
+            
+        @bots[index] = bot
+        bot
 
     getBots: -> Object.values @bots
     
@@ -125,6 +119,24 @@ class World
         @construct.tubes()
         
         @construct.updateBot bot
+        
+    # 0000000    000   000  000  000      0000000    
+    # 000   000  000   000  000  000      000   000  
+    # 0000000    000   000  000  000      000   000  
+    # 000   000  000   000  000  000      000   000  
+    # 0000000     0000000   000  0000000  0000000    
+    
+    build: ->
+                        
+    wall: (xs, ys, zs, xe, ye, ze, stone=Stone.gray) ->
+        
+        for x in [xs..xe]
+            for y in [ys..ye]
+                for z in [zs..ze]
+                    @addStone x, y, z, stone
+                    
+    delStone: (x,y,z) -> delete @stones[@indexAt x,y,z]
+    addStone: (x,y,z, stone=Stone.gray) -> @stones[@indexAt x,y,z] = stone
         
     botAt:      (x,y,z) -> @bots[@indexAt x,y,z]
     botAtPos:   (v)     -> @bots[@indexAtPos v]

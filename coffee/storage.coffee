@@ -19,7 +19,7 @@ class Storage extends CanvasButton
         
         super menu.div
         
-        @stones    = [0,0,0,0]
+        @stones    = [500,500,0,0]
         @temp      = [0,0,0,0]
         @maxStones = 1000
               
@@ -97,36 +97,5 @@ class Storage extends CanvasButton
             @meshes[stone] = mesh
             
         super()
-    
-    # render: ->
-
-        # pos = vec -2.3, 0, 0
-        # for stone in Stone.resources
-
-            # merg = new THREE.Geometry 
-#             
-            # h = Math.floor @stones[stone]/100
-            # for y in [0...h]
-                # geom = new THREE.BoxGeometry 1,1,1
-                # geom.translate 0,(y*1.2)+0.5,0
-                # merg.merge geom
-#                 
-            # for y in [0...Math.floor(@stones[stone]/10)%10]
-                # break if y == 9
-                # geom = new THREE.BoxGeometry 0.5,0.5,0.5
-                # geom.translate -0.25 + (y%2 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (y%5>2 and 0.5 or 0)
-                # merg.merge geom
-#             
-            # bufg = new THREE.BufferGeometry().fromGeometry merg
-            # mesh = new THREE.Mesh bufg, Materials.cost[stone]
-            # mesh.position.copy pos
-            # @scene.add mesh
-#             
-            # @meshes[stone]?.parent.remove @meshes[stone]
-            # @meshes[stone] = mesh
-#                 
-            # pos.add vec 1.5, 0, 0
-#             
-        # super()
             
 module.exports = Storage

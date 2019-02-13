@@ -39,7 +39,7 @@ class BotButton extends CanvasButton
             when Bot.trade
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,-0.1                
-            when Bot.science
+            when Bot.brain
                 @camera.position.copy vec(0,-1,0.9).normal().mul 1.3
                 @camera.lookAt vec 0,0,-0.05                
             else
