@@ -16,7 +16,7 @@ class Enum
             @[key] = e[key]
             @values.push e[key]
             
-    toString: (v) ->
+    string: (v) ->
         
         for k in @keys
             if @[k] == v

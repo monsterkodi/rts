@@ -128,7 +128,7 @@ class RTS
             animation delta
             
         @world.animate delta
-            
+                    
         @render()
         setTimeout @animationStep, 1000/60
             
@@ -195,7 +195,7 @@ class RTS
     onDblClick: (event) =>
         
         if bot = @world.highBot
-            log 'double', Bot.toString(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
+            log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
                     
     calcMouse: (event) ->
         
@@ -262,10 +262,10 @@ class RTS
         
         @fps.draw()
 
-        # info = _.clone @renderer.info.render
-        # info.segments = @world.tubes.getSegments().length
-        # info.packets  = @world.tubes.getPackets().length
-        # @info.draw info
+        info = _.clone @renderer.info.render
+        info.segments = @world.tubes.getSegments().length
+        info.packets  = @world.tubes.getPackets().length
+        @info.draw info
 
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000

@@ -8,7 +8,7 @@
 
 { post, elem, log, _ } = require 'kxk'
 
-{ Stone } = require '../constants'
+{ Stone, Bot } = require '../constants'
 
 CanvasButton = require './canvasbutton'
 Materials    = require '../materials'
@@ -22,6 +22,8 @@ class BuyButton extends CanvasButton
         super div, 'buyButton'
         
         @bot = botButton.bot
+        
+        @name = "BuyButton #{Bot.string @bot}"
         
         y = botButton.canvas.offsetTop
         @canvas.style = "left:100px; top:#{y}px"
@@ -75,7 +77,7 @@ class BuyButton extends CanvasButton
         
         if @canAfford()
             rts.world.storage.deduct rts.market.costForBot @bot
-            log 'build bot', @bot
+            rts.handle.buyBot @bot
             
     cost: -> rts.market.costForBot @bot
     canAfford: -> rts.world.storage.canAfford @cost()
@@ -95,20 +97,23 @@ class BuyButton extends CanvasButton
         
         for stone in Stone.resources
             
-            bufg = @geomForCostRange stone, 0, Math.floor Math.min(have[stone], cost[stone])/10
-            mesh = new THREE.Mesh bufg, Materials.cost[stone]
-            @scene.add mesh
             @meshes[stone]?.parent.remove @meshes[stone]
-            @meshes[stone] = mesh
-            
             @meshes[stone+4]?.parent.remove @meshes[stone+4]
             delete @meshes[stone+4]
-            
-            if cost[stone] > have[stone]
-                bufg = @geomForCostRange stone, Math.floor(have[stone]/10)+1, Math.floor(cost[stone]/10)
-                mesh = new THREE.Mesh bufg, Materials.cost[4]
-                @scene.add mesh
-                @meshes[stone+4] = mesh
+
+            if cost[stone]
+                
+                if have[stone]
+                    bufg = @geomForCostRange stone, 0, Math.min have[stone], cost[stone]
+                    mesh = new THREE.Mesh bufg, Materials.cost[stone]
+                    @scene.add mesh
+                    @meshes[stone] = mesh
+                
+                if cost[stone] > have[stone]
+                    bufg = @geomForCostRange stone, have[stone]+1, cost[stone]
+                    mesh = new THREE.Mesh bufg, Materials.cost[4]
+                    @scene.add mesh
+                    @meshes[stone+4] = mesh
         
         super()
                             

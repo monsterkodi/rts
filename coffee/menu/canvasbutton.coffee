@@ -17,6 +17,8 @@ class CanvasButton
         @width  = 100
         @height = 100
         
+        @name = 'canvasbutton'
+        
         @meshes = {}
         
         fullWidth  = 2 * @width 
@@ -41,12 +43,21 @@ class CanvasButton
         
     render: ->
 
+        # log 'render', @name
         CanvasButton.renderer.render @scene, @camera
         
         context = @canvas.getContext '2d'
         context.drawImage CanvasButton.renderer.domElement, 0, 0
 
-    geomForCostRange: (stone, from, to) ->
+    geomForCostRange: (stone, fromThousand, toThousand) ->
+        
+        return if fromThousand == toThousand
+        
+        from = Math.floor fromThousand/10
+        to   = Math.floor   toThousand/10
+        
+        if from == to
+            to += 1
         
         merg = new THREE.Geometry 
         

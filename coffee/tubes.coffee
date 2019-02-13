@@ -21,7 +21,7 @@ class Tubes
         @segments = {}
 
     speed: -> @world.cfg.science.path.speed
-    gap:   -> @world.cfg.science.path.gap
+    gap:   -> @world.cfg.science.path.gap + 0.1
         
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     

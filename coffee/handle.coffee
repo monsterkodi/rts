@@ -27,8 +27,10 @@ class Handle
 
         prop.delay -= delta
         if prop.delay < 0
-            func bot
-            prop.delay += 1/prop.speed
+            if func bot
+                prop.delay += 1/prop.speed
+            else
+                prop.delay = 0
             
     tickBot: (delta, bot) ->
         
@@ -36,17 +38,27 @@ class Handle
             
         if bot.type == Bot.base
             @delay delta, bot, bot.prod, =>
-                @world.storage.add Stone.red
-                @world.storage.add Stone.gelb
+                if @world.storage.canTake Stone.red
+                    @world.storage.add Stone.red
+                if @world.storage.canTake Stone.gelb
+                    @world.storage.add Stone.gelb
+                true
         
+    buyBot: (type) ->
+        
+        log "handle.buyBot #{Bot.string type}"
+                
     sendPacket: (bot) =>
         
         stone = @world.stoneBelowBot bot
         if @world.storage.canTake stone
             if bot.path?
-                @world.tubes.insertPacket bot
+                if @world.tubes.insertPacket bot
+                    @world.storage.willSend stone
+                    return true
             else if bot.type == Bot.base
                 @world.storage.add stone
+                return true
                         
     buildBotHit: (bot, hit) ->
         
@@ -67,7 +79,7 @@ class Handle
             return
         
         if @world.storage.canBuild()
-            log newPos, Face.toString newFace
+            log newPos, Face.string newFace
             rts.camera.focusOnPos rts.camera.center.plus n
             @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
             @world.moveBot bot, newPos, newFace

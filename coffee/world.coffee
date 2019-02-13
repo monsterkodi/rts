@@ -39,8 +39,8 @@ class World
                 mine: speed: 0.5
             science:
                 path: 
-                    length: 4
-                    speed:  1
+                    length: 2
+                    speed:  0.5
                     gap:    0.2
                     
         @build()
@@ -61,10 +61,14 @@ class World
     
     animate: (delta) ->
         
-        @tubes.animate delta * @speed
+        scaledDelta = delta * @speed
+        
+        @tubes.animate scaledDelta
         
         for bot in @getBots()
-            rts.handle.tickBot delta * @speed, bot
+            rts.handle.tickBot scaledDelta, bot
+            
+        @storage.animate scaledDelta
                     
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
@@ -83,7 +87,7 @@ class World
             index:     index
             mine:
                 delay: 0
-                speed: @cfg[Bot.toString type].mine.speed
+                speed: @cfg[Bot.string type].mine.speed
             
         if type == Bot.base
             bot.prod =
@@ -258,12 +262,12 @@ class World
     #      000     000     000   000  000  000  0000  000   000  
     # 0000000      000     000   000  000  000   000   0000000   
     
-    stringForBot: (bot) -> Bot.toString bot
+    stringForBot: (bot) -> Bot.string bot
             
     stringForFaceIndex: (faceIndex) ->
         
         [face,index] = @splitFaceIndex faceIndex
         pos = @posAtIndex index
-        "#{pos.x} #{pos.y} #{pos.z} #{Face.toString(face)}"
+        "#{pos.x} #{pos.y} #{pos.z} #{Face.string(face)}"
         
 module.exports = World

@@ -23,6 +23,8 @@ class BotButton extends CanvasButton
         @bot = bot
         @world = rts.world
         
+        @name = "BotButton #{Bot.string @bot}"
+        
         @canvas.id = @bot
         
         construct = @world.construct

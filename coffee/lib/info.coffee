@@ -11,15 +11,15 @@ class Info
 
     constructor: ->
                     
-        @elem = elem class:'info', style:'position:relative; z-index:1'
+        @elem = elem class:'info', style:'position:absolute; z-index:1; bottom:150px; left:10px'
 
         @trias = elem class:'infotext', parent:@elem
         @lines = elem class:'infotext', parent:@elem
         @calls = elem class:'infotext', parent:@elem
         @segmt = elem class:'infotext', parent:@elem
         @pckts = elem class:'infotext', parent:@elem
-        # @stones =elem class:'infotext', parent:@elem
-        # @temp   =elem class:'infotext', parent:@elem
+        @stones =elem class:'infotext', parent:@elem
+        @temp   =elem class:'infotext', parent:@elem
 
         document.body.appendChild @elem
             
@@ -36,8 +36,8 @@ class Info
         @lines.innerHTML = "lines: #{info.lines}"
         @segmt.innerHTML = "segmt: #{info.segments}"
         @pckts.innerHTML = "pckts: #{info.packets}"
-        # @stones.innerHTML = "stones: #{rts.world.storage.stones.slice 1}"
-        # @temp.innerHTML   = "temp:   #{rts.world.storage.temp.slice 1}"
+        @stones.innerHTML = "stones: #{rts.world.storage.stones}"
+        @temp.innerHTML   = "temp:   #{rts.world.storage.temp}"
 
 module.exports = Info
 

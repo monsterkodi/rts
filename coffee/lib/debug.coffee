@@ -27,12 +27,12 @@ class Debug
 
     constructor: () ->
 
-        @elem = elem class:'debug', style:'position:absolute; z-index:1; bottom:0px'
+        @elem = elem class:'debug', style:'position:absolute; z-index:1; bottom:10px; left:10px;'
 
         @elem.appendChild @worldSpeed = value text:'world', value: rts.world.speed.toFixed(1),                      reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         @elem.appendChild @tubeSpeed  = value text:'tube ', value: rts.world.cfg.science.path.speed.toFixed(1),     reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
         @elem.appendChild @pathLength = value text:'path ', value: rts.world.cfg.science.path.length,               reset:@resetPath,       incr:@incrPath,       decr:@decrPath
-        @elem.appendChild @tubesGap   = value text:'gap  ', value: (rts.world.cfg.science.path.gap-0.1).toFixed(2), reset:@resetGap,        incr:@incrGap,        decr:@decrGap
+        @elem.appendChild @tubesGap   = value text:'gap  ', value: rts.world.cfg.science.path.gap.toFixed(2), reset:@resetGap,        incr:@incrGap,        decr:@decrGap
 
         document.body.appendChild @elem
 
@@ -43,7 +43,7 @@ class Debug
     incrTubeSpeed: => @modTubeSpeed  0.1 
     decrTubeSpeed: => @modTubeSpeed -0.1
     modTubeSpeed: (d) -> 
-        rts.world.tubes.speed = clampZero rts.world.cfg.science.path.speed, d, 1
+        rts.world.cfg.science.path.speed = clampZero rts.world.cfg.science.path.speed, d, 1
         @tubeSpeed.children[2].innerHTML = rts.world.cfg.science.path.speed.toFixed 1
 
     incrWorldSpeed: => @modWorldSpeed rts.world.speed >= 1 and 1 or 0.1 
@@ -57,7 +57,7 @@ class Debug
     modGap: (d) -> 
         rts.world.cfg.science.path.gap += d
         rts.world.cfg.science.path.gap = clamp 0.1, 0.5, rts.world.cfg.science.path.gap
-        @tubesGap.children[2].innerHTML = (rts.world.cfg.science.path.gap-0.1).toFixed(2)
+        @tubesGap.children[2].innerHTML = rts.world.cfg.science.path.gap.toFixed(2)
 
     incrPath: => @modPath  1 
     decrPath: => @modPath -1
