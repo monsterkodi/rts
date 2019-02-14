@@ -13,6 +13,7 @@
 Storage   = require '../storage'
 BotButton = require './botbutton'
 BuyButton = require './buybutton'
+SubMenu   = require './submenu'
 
 class Menu
 
@@ -39,19 +40,17 @@ class Menu
         
         log "menu.onBotCreated #{Bot.string bot.type}"
         @buttons[Bot.string bot.type].update()
+        @buttons[Bot.string bot.type].highlight()
         
-    onClick:      (event) => @buttonForEvent(event)?.click()
-    onMouseOver:  (event) => @buttonForEvent(event)?.highlight?()
-    onMouseOut:   (event) => @buttonForEvent(event)?.unhighlight?()
-    onMouseLeave: (event) => BuyButton.button?.del()
+    onClick:      (event) => event.target.button?.click?()
+    onMouseOver:  (event) => event.target.button?.highlight?()
+    onMouseOut:   (event) => event.target.button?.unhighlight?()
+    onMouseLeave: (event) => 
         
-    buttonForEvent: (event) ->
+        BotButton.currentlyShown?.del()
+        delete BotButton.currentlyShown
         
-        for key,button of @buttons
-            if event.target == button.canvas
-                return button
-                
-        if event.target == BuyButton.button?.canvas
-            return BuyButton.button
+        SubMenu.current?.del()
+        delete SubMenu.current
         
 module.exports = Menu

@@ -6,7 +6,7 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ deg2rad, valid, empty, log, _ } = require 'kxk'
+{ deg2rad, first, valid, empty, log, _ } = require 'kxk'
 
 Vector    = require './lib/vector'
 Packet    = require './packet'
@@ -101,6 +101,7 @@ class World
     getBots: -> Object.values @bots
     
     botsOfType: (type) -> @getBots().filter (b) -> b.type == type
+    botOfType:  (type) -> first @botsOfType type
         
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       

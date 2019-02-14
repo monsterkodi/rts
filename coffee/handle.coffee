@@ -50,7 +50,7 @@ class Handle
         if not p?
             log 'WARNING handle.buyBot -- no space for new bot!'
             return
-        log "handle.buyBot #{Bot.string type}"
+        # log "handle.buyBot #{Bot.string type}"
         @world.storage.deduct rts.market.costForBot type
         bot = @world.addBot p.x,p.y,p.z, type, face
         @world.construct.botAtPos bot, p

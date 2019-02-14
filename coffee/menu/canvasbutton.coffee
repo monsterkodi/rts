@@ -31,7 +31,8 @@ class CanvasButton
 
         @canvas = elem 'canvas', class:clss, width:@width*window.devicePixelRatio, height:@height*window.devicePixelRatio
         div.appendChild @canvas
-                
+        
+        @canvas.button = @        
         @scene = new THREE.Scene()
         @scene.background = new THREE.Color 0x181818
         

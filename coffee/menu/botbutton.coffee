@@ -12,6 +12,11 @@
 
 CanvasButton = require './canvasbutton'
 BuyButton    = require './buybutton'
+BaseMenu     = require './basemenu'
+SubMenu      = require './submenu'
+TradeMenu    = require './trademenu'
+BuildMenu    = require './buildmenu'
+BrainMenu    = require './brainmenu'
 Materials    = require '../materials'
 
 class BotButton extends CanvasButton
@@ -72,10 +77,27 @@ class BotButton extends CanvasButton
         
     click: -> @focusNextBot()
     
+    show: (clss) ->
+        
+        # log 'show'
+        BotButton.currentlyShown?.del()
+        BotButton.currentlyShown = new clss @ 
+    
     highlight: ->
         
-        BuyButton.button?.del()
-        BuyButton.button = new BuyButton @ if @bot != Bot.base
+        SubMenu.current?.del()
+        delete SubMenu.current
+        
+        # log "highlight #{Bot.string @bot}"
+        if @bot == Bot.mine or not @world.botOfType @bot
+            @show BuyButton
+        else 
+            switch @bot
+                when Bot.base  then @show BaseMenu  
+                when Bot.trade then @show TradeMenu
+                when Bot.build then @show BuildMenu
+                when Bot.brain then @show BrainMenu
+            
         @camera.fov = 28
         @camera.updateProjectionMatrix()
         @mesh.material = @botMat true

@@ -8,6 +8,7 @@
 frameWidth          = 6px
 fontMono            = "Meslo LG S", "Bitstream Vera Sans Mono", "Menlo", "Cousine", "DejaVu Sans Mono", "Andale Mono", monospace
 titlebarFont        = Bahnschrift Light, Helvetica Neue, Ebrima, Varela Round, Helvetica, Arial
+borderColor         = #111
 
 // 0000000     0000000   0000000    000   000
 // 000   000  000   000  000   000   000 000 
@@ -35,15 +36,40 @@ body
     top                 100px
     right               unset
     bottom              unset
-    // border              1px solid #333
-    
+    &:hover
+        border-right        1px solid borderColor
+        border-bottom       1px solid borderColor
+
+.subMenu
+    position            absolute
+    // border              1px solid white
+        
 .buttonCanvas
     display             block
-    width               100px
-    height              100px
     
+.buttonCanvasInline
+    display             inline-block
+    
+.botMenu
+    display             inline-block
+
+.botMenu
 .buyButton
     position            absolute
+    border-right        1px solid borderColor
+    border-top          1px solid borderColor
+    border-bottom       1px solid borderColor
+    
+.stoneButton
+    border-right        1px solid borderColor
+    border-left         1px solid borderColor
+    
+    &:last-child
+        border-bottom       1px solid borderColor
+    
+.buyButton
+.buttonCanvas
+.buttonCanvasInline    
     width               100px
     height              100px
         
