@@ -36,13 +36,27 @@ class Handle
         
         @delay delta, bot, bot.mine, @sendPacket
             
-        if bot.type == Bot.base
-            @delay delta, bot, bot.prod, =>
-                if @world.storage.canTake Stone.red
-                    @world.storage.add Stone.red
-                if @world.storage.canTake Stone.gelb
-                    @world.storage.add Stone.gelb
-                true
+        storage = @world.storage
+        
+        switch bot.type 
+            when Bot.base
+                @delay delta, bot, bot.prod, =>
+                    if storage.canTake Stone.red
+                        storage.add Stone.red
+                    if storage.canTake Stone.gelb
+                        storage.add Stone.gelb
+                    true
+            when Bot.trade
+                @delay delta, bot, bot.trade, =>
+                    sellStone  = @world.status.trade.sell
+                    sellAmount = @world.cfg.trade.sell[Stone.string sellStone]
+                    if storage.has sellStone, sellAmount
+                        buyStone  = @world.status.trade.buy
+                        buyAmount = @world.cfg.trade.buy[Stone.string buyStone]
+                        log "trade #{sellAmount} #{Stone.string sellStone} for #{buyAmount} #{Stone.string buyStone}"
+                        storage.sub sellStone, sellAmount
+                        storage.add buyStone, buyAmount
+                        true
         
     buyBot: (type) ->
         

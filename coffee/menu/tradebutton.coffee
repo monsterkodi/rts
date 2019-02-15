@@ -6,76 +6,48 @@
    000     000   000  000   000  0000000    00000000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ log, _ } = require 'kxk'
+{ post, log, _ } = require 'kxk'
 
 { Stone, Bot } = require '../constants'
 
-StoneMenu    = require './stonemenu'
-CanvasButton = require './canvasbutton'
-Materials    = require '../materials'
+StoneMenu   = require './stonemenu'
+StoneButton = require './stonebutton'
+Materials   = require '../materials'
 
-class TradeButton extends CanvasButton
+class TradeButton extends StoneButton
 
+    TradeButton.sell = null
+    TradeButton.buy  = null
+    
     constructor: (div, inOut) ->
         
-        super div, 'buttonCanvasInline'
+        stone = rts.world.status.trade[inOut]
         
-        @stone = Stone.gelb
+        super div, stone, inOut, 'tradeButton buttonCanvasInline'
+        
         @name = "TradeButton #{inOut}"
         
-        @camera.updateProjectionMatrix()
+        TradeButton[@inOut] = @
+        
+        post.on @inOut, @onTrade
+        
+    del: ->
+
+        post.removeListener @inOut, @onTrade 
+        super()
+        
+    onTrade: (stone) =>
+        
+        @stone = stone
+        rts.world.status.trade[@inOut] = @stone
+        new StoneMenu @
         @render()
-        
-    #  0000000   0000000  00000000  000   000  00000000  
-    # 000       000       000       0000  000  000       
-    # 0000000   000       0000000   000 0 000  0000000   
-    #      000  000       000       000  0000  000       
-    # 0000000    0000000  00000000  000   000  00000000  
-    
-    initScene: ->
-                
-        @light = new THREE.DirectionalLight 0xffffff
-        @light.position.set 0,10,6
-        @scene.add @light
-        
-        @scene.add new THREE.AmbientLight 0xffffff
-        
-        @camera.fov = 40
-        @camera.position.copy vec(0,2,1).normal().mul 22
-        @camera.lookAt vec 0,7.6,0
         
     highlight: -> 
 
         new StoneMenu @
-        
-        @camera.fov = 33
-        @camera.updateProjectionMatrix()
-        @render()
-    
-    unhighlight: ->
-        
-        @camera.fov = 40
-        @camera.updateProjectionMatrix()
-        @render()
+        super()
         
     click: -> 
         
-    # 00000000   00000000  000   000  0000000    00000000  00000000   
-    # 000   000  000       0000  000  000   000  000       000   000  
-    # 0000000    0000000   000 0 000  000   000  0000000   0000000    
-    # 000   000  000       000  0000  000   000  000       000   000  
-    # 000   000  00000000  000   000  0000000    00000000  000   000  
-    
-    render: ->
-
-        @meshes.stone?.parent.remove @meshes.stone
-        delete @meshes.stone
-
-        bufg = @geomForCostRange @stone, 0, 10
-        mesh = new THREE.Mesh bufg, Materials.cost[@stone]
-        @scene.add mesh
-        @meshes.stone = mesh
-            
-        super()
-
 module.exports = TradeButton

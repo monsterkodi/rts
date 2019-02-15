@@ -16,9 +16,12 @@ class Camera extends THREE.PerspectiveCamera
 
     constructor: (opt) ->
         
-        aspect = opt.view.clientWidth / opt.view.clientHeight
-        super 70, aspect, 0.01, 300 # fov, aspect, near, far
+        width  = opt.view.clientWidth
+        height = opt.view.clientHeight
         
+        super 70, width/height, 0.01, 300 # fov, aspect, near, far
+        
+        @size    = vec width, height 
         @elem    = opt.view
         @dist    = @far/64
         @maxDist = @far/2
@@ -92,11 +95,11 @@ class Camera extends THREE.PerspectiveCamera
             @mouseMoved = true
         
         if event.buttons & 4
-            s = @dist * 0.001
-            @pan x*s, y*s
+            s = @dist
+            @pan x*2*s/@size.x, y*s/@size.y
             
         if event.buttons & 2
-            @pivot x, y
+            @pivot 4000*x/@size.x, 2000*y/@size.y
             
     # 00000000   000  000   000   0000000   000000000  
     # 000   000  000  000   000  000   000     000     

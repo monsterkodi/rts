@@ -6,7 +6,7 @@
 0000000      000      0000000   000   000  000   000   0000000   00000000
 ###
 
-{ post, deg2rad, elem, log, _ } = require 'kxk'
+{ post, deg2rad, clamp, elem, log, _ } = require 'kxk'
 
 { Stone } = require './constants'
 
@@ -22,8 +22,8 @@ class Storage extends CanvasButton
         @name = 'Storage'
         
         @dirty     = true
-        # @stones    = [500,500,0,0]
-        @stones    = [1000,1000,1000,1000]
+        @stones    = [500,500,0,0]
+        # @stones    = [1000,1000,1000,1000]
         @temp      = [0,0,0,0]
         @maxStones = 1000
               
@@ -37,7 +37,9 @@ class Storage extends CanvasButton
             @render()
             post.emit 'storageChanged'
             @dirty = false
-                
+               
+    has: (stone, amount) -> @stones[stone] >= amount
+            
     canTake: (stone) -> 
         
         return false if stone == Stone.gray
@@ -66,10 +68,13 @@ class Storage extends CanvasButton
             @stones[stone] -= cost[stone]
         @dirty = true
         
-    add: (stone) ->
+        
+    sub: (stone, amount=1) -> @add stone, -amount
+    add: (stone, amount=1) ->
         
         oldStones = @stones[stone]
-        @stones[stone] += 1
+        @stones[stone] += amount
+        @stones[stone] = clamp 0, @maxStones, @stones[stone]
         if Math.floor(oldStones/10) != Math.floor(@stones[stone]/10)
             @dirty = true
     
@@ -100,7 +105,9 @@ class Storage extends CanvasButton
         
         for stone in Stone.resources
             
-            @meshes[stone]?.parent.remove @meshes[stone]
+            @meshes[stone]?.parent?.remove @meshes[stone]
+            delete @meshes[stone]
+            
             if @stones[stone]
                 bufg = @geomForCostRange stone, 0, @stones[stone]
                 mesh = new THREE.Mesh bufg, Materials.cost[stone]

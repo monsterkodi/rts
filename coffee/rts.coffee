@@ -276,6 +276,7 @@ class RTS
     resized: (w,h) ->
         
         @camera.aspect = w/h
+        @camera.size = vec w,h
         @camera.updateProjectionMatrix()
         @renderer.setSize w,h
         

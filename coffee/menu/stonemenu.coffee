@@ -14,11 +14,19 @@ SubMenu     = require './submenu'
 
 class StoneMenu extends SubMenu
 
-    constructor: (button) ->
+    constructor: (tradeButton) ->
 
-        super button
+        super tradeButton
 
-        for stone in Stone.resources
-            @addButton Stone.toString(stone), new StoneButton @div, stone
+        filter = (s) -> 
+        
+            return false if s == tradeButton.stone
+            other = if tradeButton.inOut == 'sell' then 'buy' else 'sell'
+            TradeButton = require './tradebutton'
+            TradeButton[other].stone != s
+        
+        for stone in Stone.resources.filter filter
+            
+            @addButton Stone.toString(stone), new StoneButton @div, stone, tradeButton.inOut
 
 module.exports = StoneMenu

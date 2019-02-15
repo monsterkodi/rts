@@ -36,15 +36,30 @@ class World
             build:
                 mine: speed: 0.5
             trade:
-                mine: speed: 0.5
+                mine:  speed: 0.5
+                trade: speed: 0.5
+                sell:
+                    red:   4
+                    gelb:  4
+                    blue:  3
+                    white: 3
+                buy: 
+                    red:   2
+                    gelb:  2
+                    blue:  1
+                    white: 1
             science:
                 path: 
                     length: 2
                     speed:  0.5
                     gap:    0.2
+
+        @status = 
+            trade:
+                sell: Stone.red
+                buy:  Stone.blue
                     
         @build()
-        
         
         @construct = new Construct @
         @construct.initBotGeoms()
@@ -76,9 +91,15 @@ class World
     # 000   000  000   000     000     
     # 0000000     0000000      000     
     
-    addBot: (x,y,z, type=Bot.mine, face=Face.PZ) -> 
+    addBot: (x,y,z, type=Bot.mine, face=null) -> 
         
-        p = @roundPos new Vector x,y,z
+        p = @roundPos vec x,y,z
+        
+        if not face?
+            [p,face] = @emptyPosFaceNearPos p
+            return if not p?
+            log "empty face #{Bot.string type} #{Face.string face}", p
+        
         index = @indexAtPos p
         bot = 
             type:      type
@@ -89,11 +110,16 @@ class World
                 delay: 0
                 speed: @cfg[Bot.string type].mine.speed
             
-        if type == Bot.base
-            @base = bot
-            bot.prod =
-                delay: 0
-                speed: @cfg.base.prod.speed
+        switch type 
+            when Bot.base
+                @base = bot
+                bot.prod =
+                    delay: 0
+                    speed: @cfg.base.prod.speed
+            when Bot.trade
+                bot.trade =
+                    delay: 0
+                    speed: @cfg.trade.trade.speed
             
         @bots[index] = bot
         bot
@@ -211,24 +237,44 @@ class World
     emptyFaceIndex: (faceIndex) -> 
         
         [face,index] = @splitFaceIndex faceIndex
+        @emptyIndex index
+        
+    emptyIndex: (index) ->
         not @bots[index] and not @stones[index]
     
+    emptyPosFaceNearPos: (pos) ->
+        
+        pi = @indexAtPos pos
+        
+        check = [pi]
+        known = new Set
+        
+        while valid check
+            ci = check.shift()
+            if @emptyIndex ci
+                pos = @posAtIndex ci
+                for face in [Face.PZ, Face.PX, Face.PY, Face.NX, Face.NY, Face.NZ]
+                    if @stoneAtPos pos.minus Vector.normals[face]
+                        return [pos,face]
+            else
+                known.add ci
+                for neighbor in @neighborsOfIndex ci
+                    if not known.has neighbor
+                        check.push neighbor
+        [null,null]
+        
     emptyPosFaceNearBot: (bot) ->
         
         fi = @faceIndexForBot bot
-        
-        # log 'emptyPosFaceNearBot', fi
         
         check = [fi]
         known = new Set
         
         while valid check
             ci = check.shift()
-            # log 'emptyPosFaceNearBot check', ci
             if @emptyFaceIndex ci
                 [face,index] = @splitFaceIndex ci
                 pos = @posAtIndex index
-                # log 'emptyPosFaceNearBot found', pos, Face.string face
                 return [pos,face]
             else
                 known.add ci
@@ -277,6 +323,11 @@ class World
                 neighbors.push @faceIndex dir, @indexAtPos dpos
         
         neighbors
+        
+    neighborsOfIndex: (index) -> 
+        
+        pos = @posAtIndex index
+        Vector.normals.map (dir) => @indexAtPos pos.plus dir
         
     # 000  000   000  0000000    00000000  000   000  
     # 000  0000  000  000   000  000        000 000   

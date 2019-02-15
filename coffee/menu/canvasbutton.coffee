@@ -50,6 +50,42 @@ class CanvasButton
         context = @canvas.getContext '2d'
         context.drawImage CanvasButton.renderer.domElement, 0, 0
 
+    # 000000000  00000000    0000000   0000000    00000000  
+    #    000     000   000  000   000  000   000  000       
+    #    000     0000000    000000000  000   000  0000000   
+    #    000     000   000  000   000  000   000  000       
+    #    000     000   000  000   000  0000000    00000000  
+    
+    geomForTrade: (stone, amount) ->
+        
+        return if amount <= 0
+        
+        merg = new THREE.Geometry 
+        
+        for i in [0...amount]
+            geom = new THREE.BoxGeometry 1.8,1.8,1.8
+            switch amount
+                when 1 then
+                when 2
+                    switch i
+                        when 0 then geom.translate -1, 0, 0
+                        when 1 then geom.translate  1, 0, 0
+                else
+                    switch i
+                        when 0 then geom.translate -1, -1, 0
+                        when 1 then geom.translate  1, -1, 0
+                        when 2 then geom.translate  1,  1, 0
+                        when 3 then geom.translate -1,  1, 0
+            merg.merge geom
+            
+        new THREE.BufferGeometry().fromGeometry merg
+        
+    #  0000000   0000000    0000000  000000000  
+    # 000       000   000  000          000     
+    # 000       000   000  0000000      000     
+    # 000       000   000       000     000     
+    #  0000000   0000000   0000000      000     
+    
     geomForCostRange: (stone, fromThousand, toThousand) ->
         
         return if fromThousand == toThousand

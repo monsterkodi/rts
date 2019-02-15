@@ -38,7 +38,7 @@ class Menu
         
     onBotCreated: (bot) => 
         
-        log "menu.onBotCreated #{Bot.string bot.type}"
+        # log "menu.onBotCreated #{Bot.string bot.type}"
         @buttons[Bot.string bot.type].update()
         @buttons[Bot.string bot.type].highlight()
         

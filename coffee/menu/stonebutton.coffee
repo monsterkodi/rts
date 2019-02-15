@@ -6,7 +6,7 @@
 0000000      000      0000000   000   000  00000000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ log, _ } = require 'kxk'
+{ post, log, _ } = require 'kxk'
 
 { Stone } = require '../constants'
 Materials = require '../materials'
@@ -15,17 +15,22 @@ CanvasButton = require './canvasbutton'
 
 class StoneButton extends CanvasButton
 
-    constructor: (div, stone) ->
+    constructor: (div, stone, inOut, clss='stoneButton buttonCanvas') ->
 
-        super div, 'stoneButton buttonCanvas'
-        
-        @stone = stone
+        super div, clss
+
+        @stone  = stone
+        @inOut  = inOut
         
         @name = "StoneButton #{Stone.string stone}"
         
         @camera.updateProjectionMatrix()
         @render()
         
+    amount: -> rts.world.cfg.trade[@inOut][Stone.string @stone]
+        
+    click: -> post.emit @inOut, @stone
+    
     #  0000000   0000000  00000000  000   000  00000000  
     # 000       000       000       0000  000  000       
     # 0000000   000       0000000   000 0 000  0000000   
@@ -41,8 +46,8 @@ class StoneButton extends CanvasButton
         @scene.add new THREE.AmbientLight 0xffffff
         
         @camera.fov = 40
-        @camera.position.copy vec(0,2,1).normal().mul 22
-        @camera.lookAt vec 0,7.6,0
+        @camera.position.copy vec(0.3,0.6,1).normal().mul 12
+        @camera.lookAt vec 0,0,0
         
     highlight: -> 
 
@@ -56,10 +61,6 @@ class StoneButton extends CanvasButton
         @camera.updateProjectionMatrix()
         @render()
         
-    click: -> 
-        
-        log 'StoneButton.click'
-        
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
     # 0000000    0000000   000 0 000  000   000  0000000   0000000    
@@ -71,7 +72,7 @@ class StoneButton extends CanvasButton
         @meshes.stone?.parent.remove @meshes.stone
         delete @meshes.stone
 
-        bufg = @geomForCostRange @stone, 0, 10
+        bufg = @geomForTrade @stone, @amount()
         mesh = new THREE.Mesh bufg, Materials.cost[@stone]
         @scene.add mesh
         @meshes.stone = mesh
