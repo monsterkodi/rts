@@ -8,13 +8,11 @@
 
 { elem } = require 'kxk'
 
-SubMenu = require './submenu'
-
 class BotMenu
 
     constructor: (botButton) ->
 
-        y = botButton.canvas.offsetTop
+        y = botButton.canvas.offsetTop - rts.menuBorderWidth
         @div = elem class:'botMenu', style:"left:100px; top:#{y}px"
         
         botButton.canvas.parentElement.appendChild @div

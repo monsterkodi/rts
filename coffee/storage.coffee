@@ -21,12 +21,12 @@ class Storage extends CanvasButton
         
         @name     = 'Storage'
         @dirty    = true
-        @stones   = _.clone rts.world.config.storage.stones
+        @stones   = _.clone state.storage.stones
         @temp     = [0,0,0,0]
               
         @camera.updateProjectionMatrix()    
         
-    capacity: -> rts.world.config.storage.capacity
+    capacity: -> state.storage.capacity
         
     click: -> log 'storage click'
     
@@ -66,7 +66,6 @@ class Storage extends CanvasButton
         for stone in Stone.resources
             @stones[stone] -= cost[stone]
         @dirty = true
-        
         
     sub: (stone, amount=1) -> @add stone, -amount
     add: (stone, amount=1) ->

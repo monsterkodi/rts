@@ -84,9 +84,8 @@ class BotButton extends CanvasButton
         BotButton.currentlyShown = new clss @ 
     
     highlight: ->
-        
-        SubMenu.current?.del()
-        delete SubMenu.current
+
+        SubMenu.close()
         
         # log "highlight #{Bot.string @bot}"
         if @bot == Bot.mine or not @world.botOfType @bot

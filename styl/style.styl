@@ -5,10 +5,11 @@
 //      000     000        000     000    
 // 0000000      000        000     0000000
 
-frameWidth          = 6px
-fontMono            = "Meslo LG S", "Bitstream Vera Sans Mono", "Menlo", "Cousine", "DejaVu Sans Mono", "Andale Mono", monospace
-titlebarFont        = Bahnschrift Light, Helvetica Neue, Ebrima, Varela Round, Helvetica, Arial
-borderColor         = #111
+frameWidth   = 6px
+fontMono     = "Meslo LG S", "Bitstream Vera Sans Mono", "Menlo", "Cousine", "DejaVu Sans Mono", "Andale Mono", monospace
+titlebarFont = Bahnschrift Light, Helvetica Neue, Ebrima, Varela Round, Helvetica, Arial
+borderColor  = #151515
+border       = 4px solid borderColor
 
 // 0000000     0000000   0000000    000   000
 // 000   000  000   000  000   000   000 000 
@@ -37,35 +38,36 @@ body
     right               unset
     bottom              unset
     &:hover
-        border-right        1px solid borderColor
-        border-bottom       1px solid borderColor
+        border-right    border
+        border-bottom   border
 
+.botMenu
+    display             inline-block
+    height              100px
+    
 .subMenu
     position            absolute
-    // border              1px solid white
+    width               100px
         
 .buttonCanvas
     display             block
     
 .buttonCanvasInline
     display             inline-block
-    
-.botMenu
-    display             inline-block
 
 .botMenu
 .buyButton
     position            absolute
-    border-right        1px solid borderColor
-    border-top          1px solid borderColor
-    border-bottom       1px solid borderColor
+    border-right        border
+    border-top          border
+    border-bottom       border
     
 .stoneButton
-    border-right        1px solid borderColor
-    border-left         1px solid borderColor
+    border-right        border
+    border-left         border
     
     &:last-child
-        border-bottom       1px solid borderColor
+        border-bottom   border
     
 .buyButton
 .buttonCanvas

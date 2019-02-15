@@ -18,18 +18,15 @@ Construct = require './construct'
 
 class World
     
-    constructor: (@scene, @config) ->
+    constructor: (@scene, config) ->
         
         @stones = {}
         @bots   = {}
         @tubes  = new Tubes @
         @speed  = 1
         
-        @status = 
-            trade:
-                sell: Stone.red
-                buy:  Stone.blue
-                    
+        window.state = _.clone config
+                     
         @build()
         
         @construct = new Construct @
@@ -80,18 +77,18 @@ class World
             index:     index
             mine:
                 delay: 0
-                speed: @config[Bot.string type].mine.speed
+                speed: state[Bot.string type].mine.speed
             
         switch type 
             when Bot.base
                 @base = bot
                 bot.prod =
                     delay: 0
-                    speed: @config.base.prod.speed
+                    speed: state.base.prod.speed
             when Bot.trade
                 bot.trade =
                     delay: 0
-                    speed: @config.trade.trade.speed
+                    speed: state.trade.trade.speed
             
         @bots[index] = bot
         bot

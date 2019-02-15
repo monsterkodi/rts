@@ -27,7 +27,9 @@ class StoneButton extends CanvasButton
         @camera.updateProjectionMatrix()
         @render()
         
-    amount: -> rts.world.config.trade[@inOut][Stone.string @stone]
+    amount: -> 
+        if @inOut == 'buy' then return 1
+        state.trade.sell[Stone.string @stone]
         
     click: -> post.emit @inOut, @stone
     

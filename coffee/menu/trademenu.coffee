@@ -8,8 +8,9 @@
 
 { elem, $, log } = require 'kxk'
 
-TradeButton = require './tradebutton'
-BotMenu     = require './botmenu'
+TradeButton  = require './tradebutton'
+ToggleButton = require './togglebutton'
+BotMenu      = require './botmenu'
 
 class TradeMenu extends BotMenu
 
@@ -17,7 +18,13 @@ class TradeMenu extends BotMenu
 
         super botButton
 
-        @addButton 'sell', new TradeButton @div, 'sell'
-        @addButton 'buy',  new TradeButton @div, 'buy'
+        @addButton 'trade', new ToggleButton @div, @onTradeToggle, state.trade.state
+        @addButton 'sell',  new TradeButton  @div, 'sell'
+        @addButton 'buy',   new TradeButton  @div, 'buy'
+        
+    onTradeToggle: (tradeState) =>
+        
+        state.trade.state = tradeState
+        log 'trade toggle', tradeState
                     
 module.exports = TradeMenu

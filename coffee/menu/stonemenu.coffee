@@ -27,6 +27,6 @@ class StoneMenu extends SubMenu
         
         for stone in Stone.resources.filter filter
             
-            @addButton Stone.toString(stone), new StoneButton @div, stone, tradeButton.inOut
+            @addButton Stone.string(stone), new StoneButton @div, stone, tradeButton.inOut
 
 module.exports = StoneMenu

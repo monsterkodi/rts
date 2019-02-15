@@ -16,8 +16,8 @@ class SubMenu
 
         SubMenu.current?.del()
         
-        x = button.canvas.parentElement.offsetLeft + button.canvas.offsetLeft
-        y = button.canvas.parentElement.offsetTop + 100
+        x = button.canvas.parentElement.offsetLeft + button.canvas.offsetLeft - rts.menuBorderWidth
+        y = button.canvas.parentElement.offsetTop + 100 + rts.menuBorderWidth
 
         @div = elem class:'subMenu', style:"left:#{x}px; top:#{y}px;"
         
@@ -26,11 +26,17 @@ class SubMenu
         @buttons = {}
         
         SubMenu.current = @
+
+    @close: ->
+        
+        SubMenu.current?.del()
+        delete SubMenu.current
                 
     addButton: (key, button) ->
         
         @buttons[key] = button
-        @div.style.height = "#{Object.values(@buttons).length*100}px"
+        
+        @div.style.height = "#{Object.keys(@buttons).length*100}px"
         
     del: ->
 

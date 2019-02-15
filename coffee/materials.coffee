@@ -33,4 +33,8 @@ Materials =
                 new THREE.MeshStandardMaterial color:0x44aaff, dithering:false # white
                 new THREE.MeshStandardMaterial color:0x111111, dithering:false # cantAfford
     ]    
+    state: 
+        on:     new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6, roughness: 0.5, dithering:false
+        off:    new THREE.MeshPhongMaterial color:0x111111, dithering:false
+    
 module.exports = Materials

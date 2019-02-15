@@ -6,7 +6,7 @@
 000   000  00000000  000   000   0000000 
 ###
 
-{ post, elem, log, $, _ } = require 'kxk'
+{ post, stopEvent, elem, log, $, _ } = require 'kxk'
 
 { Bot }   = require '../constants'
 
@@ -32,6 +32,7 @@ class Menu
         @div.addEventListener 'mouseleave', @onMouseLeave
         @div.addEventListener 'mouseover',  @onMouseOver
         @div.addEventListener 'mouseout',   @onMouseOut
+        @div.addEventListener 'mousemove',  @onMouseMove
         @div.addEventListener 'click',      @onClick
         
         post.on 'botCreated', @onBotCreated
@@ -45,12 +46,12 @@ class Menu
     onClick:      (event) => event.target.button?.click?()
     onMouseOver:  (event) => event.target.button?.highlight?()
     onMouseOut:   (event) => event.target.button?.unhighlight?()
+    onMouseMove:  (event) => stopEvent event
     onMouseLeave: (event) => 
         
         BotButton.currentlyShown?.del()
         delete BotButton.currentlyShown
-        
-        SubMenu.current?.del()
-        delete SubMenu.current
+         
+        SubMenu.close()
         
 module.exports = Menu

@@ -44,12 +44,46 @@ class CanvasButton
         
     render: ->
 
-        # log 'render', @name
         CanvasButton.renderer.render @scene, @camera
         
         context = @canvas.getContext '2d'
         context.drawImage CanvasButton.renderer.domElement, 0, 0
 
+    #  0000000  000000000   0000000   000000000  00000000  
+    # 000          000     000   000     000     000       
+    # 0000000      000     000000000     000     0000000   
+    #      000     000     000   000     000     000       
+    # 0000000      000     000   000     000     00000000  
+    
+    geomForState: (state) ->
+        
+        switch state
+            when 'on'  
+                geom = new THREE.Geometry
+                geom.vertices.push vec -2,  2,  1
+                geom.vertices.push vec -2, -2,  1
+                geom.vertices.push vec  2,  0,  1
+                geom.vertices.push vec -2,  2,  0
+                geom.vertices.push vec  2,  0,  0
+                geom.faces.push new THREE.Face3 0, 1, 2
+                geom.faces.push new THREE.Face3 3, 0, 4
+                geom.faces.push new THREE.Face3 0, 2, 4
+                geom.computeFaceNormals()
+                geom.computeFlatVertexNormals()
+                
+            when 'off' 
+                left  = new THREE.BoxGeometry 2,4,1
+                left.translate -1.5, 0, 0     
+                right = new THREE.BoxGeometry 2,4,1
+                right.translate 1.5, 0, 0
+                geom  = new THREE.Geometry
+                geom.merge left
+                geom.merge right
+            else
+                geom = new THREE.BoxGeometry 1.8,1.8,1.8
+                
+        new THREE.BufferGeometry().fromGeometry geom
+        
     # 000000000  00000000    0000000   0000000    00000000  
     #    000     000   000  000   000  000   000  000       
     #    000     0000000    000000000  000   000  0000000   

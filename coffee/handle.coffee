@@ -47,20 +47,32 @@ class Handle
                         storage.add Stone.gelb
                     true
             when Bot.trade
-                @delay delta, bot, bot.trade, =>
-                    sellStone  = @world.status.trade.sell
-                    sellAmount = @world.config.trade.sell[Stone.string sellStone]
-                    if storage.has sellStone, sellAmount
-                        buyStone  = @world.status.trade.buy
-                        buyAmount = @world.config.trade.buy[Stone.string buyStone]
-                        
-                        buyAmount = storage.canTake buyStone, buyAmount
-                        if buyAmount
-                            # log "trade #{sellAmount} #{Stone.string sellStone} for #{buyAmount} #{Stone.string buyStone}"
+                @tickTrade delta, bot
+                
+    tickTrade: (delta, bot) ->
+        
+        if state.trade.state == 'on'
+            storage = @world.storage
+            @delay delta, bot, bot.trade, =>
+                sellStone  = state.trade.sell.stone
+                sellAmount = state.trade.sell[Stone.string sellStone]
+                if storage.has sellStone, sellAmount
+                    buyStone  = state.trade.buy.stone
+                    if storage.canTake buyStone
+                        # log "trade #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
+                            
+                        if @world.tubes.insertPacket bot, buyStone
+                            @world.storage.willSend buyStone
                             storage.sub sellStone, sellAmount
-                            storage.add buyStone,  buyAmount
+                            cost = [0,0,0,0]
+                            cost[sellStone] = sellAmount
+                            @costSpentAtPosFace cost, bot.pos, bot.face
                             true
         
+    costSpentAtPosFace: (cost, pos, face) ->
+        
+        # log 'costSpentAtPosFace', cost, pos, Face.string face
+                            
     buyBot: (type) ->
         
         [p, face] = @world.emptyPosFaceNearBot @world.base
@@ -68,7 +80,9 @@ class Handle
             log 'WARNING handle.buyBot -- no space for new bot!'
             return
         # log "handle.buyBot #{Bot.string type}"
-        @world.storage.deduct rts.market.costForBot type
+        cost = state.cost[Bot.string type]
+        @world.storage.deduct cost
+        @costSpentAtPosFace cost, p, face
         bot = @world.addBot p.x,p.y,p.z, type, face
         @world.construct.botAtPos bot, p
         rts.camera.focusOnPos p
