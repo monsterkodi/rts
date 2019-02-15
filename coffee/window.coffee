@@ -6,7 +6,7 @@
 00     00  000  000   000  0000000     0000000   00     00  
 ###
 
-{ post, stopEvent, keyinfo, prefs, win, log, $ } = require 'kxk'
+{ win, prefs, post, keyinfo, stopEvent, log, $ } = require 'kxk'
 
 RTS    = require './rts'
 Vector = require './lib/vector'
@@ -85,12 +85,19 @@ reloadWin = ->
     clearListeners()
     electron.remote.getCurrentWindow()?.webContents.reloadIgnoringCache()
 
-window.onresize = (event) => 
+window.onresize = (event) -> 
     
     saveBounds()
     main =$ "#main"
     br = main.getBoundingClientRect()
     rts?.resized br.width, br.height
+    
+window.onkeydown = (event) ->
+    
+    # log 'keydown', keyinfo.forEvent event
+    switch keyinfo.forEvent(event).key
+        when 'i' then prefs.set 'info',  not prefs.get 'info'
+        when 'd' then prefs.set 'debug', not prefs.get 'debug'
     
 post.on 'menuAction', (action) ->
     

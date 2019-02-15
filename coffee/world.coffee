@@ -18,42 +18,13 @@ Construct = require './construct'
 
 class World
     
-    constructor: (@scene) ->
+    constructor: (@scene, @config) ->
         
         @stones = {}
         @bots   = {}
         @tubes  = new Tubes @
         @speed  = 1
         
-        @cfg = 
-            base:
-                prod: speed: 1
-                mine: speed: 0.5
-            mine:
-                mine: speed: 2
-            brain:
-                mine: speed: 0.5
-            build:
-                mine: speed: 0.5
-            trade:
-                mine:  speed: 0.5
-                trade: speed: 0.5
-                sell:
-                    red:   4
-                    gelb:  4
-                    blue:  3
-                    white: 3
-                buy: 
-                    red:   2
-                    gelb:  2
-                    blue:  1
-                    white: 1
-            science:
-                path: 
-                    length: 2
-                    speed:  0.5
-                    gap:    0.2
-
         @status = 
             trade:
                 sell: Stone.red
@@ -97,8 +68,9 @@ class World
         
         if not face?
             [p,face] = @emptyPosFaceNearPos p
-            return if not p?
-            log "empty face #{Bot.string type} #{Face.string face}", p
+            if not p?
+                log 'no empty space for bot!'
+                return
         
         index = @indexAtPos p
         bot = 
@@ -108,18 +80,18 @@ class World
             index:     index
             mine:
                 delay: 0
-                speed: @cfg[Bot.string type].mine.speed
+                speed: @config[Bot.string type].mine.speed
             
         switch type 
             when Bot.base
                 @base = bot
                 bot.prod =
                     delay: 0
-                    speed: @cfg.base.prod.speed
+                    speed: @config.base.prod.speed
             when Bot.trade
                 bot.trade =
                     delay: 0
-                    speed: @cfg.trade.trade.speed
+                    speed: @config.trade.trade.speed
             
         @bots[index] = bot
         bot

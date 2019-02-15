@@ -49,14 +49,17 @@ class Handle
             when Bot.trade
                 @delay delta, bot, bot.trade, =>
                     sellStone  = @world.status.trade.sell
-                    sellAmount = @world.cfg.trade.sell[Stone.string sellStone]
+                    sellAmount = @world.config.trade.sell[Stone.string sellStone]
                     if storage.has sellStone, sellAmount
                         buyStone  = @world.status.trade.buy
-                        buyAmount = @world.cfg.trade.buy[Stone.string buyStone]
-                        log "trade #{sellAmount} #{Stone.string sellStone} for #{buyAmount} #{Stone.string buyStone}"
-                        storage.sub sellStone, sellAmount
-                        storage.add buyStone, buyAmount
-                        true
+                        buyAmount = @world.config.trade.buy[Stone.string buyStone]
+                        
+                        buyAmount = storage.canTake buyStone, buyAmount
+                        if buyAmount
+                            # log "trade #{sellAmount} #{Stone.string sellStone} for #{buyAmount} #{Stone.string buyStone}"
+                            storage.sub sellStone, sellAmount
+                            storage.add buyStone,  buyAmount
+                            true
         
     buyBot: (type) ->
         

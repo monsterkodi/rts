@@ -10,13 +10,14 @@
 
 { Stone, Bot, Face } = require './constants'
 
-World = require './world'
+Config = require './config'
+World  = require './world'
 
 class Map extends World
 
     constructor: (scene) ->
         
-        super scene
+        super scene, Config.default
         
     build: ->
 

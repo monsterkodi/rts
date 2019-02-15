@@ -19,15 +19,14 @@ class Storage extends CanvasButton
         
         super menu.div
         
-        @name = 'Storage'
-        
-        @dirty     = true
-        @stones    = [500,500,0,0]
-        # @stones    = [1000,1000,1000,1000]
-        @temp      = [0,0,0,0]
-        @maxStones = 1000
+        @name     = 'Storage'
+        @dirty    = true
+        @stones   = _.clone rts.world.config.storage.stones
+        @temp     = [0,0,0,0]
               
         @camera.updateProjectionMatrix()    
+        
+    capacity: -> rts.world.config.storage.capacity
         
     click: -> log 'storage click'
     
@@ -40,10 +39,10 @@ class Storage extends CanvasButton
                
     has: (stone, amount) -> @stones[stone] >= amount
             
-    canTake: (stone) -> 
+    canTake: (stone, amount=1) -> 
         
-        return false if stone == Stone.gray
-        @stones[stone] + @temp[stone] < @maxStones
+        return 0 if stone == Stone.gray
+        clamp 0, amount, @capacity() - @stones[stone] - @temp[stone]
 
     willSend: (stone) -> @temp[stone] += 1
         
@@ -74,7 +73,7 @@ class Storage extends CanvasButton
         
         oldStones = @stones[stone]
         @stones[stone] += amount
-        @stones[stone] = clamp 0, @maxStones, @stones[stone]
+        @stones[stone] = clamp 0, @capacity(), @stones[stone]
         if Math.floor(oldStones/10) != Math.floor(@stones[stone]/10)
             @dirty = true
     

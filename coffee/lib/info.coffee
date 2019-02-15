@@ -22,7 +22,11 @@ class Info
         @temp   =elem class:'infotext', parent:@elem
 
         document.body.appendChild @elem
-            
+          
+    del: ->
+        
+        @elem.remove()
+        
     # 0000000    00000000    0000000   000   000
     # 000   000  000   000  000   000  000 0 000
     # 000   000  0000000    000000000  000000000

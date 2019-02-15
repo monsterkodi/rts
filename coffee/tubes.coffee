@@ -20,8 +20,8 @@ class Tubes
         @astar    = new AStar @world
         @segments = {}
 
-    speed: -> @world.cfg.science.path.speed
-    gap:   -> @world.cfg.science.path.gap + 0.1
+    speed: -> @world.config.science.path.speed
+    gap:   -> @world.config.science.path.gap + 0.1
         
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
@@ -197,7 +197,7 @@ class Tubes
         
         path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
         
-        if path and path.length <= @world.cfg.science.path.length+1
+        if path and path.length <= @world.config.science.path.length+1
             to.path = 
                 points: @pathPoints path
                 length: path.length

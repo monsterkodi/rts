@@ -6,7 +6,7 @@
 000   000     000     0000000 
 ###
 
-{ elem, empty, valid, deg2rad, log, _ } = require 'kxk'
+{ prefs, elem, empty, valid, deg2rad, log, _ } = require 'kxk'
 
 { Bot } = require './constants'
 
@@ -94,8 +94,6 @@ class RTS
         document.addEventListener 'mouseup',   @onMouseUp
         document.addEventListener 'dblclick',  @onDblClick
         
-        @debug = new Debug
-        @info  = new Info
         @menu  = new Menu
         
         @lastAnimationTime = window.performance.now()
@@ -262,10 +260,21 @@ class RTS
         
         @fps.draw()
 
-        info = _.clone @renderer.info.render
-        info.segments = @world.tubes.getSegments().length
-        info.packets  = @world.tubes.getPackets().length
-        @info.draw info
+        if prefs.get 'info'
+            info = _.clone @renderer.info.render
+            info.segments = @world.tubes.getSegments().length
+            info.packets  = @world.tubes.getPackets().length
+            @info = new Info if not @info
+            @info.draw info
+        else if @info?
+            @info.del()
+            delete @info
+            
+        if prefs.get 'debug'
+            @debug = new Debug if not @debug
+        else if @debug
+            @debug.del()
+            delete @debug
 
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000
