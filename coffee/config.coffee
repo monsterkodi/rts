@@ -13,17 +13,17 @@ module.exports =
     default:
             
         storage:
-            stones: [500, 500, 0, 0]
-            capacity: 1000
+            capacity: 80
+            stones:[ 5 *8, 5 *8, 5 *8, 5 *8]
             
         cost: 
-            mine:  [400,200,0,0]
-            trade: [300,600,0,0]
-            brain: [500,100,500,0]
-            build: [500,500,0,500]
+            brain: [ 4 *8, 2 *8, 0   , 0   ]
+            trade: [ 3 *8, 4 *8, 3 *8, 2 *8]
+            build: [ 2 *8, 3 *8, 4 *8, 5 *8]
+            mine:  [ 2 *8, 2 *8, 2 *8, 2 *8]
               
         base:
-            prod: speed: 1
+            prod: speed: 0.1
             mine: speed: 0.5
             
         mine:

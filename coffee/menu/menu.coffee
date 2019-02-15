@@ -25,8 +25,16 @@ class Menu
         rts.world.storage = new Storage @
         
         @buttons = storage:rts.world.storage
-                
-        for bot in Bot.values
+         
+        bots = [
+            Bot.base
+            Bot.brain
+            Bot.trade
+            Bot.build
+            Bot.mine
+        ]
+        
+        for bot in bots
             @buttons[Bot.string bot] = new BotButton bot, @div
             
         @div.addEventListener 'mouseleave', @onMouseLeave

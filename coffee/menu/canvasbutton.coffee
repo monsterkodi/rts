@@ -8,6 +8,8 @@
 
 { elem, empty, log, _ } = require 'kxk'
 
+{ Stone } = require '../constants'
+
 class CanvasButton
     
     @renderer = null
@@ -120,50 +122,54 @@ class CanvasButton
     # 000       000   000       000     000     
     #  0000000   0000000   0000000      000     
     
-    geomForCostRange: (stone, fromThousand, toThousand) ->
+    
+    smallGeom: (h,y) ->
+        geom = new THREE.BoxGeometry 0.5,0.5,0.5
+        f = (y-1)%4
+        geom.translate -0.25 + (0<f<3 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (f>1 and 0.5 or 0)
+        geom
+    
+    geomForStonesMissing: (stone, have, cost) ->
         
-        return if fromThousand == toThousand
-        
-        from = Math.floor fromThousand/10
-        to   = Math.floor   toThousand/10
-        
-        if from == to
-            to += 1
-        
+        ceil  = 8*Math.ceil have/8
+        small = ceil-have
+            
         merg = new THREE.Geometry 
-        
-        l = Math.floor from/10
-        h = Math.floor to/10
-        
-        trans = (geom,h,y,f) ->
-            geom.translate -0.25 + (1<f<4 and 0.5 or 0),(h*1.2)+0.25+(y>4 and 0.5 or 0), -0.25 + (f>2 and 0.5 or 0)
-        
-        if (from%10) > 0
-             
-            for y in [from%10..9]
-                f = y%5
-                continue if f == 0
-                geom = new THREE.BoxGeometry 0.5,0.5,0.5
-                trans geom,l,y,f
+        @geomForStoneAmount stone, cost-ceil, merg
+        merg.translate 0, ceil/8*1.2, 0
+            
+        if small
+            for y in [9-small..8]
+                geom = @smallGeom ceil/8-1, y
+                geom.translate stone*1.5-2.3,0,0
                 merg.merge geom
                 
-            l += 1
+        new THREE.BufferGeometry().fromGeometry merg
+    
+    geomForStoneAmount: (stone, amount, mergeWith) ->
         
-        for y in [l...h]
+        return if amount == 0
+        
+        merg  = new THREE.Geometry 
+        
+        big   = Math.floor amount/8
+        small = amount - big*8
+        
+        for y in [0...big]
             geom = new THREE.BoxGeometry 1,1,1
             geom.translate 0,(y*1.2)+0.5,0
             merg.merge geom
         
-        if to%10 > 0
-            for y in [1..to%10]
-                f = y%5
-                continue if f == 0
-                geom = new THREE.BoxGeometry 0.5,0.5,0.5
-                trans geom,h,y,f
-                merg.merge geom
+        if small
+            for y in [1..small%8]
+                merg.merge @smallGeom big,y
                 
         merg.translate stone*1.5-2.3, 0, 0 
             
-        new THREE.BufferGeometry().fromGeometry merg
+        if mergeWith
+            mergeWith.merge merg
+            mergeWith
+        else
+            new THREE.BufferGeometry().fromGeometry merg
         
 module.exports = CanvasButton

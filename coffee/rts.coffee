@@ -115,17 +115,17 @@ class RTS
         delta = (now - @lastAnimationTime) * 0.001
         @lastAnimationTime = now
         
-        if not @paused
-            angle = -delta*0.3*@world.speed
-            @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
-        
         oldAnimations = @animations.clone()
         @animations = []
         
         for animation in oldAnimations
             animation delta
-            
-        @world.animate delta
+        
+        if not @paused
+            angle = -delta*0.3*@world.speed
+            @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
+                        
+            @world.animate delta
                     
         @render()
         setTimeout @animationStep, 1000/60
@@ -138,12 +138,11 @@ class RTS
     
     onMouseDown: (event) =>
         
+        @calcMouse event
+        @downPos = @mouse.clone()
+        
         if event.buttons == 1
-            
-            @calcMouse event
-            
-            @downPos = @mouse.clone()
-            
+                        
             if @world.highBot?
                 @dragBot = @world.highBot
             else
@@ -156,16 +155,18 @@ class RTS
 
         if not @camMove
             delete @dragBot
-            
+                        
         delete @camMove
         
         @calcMouse event
-        
+
         moved = @downPos?.dist @mouse
         if moved < 0.01
-            
-            if bot = @world.highBot
-                @handle.botClicked bot
+            if event.button == 1
+                @focusOnHit()
+            else
+                if bot = @world.highBot
+                    @handle.botClicked bot
     
     onMouseMove: (event) =>
 
@@ -201,6 +202,14 @@ class RTS
         @mouse.x = ((event.clientX-br.left) / br.width) * 2 - 1
         @mouse.y = -((event.clientY-br.top) / br.height ) * 2 + 1
         @mouse
+        
+    focusOnHit: ->
+        
+        if hit = @castRay false
+            if hit.bot
+                @camera.fadeToPos hit.bot.pos
+            else    
+                @camera.fadeToPos @world.roundPos hit.point.minus hit.norm.mul 0.5
 
     #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
     # 000       000   000  000          000     000   000  000   000   000 000   
@@ -220,13 +229,12 @@ class RTS
         
         @raycaster.setFromCamera @mouse, @camera
         intersects = @raycaster.intersectObjects @scene.children, false 
-        # log 'hits', intersects.length
 
         intersect = @filterHit intersects, ignoreHighlight
         
         return if empty intersect
         
-        point = intersect.point
+        point = vec intersect.point
         
         info = 
             pos:    @world.roundPos point

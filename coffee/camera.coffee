@@ -74,10 +74,6 @@ class Camera extends THREE.PerspectiveCamera
         
     onMouseUp: (event) => 
 
-        if @downButtons & 4
-            if not @mouseMoved
-                @focusOnHit()
-        
         window.removeEventListener 'mousemove', @onMouseDrag
         window.removeEventListener 'mouseup',   @onMouseUp
         
@@ -167,17 +163,7 @@ class Camera extends THREE.PerspectiveCamera
     # 000000    000   000  000       000   000  0000000   
     # 000       000   000  000       000   000       000  
     # 000        0000000    0000000   0000000   0000000   
-    
-    focusOnHit: ->
-        
-        raycaster = new THREE.Raycaster
-        raycaster.setFromCamera rts.mouse, @
-        intersects = raycaster.intersectObjects rts.scene.children, true
-        intersects = intersects.filter (i) -> valid i.face
-        
-        if intersects.length
-            @fadeToPos vec(intersects[0].point).round()
-     
+         
     fadeToPos: (v) -> 
         
         @centerTarget = v

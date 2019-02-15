@@ -73,8 +73,7 @@ class Storage extends CanvasButton
         oldStones = @stones[stone]
         @stones[stone] += amount
         @stones[stone] = clamp 0, @capacity(), @stones[stone]
-        if Math.floor(oldStones/10) != Math.floor(@stones[stone]/10)
-            @dirty = true
+        @dirty = true
     
     #  0000000   0000000  00000000  000   000  00000000  
     # 000       000       000       0000  000  000       
@@ -100,14 +99,14 @@ class Storage extends CanvasButton
     # 000   000  00000000  000   000  0000000    00000000  000   000  
     
     render: ->
-        
+
         for stone in Stone.resources
             
             @meshes[stone]?.parent?.remove @meshes[stone]
             delete @meshes[stone]
             
             if @stones[stone]
-                bufg = @geomForCostRange stone, 0, @stones[stone]
+                bufg = @geomForStoneAmount stone, @stones[stone]
                 mesh = new THREE.Mesh bufg, Materials.cost[stone]
                 @scene.add mesh
                 @meshes[stone] = mesh

@@ -56,8 +56,8 @@ class BuyButton extends CanvasButton
         @scene.add new THREE.AmbientLight 0xffffff
         
         @camera.fov = 40
-        @camera.position.copy vec(0,2,1).normal().mul 22
-        @camera.lookAt vec 0,7.6,0
+        @camera.position.copy vec(0,1,1).normal().mul 14
+        @camera.lookAt vec 0,3,0
         
     highlight: -> 
 
@@ -103,13 +103,13 @@ class BuyButton extends CanvasButton
             if cost[stone]
                 
                 if have[stone]
-                    bufg = @geomForCostRange stone, 0, Math.min have[stone], cost[stone]
+                    bufg = @geomForStoneAmount stone, Math.min have[stone], cost[stone]
                     mesh = new THREE.Mesh bufg, Materials.cost[stone]
                     @scene.add mesh
                     @meshes[stone] = mesh
                 
                 if cost[stone] > have[stone]
-                    bufg = @geomForCostRange stone, have[stone]+1, cost[stone]
+                    bufg = @geomForStonesMissing stone, have[stone], cost[stone]
                     mesh = new THREE.Mesh bufg, Materials.cost[4]
                     @scene.add mesh
                     @meshes[stone+4] = mesh

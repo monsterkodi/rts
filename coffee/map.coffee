@@ -42,11 +42,11 @@ class Map extends World
                 # @addStone  0, 2, 0, Stone.white
                 # @addStone  0,-2, 0, Stone.white
                 
-        @addStone  0,0,0, Stone.white
-        # @addStone  0,1,0, Stone.white
+        @addStone  0,0,0 #, Stone.white
+        @addStone  0,0,-1, Stone.white
         
         @addBot  0, 0, 1, Bot.base
-        @addBot  0, 0, 1, Bot.trade
+        # @addBot  0, 0, 1, Bot.trade
         # @addBot  0, 2, 1, Bot.mine
         
 module.exports = Map

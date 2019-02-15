@@ -6,7 +6,7 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ deg2rad, first, valid, empty, log, _ } = require 'kxk'
+{ prefs, deg2rad, first, valid, empty, log, _ } = require 'kxk'
 
 Vector    = require './lib/vector'
 Packet    = require './packet'
@@ -23,7 +23,7 @@ class World
         @stones = {}
         @bots   = {}
         @tubes  = new Tubes @
-        @speed  = 1
+        @speed  = prefs.get 'speed', 1
         
         window.state = _.clone config
                      
@@ -36,6 +36,8 @@ class World
         
         @updateTubes()
         
+    setSpeed: (@speed) -> prefs.set 'speed', @speed
+        
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
     # 000000000  000 0 000  000  000000000  000000000     000     0000000   
@@ -45,6 +47,8 @@ class World
     animate: (delta) ->
         
         scaledDelta = delta * @speed
+        
+        # log 'animate', scaledDelta
         
         @tubes.animate scaledDelta
         
@@ -76,18 +80,18 @@ class World
             face:      face
             index:     index
             mine:
-                delay: 0
+                delay: 1/state[Bot.string type].mine.speed
                 speed: state[Bot.string type].mine.speed
             
         switch type 
             when Bot.base
                 @base = bot
                 bot.prod =
-                    delay: 0
+                    delay: 1/state.base.prod.speed
                     speed: state.base.prod.speed
             when Bot.trade
                 bot.trade =
-                    delay: 0
+                    delay: 1/state.base.prod.speed
                     speed: state.trade.trade.speed
             
         @bots[index] = bot

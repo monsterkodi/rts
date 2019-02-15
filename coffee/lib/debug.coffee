@@ -55,7 +55,7 @@ class Debug
     incrWorldSpeed: => @modWorldSpeed rts.world.speed >= 1 and 1 or 0.1 
     decrWorldSpeed: => @modWorldSpeed rts.world.speed > 1 and -1 or -0.1
     modWorldSpeed: (d) -> 
-        rts.world.speed = @clampZero rts.world.speed, d, 10
+        rts.world.setSpeed @clampZero rts.world.speed, d, 10
         @worldSpeed.children[2].innerHTML = rts.world.speed.toFixed 1
 
     #  0000000    0000000   00000000   
