@@ -15,9 +15,9 @@ class Debug
         @elem = elem class:'debug', style:'position:absolute; z-index:1; bottom:10px; left:10px;'
 
         @elem.appendChild @worldSpeed = @value text:'world', value: rts.world.speed.toFixed(1),                      reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
-        @elem.appendChild @tubeSpeed  = @value text:'tube ', value: state.science.path.speed.toFixed(1),     reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
+        @elem.appendChild @tubeSpeed  = @value text:'tube ', value: state.science.tube.speed.toFixed(1),     reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
         @elem.appendChild @pathLength = @value text:'path ', value: state.science.path.length,               reset:@resetPath,       incr:@incrPath,       decr:@decrPath
-        @elem.appendChild @tubesGap   = @value text:'gap  ', value: state.science.path.gap.toFixed(2), reset:@resetGap,        incr:@incrGap,        decr:@decrGap
+        @elem.appendChild @tubesGap   = @value text:'gap  ', value: state.science.tube.gap.toFixed(2), reset:@resetGap,        incr:@incrGap,        decr:@decrGap
 
         document.body.appendChild @elem
 
@@ -30,9 +30,9 @@ class Debug
     # 000   000  00000000  0000000   00000000     000     
     
     resetWorldSpeed: => @modWorldSpeed 1-rts.world.speed
-    resetTubeSpeed:  => @modTubeSpeed 0.5-state.science.path.speed
+    resetTubeSpeed:  => @modTubeSpeed 0.5-state.science.tube.speed
     resetPath:       => @modPath 10-state.science.path.length
-    resetGap:        => @modGap 0.12-state.science.path.gap
+    resetGap:        => @modGap 0.12-state.science.tube.gap
     
     # 000000000  000   000  0000000    00000000  
     #    000     000   000  000   000  000       
@@ -43,8 +43,8 @@ class Debug
     incrTubeSpeed: => @modTubeSpeed  0.1 
     decrTubeSpeed: => @modTubeSpeed -0.1
     modTubeSpeed: (d) -> 
-        state.science.path.speed = @clampZero state.science.path.speed, d, 1
-        @tubeSpeed.children[2].innerHTML = state.science.path.speed.toFixed 1
+        state.science.tube.speed = @clampZero state.science.tube.speed, d, 1
+        @tubeSpeed.children[2].innerHTML = state.science.tube.speed.toFixed 1
 
     # 000   000   0000000   00000000   000      0000000    
     # 000 0 000  000   000  000   000  000      000   000  
@@ -67,9 +67,9 @@ class Debug
     incrGap: => @modGap  0.01 
     decrGap: => @modGap -0.01
     modGap: (d) -> 
-        state.science.path.gap += d
-        state.science.path.gap = clamp 0.1, 0.5, state.science.path.gap
-        @tubesGap.children[2].innerHTML = state.science.path.gap.toFixed(2)
+        state.science.tube.gap += d
+        state.science.tube.gap = clamp 0.1, 0.5, state.science.tube.gap
+        @tubesGap.children[2].innerHTML = state.science.tube.gap.toFixed(2)
 
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  

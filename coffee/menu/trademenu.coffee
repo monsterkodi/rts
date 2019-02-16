@@ -25,6 +25,5 @@ class TradeMenu extends BotMenu
     onTradeToggle: (tradeState) =>
         
         state.trade.state = tradeState
-        log 'trade toggle', tradeState
                     
 module.exports = TradeMenu

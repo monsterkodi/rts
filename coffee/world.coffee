@@ -26,7 +26,7 @@ class World
         @speed  = prefs.get 'speed', 1
         
         window.state = _.clone config
-                     
+        
         @build()
         
         @construct = new Construct @

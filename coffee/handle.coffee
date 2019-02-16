@@ -23,6 +23,12 @@ class Handle
         switch hit?.bot?.type 
             when Bot.build then @buildBotHit bot, hit
 
+    # 0000000    00000000  000       0000000   000   000  
+    # 000   000  000       000      000   000   000 000   
+    # 000   000  0000000   000      000000000    00000    
+    # 000   000  000       000      000   000     000     
+    # 0000000    00000000  0000000  000   000     000     
+    
     delay: (delta, bot, prop, func) ->
 
         prop.delay -= delta
@@ -32,6 +38,12 @@ class Handle
             else
                 prop.delay = 0
             
+    # 000000000  000   0000000  000   000  
+    #    000     000  000       000  000   
+    #    000     000  000       0000000    
+    #    000     000  000       000  000   
+    #    000     000   0000000  000   000  
+    
     tickBot: (delta, bot) ->
         
         @delay delta, bot, bot.mine, @sendPacket
@@ -49,6 +61,12 @@ class Handle
             when Bot.trade
                 @tickTrade delta, bot
                 
+    # 000000000  00000000    0000000   0000000    00000000  
+    #    000     000   000  000   000  000   000  000       
+    #    000     0000000    000000000  000   000  0000000   
+    #    000     000   000  000   000  000   000  000       
+    #    000     000   000  000   000  0000000    00000000  
+    
     tickTrade: (delta, bot) ->
         
         if state.trade.state == 'on'
@@ -73,14 +91,21 @@ class Handle
         
         # log 'costSpentAtPosFace', cost, pos, Face.string face
                             
+    # 0000000    000   000  000   000  
+    # 000   000  000   000   000 000   
+    # 0000000    000   000    00000    
+    # 000   000  000   000     000     
+    # 0000000     0000000      000     
+    
     buyBot: (type) ->
-        
+                
         [p, face] = @world.emptyPosFaceNearBot @world.base
         if not p?
             log 'WARNING handle.buyBot -- no space for new bot!'
             return
         # log "handle.buyBot #{Bot.string type}"
         cost = state.cost[Bot.string type]
+
         @world.storage.deduct cost
         @costSpentAtPosFace cost, p, face
         bot = @world.addBot p.x,p.y,p.z, type, face
@@ -88,8 +113,15 @@ class Handle
         rts.camera.focusOnPos p
         @world.highlightBot bot
         @world.updateTubes()
+                
         post.emit 'botCreated', bot
                 
+    #  0000000  00000000  000   000  0000000    
+    # 000       000       0000  000  000   000  
+    # 0000000   0000000   000 0 000  000   000  
+    #      000  000       000  0000  000   000  
+    # 0000000   00000000  000   000  0000000    
+    
     sendPacket: (bot) =>
         
         stone = @world.stoneBelowBot bot
@@ -102,8 +134,14 @@ class Handle
                 @world.storage.add stone
                 return true
                         
+    # 0000000    000   000  000  000      0000000    
+    # 000   000  000   000  000  000      000   000  
+    # 0000000    000   000  000  000      000   000  
+    # 000   000  000   000  000  000      000   000  
+    # 0000000     0000000   000  0000000  0000000    
+    
     buildBotHit: (bot, hit) ->
-        
+                
         normal = hit.norm.applyQuaternion bot.mesh.quaternion
         hitpos = bot.pos.to hit.point
 
@@ -120,8 +158,8 @@ class Handle
             log 'target occupied'
             return
         
-        if @world.storage.canBuild()
-            log newPos, Face.string newFace
+        if @world.storage.deductBuild()
+            # log newPos, Face.string newFace
             rts.camera.focusOnPos rts.camera.center.plus n
             @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
             @world.moveBot bot, newPos, newFace
@@ -129,6 +167,12 @@ class Handle
         else
             log 'cant build'
 
+    # 00     00   0000000   000   000  00000000  
+    # 000   000  000   000  000   000  000       
+    # 000000000  000   000   000 000   0000000   
+    # 000 0 000  000   000     000     000       
+    # 000   000   0000000       0      00000000  
+    
     moveBot: (bot, pos, face) ->
         
         wbot = @world.botAtPos(pos)

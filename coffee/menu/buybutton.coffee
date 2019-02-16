@@ -96,8 +96,9 @@ class BuyButton extends CanvasButton
         
         for stone in Stone.resources
             
-            @meshes[stone]?.parent.remove @meshes[stone]
-            @meshes[stone+4]?.parent.remove @meshes[stone+4]
+            @meshes[stone]?.parent?.remove @meshes[stone]
+            @meshes[stone+4]?.parent?.remove @meshes[stone+4]
+            delete @meshes[stone]
             delete @meshes[stone+4]
 
             if cost[stone]

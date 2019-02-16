@@ -51,7 +51,7 @@ class ToggleButton extends CanvasButton
         @scene.add new THREE.AmbientLight 0xffffff
         
         @camera.fov = 40
-        @camera.position.copy vec(0.3,0.6,1).normal().mul 12
+        @camera.position.copy vec(0.1,0.3,1).normal().mul 12
         @camera.lookAt vec 0,0,0
         
     highlight: -> 

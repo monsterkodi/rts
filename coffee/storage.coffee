@@ -46,10 +46,10 @@ class Storage extends CanvasButton
 
     willSend: (stone) -> @temp[stone] += 1
         
-    canBuild: -> 
+    deductBuild: -> 
         
-        if @stones[Stone.white] >= 20
-            @stones[Stone.white] -= 20
+        if @canAfford state.science.build.cost
+            @deduct state.science.build.cost
             @dirty = true
             return true
         false
@@ -83,6 +83,8 @@ class Storage extends CanvasButton
     
     initScene: ->
                 
+        @scene.background = new THREE.Color 0x181818
+        
         @light = new THREE.DirectionalLight 0xffffff
         @light.position.set 0,10,6
         @scene.add @light

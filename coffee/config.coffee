@@ -31,6 +31,7 @@ module.exports =
             
         brain:
             mine: speed: 0.5
+            state: 'on'
             
         build:
             mine: speed: 0.5
@@ -42,14 +43,31 @@ module.exports =
             sell:
                 red:   4
                 gelb:  4
-                blue:  3
-                white: 3
+                blue:  4
+                white: 4
                 stone: Stone.red
             buy: 
                 stone: Stone.blue
             
         science:
-            path: 
-                length: 2
+            mine:
+                speed:  2.0
+                limit:  2
+            trade:
+                speed:  0.5
+                sell:   4
+            brain:
+                speed:  0.5
+                price:  1.0
+            base:
+                speed:  0.1
+                prod:   [1,1,0,0]
+            tube:
                 speed:  0.5
                 gap:    0.2
+            build:
+                cost:   [0,0,0,8]
+            path: 
+                length: 2
+                
+                

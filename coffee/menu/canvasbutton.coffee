@@ -36,13 +36,38 @@ class CanvasButton
         
         @canvas.button = @        
         @scene = new THREE.Scene()
-        @scene.background = new THREE.Color 0x181818
+        @scene.background = new THREE.Color 0x202020
         
         @camera = new THREE.PerspectiveCamera 30, @width/@height, 0.01, 100
                 
         @initScene()
         
     del: => @canvas.remove()
+
+    initScene: ->
+                
+        @light = new THREE.DirectionalLight 0xffffff
+        @light.position.set 0,10,6
+        @scene.add @light
+        
+        @scene.add new THREE.AmbientLight 0xffffff
+        
+        @camera.fov = 40
+        @camera.position.copy vec(0.3,0.6,1).normal().mul 12
+        @camera.lookAt vec 0,0,0
+        @camera.updateProjectionMatrix()
+    
+    highlight: -> 
+
+        @camera.fov = 33
+        @camera.updateProjectionMatrix()
+        @render()
+    
+    unhighlight: ->
+
+        @camera.fov = 40
+        @camera.updateProjectionMatrix()
+        @render()
         
     render: ->
 
@@ -60,23 +85,23 @@ class CanvasButton
     geomForState: (state) ->
         
         switch state
-            when 'on'  
+            when 'off'  
                 geom = new THREE.Geometry
-                geom.vertices.push vec -2,  2,  1
-                geom.vertices.push vec -2, -2,  1
-                geom.vertices.push vec  2,  0,  1
-                geom.vertices.push vec -2,  2,  0
-                geom.vertices.push vec  2,  0,  0
+                geom.vertices.push vec -1.5,  2,  1.5
+                geom.vertices.push vec -1.5, -2,  1.5
+                geom.vertices.push vec  2.0,  0,  1.5
+                geom.vertices.push vec -1.5,  2,  0
+                geom.vertices.push vec  2.0,  0,  0
                 geom.faces.push new THREE.Face3 0, 1, 2
                 geom.faces.push new THREE.Face3 3, 0, 4
                 geom.faces.push new THREE.Face3 0, 2, 4
                 geom.computeFaceNormals()
                 geom.computeFlatVertexNormals()
                 
-            when 'off' 
-                left  = new THREE.BoxGeometry 2,4,1
+            when 'on' 
+                left  = new THREE.BoxGeometry 2,4,1.5
                 left.translate -1.5, 0, 0     
-                right = new THREE.BoxGeometry 2,4,1
+                right = new THREE.BoxGeometry 2,4,1.5
                 right.translate 1.5, 0, 0
                 geom  = new THREE.Geometry
                 geom.merge left

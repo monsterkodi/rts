@@ -29,7 +29,7 @@ class RTS
         
         window.rts = @
         
-        @menuBorderWidth = 4
+        @menuBorderWidth = 50
         
         @fps = new FPS
         @paused = false
@@ -94,9 +94,10 @@ class RTS
         document.addEventListener 'mouseup',   @onMouseUp
         document.addEventListener 'dblclick',  @onDblClick
         
-        @menu  = new Menu
+        @menu = new Menu
         
         @lastAnimationTime = window.performance.now()
+                
         @animationStep()
 
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  

@@ -58,6 +58,8 @@ class BotButton extends CanvasButton
         
     initScene: ->
         
+        @scene.background = new THREE.Color 0x181818
+        
         @light = new THREE.DirectionalLight 0xffffff
         @light.position.set -2,-2,2
         @scene.add @light
@@ -79,7 +81,6 @@ class BotButton extends CanvasButton
     
     show: (clss) ->
         
-        # log 'show'
         BotButton.currentlyShown?.del()
         BotButton.currentlyShown = new clss @ 
     
@@ -87,7 +88,6 @@ class BotButton extends CanvasButton
 
         SubMenu.close()
         
-        # log "highlight #{Bot.string @bot}"
         if @bot == Bot.mine or not @world.botOfType @bot
             @show BuyButton
         else 
@@ -117,10 +117,8 @@ class BotButton extends CanvasButton
     botMat: (highlight=false) ->
         
         if empty @world.botsOfType @bot
-            color = highlight and 0x555555 or 0x333333
+            if highlight then Materials.menu.inactiveHigh else Materials.menu.inactive
         else
-            color = highlight and 0xffffff or 0xcccccc
-        
-        mat = new THREE.MeshStandardMaterial color:color, metalness: 0.9, roughness: 0.75
+            if highlight then Materials.menu.activeHigh else Materials.menu.active
         
 module.exports = BotButton

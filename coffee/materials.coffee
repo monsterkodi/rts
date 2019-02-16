@@ -34,7 +34,13 @@ Materials =
                 new THREE.MeshStandardMaterial color:0x111111, dithering:false # cantAfford
     ]    
     state: 
-        on:     new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6, roughness: 0.5, dithering:false
-        off:    new THREE.MeshPhongMaterial color:0x111111, dithering:false
+        off:    new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6, roughness: 0.5, dithering:false
+        on:     new THREE.MeshPhongMaterial    color:0x111111, dithering:false
+        
+    menu:
+        active:       new THREE.MeshStandardMaterial color:0xcccccc, metalness: 0.9, roughness: 0.75
+        inactive:     new THREE.MeshStandardMaterial color:0x333333, metalness: 0.9, roughness: 0.75
+        activeHigh:   new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.75
+        inactiveHigh: new THREE.MeshStandardMaterial color:0x555555, metalness: 0.9, roughness: 0.75
     
 module.exports = Materials

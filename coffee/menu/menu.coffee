@@ -37,17 +37,17 @@ class Menu
         for bot in bots
             @buttons[Bot.string bot] = new BotButton bot, @div
             
+        @div.addEventListener 'mouseenter', @onMouseEnter
         @div.addEventListener 'mouseleave', @onMouseLeave
         @div.addEventListener 'mouseover',  @onMouseOver
         @div.addEventListener 'mouseout',   @onMouseOut
         @div.addEventListener 'mousemove',  @onMouseMove
         @div.addEventListener 'click',      @onClick
-        
+                
         post.on 'botCreated', @onBotCreated
         
     onBotCreated: (bot) => 
         
-        # log "menu.onBotCreated #{Bot.string bot.type}"
         @buttons[Bot.string bot.type].update()
         @buttons[Bot.string bot.type].highlight()
         
@@ -55,11 +55,21 @@ class Menu
     onMouseOver:  (event) => event.target.button?.highlight?()
     onMouseOut:   (event) => event.target.button?.unhighlight?()
     onMouseMove:  (event) => stopEvent event
+    onMouseEnter: (event) =>
+
+        for key,button of @buttons
+            button.scene.background = new THREE.Color 0x202020
+            button.render()
+        
     onMouseLeave: (event) => 
         
         BotButton.currentlyShown?.del()
         delete BotButton.currentlyShown
-         
+          
         SubMenu.close()
+        
+        for key,button of @buttons
+            button.scene.background = new THREE.Color 0x181818
+            button.render()                
         
 module.exports = Menu
