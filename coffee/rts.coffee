@@ -10,16 +10,17 @@
 
 { Bot } = require './constants'
 
-THREE  = require 'three'
-FPS    = require './lib/fps'
-Info   = require './lib/info'
-Debug  = require './lib/debug'
-Menu   = require './menu/menu'
-World  = require './world'
-Map    = require './map'
-Camera = require './camera'
-Handle = require './handle'
-Vector = require './lib/vector'
+THREE   = require 'three'
+FPS     = require './lib/fps'
+Info    = require './lib/info'
+Debug   = require './lib/debug'
+Menu    = require './menu/menu'
+World   = require './world'
+Map     = require './map'
+Camera  = require './camera'
+Handle  = require './handle'
+Science = require './science'
+Vector  = require './lib/vector'
 
 window.THREE = THREE
 
@@ -85,7 +86,7 @@ class RTS
             
         @world  = new Map @scene    
         @handle = new Handle @world
-        
+                
         @mouse = vec()
         @raycaster = new THREE.Raycaster()
         
@@ -196,6 +197,9 @@ class RTS
         
         if bot = @world.highBot
             log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
+            switch bot.type
+                when Bot.brain then state.brain.state = state.brain.state == 'on' and 'off' or 'on'
+                when Bot.trade then state.trade.state = state.trade.state == 'on' and 'off' or 'on'
                     
     calcMouse: (event) ->
         

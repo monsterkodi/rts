@@ -29,7 +29,7 @@ class StoneButton extends CanvasButton
         
     amount: -> 
         if @inOut == 'buy' then return 1
-        state.trade.sell[Stone.string @stone]
+        state.science.trade.sell
         
     click: -> post.emit @inOut, @stone
     

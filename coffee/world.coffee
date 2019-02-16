@@ -6,12 +6,13 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ prefs, deg2rad, first, valid, empty, log, _ } = require 'kxk'
+{ post, prefs, deg2rad, clamp, first, valid, empty, log, _ } = require 'kxk'
 
 Vector    = require './lib/vector'
 Packet    = require './packet'
 Tubes     = require './tubes'
 Storage   = require './storage'
+Science   = require './science' 
 Construct = require './construct'
 
 { Stone, Bot, Face, Edge, Bend } = require './constants'
@@ -25,8 +26,8 @@ class World
         @tubes  = new Tubes @
         @speed  = prefs.get 'speed', 1
         
-        window.state = _.clone config
-        
+        Science.initState config
+                
         @build()
         
         @construct = new Construct @
@@ -36,7 +37,13 @@ class World
         
         @updateTubes()
         
-    setSpeed: (@speed) -> prefs.set 'speed', @speed
+    setSpeed: (@speed) -> 
+        prefs.set 'speed', @speed
+        post.emit 'worldSpeed', @speed
+
+    resetSpeed: -> @setSpeed 1
+    incrSpeed: -> @setSpeed clamp 0, 10, @speed + (@speed >= 1 and  1 or  0.1)
+    decrSpeed: -> @setSpeed clamp 0, 10, @speed + (@speed >  1 and -1 or -0.1)
         
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -75,25 +82,23 @@ class World
         
         index = @indexAtPos p
         bot = 
-            type:      type
-            pos:       p
-            face:      face
-            index:     index
-            mine:
-                delay: 1/state[Bot.string type].mine.speed
-                speed: state[Bot.string type].mine.speed
+            type:  type
+            pos:   p
+            face:  face
+            index: index
             
+        bot.mine = 1/Science.mineSpeed type
+                
         switch type 
             when Bot.base
                 @base = bot
-                bot.prod =
-                    delay: 1/state.base.prod.speed
-                    speed: state.base.prod.speed
+                bot.prod = 1/state.science.base.speed
             when Bot.trade
-                bot.trade =
-                    delay: 1/state.base.prod.speed
-                    speed: state.trade.trade.speed
+                bot.trade = 1/state.science.trade.speed
+            when Bot.brain
+                bot.think = 1/state.science.brain.speed
             
+        # log 'addBot', bot
         @bots[index] = bot
         bot
 

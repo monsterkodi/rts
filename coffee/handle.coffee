@@ -10,6 +10,7 @@
 
 { Face, Bot, Stone } = require './constants'
 
+Science = require './science'
 Vector = require './lib/vector'
 
 class Handle
@@ -29,14 +30,19 @@ class Handle
     # 000   000  000       000      000   000     000     
     # 0000000    00000000  0000000  000   000     000     
     
-    delay: (delta, bot, prop, func) ->
+    delay: (delta, bot, speed, delay, func) ->
 
-        prop.delay -= delta
-        if prop.delay < 0
+        # log "delay #{Bot.string(bot.type)} #{speed} #{delay} delay:#{bot[delay]}"#, state.science[Bot.string bot.type]
+        bot[delay] -= delta
+        if bot[delay] <= 0
             if func bot
-                prop.delay += 1/prop.speed
+                if speed == 'mine'
+                    s = Science.mineSpeed bot.type
+                else
+                    s = state.science[Bot.string bot.type][speed]
+                bot[delay] += 1/s
             else
-                prop.delay = 0
+                bot[delay] = 0
             
     # 000000000  000   0000000  000   000  
     #    000     000  000       000  000   
@@ -46,21 +52,51 @@ class Handle
     
     tickBot: (delta, bot) ->
         
-        @delay delta, bot, bot.mine, @sendPacket
-            
-        storage = @world.storage
-        
+        @delay delta, bot, 'mine', 'mine', @sendPacket
+                            
         switch bot.type 
-            when Bot.base
-                @delay delta, bot, bot.prod, =>
-                    if storage.canTake Stone.red
-                        storage.add Stone.red
-                    if storage.canTake Stone.gelb
-                        storage.add Stone.gelb
-                    true
-            when Bot.trade
-                @tickTrade delta, bot
+            when Bot.base  then @tickBase  delta, bot
+            when Bot.brain then @tickBrain delta, bot
+            when Bot.trade then @tickTrade delta, bot
                 
+    # 0000000     0000000    0000000  00000000  
+    # 000   000  000   000  000       000       
+    # 0000000    000000000  0000000   0000000   
+    # 000   000  000   000       000  000       
+    # 0000000    000   000  0000000   00000000  
+    
+    tickBase: (delta, bot) ->
+        
+        @delay delta, bot, 'speed', 'prod', =>
+            storage = @world.storage
+            for stone in Stone.resources
+                amount = state.science.base.prod[stone]
+                for i in [0...amount]
+                    if storage.canTake stone
+                        storage.add stone
+            true
+    
+    # 0000000    00000000    0000000   000  000   000  
+    # 000   000  000   000  000   000  000  0000  000  
+    # 0000000    0000000    000000000  000  000 0 000  
+    # 000   000  000   000  000   000  000  000  0000  
+    # 0000000    000   000  000   000  000  000   000  
+    
+    tickBrain: (delta, bot) ->
+        
+        return if state.brain.state != 'on'
+        
+        @delay delta, bot, 'speed', 'think', =>
+            
+            if cost = Science.currentCost()
+                # log 'tickBrain', cost
+                storage = @world.storage
+                if storage.canAfford cost
+                    Science.deduct cost
+                    storage.deduct cost
+                    @costSpentAtPosFace cost, bot.pos, bot.face
+                    true
+            
     # 000000000  00000000    0000000   0000000    00000000  
     #    000     000   000  000   000  000   000  000       
     #    000     0000000    000000000  000   000  0000000   
@@ -69,23 +105,26 @@ class Handle
     
     tickTrade: (delta, bot) ->
         
-        if state.trade.state == 'on'
-            storage = @world.storage
-            @delay delta, bot, bot.trade, =>
-                sellStone  = state.trade.sell.stone
-                sellAmount = state.trade.sell[Stone.string sellStone]
-                if storage.has sellStone, sellAmount
-                    buyStone  = state.trade.buy.stone
-                    if storage.canTake buyStone
-                        # log "trade #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
-                            
-                        if @world.tubes.insertPacket bot, buyStone
-                            @world.storage.willSend buyStone
-                            storage.sub sellStone, sellAmount
-                            cost = [0,0,0,0]
-                            cost[sellStone] = sellAmount
-                            @costSpentAtPosFace cost, bot.pos, bot.face
-                            true
+        return if state.trade.state != 'on'
+        
+        @delay delta, bot, 'speed', 'trade', =>
+            
+            storage    = @world.storage
+            sellStone  = state.trade.sell
+            sellAmount = state.science.trade.sell
+            # log "sell #{sellAmount} #{Stone.string sellStone}"
+            if storage.has sellStone, sellAmount
+                buyStone = state.trade.buy
+                # log "buy #{Stone.string buyStone}"
+                if storage.canTake buyStone
+                    # log "trade #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
+                    if @world.tubes.insertPacket bot, buyStone
+                        @world.storage.willSend buyStone
+                        storage.sub sellStone, sellAmount
+                        cost = [0,0,0,0]
+                        cost[sellStone] = sellAmount
+                        @costSpentAtPosFace cost, bot.pos, bot.face
+                        true
         
     costSpentAtPosFace: (cost, pos, face) ->
         
@@ -141,7 +180,11 @@ class Handle
     # 0000000     0000000   000  0000000  0000000    
     
     buildBotHit: (bot, hit) ->
-                
+             
+        if not bot.path
+            log 'no path'
+            return 
+        
         normal = hit.norm.applyQuaternion bot.mesh.quaternion
         hitpos = bot.pos.to hit.point
 

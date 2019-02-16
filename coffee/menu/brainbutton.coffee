@@ -26,8 +26,19 @@ class BrainButton extends CanvasButton
             
         @render()
         
-    click: -> Science.queue @scienceKey
+    click: => 
+        
+        if Science.enqueue @scienceKey
+            @render()
     
+    highlight: =>
+        @high = true
+        super()
+
+    unhighlight: =>
+        @high = false
+        super()
+        
     #  0000000   0000000  00000000  000   000  00000000  
     # 000       000       000       0000  000  000       
     # 0000000   000       0000000   000 0 000  0000000   
@@ -47,6 +58,8 @@ class BrainButton extends CanvasButton
         @camera.lookAt vec 0,0,0
         @camera.updateProjectionMatrix()
     
+    stars: -> Science.nextStars @scienceKey
+        
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
     # 0000000    0000000   000 0 000  000   000  0000000   0000000    
@@ -54,6 +67,14 @@ class BrainButton extends CanvasButton
     # 000   000  00000000  000   000  0000000    00000000  000   000  
     
     render: ->
+
+        for key,mesh of @meshes
+            mesh.parent?.remove mesh
+        @meshes = {}
+        
+        stars = @stars()
+        if stars > Science.maxStars @scienceKey
+            return super()
         
         construct = rts.world.construct
         mat = Materials.menu.active
@@ -64,9 +85,6 @@ class BrainButton extends CanvasButton
         # 000   000  000   000     000     
         # 0000000     0000000      000     
         
-        @meshes.bot?.parent.remove @meshes.bot
-        delete @meshes.bot
-
         name = first @scienceKey.split '.'
         bot = Bot.base
         if name in Bot.keys
@@ -93,10 +111,7 @@ class BrainButton extends CanvasButton
         #    000     000   000  00000000   000  000       
         #    000     000   000  000        000  000       
         #    000      0000000   000        000   0000000  
-        
-        @meshes.topic?.parent.remove @meshes.topic
-        delete @meshes.topic
-        
+                
         topic = last @scienceKey.split '.'
   
         geom = switch topic 
@@ -128,8 +143,11 @@ class BrainButton extends CanvasButton
                 g.merge Geometry.box 0.05, -0.03, -0.055
                 g.merge Geometry.box 0.05,  0.03, -0.055
                 g
-                
-        geom.translate 0.17, 0.17, 0.55
+               
+        if @high
+            geom.translate 0.14, 0.15, 0.55
+        else
+            geom.translate 0.17, 0.17, 0.55
                 
         bufg = new THREE.BufferGeometry().fromGeometry geom
         mesh = new THREE.Mesh bufg, mat
@@ -141,23 +159,23 @@ class BrainButton extends CanvasButton
         # 0000000      000     000000000  0000000    0000000   
         #      000     000     000   000  000   000       000  
         # 0000000      000     000   000  000   000  0000000   
-        
-        @meshes.stars?.parent.remove @meshes.stars
-        delete @meshes.stars
-        
+                                
         g = new THREE.Geometry 
-        g.merge Geometry.star 0.1, -0.2
-        g.merge Geometry.star 0.1, -0.1
         g.merge Geometry.star 0.1,  0.0
-        g.merge Geometry.star 0.1,  0.1
-        g.merge Geometry.star 0.1,  0.2
-        g.translate 0, -0.3, 0.5
+        g.merge Geometry.star 0.1,  0.1 if stars > 1
+        g.merge Geometry.star 0.1,  0.2 if stars > 2
+        g.merge Geometry.star 0.1,  0.3 if stars > 3
+        g.merge Geometry.star 0.1,  0.4 if stars > 4
+        if @high
+            g.translate -0.1*stars/2+0.05, -0.295, 0.3
+        else
+            g.translate -0.1*stars/2+0.05, -0.3, 0.5
         
         bufg = new THREE.BufferGeometry().fromGeometry g
-        mesh = new THREE.Mesh bufg, Materials.menu.inactive
+        mesh = new THREE.Mesh bufg, Materials.menu.activeHigh
         @scene.add mesh
-        @meshes.stars = mesh
-        
+        @meshes.starsActive = mesh
+                    
         super()
         
 module.exports = BrainButton

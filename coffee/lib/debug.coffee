@@ -6,7 +6,7 @@
 0000000    00000000  0000000     0000000    0000000 
 ###
 
-{ elem, clamp, def, log, _ } = require 'kxk'
+{ post, elem, clamp, def, log, _ } = require 'kxk'
 
 class Debug
 
@@ -15,13 +15,18 @@ class Debug
         @elem = elem class:'debug', style:'position:absolute; z-index:1; bottom:10px; left:10px;'
 
         @elem.appendChild @worldSpeed = @value text:'world', value: rts.world.speed.toFixed(1),                      reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
-        @elem.appendChild @tubeSpeed  = @value text:'tube ', value: state.science.tube.speed.toFixed(1),     reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
-        @elem.appendChild @pathLength = @value text:'path ', value: state.science.path.length,               reset:@resetPath,       incr:@incrPath,       decr:@decrPath
-        @elem.appendChild @tubesGap   = @value text:'gap  ', value: state.science.tube.gap.toFixed(2), reset:@resetGap,        incr:@incrGap,        decr:@decrGap
+        @elem.appendChild @tubeSpeed  = @value text:'tube ', value: state.science.tube.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
+        @elem.appendChild @pathLength = @value text:'path ', value: state.science.path.length,           reset:@resetPath,       incr:@incrPath,       decr:@decrPath
+        @elem.appendChild @tubesGap   = @value text:'gap  ', value: state.science.tube.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
 
         document.body.appendChild @elem
+        
+        post.on 'worldSpeed', @updateWorldSpeed
 
-    del: -> @elem.remove()
+    del: -> 
+    
+        post.removeListener 'worldSpeed', @updateWorldSpeed
+        @elem.remove()
         
     # 00000000   00000000   0000000  00000000  000000000  
     # 000   000  000       000       000          000     
@@ -52,11 +57,9 @@ class Debug
     # 000   000  000   000  000   000  000      000   000  
     # 00     00   0000000   000   000  0000000  0000000    
     
-    incrWorldSpeed: => @modWorldSpeed rts.world.speed >= 1 and 1 or 0.1 
-    decrWorldSpeed: => @modWorldSpeed rts.world.speed > 1 and -1 or -0.1
-    modWorldSpeed: (d) -> 
-        rts.world.setSpeed @clampZero rts.world.speed, d, 10
-        @worldSpeed.children[2].innerHTML = rts.world.speed.toFixed 1
+    incrWorldSpeed: => rts.world.incrSpeed()
+    decrWorldSpeed: => rts.world.decrSpeed()
+    updateWorldSpeed: =>  @worldSpeed.children[2].innerHTML = rts.world.speed.toFixed 1
 
     #  0000000    0000000   00000000   
     # 000        000   000  000   000  
