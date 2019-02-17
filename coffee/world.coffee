@@ -6,7 +6,7 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ post, prefs, deg2rad, clamp, first, valid, empty, log, _ } = require 'kxk'
+{ post, prefs, deg2rad, clamp, first, valid, empty, str, log, _ } = require 'kxk'
 
 Vector    = require './lib/vector'
 Packet    = require './packet'
@@ -75,7 +75,7 @@ class World
         
         @sample -= scaledDelta
         if @sample <= 0
-            Graph.sample @storage.stones
+            Graph.sampleStorage @storage
             @sample = 1.0
         
         post.emit 'tick'
@@ -302,7 +302,7 @@ class World
             return neighbors
         
         if not @stoneAtPos(pos.minus Vector.normals[face])?
-            log 'no stone below face!'
+            log "no stone below #{vec pos} face #{Face.string face}!"
             return neighbors
             
         for dir in @dirsForFace face

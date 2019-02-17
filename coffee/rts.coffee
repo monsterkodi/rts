@@ -38,6 +38,7 @@ class RTS
         @animations = []
         
         @renderer = new THREE.WebGLRenderer antialias: true
+        @renderer.setPixelRatio window.devicePixelRatio
 
         @renderer.setClearColor Color.menu.background     
         @renderer.setSize @view.clientWidth, @view.clientHeight

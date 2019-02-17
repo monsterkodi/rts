@@ -13,14 +13,14 @@ BrainButton = require './brainbutton'
 
 class QueueButton extends BrainButton
 
-    constructor: (div, @info, @index) ->
+    constructor: (div, @info) ->
 
         super div, @info.scienceKey
         
         @canvas.classList.add 'queueButton'
 
-    stars: -> Science.queue[@index]?.stars
-    
+    stars: -> @info.stars
+  
     click: => Science.dequeue @info
     
 module.exports = QueueButton

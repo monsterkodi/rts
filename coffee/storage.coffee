@@ -19,14 +19,16 @@ class Storage extends CanvasButton
 
     constructor: (menu) ->
         
-        super menu.div
-        
         @name     = 'Storage'
         @dirty    = true
         @stones   = _.clone state.storage.stones
         @temp     = [0,0,0,0]
-              
-        @camera.updateProjectionMatrix()    
+
+        @resetBalance()
+        
+        super menu.div
+        
+    resetBalance: -> @balance = gains:[0,0,0,0], spent:[0,0,0,0]
         
     capacity: -> state.storage.capacity
         
@@ -62,23 +64,29 @@ class Storage extends CanvasButton
             if @stones[stone] < cost[stone]
                 return false
         true
+                
+    clear: -> @deduct @stones, 'clear'
+    fill:  -> @deduct [-@capacity(), -@capacity(), -@capacity(), -@capacity()], 'fill'
+
+    deduct: (cost, reason) ->
         
-    deduct: (cost) ->
-        
-        cap = @capacity()
         for stone in Stone.resources
-            @stones[stone] = clamp 0, cap, @stones[stone] - cost[stone]
-        @dirty = true
-        
-    clear: -> @deduct @stones
-    fill:  -> @deduct [-@capacity(), -@capacity(), -@capacity(), -@capacity()]
-        
-    sub: (stone, amount=1) -> @add stone, -amount
-    add: (stone, amount=1) ->
+            @add stone, -cost[stone], reason
+    
+    add: (stone, amount=1, reason=null) ->
         
         oldStones = @stones[stone]
+        
         @stones[stone] += amount
         @stones[stone] = clamp 0, @capacity(), @stones[stone]
+        
+        if not reason
+            delta = @stones[stone]-oldStones
+            if delta > 0
+                @balance.gains[stone] += delta
+            else 
+                @balance.spent[stone] -= delta
+            
         @dirty = true
     
     #  0000000   0000000  00000000  000   000  00000000  

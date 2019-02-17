@@ -95,6 +95,7 @@ class Handle
     tickBrain: (delta, bot) ->
         
         return if state.brain.state != 'on'
+        return if not bot.path
         
         @delay delta, bot, 'speed', 'think', =>
             
@@ -116,6 +117,7 @@ class Handle
     tickTrade: (delta, bot) ->
         
         return if state.trade.state != 'on'
+        return if not bot.path
         
         @delay delta, bot, 'speed', 'trade', =>
             
@@ -130,7 +132,7 @@ class Handle
                     # log "trade #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
                     if @world.tubes.insertPacket bot, buyStone
                         @world.storage.willSend buyStone
-                        storage.sub sellStone, sellAmount
+                        storage.add sellStone, -sellAmount
                         cost = [0,0,0,0]
                         cost[sellStone] = sellAmount
                         @world.spent.costAtPosFace cost, bot.pos, bot.face
@@ -162,7 +164,7 @@ class Handle
             return
         # log "handle.buyBot #{Bot.string type}"
 
-        @world.storage.deduct cost
+        @world.storage.deduct cost, 'buy'
         @world.spent.costAtPosFace cost, p, face
         bot = @world.addBot p.x,p.y,p.z, type, face
         @world.construct.botAtPos bot, p

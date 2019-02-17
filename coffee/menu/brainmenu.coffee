@@ -50,28 +50,29 @@ class BrainMenu extends BotMenu
         @div.style.width  = "500px"
         @div.style.height = "500px"
         
-        post.on 'scienceQueued', @onScienceQueued
+        post.on 'scienceQueued',   @onScienceQueued
         post.on 'scienceDequeued', @onScienceDequeued
+        post.on 'scienceUpdated',  @onScienceUpdated
            
     del: ->
-        post.removeListener 'scienceQueued', @onScienceQueued
+        post.removeListener 'scienceQueued',   @onScienceQueued
         post.removeListener 'scienceDequeued', @onScienceDequeued
+        post.removeListener 'scienceUpdated',  @onScienceUpdated
         super()
         
-    onScienceQueued: (info) => @addToQueue info
+    onScienceQueued:   (info) => @addToQueue   info
     onScienceDequeued: (info) => @delFromQueue info
+    onScienceUpdated:  (info) => @queue[info.index]?.render()
         
     addToQueue: (info) -> 
     
-        # log 'addToQueue', info
-        btn = new QueueButton @div, info, @queue.length
+        btn = new QueueButton @div, info
         btn.canvas.style.left = "#{@queue.length*100+100}px"
         btn.canvas.style.top  = "0"
         @queue.push btn
     
     delFromQueue: (info) ->
         
-        # log 'delFromQueue', info
         btn = @queue[info.index]
         @queue.splice info.index, 1
         btn.del()

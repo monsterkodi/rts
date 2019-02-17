@@ -41,11 +41,14 @@ class Science
         window.state = _.clone config
                 
         state.science = {}
+        state.progress = {}
         
         for science,cfg of Science.tree
             state.science[science] = {}
+            state.progress[science] = {}
             for key,values of cfg
                 state.science[science][key] = values.v[0]
+                state.progress[science][key] = [0,0,0,0,0,0]
                 
         # log 'initState', state.science
 
@@ -67,7 +70,7 @@ class Science
         next = @stars(scienceKey)+1
         for info in @queue
             if info.scienceKey == scienceKey
-                next = Math.max next, info.stars+1
+                next = info.stars+1
         next
 
     @maxStars: (scienceKey) -> 
@@ -78,9 +81,10 @@ class Science
     @enqueue: (scienceKey) ->
         
         stars = @nextStars scienceKey
+        [science, key] = @split scienceKey
         if stars <= @maxStars(scienceKey) and @queue.length < @maxQueue
             c     = window.debug?.cheapScience and 1 or state.scienceCost[stars]
-            times = window.debug?.fastScience and 1 or state.scienceSteps[stars]
+            times = window.debug?.fastScience and 1 or state.scienceSteps[stars]-state.progress[science][key][stars]
             cost  = [c,c,c,c]
             @queue.push scienceKey:scienceKey, stars:stars, cost:cost, times:times
             post.emit 'scienceQueued', last @queue
@@ -98,9 +102,14 @@ class Science
     @currentCost: -> first(@queue)?.cost
     @deduct: -> 
         if info = first @queue
+            [science,key] = @split info.scienceKey
+            state.progress[science][key][info.stars] += 1
             info.times -= 1
+            info.index = 0
             if info.times == 0
                 @finished info
+            else
+                post.emit 'scienceUpdated', info
             
     @finished: (info) =>
         log 'Science.finished', info

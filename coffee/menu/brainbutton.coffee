@@ -10,6 +10,7 @@
 
 { Bot, Stone } = require '../constants'
 
+Color        = require '../color'
 Science      = require '../science'
 Geometry     = require '../geometry'
 Materials    = require '../materials'
@@ -85,13 +86,14 @@ class BrainButton extends CanvasButton
         # 000   000  000   000     000     
         # 0000000     0000000      000     
         
-        name = first @scienceKey.split '.'
+        [science, key] = @scienceKey.split '.'
+        
         bot = Bot.base
-        if name in Bot.keys
-            bot  = Bot[name]
+        if science in Bot.keys
+            bot  = Bot[science]
             geom = construct.botGeoms[construct.geomForBotType bot]
         else 
-            switch name 
+            switch science 
                 when 'tube', 'path'
                     geom = Geometry.tube 0.6
                 else
@@ -99,7 +101,7 @@ class BrainButton extends CanvasButton
             
         mesh = new THREE.Mesh geom, mat
         
-        switch name
+        switch science
             when 'trade', 'brain'
                 mesh.rotateX deg2rad -90
         
@@ -112,9 +114,7 @@ class BrainButton extends CanvasButton
         #    000     000   000  000        000  000       
         #    000      0000000   000        000   0000000  
                 
-        topic = last @scienceKey.split '.'
-  
-        geom = switch topic 
+        geom = switch key 
             when 'limit', 'length'
                 mat = Materials.stone[Stone.white]
                 g = new THREE.Geometry 
@@ -177,5 +177,11 @@ class BrainButton extends CanvasButton
         @meshes.starsActive = mesh
                     
         super()
+        
+        ctx = @canvas.getContext '2d'
+        
+        progress = 100*state.progress[science][key][stars]/state.scienceSteps[stars]
+        ctx.fillStyle = Color.menu.progress.getStyle()
+        ctx.fillRect 100-progress, 199, 2*progress, 1
         
 module.exports = BrainButton

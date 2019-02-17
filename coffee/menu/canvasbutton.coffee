@@ -44,6 +44,8 @@ class CanvasButton
                 
         @initScene()
         
+        @camera.updateProjectionMatrix() 
+        
     del: => @canvas.remove()
 
     initScene: ->
@@ -57,7 +59,6 @@ class CanvasButton
         @camera.fov = 40
         @camera.position.copy vec(0.3,0.6,1).normal().mul 12
         @camera.lookAt vec 0,0,0
-        @camera.updateProjectionMatrix()
     
     highlight: -> 
 

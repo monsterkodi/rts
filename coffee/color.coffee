@@ -15,6 +15,7 @@ Color =
     menu:
         background:      new THREE.Color 0x181818
         backgroundHover: new THREE.Color 0x202020
+        progress:        new THREE.Color 0x8888ff
 
     stone: 
         red:             new THREE.Color 0x881111
@@ -22,7 +23,13 @@ Color =
         white:           new THREE.Color 0x44aaff
         gray:            new THREE.Color 0x111111
         blue:            new THREE.Color 0x222288
-    
+
+    spent: 
+        red:             new THREE.Color 0x441111
+        gelb:            new THREE.Color 0xaa4411
+        white:           new THREE.Color 0x2288aa
+        blue:            new THREE.Color 0x2222aa
+        
     cost:
         blue:            new THREE.Color 0x4444ff
         
