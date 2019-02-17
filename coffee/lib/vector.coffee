@@ -6,7 +6,7 @@
     0      00000000   0000000     000      0000000   000   000
 ###
 
-{ rad2deg, log } = require 'kxk'
+{ deg2rad, rad2deg, log } = require 'kxk'
 
 THREE = require 'three'
 
@@ -43,7 +43,13 @@ class Vector extends THREE.Vector3
     reflect: (n) ->
         dot = 2*(@x*n.x + @y*n.y + @z*n.z)
         new Vector @x-dot*n.x, @y-dot*n.y, @z-dot*n.z
+        
+    rotate: (axis, angle) ->
+        @applyQuaternion quat().setFromAxisAngle axis, deg2rad angle
+        @
 
+    rotated: (axis, angle) -> @clone().rotate axis,angle
+        
     cross: (v) -> @clone().crossVectors(@,v)
     normalize: ->
         l = @length()
@@ -59,18 +65,22 @@ class Vector extends THREE.Vector3
     equals: (o) -> @manhattan(o) < 0.001
     same:   (o) -> @x==o.x and @y==o.y and z=o.z
 
-    fade: (o, val) ->
+    fade: (o, val) -> # linear interpolation from this (val==0) to other (val==1)
+        
         @x = @x * (1-val) + o.x * val
         @y = @y * (1-val) + o.y * val
         @z = @z * (1-val) + o.z * val
+        @
+        
+    faded: (o, val) -> @clone().fade o, val
     
     xyangle: (v) ->
+        
         thisXY  = new Vector(@x, @y).normal()
         otherXY = new Vector(v.x, v.y).normal()
         if thisXY.xyperp().dot otherXY >= 0 
             return rad2deg(Math.acos(thisXY.dot otherXY))
         -rad2deg(Math.acos(thisXY.dot otherXY))
-
         
     manhattan: (o) -> Math.abs(o.x-@x)+Math.abs(o.y-@y)+Math.abs(o.z-@z)
     dist:   (o) -> @minus(o).length()

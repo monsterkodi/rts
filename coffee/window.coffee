@@ -94,7 +94,7 @@ window.onresize = (event) ->
     
 window.onkeydown = (event) ->
     
-    log 'keydown', keyinfo.forEvent event
+    # log 'keydown', keyinfo.forEvent event
     switch keyinfo.forEvent(event).key
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
         when 'd'     then prefs.set 'debug', not prefs.get 'debug'

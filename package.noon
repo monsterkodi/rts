@@ -1,6 +1,6 @@
 name            rts
 productName     rts
-version         0.0.1
+version         0.1.0
 main            js/main.js
 author          monsterkodi
 license         Unlicense

@@ -17,6 +17,7 @@ Debug   = require './lib/debug'
 Menu    = require './menu/menu'
 World   = require './world'
 Map     = require './map'
+Color   = require './color'
 Camera  = require './camera'
 Handle  = require './handle'
 Science = require './science'
@@ -38,7 +39,7 @@ class RTS
         
         @renderer = new THREE.WebGLRenderer antialias: true
 
-        @renderer.setClearColor 0x181818        
+        @renderer.setClearColor Color.menu.background     
         @renderer.setSize @view.clientWidth, @view.clientHeight
         @renderer.shadowMap.enabled = true
         @renderer.shadowMap.type = THREE.PCFSoftShadowMap

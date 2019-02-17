@@ -219,7 +219,9 @@ class Construct
         
     colorBot: (bot) ->
         
-        if stone = @world.stoneBelowBot bot
+        stone = @world.stoneBelowBot bot
+        # log 'colorBot', Bot.string(bot.type), bot.pos, @world.posBelowBot(bot), Stone.string(@world.stoneBelowBot bot)
+        if stone in Stone.resources
             bot.mesh.material = Materials.bot[stone]
         else
             bot.mesh.material = Materials.bot[Stone.gray]

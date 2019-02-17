@@ -18,14 +18,14 @@ TradeMenu    = require './trademenu'
 BuildMenu    = require './buildmenu'
 BrainMenu    = require './brainmenu'
 Materials    = require '../materials'
+Color        = require '../color'
 
 class BotButton extends CanvasButton
 
-    constructor: (bot,div) ->
+    constructor: (@bot, div) ->
 
         super div
         
-        @bot = bot
         @world = rts.world
         
         @name = "BotButton #{Bot.string @bot}"
@@ -58,7 +58,7 @@ class BotButton extends CanvasButton
         
     initScene: ->
         
-        @scene.background = new THREE.Color 0x181818
+        @scene.background = Color.menu.background
         
         @light = new THREE.DirectionalLight 0xffffff
         @light.position.set -2,-2,2
@@ -77,7 +77,7 @@ class BotButton extends CanvasButton
             @world.highlightBot @focusBot
             rts.camera.focusOnPos @focusBot.pos
         
-    click: -> @focusNextBot()
+    click: -> rts.handle.botButtonClick @
     
     show: (clss) ->
         

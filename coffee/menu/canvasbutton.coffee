@@ -10,6 +10,8 @@
 
 { Stone } = require '../constants'
 
+Color = require '../color'
+
 class CanvasButton
     
     @renderer = null
@@ -36,7 +38,7 @@ class CanvasButton
         
         @canvas.button = @        
         @scene = new THREE.Scene()
-        @scene.background = new THREE.Color 0x202020
+        @scene.background = Color.menu.backgroundHover
         
         @camera = new THREE.PerspectiveCamera 30, @width/@height, 0.01, 100
                 

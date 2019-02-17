@@ -73,11 +73,8 @@ class BuyButton extends CanvasButton
         @camera.updateProjectionMatrix()
         @render()
         
-    click: -> 
-        
-        if @canAfford()
-            rts.handle.buyBot @bot
-            
+    click: -> rts.handle.buyButtonClick @
+                    
     canAfford: -> rts.world.storage.canAfford @cost()
     cost: -> state.cost[Bot.string @bot]
         

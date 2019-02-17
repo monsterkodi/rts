@@ -42,8 +42,11 @@ class Map extends World
                 # @addStone  0, 2, 0, Stone.white
                 # @addStone  0,-2, 0, Stone.white
                 
-        @addStone  0,0,0 #, Stone.white
-        @addStone  0,0,-1, Stone.white
+        @addStone  0, 0, 0
+        @addStone  1, 0, 0, Stone.white
+        @addStone -1, 0, 0, Stone.red
+        @addStone  0, 1, 0, Stone.gelb
+        @addStone  0,-1, 0, Stone.blue
         
         @addBot  0, 0, 1, Bot.base
         # @addBot  0, 0, 1, Bot.trade

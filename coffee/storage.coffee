@@ -12,6 +12,8 @@
 
 CanvasButton = require './menu/canvasbutton'
 Materials    = require './materials'
+Graph        = require './graph'
+Color        = require './color'
 
 class Storage extends CanvasButton
 
@@ -28,7 +30,7 @@ class Storage extends CanvasButton
         
     capacity: -> state.storage.capacity
         
-    click: -> log 'storage click'
+    click: -> Graph.toggle()
     
     animate: (delta) ->
         
@@ -63,9 +65,13 @@ class Storage extends CanvasButton
         
     deduct: (cost) ->
         
+        cap = @capacity()
         for stone in Stone.resources
-            @stones[stone] -= cost[stone]
+            @stones[stone] = clamp 0, cap, @stones[stone] - cost[stone]
         @dirty = true
+        
+    clear: -> @deduct @stones
+    fill:  -> @deduct [-@capacity(), -@capacity(), -@capacity(), -@capacity()]
         
     sub: (stone, amount=1) -> @add stone, -amount
     add: (stone, amount=1) ->
@@ -83,7 +89,7 @@ class Storage extends CanvasButton
     
     initScene: ->
                 
-        @scene.background = new THREE.Color 0x181818
+        @scene.background = Color.menu.background
         
         @light = new THREE.DirectionalLight 0xffffff
         @light.position.set 0,10,6

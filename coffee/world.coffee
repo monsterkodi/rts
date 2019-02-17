@@ -11,6 +11,8 @@
 Vector    = require './lib/vector'
 Packet    = require './packet'
 Tubes     = require './tubes'
+Spent     = require './spent'
+Graph     = require './graph'
 Storage   = require './storage'
 Science   = require './science' 
 Construct = require './construct'
@@ -24,7 +26,10 @@ class World
         @stones = {}
         @bots   = {}
         @tubes  = new Tubes @
+        @spent  = new Spent @
         @speed  = prefs.get 'speed', 1
+        
+        @sample = 0
         
         Science.initState config
                 
@@ -36,6 +41,9 @@ class World
         @construct.bots()
         
         @updateTubes()
+        
+        if prefs.get 'graph', false
+            Graph.toggle()
         
     setSpeed: (@speed) -> 
         prefs.set 'speed', @speed
@@ -57,12 +65,20 @@ class World
         
         # log 'animate', scaledDelta
         
+        @spent.animate scaledDelta
         @tubes.animate scaledDelta
         
         for bot in @getBots()
             rts.handle.tickBot scaledDelta, bot
             
         @storage.animate scaledDelta
+        
+        @sample -= scaledDelta
+        if @sample <= 0
+            Graph.sample @storage.stones
+            @sample = 1.0
+        
+        post.emit 'tick'
                     
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
@@ -267,14 +283,15 @@ class World
     # 000  0000  000       000  000   000  000   000  000   000  000   000  000   000       000  
     # 000   000  00000000  000   0000000   000   000  0000000     0000000   000   000  0000000   
     
+    dirsForFace: (face) ->
+        
+        [[Vector.PY, Vector.PZ, Vector.NY, Vector.NZ]
+         [Vector.PZ, Vector.PX, Vector.NZ, Vector.NX]
+         [Vector.PX, Vector.PY, Vector.NX, Vector.NY]
+        ][face%3]
+    
     neighborsOfFaceIndex: (faceIndex) -> 
         
-        faceDirections = [
-            [Vector.PY, Vector.PZ, Vector.NY, Vector.NZ]
-            [Vector.PZ, Vector.PX, Vector.NZ, Vector.NX]
-            [Vector.PX, Vector.PY, Vector.NX, Vector.NY]
-        ]
-
         [face, index] = @splitFaceIndex faceIndex
         pos = @posAtIndex index
         
@@ -288,7 +305,7 @@ class World
             log 'no stone below face!'
             return neighbors
             
-        for dir in faceDirections[face%3]
+        for dir in @dirsForFace face
 
             unit = Vector.normals[dir]
             fpos = pos.plus unit

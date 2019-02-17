@@ -23,7 +23,23 @@ class Enum
                 return k
 
 module.exports = 
+
+    Bot: new Enum
+        base:       1
+        mine:       2
+        trade:      3
+        build:      4
+        brain:      5
     
+    Stone: new Enum
+        red:        0
+        gelb:       1
+        blue:       2
+        white:      3
+        gray:       4
+        resources:  [0,1,2,3]
+        all:        [0..4]
+        
     Bend: new Enum
         flat:       0
         concave:    1
@@ -36,23 +52,7 @@ module.exports =
         NX:         3
         NY:         4
         NZ:         5
-                
-    Stone: new Enum
-        red:        0
-        gelb:       1
-        blue:       2
-        white:      3
-        gray:       4
-        resources:  [0,1,2,3]
-        all:        [0..4]
-        
-    Bot: new Enum
-        base:       1
-        mine:       2
-        trade:      3
-        build:      4
-        brain:      5
-        
+                                
     Geom: new Enum
         cube:       1
         cone:       2

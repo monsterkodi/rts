@@ -15,18 +15,18 @@ class Science
     @tree = 
         base:
             speed:  x:0, y:0, v:[0.1, 0.2, 0.3, 0.4, 0.5, 0.6]
-            prod:   x:0, y:1, v:[[1,1,1,1],[2,2,2,2],[4,4,4,4],[8,8,8,8],[16,16,16,16],[32,32,32,32]]
+            prod:   x:0, y:1, v:[[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[6,6,6,6],[8,8,8,8]]
         brain:
-            speed:  x:1, y:0, v:[0.5, 0.75, 1.0, 1.5, 2.0, 3.0]
-            price:  x:1, y:1, v:[1.0, 0.9,  0.8, 0.7, 0.6, 0.5]
+            speed:  x:1, y:0, v:[0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
+            price:  x:1, y:1, v:[1.0, 0.9, 0.8, 0.7, 0.6, 0.5]
         trade:
-            speed:  x:2, y:0, v:[0.5, 0.75, 1.0, 1.5, 2.0, 3.0]
+            speed:  x:2, y:0, v:[0.1, 0.2, 0.4, 0.8, 1.2, 1.6]
             sell:   x:2, y:1, v:[4, 3, 2, 1]
         mine:
-            speed:  x:3, y:0, v:[2.0,2.5,3.0,3.5,4.0,5.0]
-            limit:  x:3, y:1, v:[2,3,4,6,8,12]
+            speed:  x:3, y:0, v:[0.8, 1.0, 1.2, 1.4, 1.6, 2.0]
+            limit:  x:3, y:1, v:[2, 4, 8, 12, 16, 32]
         build:
-            cost:   x:0, y:2, v:[[0,0,0,16],[0,0,0,12],[0,0,0,8],[0,0,0,4],[0,0,0,2],[0,0,0,1]]
+            cost:   x:0, y:2, v:[[0,0,0,32],[0,0,0,24],[0,0,0,20],[0,0,0,16],[0,0,0,12],[0,0,0,8]]
         tube:
             speed:  x:1, y:2, v:[0.2, 0.3, 0.5, 0.8, 1.3, 2.0]
             gap:    x:2, y:2, v:[0.2, 0.14, 0.1, 0.07, 0.05, 0.0]
@@ -53,7 +53,7 @@ class Science
         
         switch type
             when Bot.mine then state.science.mine.speed
-            else 0.5
+            else state.nonMineSpeed
         
     @split: (scienceKey) -> scienceKey.split '.'
         
@@ -68,7 +68,6 @@ class Science
         for info in @queue
             if info.scienceKey == scienceKey
                 next = Math.max next, info.stars+1
-        # log "nextStars #{scienceKey} #{next}"
         next
 
     @maxStars: (scienceKey) -> 
@@ -80,10 +79,11 @@ class Science
         
         stars = @nextStars scienceKey
         if stars <= @maxStars(scienceKey) and @queue.length < @maxQueue
-            @queue.push scienceKey:scienceKey, stars:stars, cost:[0,0,1,0], times:10
-            # log "Science.queue #{scienceKey} #{stars+1}", @queue
+            c     = window.debug?.cheapScience and 1 or state.scienceCost[stars]
+            times = window.debug?.fastScience and 1 or state.scienceSteps[stars]
+            cost  = [c,c,c,c]
+            @queue.push scienceKey:scienceKey, stars:stars, cost:cost, times:times
             post.emit 'scienceQueued', last @queue
-            # @finished scienceKey:scienceKey, stars:stars+1
             true
             
     @dequeue: (info) -> 
@@ -103,15 +103,17 @@ class Science
                 @finished info
             
     @finished: (info) =>
-        log 'finished', info
+        log 'Science.finished', info
         info.index = 0
         @queue.shift()
-        post.emit 'scienceDequeued', info
+        
         scienceKey = info.scienceKey
         [science,key] = @split scienceKey
         
         state.science[science][key] = @tree[science][key].v[info.stars]
         switch scienceKey
             when 'path.length' then rts.world.updateTubes()
+            
+        post.emit 'scienceDequeued', info
             
 module.exports = Science

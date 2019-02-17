@@ -6,7 +6,7 @@
 000   000  000   000  000   000  0000000    0000000  00000000
 ###
 
-{ post, log, str, _ } = require 'kxk'
+{ post, empty, log, str, _ } = require 'kxk'
 
 { Face, Bot, Stone } = require './constants'
 
@@ -16,6 +16,13 @@ Vector = require './lib/vector'
 class Handle
 
     constructor: (@world) ->
+        
+    botButtonClick: (button) ->
+        
+        if empty @world.botsOfType button.bot
+            @buyBot button.bot
+        else
+            button.focusNextBot()
         
     botClicked: (bot) -> 
     
@@ -68,12 +75,15 @@ class Handle
     tickBase: (delta, bot) ->
         
         @delay delta, bot, 'speed', 'prod', =>
+            gained = [0,0,0,0]
             storage = @world.storage
             for stone in Stone.resources
                 amount = state.science.base.prod[stone]
                 for i in [0...amount]
                     if storage.canTake stone
                         storage.add stone
+                        gained[stone] += 1
+            @world.spent.gainAtPosFace gained, bot.pos, bot.face
             true
     
     # 0000000    00000000    0000000   000  000   000  
@@ -94,7 +104,7 @@ class Handle
                 if storage.canAfford cost
                     Science.deduct cost
                     storage.deduct cost
-                    @costSpentAtPosFace cost, bot.pos, bot.face
+                    @world.spent.costAtPosFace cost, bot.pos, bot.face
                     true
             
     # 000000000  00000000    0000000   0000000    00000000  
@@ -123,30 +133,37 @@ class Handle
                         storage.sub sellStone, sellAmount
                         cost = [0,0,0,0]
                         cost[sellStone] = sellAmount
-                        @costSpentAtPosFace cost, bot.pos, bot.face
+                        @world.spent.costAtPosFace cost, bot.pos, bot.face
                         true
         
-    costSpentAtPosFace: (cost, pos, face) ->
-        
-        # log 'costSpentAtPosFace', cost, pos, Face.string face
-                            
     # 0000000    000   000  000   000  
     # 000   000  000   000   000 000   
     # 0000000    000   000    00000    
     # 000   000  000   000     000     
     # 0000000     0000000      000     
+
+    buyButtonClick: (button) -> @buyBot button.bot    
     
     buyBot: (type) ->
                 
+        cost = state.cost[Bot.string type]
+        if not @world.storage.canAfford cost
+            log 'WARNING handle.buyBot -- not enough stones for bot!'
+            return
+        
+        if type == Bot.mine
+            if @world.botsOfType(type).length >= state.science.mine.limit
+                log 'WARNING handle.buyBot -- mine limit reached!'
+                return
+            
         [p, face] = @world.emptyPosFaceNearBot @world.base
         if not p?
             log 'WARNING handle.buyBot -- no space for new bot!'
             return
         # log "handle.buyBot #{Bot.string type}"
-        cost = state.cost[Bot.string type]
 
         @world.storage.deduct cost
-        @costSpentAtPosFace cost, p, face
+        @world.spent.costAtPosFace cost, p, face
         bot = @world.addBot p.x,p.y,p.z, type, face
         @world.construct.botAtPos bot, p
         rts.camera.focusOnPos p
@@ -171,6 +188,9 @@ class Handle
                     return true
             else if bot.type == Bot.base
                 @world.storage.add stone
+                gained = [0,0,0,0]
+                gained[stone] = 1
+                @world.spent.gainAtPosFace gained, bot.pos, bot.face
                 return true
                         
     # 0000000    000   000  000  000      0000000    
@@ -205,6 +225,7 @@ class Handle
             # log newPos, Face.string newFace
             rts.camera.focusOnPos rts.camera.center.plus n
             @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
+            @world.spent.costAtPosFace state.science.build.cost, bot.pos, bot.face, 0.5
             @world.moveBot bot, newPos, newFace
             @world.construct.stones()
         else

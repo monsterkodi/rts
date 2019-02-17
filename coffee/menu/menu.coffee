@@ -10,6 +10,7 @@
 
 { Bot }   = require '../constants'
 
+Color     = require '../color'
 Storage   = require '../storage'
 BotButton = require './botbutton'
 BuyButton = require './buybutton'
@@ -58,7 +59,7 @@ class Menu
     onMouseEnter: (event) =>
 
         for key,button of @buttons
-            button.scene.background = new THREE.Color 0x202020
+            button.scene.background = Color.menu.backgroundHover
             button.render()
         
     onMouseLeave: (event) => 
@@ -69,7 +70,7 @@ class Menu
         SubMenu.close()
         
         for key,button of @buttons
-            button.scene.background = new THREE.Color 0x181818
+            button.scene.background = Color.menu.background
             button.render()                
         
 module.exports = Menu
