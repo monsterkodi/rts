@@ -14,14 +14,16 @@ Color     = require '../color'
 Storage   = require '../storage'
 BotButton = require './botbutton'
 BuyButton = require './buybutton'
+SpeedButton = require './speedbutton'
 SubMenu   = require './submenu'
 
 class Menu
 
     constructor: ->
 
+        main =$ "#main"
         @div = elem class:'buttons', style:"left:0px; top:0px"
-        $("#main").appendChild @div
+        main.appendChild @div
         
         rts.world.storage = new Storage @
         
@@ -38,6 +40,8 @@ class Menu
         for bot in bots
             @buttons[Bot.string bot] = new BotButton bot, @div
             
+        @speed = new SpeedButton main
+            
         @div.addEventListener 'mouseenter', @onMouseEnter
         @div.addEventListener 'mouseleave', @onMouseLeave
         @div.addEventListener 'mouseover',  @onMouseOver
@@ -52,9 +56,9 @@ class Menu
         @buttons[Bot.string bot.type].update()
         @buttons[Bot.string bot.type].highlight()
         
-    onClick:      (event) => event.target.button?.click?()
-    onMouseOver:  (event) => event.target.button?.highlight?()
-    onMouseOut:   (event) => event.target.button?.unhighlight?()
+    onClick:      (event) => event.target.button?.click? event
+    onMouseOver:  (event) => event.target.button?.highlight? event
+    onMouseOut:   (event) => event.target.button?.unhighlight? event
     onMouseMove:  (event) => stopEvent event
     onMouseEnter: (event) =>
 

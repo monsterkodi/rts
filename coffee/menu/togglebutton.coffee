@@ -17,7 +17,7 @@ class ToggleButton extends CanvasButton
 
     constructor: (div, cb, state='off', states=['off', 'on']) ->
         
-        super div, 'toggleButton buttonCanvasInline'
+        super div, 'toggleButton canvasButtonInline'
 
         @name   = "ToggleButton"
         @states = states

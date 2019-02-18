@@ -23,7 +23,7 @@ class TradeButton extends StoneButton
         
         stone = state.trade[inOut]
         
-        super div, stone, inOut, 'tradeButton buttonCanvasInline'
+        super div, stone, inOut, 'tradeButton canvasButtonInline'
         
         @name = "TradeButton #{inOut}"
         

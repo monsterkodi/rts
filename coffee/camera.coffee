@@ -166,13 +166,13 @@ class Camera extends THREE.PerspectiveCamera
          
     fadeToPos: (v) -> 
         
-        @centerTarget = v
+        @centerTarget = vec v
         @startFadeCenter()
             
     focusOnPos: (v) ->
         
-        @centerTarget = v
-        @center = v
+        @centerTarget = vec v
+        @center = vec v
         @update()
             
     startFadeCenter: -> 

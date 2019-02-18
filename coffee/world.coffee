@@ -353,7 +353,7 @@ class World
     
     stoneBelowBot: (bot) -> @stoneAtPos @posBelowBot bot
     posBelowBot: (bot) -> bot.pos.minus Vector.normals[bot.face]            
-    roundPos:  (v) -> new Vector(v).round()
+    roundPos: (v) -> vec(v).round()
             
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
@@ -367,10 +367,7 @@ class World
         delete @highBot?.highlight
         delete @highBot
     
-    highlightPos: (v) -> 
-        
-        p = @roundPos v
-        @highlightBot @botAtPos p
+    highlightPos: (v) -> @highlightBot @botAtPos @roundPos v
         
     highlightBot: (bot) ->
         

@@ -16,7 +16,7 @@ class CanvasButton
     
     @renderer = null
 
-    constructor: (div, clss='buttonCanvas') ->
+    constructor: (div, clss='canvasButton') ->
         
         @width  = 100
         @height = 100
@@ -38,7 +38,7 @@ class CanvasButton
         
         @canvas.button = @        
         @scene = new THREE.Scene()
-        @scene.background = Color.menu.backgroundHover
+        @scene.background = Color.menu.background
         
         @camera = new THREE.PerspectiveCamera 30, @width/@height, 0.01, 100
                 

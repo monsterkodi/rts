@@ -258,8 +258,7 @@ class Construct
         geom.scale s,s,s
         
         mesh = new THREE.Mesh geom, Materials.highlight
-        p = bot.pos
-        mesh.position.set p.x, p.y, p.z
+        mesh.position.copy bot.pos
         @orientFace mesh, bot.face
         @world.scene.add mesh
         mesh

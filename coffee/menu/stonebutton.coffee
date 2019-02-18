@@ -17,7 +17,7 @@ CanvasButton = require './canvasbutton'
 
 class StoneButton extends CanvasButton
 
-    constructor: (div, stone, inOut, clss='stoneButton buttonCanvas') ->
+    constructor: (div, stone, inOut, clss='stoneButton canvasButton') ->
 
         super div, clss
 

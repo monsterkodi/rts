@@ -204,6 +204,14 @@ class Geometry
         geom = new THREE.BoxGeometry size, size, size
         geom.translate x, y, z
         geom
+        
+    @sphere: (size=1, x=0, y=0, z=0) ->
+        
+        geom = new THREE.SphereGeometry size, 6, 6
+        geom.computeFaceNormals()
+        geom.computeFlatVertexNormals()
+        geom.translate x, y, z
+        geom
 
     #  0000000  000000000   0000000   00000000   
     # 000          000     000   000  000   000  

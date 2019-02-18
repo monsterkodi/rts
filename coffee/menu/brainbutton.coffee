@@ -20,7 +20,7 @@ class BrainButton extends CanvasButton
 
     constructor: (div, scienceKey) ->
 
-        super div, 'brainButton buttonCanvas'
+        super div, 'brainButton canvasButton'
         
         @name = "BrainButton #{scienceKey}"
         @scienceKey = scienceKey
