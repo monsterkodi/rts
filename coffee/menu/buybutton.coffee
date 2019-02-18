@@ -12,6 +12,7 @@
 
 CanvasButton = require './canvasbutton'
 Materials    = require '../materials'
+Geometry     = require '../geometry' 
 
 class BuyButton extends CanvasButton
 
@@ -101,13 +102,13 @@ class BuyButton extends CanvasButton
             if cost[stone]
                 
                 if have[stone]
-                    bufg = @geomForStoneAmount stone, Math.min have[stone], cost[stone]
+                    bufg = Geometry.stoneAmount stone, Math.min have[stone], cost[stone]
                     mesh = new THREE.Mesh bufg, Materials.cost[stone]
                     @scene.add mesh
                     @meshes[stone] = mesh
                 
                 if cost[stone] > have[stone]
-                    bufg = @geomForStonesMissing stone, have[stone], cost[stone]
+                    bufg = Geometry.stonesMissing stone, have[stone], cost[stone]
                     mesh = new THREE.Mesh bufg, Materials.cost[4]
                     @scene.add mesh
                     @meshes[stone+4] = mesh

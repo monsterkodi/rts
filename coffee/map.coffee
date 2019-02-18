@@ -63,6 +63,9 @@ class Map extends World
         @addStone -4, 0, -6, Stone.gelb
         @addStone  0,-4, -6, Stone.red
         
+        @wall  0, 0,-1, 0,0,-3
+        @wall -1,-1,-2, 1,1,-2
+        
         @addBot  0, 0, 1, Bot.base
         # @addBot  0, 0, 1, Bot.trade
         # @addBot  0, 2, 1, Bot.mine

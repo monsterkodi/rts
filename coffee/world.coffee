@@ -131,6 +131,8 @@ class World
     
     moveBot: (bot, toPos, toFace=bot.face) ->
         
+        log 'moveBot', toPos
+        
         fromIndex = bot.index
         toIndex = @indexAtPos toPos
         delete @bots[fromIndex]

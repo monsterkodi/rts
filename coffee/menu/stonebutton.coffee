@@ -9,6 +9,8 @@
 { post, log, _ } = require 'kxk'
 
 { Stone } = require '../constants'
+
+Geometry  = require '../geometry'
 Materials = require '../materials'
 
 CanvasButton = require './canvasbutton'
@@ -74,7 +76,7 @@ class StoneButton extends CanvasButton
         @meshes.stone?.parent.remove @meshes.stone
         delete @meshes.stone
 
-        bufg = @geomForTrade @stone, @amount()
+        bufg = Geometry.trade @stone, @amount()
         mesh = new THREE.Mesh bufg, Materials.cost[@stone]
         @scene.add mesh
         @meshes.stone = mesh

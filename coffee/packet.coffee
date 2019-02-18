@@ -6,7 +6,7 @@
 000        000   000   0000000  000   000  00000000     000   
 ###
 
-{ deg2rad, empty, log, _ } = require 'kxk'
+{ deg2rad, empty, clamp, log, _ } = require 'kxk'
 
 THREE     = require 'three'
 Vector    = require './lib/vector'
@@ -18,13 +18,28 @@ class Packet
         
         @moved = 0
         
-        s = 0.1
+        s = 0.001
         geom = new THREE.BoxGeometry s,s,s
          
         @mesh = new THREE.Mesh geom, Materials.stone[@stone]
         @mesh.castShadow = true
         @mesh.receiveShadow = true
         world.scene.add @mesh
+        
+        @lifeTime = 0
+        rts.animate @initialScale
+        
+    initialScale: (deltaSeconds) =>
+
+        if @moved > 0.2 then return
+        
+        @lifeTime += deltaSeconds * rts.world.speed
+        @mesh.geometry.normalize()
+        timeOrTravel = clamp 0, 1, Math.max @lifeTime, @moved/0.2
+        s = Math.min timeOrTravel*0.1, 0.1
+        @mesh.geometry.scale s,s,s
+        if @moved < 0.2 and @lifeTime < 1
+            rts.animate @initialScale
         
     moveOnSegment: (seg) ->
         

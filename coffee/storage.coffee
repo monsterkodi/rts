@@ -6,12 +6,13 @@
 0000000      000      0000000   000   000  000   000   0000000   00000000
 ###
 
-{ post, deg2rad, clamp, elem, log, _ } = require 'kxk'
+{ post, clamp, menu, _ } = require 'kxk'
 
 { Stone } = require './constants'
 
 CanvasButton = require './menu/canvasbutton'
 Materials    = require './materials'
+Geometry     = require './geometry'
 Graph        = require './graph'
 Color        = require './color'
 
@@ -122,7 +123,7 @@ class Storage extends CanvasButton
             delete @meshes[stone]
             
             if @stones[stone]
-                bufg = @geomForStoneAmount stone, @stones[stone]
+                bufg = Geometry.stoneAmount stone, @stones[stone]
                 mesh = new THREE.Mesh bufg, Materials.cost[stone]
                 @scene.add mesh
                 @meshes[stone] = mesh

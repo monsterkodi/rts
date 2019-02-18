@@ -342,7 +342,6 @@ class Construct
             cube.translate p.x, p.y, p.z
             stonesides[stone].merge cube
             
-            
         for stone in Stone.all
             
             @stoneMeshes[stone]?.parent.remove @stoneMeshes[stone] 

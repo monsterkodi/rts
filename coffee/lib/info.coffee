@@ -11,7 +11,7 @@ class Info
 
     constructor: ->
                     
-        @elem = elem class:'info', style:'position:absolute; z-index:1; bottom:150px; left:10px'
+        @elem = elem class:'info', style:'position:absolute; z-index:1; bottom:10px; right:20px'
 
         @trias = elem class:'infotext', parent:@elem
         @lines = elem class:'infotext', parent:@elem

@@ -151,17 +151,17 @@ class Tubes
                 fi = @world.faceIndex bot.path.points[0].face, bot.path.points[0].index
                 si = @segIndex fi, fi
                 fakePoints = [_.cloneDeep(bot.path.points[0]), _.clone(bot.path.points[0])]
-                fakePoints[0].pos.add Vector.normals[bot.face].mul 0.6
+                fakePoints[0].pos.add Vector.normals[bot.face].mul 0.7
                 @segments[si] = 
-                    index:si
-                    from:0
-                    to:fi
-                    moves:1
+                    index:  si
+                    from:   0
+                    to:     fi
+                    moves:  1
                     packets:[]
-                    points:fakePoints
-                    dist:bot.path.length
-                    in:[]
-                    out:null
+                    points: fakePoints
+                    dist:   bot.path.length
+                    in:     []
+                    out:    null
             
         for index,segment of oldSegments
             if @segments[index]
@@ -251,15 +251,15 @@ class Tubes
                     p = 4
                 segPoints = points.slice points.length-p, points.length
                 @segments[si] = 
-                    index:si 
-                    from:path[i-1] 
-                    to:path[i] 
+                    index:  si 
+                    from:   path[i-1] 
+                    to:     path[i] 
                     packets:[] 
-                    points:segPoints
-                    dist:path.length-i
-                    moves:moves
-                    in:[]
-                    out:null
+                    points: segPoints
+                    dist:   path.length-i
+                    moves:  moves
+                    in:     []
+                    out:    null
             
             [lastFace, lastIndex] = [nextFace, nextIndex]
             lastPos = nextPos

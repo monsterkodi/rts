@@ -8,6 +8,7 @@
 
 { log, _ } = require 'kxk'
 
+Geometry     = require '../geometry'
 Materials    = require '../materials'
 CanvasButton = require './canvasbutton'
 SubMenu      = require './submenu'
@@ -79,7 +80,7 @@ class ToggleButton extends CanvasButton
         @meshes.state?.parent.remove @meshes.state
         delete @meshes.state
 
-        bufg = @geomForState @state
+        bufg = Geometry.state @state
         
         mesh = new THREE.Mesh bufg, Materials.state[@state]
         @scene.add mesh
