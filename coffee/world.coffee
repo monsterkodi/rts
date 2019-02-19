@@ -42,11 +42,13 @@ class World
         
         @updateTubes()
         
+        @spent.init()
+        
         if prefs.get 'graph', false
             Graph.toggle()
         
     setSpeed: (@speed) -> 
-        prefs.set 'speed', @speed
+        prefs.set 'speed',      @speed
         post.emit 'worldSpeed', @speed
 
     resetSpeed: -> @setSpeed 1
