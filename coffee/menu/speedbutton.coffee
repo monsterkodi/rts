@@ -6,7 +6,7 @@
 0000000   000        00000000  00000000  0000000    0000000     0000000      000        000      0000000   000   000
 ###
 
-{ clamp, deg2rad, log } = require 'kxk'
+{ post, drag, clamp, deg2rad, log } = require 'kxk'
 
 Color        = require '../color' 
 Geometry     = require '../geometry' 
@@ -22,10 +22,15 @@ class SpeedButton extends CanvasButton
         @name = 'SpeedButton'
         @scene.background = Color.menu.background
         
-        @canvas.addEventListener 'click', @onClick
-                
-        @render()
-
+        post.on 'worldSpeed', @onWorldSpeed        
+        
+        @drag = new drag
+            target:  @canvas
+            onStart: @onDrag
+            onMove:  @onDrag
+        
+        @onWorldSpeed()
+            
     initScene: ->
 
         super()
@@ -36,26 +41,42 @@ class SpeedButton extends CanvasButton
         
         merg = new THREE.Geometry
         
-        for i in [-3..3]
+        for i in [-6..6]
             geom = Geometry.sphere 0.5
             geom.rotateX deg2rad 90
-            p = vec(0,4,0).rotate vec(0,0,1), i*45
+            p = vec(0,4,0).rotate vec(0,0,1), i*22.5
             geom.translate p.x, p.y, p.z
             merg.merge geom
         
         bufg = new THREE.BufferGeometry().fromGeometry merg
         mesh = new THREE.Mesh bufg, Materials.menu.inactive
-        
         @scene.add mesh
+        
+        geom = Geometry.sphere 0.6
+        geom.rotateX deg2rad 90
+        bufg = new THREE.BufferGeometry().fromGeometry geom
+        @dot = new THREE.Mesh bufg, Materials.menu.active
+        @scene.add @dot
+        
         @light.position.set -4,4,6
         @camera.position.copy vec(0,0,1).normal().mul 10
         @camera.lookAt vec 0,0,0
         
-    onClick: (event) -> 
+    onDrag: (drag, event) => 
         
-        ctr2Pos = vec(50, 50).to vec event.offsetX, 100-event.offsetY
+        br = @canvas.getBoundingClientRect()
+        
+        ctr2Pos = vec(br.left+50, br.top+50).to drag.pos
+        ctr2Pos.y = -ctr2Pos.y
         angle = Math.sign(ctr2Pos.dot(vec 1,0,0)) * ctr2Pos.angle(vec 0,1,0)
-        sectn = clamp -3, 3, Math.round angle/45
-        log 'sectn', sectn
+        sectn = clamp -6, 6, Math.round angle/22.5
+        
+        rts.world.setSpeed sectn+6
+                
+    onWorldSpeed: =>
+        
+        p = vec(0,4,0).rotate vec(0,0,1), 180-45-rts.world.speedIndex*22.5
+        @dot.position.copy p
+        @render()
 
 module.exports = SpeedButton

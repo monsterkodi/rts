@@ -83,7 +83,7 @@ class Spent
         numStones = 0
         cost.map (c) -> numStones += c
         stoneIndex = 0
-        rotCount+=15
+        rotCount -= 15
         for stone in Stone.resources
             for i in [0...cost[stone]]
                 @spawnCost stone, stoneIndex, numStones, pos, face, radius

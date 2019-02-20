@@ -18,10 +18,10 @@ class Debug
             cheapScience: false
             fastScience: false
         
-        @worldSpeed = @value text:'world', value: rts.world.speed.toFixed(1),                      reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
-        @tubeSpeed  = @value text:'tube ', value: state.science.tube.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
+        # @worldSpeed = @value text:'world', value: rts.world.speed.toFixed(1),          reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
+        # @tubeSpeed  = @value text:'tube ', value: state.science.tube.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
+        # @tubesGap   = @value text:'gap  ', value: state.science.tube.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
         @pathLength = @value text:'path ', value: state.science.path.length,           reset:@resetPath,       incr:@incrPath,       decr:@decrPath
-        @tubesGap   = @value text:'gap  ', value: state.science.tube.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
         @button text:'fill  storage', cb: -> rts.world.storage.fill()
         @button text:'clear storage', cb: -> rts.world.storage.clear()
         @toggle text:'cheap science', obj:window.debug, key:'cheapScience'

@@ -29,7 +29,7 @@ class World
         @tubes  = new Tubes @
         @spent  = new Spent @
         @boxes  = new Boxes @ 
-        @speed  = prefs.get 'speed', 1
+        @setSpeed prefs.get 'speed', 6
         
         @sample = 0
         
@@ -47,13 +47,15 @@ class World
         if prefs.get 'graph', false
             Graph.toggle()
         
-    setSpeed: (@speed) -> 
-        prefs.set 'speed',      @speed
-        post.emit 'worldSpeed', @speed
+    setSpeed: (speedIndex) -> 
+        @speedIndex = clamp 0, 12, speedIndex
+        @speed = [1/8, 3/16, 1/4, 3/8, 1/2, 3/4, 1, 3/2, 2, 3, 4, 6, 8][@speedIndex]
+        prefs.set 'speed',      @speedIndex
+        post.emit 'worldSpeed', @speed, @speedIndex
 
-    resetSpeed: -> @setSpeed 1
-    incrSpeed: -> @setSpeed clamp 0, 10, @speed + (@speed >= 1 and  1 or  0.1)
-    decrSpeed: -> @setSpeed clamp 0, 10, @speed + (@speed >  1 and -1 or -0.1)
+    resetSpeed: -> @setSpeed 6
+    incrSpeed:  -> @setSpeed @speedIndex + 1
+    decrSpeed:  -> @setSpeed @speedIndex - 1
         
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
