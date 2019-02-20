@@ -276,11 +276,8 @@ class RTS
         @fps.draw()
 
         if prefs.get 'info'
-            info = _.clone @renderer.info.render
-            info.segments = @world.tubes.getSegments().length
-            info.packets  = @world.tubes.getPackets().length
             @info = new Info if not @info
-            @info.draw info
+            @info.draw()
         else if @info?
             @info.del()
             delete @info

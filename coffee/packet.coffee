@@ -31,16 +31,16 @@ class Packet
         
     initialScale: (deltaSeconds) =>
 
-        if @moved > 0.2 then return
-        
         @lifeTime += deltaSeconds * rts.world.speed
         @mesh.geometry.normalize()
-        timeOrTravel = clamp 0, 1, Math.max @lifeTime, @moved/0.2
+        timeOrTravel = clamp 0, 1, Math.max @lifeTime, @moved*5
         s = Math.min timeOrTravel*0.1, 0.1
         @mesh.geometry.scale s,s,s
-        if @moved < 0.2 and @lifeTime < 1
-            rts.animate @initialScale
+        if s < 0.1
+            rts.animate @initialScale            
         
+    move: (delta) -> @moved += delta
+            
     moveOnSegment: (seg) ->
         
         points = seg.points

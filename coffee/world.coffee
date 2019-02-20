@@ -11,6 +11,7 @@
 Vector    = require './lib/vector'
 Packet    = require './packet'
 Tubes     = require './tubes'
+Boxes     = require './boxes'
 Spent     = require './spent'
 Graph     = require './graph'
 Storage   = require './storage'
@@ -27,6 +28,7 @@ class World
         @bots   = {}
         @tubes  = new Tubes @
         @spent  = new Spent @
+        @boxes  = new Boxes @ 
         @speed  = prefs.get 'speed', 1
         
         @sample = 0
@@ -41,8 +43,6 @@ class World
         @construct.bots()
         
         @updateTubes()
-        
-        @spent.init()
         
         if prefs.get 'graph', false
             Graph.toggle()
@@ -67,6 +67,7 @@ class World
         
         # log 'animate', scaledDelta
         
+        @boxes.animate scaledDelta
         @spent.animate scaledDelta
         @tubes.animate scaledDelta
         
@@ -133,7 +134,7 @@ class World
     
     moveBot: (bot, toPos, toFace=bot.face) ->
         
-        log 'moveBot', toPos
+        # log 'moveBot', toPos
         
         fromIndex = bot.index
         toIndex = @indexAtPos toPos

@@ -8,6 +8,7 @@
 
 { clamp, deg2rad, log } = require 'kxk'
 
+Color        = require '../color' 
 Geometry     = require '../geometry' 
 Materials    = require '../materials'
 CanvasButton = require './canvasbutton'
@@ -19,6 +20,7 @@ class SpeedButton extends CanvasButton
         super div, 'speedButton canvasButtonInline'
         
         @name = 'SpeedButton'
+        @scene.background = Color.menu.background
         
         @canvas.addEventListener 'click', @onClick
                 

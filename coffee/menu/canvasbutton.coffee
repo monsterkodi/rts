@@ -38,7 +38,7 @@ class CanvasButton
         
         @canvas.button = @        
         @scene = new THREE.Scene()
-        @scene.background = Color.menu.background
+        @scene.background = Color.menu.backgroundHover
         
         @camera = new THREE.PerspectiveCamera 30, @width/@height, 0.01, 100
                 

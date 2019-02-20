@@ -6,17 +6,14 @@
 0000000   000        00000000  000   000     000
 ###
 
-{ valid, pos, log } = require 'kxk'
+{ deg2rad, valid, pos, log } = require 'kxk'
 
 
-{ Stone, Face } = require './constants'
+{ Stone, Face, Bot } = require './constants'
 
-THREE     = require 'three'
 Vector    = require './lib/vector'
 Color     = require './color'
 Materials = require './materials'
-
-require('three-instanced-mesh')(THREE)
 
 rotCount = 0
 
@@ -27,64 +24,39 @@ class Spent
         @spent = []
         @gains = []
         
-    init: ->
-        
-        geom = new THREE.BoxBufferGeometry(0.1,0.1,0.1,1,1,1)
-        
-        @cluster = new THREE.InstancedMesh geom, Materials.white, 
-            1000,                       
-            true, # is it dynamic
-            true, # does it have color
-            true, # uniform scale, if you know that the placement function will not do a non-uniform scale, this will optimize the shader
-        
-        v3 = new THREE.Vector3()
-        
-        for i in [0...1000]
-            @cluster.setScaleAt i, v3.set(1,1,1) 
-            @cluster.setColorAt i, Color.stones[Math.round Math.random()*4]
-            @cluster.setPositionAt i , v3.set Math.random() , Math.random(), Math.random() 
-        
-        @world.scene.add @cluster 
-        
     animate: (delta) ->
-
-        # v3 = new THREE.Vector3()
-        # q  = new THREE.Quaternion()
         
-        # for i in [0...1000]
-            # @cluster.setQuaternionAt i , q 
-            # @cluster.setPositionAt i , v3.set Math.random() , Math.random(), Math.random() 
-        
-        @cluster.needsUpdate()
         if valid @spent
             for i in [@spent.length-1..0]
-                mesh = @spent[i]
-                mesh.position.add mesh.dir.mul 0.4*delta/mesh.maxLife
-                mesh.life -= delta
-                s = Math.min 1.0, mesh.life
-                mesh.geometry.scale s,s,s
-                if mesh.life <= 0
-                    @world.scene.remove mesh
+                box = @spent[i]
+                pos = @world.boxes.pos box
+                rot = @world.boxes.rot box
+                pos.add box.dir.mul 0.4*delta/box.maxLife
+                box.life -= delta
+                s = Math.min 1.0, box.life
+                @world.boxes.setPos box, pos
+                @world.boxes.setSize box, s*0.05
+                @world.boxes.setRot box, rot.multiply box.rot
+                if box.life <= 0
+                    @world.boxes.del box
                     @spent.splice i, 1
 
         if valid @gains
             for i in [@gains.length-1..0]
-                mesh = @gains[i]
-                mesh.life -= delta
-                if not mesh.bot?
+                box = @gains[i]
+                box.life -= delta
+                if not box.bot?
                     log 'no bot? splice!'
                     @gains.splice i, 1
                     continue
-                newPos = mesh.bot.pos.faded mesh.startPos, mesh.life/mesh.maxLife
-                mesh.position.copy newPos
-                mesh.geometry.normalize()
-                s = Math.min 0.1, 0.1*(mesh.maxLife-mesh.life)
-                mesh.geometry.scale s,s,s
-                s = Math.min 1.0, mesh.life
-                if mesh.life <= 0
-                    @world.scene.remove mesh
+                newPos = box.bot.pos.faded box.startPos, box.life/box.maxLife
+                @world.boxes.setPos box, newPos
+                s = Math.min 0.1, 0.1*(box.maxLife-box.life)
+                @world.boxes.setSize box, s
+                if box.life <= 0
+                    @world.boxes.del box
                     @gains.splice i, 1
-
+                    
     gainAtPosFace: (cost, pos, face) ->
 
         numStones = 0
@@ -95,6 +67,17 @@ class Spent
                 @spawnGain stone, stoneIndex, numStones, pos, face
                 stoneIndex += 1
 
+    costAtBot: (cost, bot) ->
+        
+        radius = switch bot.type
+            when Bot.build then 0.10
+            when Bot.trade then 0.22
+            when Bot.mine  then 0.13
+            when Bot.brain then 0.18
+            else 0.8
+        
+        @costAtPosFace cost, bot.pos, bot.face, radius
+                
     costAtPosFace: (cost, pos, face, radius=0.23) ->
 
         numStones = 0
@@ -108,36 +91,35 @@ class Spent
 
     spawnCost: (stone, stoneIndex, numStones, pos, face, radius) ->
 
-        s = 0.05
-        geom = new THREE.BoxGeometry s,s,s
-
-        mesh = new THREE.Mesh geom, Materials.stone[stone]
-        mesh.castShadow = true
-        mesh.life = mesh.maxLife = 6
-        mesh.dir = Vector.normals[@world.dirsForFace(face)[0]].clone()
-        mesh.dir.rotate Vector.normals[face], rotCount+360*stoneIndex/numStones
-        mesh.position.copy pos.plus mesh.dir.mul radius
-        @spent.push mesh
-        @world.scene.add mesh
+        dir = Vector.normals[@world.dirsForFace(face)[0]].clone()
+        angle = rotCount+360*stoneIndex/numStones
+        dir.rotate Vector.normals[face], angle
+        
+        startPos = pos.plus dir.mul radius
+         
+        rot = quat().setFromAxisAngle Vector.normals[face], deg2rad angle+45
+        axis = Vector.normals[(face+1)%6].clone().applyQuaternion rot
+        rot.premultiply quat().setFromAxisAngle axis, deg2rad 45
+        
+        box = @world.boxes.add pos:startPos, size:0.05, stone:stone, rot:rot
+        box.dir = dir
+        box.rot = quat().setFromAxisAngle Vector.normals[face], deg2rad 1
+        box.life = box.maxLife = 6
+        @spent.push box
 
     spawnGain: (stone, stoneIndex, numStones, pos, face) ->
 
-        s = 0.001
-        geom = new THREE.BoxGeometry s,s,s
-
-        mesh = new THREE.Mesh geom, Materials.stone[stone]
-        mesh.castShadow = true
-        mesh.life = mesh.maxLife = 4
         if numStones > 1
             dir = Vector.normals[@world.dirsForFace(face)[0]].clone()
             dir.rotate Vector.normals[face], 360*stoneIndex/numStones
-            mesh.startPos = pos.plus dir.plus(Vector.normals[face].mul 0.5).normal().mul 0.6
+            startPos = pos.plus dir.plus(Vector.normals[face].mul 0.5).normal().mul 0.6
         else
-            mesh.startPos = pos.plus Vector.normals[face].mul 0.5
-
-        mesh.position.copy mesh.startPos
-        mesh.bot = rts.world.botAtPos pos
-        @gains.push mesh
-        @world.scene.add mesh
+            startPos = pos.plus Vector.normals[face].mul 0.5
+        
+        box = @world.boxes.add pos:startPos, size:0.001, stone:stone, dir:pos.to startPos
+        box.startPos = startPos
+        box.bot = rts.world.botAtPos pos
+        box.life = box.maxLife = 4
+        @gains.push box
 
 module.exports = Spent

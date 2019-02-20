@@ -105,7 +105,7 @@ class Handle
                 if storage.canAfford cost
                     Science.deduct cost
                     storage.deduct cost
-                    @world.spent.costAtPosFace cost, bot.pos, bot.face
+                    @world.spent.costAtBot cost, bot
                     true
             
     # 000000000  00000000    0000000   0000000    00000000  
@@ -135,7 +135,7 @@ class Handle
                         storage.add sellStone, -sellAmount
                         cost = [0,0,0,0]
                         cost[sellStone] = sellAmount
-                        @world.spent.costAtPosFace cost, bot.pos, bot.face
+                        @world.spent.costAtBot cost, bot
                         true
         
     # 0000000    000   000  000   000  
@@ -165,8 +165,8 @@ class Handle
         # log "handle.buyBot #{Bot.string type}"
 
         @world.storage.deduct cost, 'buy'
-        @world.spent.costAtPosFace cost, p, face
         bot = @world.addBot p.x,p.y,p.z, type, face
+        @world.spent.costAtBot cost, bot
         @world.construct.botAtPos bot, p
         rts.camera.focusOnPos p
         @world.highlightBot bot
@@ -227,7 +227,7 @@ class Handle
             # log newPos, Face.string newFace
             rts.camera.focusOnPos rts.camera.center.plus n
             @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
-            @world.spent.costAtPosFace state.science.build.cost, bot.pos, bot.face, 0.5
+            @world.spent.costAtBot state.science.build.cost, bot
             @world.moveBot bot, newPos, newFace
             @world.construct.stones()
         else

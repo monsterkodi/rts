@@ -104,20 +104,20 @@ class Tubes
                         nextDist = (seg.packets[pckIndex+1].moved - @gap()) - pck.moved
                         
                     moveDist = Math.min delta * @speed(), nextDist
-                    pck.moved += moveDist 
+                    pck.move moveDist 
                     
                     if pck.moved >= seg.moves
                         if pck == first outSeg.queue
                             outSeg.queue.shift()
                         @insertPacketIntoSegment pck, outSeg
                         seg.packets.pop()
-                        pck.moved -= seg.moves
+                        pck.move -seg.moves
                         pck.moveOnSegment outSeg
                     else
                         pck.moveOnSegment seg
                 else
                     
-                    pck.moved += delta * @speed()
+                    pck.move delta * @speed()
                     if pck.moved >= seg.moves
                         pck = seg.packets.pop()
                         @world.storage.add pck.stone
