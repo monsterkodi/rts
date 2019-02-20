@@ -5,8 +5,9 @@ main            js/main.js
 author          monsterkodi
 license         Unlicense
 dependencies
-                kxk     ../kxk
-                three   ^0.100.0
+                kxk             ../kxk
+                three           ^0.100.0
+                three-instanced-mesh  ^0.96.2
 devDependencies
                 electron        ^4.0.3
                 electron-packager  ^13.0.1

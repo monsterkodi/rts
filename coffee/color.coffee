@@ -20,15 +20,15 @@ Color =
     stone: 
         red:             new THREE.Color 0x881111
         gelb:            new THREE.Color 0xff8822
+        blue:            new THREE.Color 0x222288
         white:           new THREE.Color 0x44aaff
         gray:            new THREE.Color 0x111111
-        blue:            new THREE.Color 0x222288
 
     spent: 
         red:             new THREE.Color 0x441111
         gelb:            new THREE.Color 0xaa4411
-        white:           new THREE.Color 0x2288aa
         blue:            new THREE.Color 0x2222aa
+        white:           new THREE.Color 0x2288aa
         
     cost:
         blue:            new THREE.Color 0x4444ff
@@ -45,5 +45,7 @@ Color.bot.red   = Color.stone.red
 Color.bot.gelb  = Color.stone.gelb
 Color.bot.blue  = Color.stone.blue
 Color.bot.white = Color.stone.white
+
+Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray]
         
 module.exports = Color
