@@ -31,6 +31,12 @@ class Packet
         @lifeTime = 0
         rts.animate @initialScale
         
+    #  0000000   0000000   0000000   000      00000000  
+    # 000       000       000   000  000      000       
+    # 0000000   000       000000000  000      0000000   
+    #      000  000       000   000  000      000       
+    # 0000000    0000000  000   000  0000000  00000000  
+    
     initialScale: (deltaSeconds) =>
 
         @lifeTime += deltaSeconds * rts.world.speed
@@ -44,6 +50,12 @@ class Packet
         if s < 0.1
             rts.animate @initialScale            
         
+    # 00     00   0000000   000   000  00000000  
+    # 000   000  000   000  000   000  000       
+    # 000000000  000   000   000 000   0000000   
+    # 000 0 000  000   000     000     000       
+    # 000   000   0000000       0      00000000  
+    
     move: (delta) -> @moved += delta
             
     moveOnSegment: (seg) ->
@@ -75,6 +87,12 @@ class Packet
         rts.world.boxes.setPos @box, tgt
         
         # @mesh.position.copy tgt
+    
+    # 0000000    00000000  000      
+    # 000   000  000       000      
+    # 000   000  0000000   000      
+    # 000   000  000       000      
+    # 0000000    00000000  0000000  
     
     del: -> 
     

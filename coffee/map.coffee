@@ -20,27 +20,47 @@ class Map extends World
         super scene, Config.default
         
     build: ->
+        
+        # @grid()
+        # @plenty()
+        @sparse()
+        
+    sparse: ->
+        
+        @addStone  0, 0,  0
+        @addStone  8, 8,  0, Stone.red
+        @addStone  8, -8, 0, Stone.gelb
+        @addStone -8,  8, 0, Stone.white
+        @addStone -8, -8, 0, Stone.blue
+        
+        @addBot  0, 0, 1, Bot.base
+        
+    grid: ->
 
-        # @addStone  0, 0,-1
-        # @addStone  3, 0, 0
-        # @addStone -2, 0, 0
-        # @addStone -3, 0, 0
-        # @addStone  2, 0, 0
+        @addStone  0, 0,-1
+        @addStone  3, 0, 0
+        @addStone -2, 0, 0
+        @addStone -3, 0, 0
+        @addStone  2, 0, 0
                 
-        # for z in [0..0]
-            # for y in [-5..5]
-                # @wall -20,y*4,z*2, 20,y*4,z*2
-                # @wall y*4,-20,z*2, y*4,20,z*2
+        for z in [0..0]
+            for y in [-5..5]
+                @wall -20,y*4,z*2, 20,y*4,z*2
+                @wall y*4,-20,z*2, y*4,20,z*2
 
-        # for x in [-2..2]
-            # for y in [-2..2]
-#                 
-                # @addStone  x*8-1, y*8,   0, Stone.red
-                # @addStone  x*8,   y*8-1, 0, Stone.gelb
-                # @addStone  x*8,   y*8+1, 0, Stone.white
-                # @addStone  x*8+1, y*8,   0, Stone.blue
-                # @addStone  0, 2, 0, Stone.white
-                # @addStone  0,-2, 0, Stone.white
+        for x in [-2..2]
+            for y in [-2..2]
+                 
+                @addStone  x*8-1, y*8,   0, Stone.red
+                @addStone  x*8,   y*8-1, 0, Stone.gelb
+                @addStone  x*8,   y*8+1, 0, Stone.white
+                @addStone  x*8+1, y*8,   0, Stone.blue
+                @addStone  0,       2,   0, Stone.white
+                @addStone  0,      -2,   0, Stone.white
+                
+        @addBot  0, 0, 1, Bot.base
+                
+    plenty: ->
                 
         @addStone  0, 0, 0
         @addStone  1, 0, 0, Stone.white
@@ -67,7 +87,5 @@ class Map extends World
         @wall -1,-1,-2, 1,1,-2
         
         @addBot  0, 0, 1, Bot.base
-        # @addBot  0, 0, 1, Bot.trade
-        # @addBot  0, 2, 1, Bot.mine
         
 module.exports = Map

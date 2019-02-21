@@ -14,8 +14,8 @@ Materials =
     
     white:      new THREE.MeshStandardMaterial color:0xffffff
     highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2
-    path:       new THREE.MeshStandardMaterial color:0xbbbbbb, metalness: 0.9, roughness: 0.5
     spent:      new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6, roughness: 0.7, side:THREE.DoubleSide
+    path:       new THREE.MeshStandardMaterial color:Color.path, metalness: 0.9, roughness: 0.5
     stone: [   
                 new THREE.MeshStandardMaterial color:Color.stone.red,   dithering:true # red
                 new THREE.MeshStandardMaterial color:Color.stone.gelb,  dithering:true # gelb
@@ -38,13 +38,13 @@ Materials =
                 new THREE.MeshStandardMaterial color:Color.cost.gray,   dithering:false # cantAfford
     ]    
     state: 
-        off:    new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6, roughness: 0.5, dithering:false
-        on:     new THREE.MeshPhongMaterial    color:0x111111, dithering:false
+        off:    new THREE.MeshStandardMaterial color:Color.menu.state.off, metalness: 0.6, roughness: 0.5, dithering:false
+        on:     new THREE.MeshPhongMaterial    color:Color.menu.state.on,  dithering:false
         
     menu:
-        active:       new THREE.MeshStandardMaterial color:0xcccccc, metalness: 0.9, roughness: 0.75
-        inactive:     new THREE.MeshStandardMaterial color:0x333333, metalness: 0.9, roughness: 0.75
-        activeHigh:   new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.9, roughness: 0.75
-        inactiveHigh: new THREE.MeshStandardMaterial color:0x555555, metalness: 0.9, roughness: 0.75
+        active:       new THREE.MeshStandardMaterial color:Color.menu.active,       metalness: 0.9, roughness: 0.75
+        inactive:     new THREE.MeshStandardMaterial color:Color.menu.inactive,     metalness: 0.9, roughness: 0.75
+        activeHigh:   new THREE.MeshStandardMaterial color:Color.menu.activeHigh,   metalness: 0.9, roughness: 0.75
+        inactiveHigh: new THREE.MeshStandardMaterial color:Color.menu.inactiveHigh, metalness: 0.9, roughness: 0.75
     
 module.exports = Materials
