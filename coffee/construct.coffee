@@ -10,7 +10,9 @@
 
 THREE     = require 'three'
 Vector    = require './lib/vector'
+Geometry  = require './geometry'
 Materials = require './materials'
+ThreeBSP  = require('three-js-csg')(THREE)
 
 { Stone, Bot, Geom, Face } = require './constants'
 
@@ -233,6 +235,41 @@ class Construct
     # 0000000     0000000      000     
     
     dot: (bot) ->
+        
+        if false
+            box1   = new THREE.Mesh new THREE.BoxGeometry 0.1, 0.1, 0.4
+            box2   = new THREE.Mesh new THREE.BoxGeometry 0.1, 0.4, 0.1
+            box3   = new THREE.Mesh new THREE.BoxGeometry 0.4, 0.1, 0.1
+            sphere = new THREE.Mesh new THREE.Geometry().fromBufferGeometry Geometry.cornerBox()
+            sphere.geometry.rotateX deg2rad 90
+            s = 0.2
+            sphere.geometry.scale s,s,s
+     
+            sBSP = new ThreeBSP sphere
+            b1 = new ThreeBSP box1
+            b2 = new ThreeBSP box2
+            b3 = new ThreeBSP box3
+     
+            sub = sBSP.subtract(b1).subtract(b2).subtract(b3)
+            newMesh = sub.toMesh()
+            geom = new THREE.Geometry
+            geom.copy newMesh.geometry
+            
+            bot.dot = new THREE.Mesh geom, Materials.path
+            bot.dot.castShadow = true
+            bot.dot.receiveShadow = true
+            @world.scene.add bot.dot
+            
+            sphere = new THREE.SphereGeometry 0.1, 6, 6
+            sphere.computeFaceNormals()
+            sphere.rotateX deg2rad 90
+            sphere.computeFlatVertexNormals()
+        
+            bot.dot = new THREE.Mesh geom, Materials.path
+            bot.dot.castShadow = true
+            bot.dot.receiveShadow = true
+            @world.scene.add bot.dot
+            return
         
         sphere = new THREE.SphereGeometry 0.1, 6, 6
         sphere.computeFaceNormals()

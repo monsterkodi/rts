@@ -12,6 +12,74 @@ class Geometry
     
     @cache = {}
     
+    @cornerBox: ->
+                    
+        s = 0.45
+        o = 0.5
+        i = 0.4
+        
+        topside = new THREE.Geometry()
+        
+        topside.vertices.push vec  s,  s, s
+        topside.vertices.push vec -s,  s, s
+        topside.vertices.push vec -s, -s, s
+        topside.vertices.push vec  s, -s, s
+
+        topside.vertices.push vec  i,  i, o
+        topside.vertices.push vec -i,  i, o
+        topside.vertices.push vec -i, -i, o
+        topside.vertices.push vec  i, -i, o
+        
+        topside.faces.push new THREE.Face3 4, 5, 6
+        topside.faces.push new THREE.Face3 4, 6, 7
+
+        topside.faces.push new THREE.Face3 0, 1, 5
+        topside.faces.push new THREE.Face3 0, 5, 4
+        
+        topside.faces.push new THREE.Face3 1, 2, 6
+        topside.faces.push new THREE.Face3 1, 6, 5
+
+        topside.faces.push new THREE.Face3 2, 3, 7
+        topside.faces.push new THREE.Face3 2, 7, 6
+        
+        topside.faces.push new THREE.Face3 0, 4, 7
+        topside.faces.push new THREE.Face3 0, 7, 3
+        
+        topside.computeFaceNormals()
+        topside.computeFlatVertexNormals()
+        
+        rightside = new THREE.Geometry()
+        rightside.copy topside
+        rightside.rotateY deg2rad 90
+        
+        leftside = new THREE.Geometry()
+        leftside.copy topside
+        leftside.rotateY deg2rad -90
+
+        backside = new THREE.Geometry()
+        backside.copy topside
+        backside.rotateX deg2rad -90
+
+        frontside = new THREE.Geometry()
+        frontside.copy topside
+        frontside.rotateX deg2rad 90
+
+        bottomside = new THREE.Geometry()
+        bottomside.copy topside
+        bottomside.rotateX deg2rad -180
+                
+        cube = new THREE.Geometry()
+        cube.merge topside
+        cube.merge rightside
+        cube.merge backside
+        cube.merge bottomside
+        cube.merge leftside
+        cube.merge frontside
+
+        bufg = new THREE.BufferGeometry()
+        bufg.fromGeometry cube
+        bufg
+    
     #  0000000   0000000    0000000  000000000  
     # 000       000   000  000          000     
     # 000       000   000  0000000      000     

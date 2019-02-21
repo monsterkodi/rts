@@ -14,18 +14,21 @@ THREE = require 'three'
 require('three-instanced-mesh')(THREE)
 
 Color     = require './color'
+Geometry  = require './geometry'
 Materials = require './materials'
 
 class Boxes
 
     constructor: (@world) ->
 
-        geom = new THREE.BoxBufferGeometry 1,1,1
+        # geom = new THREE.BoxBufferGeometry 1,1,1
+        geom = Geometry.cornerBox()
         
         @maxBoxes = 1000
         @boxes = []
         @cluster = new THREE.InstancedMesh geom, Materials.white, @maxBoxes, true, true, true
         
+        @cluster.receiveShadow = true
         @cluster.castShadow = true
         @world.scene.add @cluster 
         
@@ -54,8 +57,12 @@ class Boxes
         @setPos   box, cfg.pos
         @setStone box, cfg.stone ? Stone.gray
         @setSize  box, cfg.size ? 0.1
-        @setDir   box, cfg.dir if cfg.dir?
-        @setRot   box, cfg.rot if cfg.rot?
+        if cfg.dir?
+            @setDir box, cfg.dir 
+        else if cfg.rot?
+            @setRot box, cfg.rot 
+        else
+            @setRot box, quat()
         
         box
         

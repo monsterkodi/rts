@@ -19,12 +19,14 @@ class Packet
         @moved = 0
         
         s = 0.001
-        geom = new THREE.BoxGeometry s,s,s
-         
-        @mesh = new THREE.Mesh geom, Materials.stone[@stone]
-        @mesh.castShadow = true
-        @mesh.receiveShadow = true
-        world.scene.add @mesh
+        # geom = new THREE.BoxGeometry s,s,s
+
+        # @mesh = new THREE.Mesh geom, Materials.stone[@stone]
+        # @mesh.castShadow = true
+        # @mesh.receiveShadow = true
+        # world.scene.add @mesh
+        
+        @box = world.boxes.add stone:@stone, size:s, pos:vec(0,0,0)
         
         @lifeTime = 0
         rts.animate @initialScale
@@ -32,10 +34,13 @@ class Packet
     initialScale: (deltaSeconds) =>
 
         @lifeTime += deltaSeconds * rts.world.speed
-        @mesh.geometry.normalize()
+        # @mesh.geometry.normalize()
         timeOrTravel = clamp 0, 1, Math.max @lifeTime, @moved*5
         s = Math.min timeOrTravel*0.1, 0.1
-        @mesh.geometry.scale s,s,s
+        # @mesh.geometry.scale s,s,s
+        
+        rts.world.boxes.setSize @box, s
+        
         if s < 0.1
             rts.animate @initialScale            
         
@@ -67,11 +72,14 @@ class Packet
         dir = ths.pos.to nxt.pos
         tgt = ths.pos.plus dir.mul frc
         
-        @mesh.position.copy tgt
+        rts.world.boxes.setPos @box, tgt
+        
+        # @mesh.position.copy tgt
     
     del: -> 
     
-        @mesh.parent.remove @mesh
+        rts.world.boxes.del @box
+        # @mesh.parent.remove @mesh
         rts.world.storage.temp[@stone] -= 1
             
 module.exports = Packet

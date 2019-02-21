@@ -103,7 +103,7 @@ class Spent
         
         box = @world.boxes.add pos:startPos, size:0.05, stone:stone, rot:rot
         box.dir = dir
-        box.rot = quat().setFromAxisAngle Vector.normals[face], deg2rad 1
+        box.rot = quat().setFromAxisAngle Vector.normals[face], deg2rad -1
         box.life = box.maxLife = 6
         @spent.push box
 
