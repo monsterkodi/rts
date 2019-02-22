@@ -299,6 +299,31 @@ class Construct
         @orientFace mesh, bot.face
         @world.scene.add mesh
         mesh
+        
+    #  0000000   0000000    0000000   00000000  
+    # 000       000   000  000        000       
+    # 000       000000000  000  0000  0000000   
+    # 000       000   000  000   000  000       
+    #  0000000  000   000   0000000   00000000  
+    
+    cage: (bot, s) ->
+        
+        geom = new THREE.Geometry
+        
+        for x in [-s..s]
+            for y in [-s..s]
+                for z in [-s..s]
+                    v = vec x,y,z
+                    # if Math.round(v.length()) <= s
+                    # if Math.round(v.manhattan(vec())) == s
+                    if Math.round(v.paris(vec())) == s
+                        geom.vertices.push v
+                        
+        mesh = new THREE.Points geom, Materials.cage
+        mesh.position.copy bot.pos
+        @orientFace mesh, bot.face
+        @world.scene.add mesh
+        mesh
             
     #  0000000  000000000   0000000   000   000  00000000   0000000    
     # 000          000     000   000  0000  000  000       000         

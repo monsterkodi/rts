@@ -26,7 +26,11 @@ module.exports =
         scienceSteps: [0,8,16,32,64,128]
             
         nonMineSpeed: 0.2
-            
+           
+        base:  
+            state: 'on'
+            radius: 4
+        
         brain: state: 'on'
         build: state: 'build'
             

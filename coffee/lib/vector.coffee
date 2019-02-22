@@ -6,7 +6,7 @@
     0      00000000   0000000     000      0000000   000   000
 ###
 
-{ deg2rad, rad2deg, log } = require 'kxk'
+{ deg2rad, rad2deg, last, log } = require 'kxk'
 
 THREE = require 'three'
 
@@ -82,6 +82,11 @@ class Vector extends THREE.Vector3
             return rad2deg(Math.acos(thisXY.dot otherXY))
         -rad2deg(Math.acos(thisXY.dot otherXY))
         
+    paris: (o) -> 
+        m = [Math.abs(o.x-@x),Math.abs(o.y-@y),Math.abs(o.z-@z)]
+        m.sort (a,b) -> b-a
+        m[0]+0.2*m[1]+0.1*m[2]
+    
     manhattan: (o) -> Math.abs(o.x-@x)+Math.abs(o.y-@y)+Math.abs(o.z-@z)
     dist:   (o) -> @minus(o).length()
     length:    -> Math.sqrt @x*@x + @y*@y + @z*@z

@@ -28,12 +28,15 @@ class Map extends World
         
     pest: ->
 
-        @addMonster 1, 1, 1
-        for i in [0..1000]
-            @addMonster randInt(40)-20, randInt(40)-20, 2+randInt(40)
-        # @addMonster 0, 1, 1
-        # @addMonster 0,-1, 1
-        # @addMonster -1, 0, 1
+        d = state.base.radius
+        @addMonster  d, d, 1
+        @addMonster  d,-d, 1
+        @addMonster -d, d, 1
+        @addMonster -d,-d, 1
+        
+        # s = 6
+        # for i in [0..10]
+            # @addMonster randInt(s)-s/2, randInt(s)-s/2, 2+randInt(s)
 
         @addStone  0, 0, 0
         @addStone  3, 0, 0

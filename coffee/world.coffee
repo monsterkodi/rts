@@ -205,6 +205,7 @@ class World
         
     isStoneAt: (x,y,z) -> @stones[@indexAt x,y,z] != undefined
     isItemAt:  (x,y,z) -> @isStoneAt(x,y,z) or @botAt(x,y,z) 
+    isItemAtPos: (p) -> @isItemAt p.x,p.y,p.z
                 
     # 00000000   0000000    0000000  00000000  
     # 000       000   000  000       000       
@@ -394,6 +395,9 @@ class World
     removeHighlight: ->
         
         @highBot?.highlight?.parent.remove @highBot?.highlight
+        if @baseCage
+            @baseCage.parent.remove @baseCage
+            delete @baseCage
         delete @highBot?.highlight
         delete @highBot
     
@@ -404,11 +408,13 @@ class World
         if bot
             if bot == @highBot
                 @construct.orientFace bot.highlight, bot.face
+                @baseCage.position.copy bot.pos
                 return
             @removeHighlight()
             @highBot = bot
-                    
             bot.highlight = @construct.highlight bot
+            if bot.type == Bot.base
+                @baseCage = @construct.cage bot, state.base.radius
         else
             @removeHighlight()
                                 
