@@ -37,6 +37,7 @@ module.exports =
         blue:       2
         white:      3
         gray:       4
+        monster:    5
         resources:  [0,1,2,3]
         all:        [0..4]
         

@@ -46,6 +46,8 @@ Color =
         gray:            color 0xccccdd
         
     path:                color 0xbbbbbb
+    
+    monster:             color 0x333333
 
 Color.cost.red   = Color.stone.red
 Color.cost.gelb  = Color.stone.gelb
@@ -57,6 +59,6 @@ Color.bot.gelb   = Color.stone.gelb
 Color.bot.blue   = Color.stone.blue
 Color.bot.white  = Color.stone.white
 
-Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray]
+Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.monster]
         
 module.exports = Color

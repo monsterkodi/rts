@@ -18,15 +18,9 @@ class Packet
         
         @moved = 0
         
-        s = 0.001
-        # geom = new THREE.BoxGeometry s,s,s
-
-        # @mesh = new THREE.Mesh geom, Materials.stone[@stone]
-        # @mesh.castShadow = true
-        # @mesh.receiveShadow = true
-        # world.scene.add @mesh
+        size = 0.001
         
-        @box = world.boxes.add stone:@stone, size:s, pos:vec(0,0,0)
+        @box = world.boxes.add stone:@stone, size:size, pos:vec(0,0,0)
         
         @lifeTime = 0
         rts.animate @initialScale
@@ -40,14 +34,12 @@ class Packet
     initialScale: (deltaSeconds) =>
 
         @lifeTime += deltaSeconds * rts.world.speed
-        # @mesh.geometry.normalize()
         timeOrTravel = clamp 0, 1, Math.max @lifeTime, @moved*5
-        s = Math.min timeOrTravel*0.1, 0.1
-        # @mesh.geometry.scale s,s,s
+        size = Math.min timeOrTravel*0.1, 0.1
         
-        rts.world.boxes.setSize @box, s
+        rts.world.boxes.setSize @box, size
         
-        if s < 0.1
+        if size < 0.1
             rts.animate @initialScale            
         
     # 00     00   0000000   000   000  00000000  
@@ -86,8 +78,6 @@ class Packet
         
         rts.world.boxes.setPos @box, tgt
         
-        # @mesh.position.copy tgt
-    
     # 0000000    00000000  000      
     # 000   000  000       000      
     # 000   000  0000000   000      
@@ -97,7 +87,6 @@ class Packet
     del: -> 
     
         rts.world.boxes.del @box
-        # @mesh.parent.remove @mesh
         rts.world.storage.temp[@stone] -= 1
             
 module.exports = Packet

@@ -6,7 +6,7 @@
 000   000  000   000  000      
 ###
 
-{ log, _ } = require 'kxk'
+{ randInt, log, _ } = require 'kxk'
 
 { Stone, Bot, Face } = require './constants'
 
@@ -21,22 +21,30 @@ class Map extends World
         
     build: ->
         
+        @pest()
         # @grid()
+        # @sparse()
         # @plenty()
-        @sparse()
         
-    sparse: ->
-        
-        @addStone  0, 0,  0
-        @addStone  8, 8,  0, Stone.red
-        @addStone  8, -8, 0, Stone.gelb
-        @addStone -8,  8, 0, Stone.white
-        @addStone -8, -8, 0, Stone.blue
+    pest: ->
+
+        @addMonster 1, 1, 1
+        for i in [0..1000]
+            @addMonster randInt(40)-20, randInt(40)-20, 2+randInt(40)
+        # @addMonster 0, 1, 1
+        # @addMonster 0,-1, 1
+        # @addMonster -1, 0, 1
+
+        @addStone  0, 0, 0
+        @addStone  3, 0, 0
+        @addStone -2, 0, 0
+        @addStone -3, 0, 0
+        @addStone  2, 0, 0
         
         @addBot  0, 0, 1, Bot.base
         
     grid: ->
-
+        
         @addStone  0, 0,-1
         @addStone  3, 0, 0
         @addStone -2, 0, 0
@@ -59,7 +67,17 @@ class Map extends World
                 @addStone  0,      -2,   0, Stone.white
                 
         @addBot  0, 0, 1, Bot.base
-                
+          
+    sparse: ->
+        
+        @addStone  0, 0,  0
+        @addStone  8, 8,  0, Stone.red
+        @addStone  8, -8, 0, Stone.gelb
+        @addStone -8,  8, 0, Stone.white
+        @addStone -8, -8, 0, Stone.blue
+        
+        @addBot  0, 0, 1, Bot.base
+        
     plenty: ->
                 
         @addStone  0, 0, 0

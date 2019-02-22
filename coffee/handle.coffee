@@ -245,7 +245,8 @@ class Handle
         if not wbot or wbot == bot
             index = @world.indexAtPos pos
             if bot.face != face or bot.index != index
-                @world.moveBot bot, pos, face
-                @world.highlightPos bot.pos
+                if @world.canBotMoveTo bot, face, index 
+                    @world.moveBot bot, pos, face
+                    @world.highlightPos bot.pos
             
 module.exports = Handle

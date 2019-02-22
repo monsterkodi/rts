@@ -25,7 +25,7 @@ class Camera extends THREE.PerspectiveCamera
         @elem    = opt.view
         @dist    = @far/64
         @maxDist = @far/2
-        @minDist = 0.4
+        @minDist = 0.9
         @center  = vec 0, 0, 0
         @degree  = 60
         @rotate  = 0

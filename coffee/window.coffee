@@ -98,7 +98,7 @@ window.onkeydown = (event) ->
     switch keyinfo.forEvent(event).key
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
         when 'd'     then prefs.set 'debug', not prefs.get 'debug'
-        when 'space' then rts.paused = not rts.paused
+        when 'space' then rts.togglePause()
         when '='     then rts.world.incrSpeed(); rts.world.incrSpeed()
         when '-'     then rts.world.decrSpeed(); rts.world.decrSpeed()
         when '0'     then rts.world.resetSpeed()

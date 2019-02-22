@@ -6,7 +6,7 @@
 000   000     000     0000000 
 ###
 
-{ prefs, elem, empty, valid, deg2rad, log, _ } = require 'kxk'
+{ prefs, post, elem, empty, valid, deg2rad, log, _ } = require 'kxk'
 
 { Bot } = require './constants'
 
@@ -52,15 +52,7 @@ class RTS
         @camera = new Camera view:@view
                 
         @scene = new THREE.Scene()
-        
-        # @scene.add new THREE.CameraHelper @camera 
-        
-        # gridHelper = new THREE.GridHelper 100, 100, 0x444444, 0x111111
-        # gridHelper.rotateX deg2rad 90
-        # gridHelper.position.set 0, 0,-0.001
-        # @scene.add gridHelper
-        # @scene.add new THREE.AxesHelper 50
-        
+                
         @sun = new THREE.PointLight 0xffffff, 0.5
         @sun.position.copy @player.camera.getPosition() if @player?
         @sun.position.copy @camera.position
@@ -77,16 +69,29 @@ class RTS
 
         @light2 = new THREE.DirectionalLight
         @light2.intensity = 0.5
-        @light2.position.z = 20
-        @light2.position.x = 20
+        @light2.position.set 50, 0, 50
+        @light2.target.position.set 0, 0, 1
         @light2.castShadow = true
         @light2.shadow.mapSize = shadowMapSize
         @scene.add @light2
+        @scene.add @light2.target
         
         @ambient = new THREE.AmbientLight 0x333333
         @scene.add @ambient
-            
-        @world  = new Map @scene    
+        
+        # @scene.add new THREE.CameraHelper @camera 
+        # gridHelper = new THREE.GridHelper 100, 100, 0x444444, 0x111111
+        # gridHelper.rotateX deg2rad 90
+        # gridHelper.position.set 0, 0,-0.001
+        # @scene.add gridHelper
+        # @scene.add new THREE.AxesHelper 50
+        
+        # @scene.add new THREE.PointLightHelper @sun, 5
+        # @scene.add new THREE.DirectionalLightHelper @light, 5
+        # @light2Helper = new THREE.DirectionalLightHelper @light2, 5, new THREE.Color 0xffff00
+        # @scene.add @light2Helper
+        
+        new Map @scene
         @handle = new Handle @world
                 
         @mouse = vec()
@@ -112,6 +117,11 @@ class RTS
     animate: (func) ->
         
         @animations.push func
+        
+    togglePause: -> 
+    
+        @paused = not @paused
+        post.emit 'pause', @paused
     
     animationStep: =>
         
@@ -126,9 +136,9 @@ class RTS
             animation delta
         
         if not @paused
-            angle = -delta*0.3*@world.speed
+            angle = -delta*0.05*@world.speed
             @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
-                        
+            @light2Helper?.update()   
             @world.animate delta
                     
         @render()

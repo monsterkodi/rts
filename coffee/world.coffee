@@ -6,7 +6,7 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ post, prefs, deg2rad, clamp, first, valid, empty, str, log, _ } = require 'kxk'
+{ post, prefs, deg2rad, randInt, clamp, first, valid, empty, str, log, _ } = require 'kxk'
 
 Vector    = require './lib/vector'
 Packet    = require './packet'
@@ -14,6 +14,7 @@ Tubes     = require './tubes'
 Boxes     = require './boxes'
 Spent     = require './spent'
 Graph     = require './graph'
+Monster   = require './monster'
 Storage   = require './storage'
 Science   = require './science' 
 Construct = require './construct'
@@ -24,11 +25,16 @@ class World
     
     constructor: (@scene, config) ->
         
+        rts.world  = @
+        
         @stones = {}
         @bots   = {}
+        @monsters = []
+        
         @tubes  = new Tubes @
         @spent  = new Spent @
         @boxes  = new Boxes @ 
+        
         @setSpeed prefs.get 'speed', 6
         
         @sample = 0
@@ -76,6 +82,9 @@ class World
         for bot in @getBots()
             rts.handle.tickBot scaledDelta, bot
             
+        for monster in @monsters
+            monster.animate scaledDelta
+            
         @storage.animate scaledDelta
         
         @sample -= scaledDelta
@@ -84,7 +93,19 @@ class World
             @sample = 1.0
         
         post.emit 'tick'
-                    
+                 
+    # 00     00   0000000   000   000   0000000  000000000  00000000  00000000   
+    # 000   000  000   000  0000  000  000          000     000       000   000  
+    # 000000000  000   000  000 0 000  0000000      000     0000000   0000000    
+    # 000 0 000  000   000  000  0000       000     000     000       000   000  
+    # 000   000   0000000   000   000  0000000      000     00000000  000   000  
+    
+    addMonster: (x,y,z,d) ->
+        d ?= Vector.normals[randInt 6]
+        monster = new Monster @, vec(x,y,z), d
+        @monsters.push monster
+        monster
+        
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
     # 0000000    000   000     000     
@@ -155,6 +176,10 @@ class World
         
         @tubes.build()
         @construct.tubes()
+        
+    pathFromTo: (fromIndex, toFaceIndex) -> @tubes.astar.findPath fromIndex, toFaceIndex
+    
+    canBotMoveTo: (bot, face, index) -> @pathFromTo @faceIndex(bot.face, bot.index), @faceIndex(face, index)
         
     # 0000000    000   000  000  000      0000000    
     # 000   000  000   000  000  000      000   000  

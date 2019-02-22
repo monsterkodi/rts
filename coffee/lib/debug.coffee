@@ -96,12 +96,6 @@ class Debug
         @pathLength.children[2].innerHTML = state.science.path.length
         rts.world.updateTubes()
         
-    # 000   000   0000000   000      000   000  00000000  
-    # 000   000  000   000  000      000   000  000       
-    #  000 000   000000000  000      000   000  0000000   
-    #    000     000   000  000      000   000  000       
-    #     0      000   000  0000000   0000000   00000000  
-    
     value: (cfg) ->
         
         lbl = elem class:'label', text:cfg.text
@@ -118,12 +112,6 @@ class Debug
             cfg.cb? cfg.obj[cfg.key]
         btn = elem class:'btn', text:cfg.text+" #{cfg.obj[cfg.key] and 'on' or 'off'}", click:tgl(cfg), parent:@elem
         
-    #  0000000  000       0000000   00     00  00000000   0000000  00000000  00000000    0000000   
-    # 000       000      000   000  000   000  000   000     000   000       000   000  000   000  
-    # 000       000      000000000  000000000  00000000     000    0000000   0000000    000   000  
-    # 000       000      000   000  000 0 000  000         000     000       000   000  000   000  
-    #  0000000  0000000  000   000  000   000  000        0000000  00000000  000   000   0000000   
-    
     clampZero: (v,d,m) ->
         v += d
         v = Math.max 0, v
