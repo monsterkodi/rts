@@ -21,8 +21,8 @@ class Map extends World
         
     build: ->
         
-        @pest()
-        # @grid()
+        # @pest()
+        @grid()
         # @sparse()
         # @plenty()
         

@@ -122,10 +122,8 @@ class Science
         state.science[science][key] = @tree[science][key].v[info.stars]
         switch scienceKey
             when 'path.length' then rts.world.updateTubes()
-            when 'trade.sell'  
-                log 'rts.menu.buttons.trade', rts.menu.buttons.trade?
-                rts.menu.buttons.trade.update()
             
         post.emit 'scienceDequeued', info
+        post.emit 'scienceFinished', scienceKey
             
 module.exports = Science

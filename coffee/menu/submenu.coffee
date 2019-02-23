@@ -12,16 +12,16 @@ class SubMenu
 
     @current = null
     
-    constructor: (button) ->
+    constructor: (@button) ->
 
         SubMenu.current?.del()
         
-        x = button.canvas.parentElement.offsetLeft + button.canvas.offsetLeft - rts.menuBorderWidth
-        y = button.canvas.parentElement.offsetTop + 100 + rts.menuBorderWidth
-
+        x = @button.canvas.parentElement.offsetLeft + @button.canvas.offsetLeft - rts.menuBorderWidth
+        y = @button.canvas.parentElement.offsetTop + 100 + rts.menuBorderWidth
+            
         @div = elem class:'subMenu', style:"left:#{x}px; top:#{y}px;"
         
-        button.canvas.parentElement.parentElement.appendChild @div
+        @button.canvas.parentElement.parentElement.appendChild @div
                 
         @buttons = {}
         

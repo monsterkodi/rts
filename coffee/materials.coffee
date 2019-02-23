@@ -34,11 +34,11 @@ Materials =
                 new THREE.MeshStandardMaterial color:Color.bot.gray,  metalness: 0.9, roughness: 0.5 # gray
     ]
     cost: [   
-                new THREE.MeshStandardMaterial color:Color.cost.red   # red
-                new THREE.MeshStandardMaterial color:Color.cost.gelb  # gelb
-                new THREE.MeshStandardMaterial color:Color.cost.blue  # blue
-                new THREE.MeshStandardMaterial color:Color.cost.white # white
-                new THREE.MeshStandardMaterial color:Color.cost.gray  # cantAfford
+                new THREE.MeshStandardMaterial color:Color.stone.red   # red
+                new THREE.MeshStandardMaterial color:Color.stone.gelb  # gelb
+                new THREE.MeshStandardMaterial color:Color.stone.blue  # blue
+                new THREE.MeshStandardMaterial color:Color.stone.white # white
+                new THREE.MeshStandardMaterial color:Color.stone.gray  # cantAfford
     ]    
     state: 
         off:    new THREE.MeshStandardMaterial color:Color.menu.state.off, metalness: 0.6, roughness: 0.5

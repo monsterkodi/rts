@@ -35,7 +35,7 @@ class World
         
         @tubes  = new Tubes @
         @spent  = new Spent @
-        @boxes  = new Boxes @ 
+        @boxes  = new Boxes @scene 
         
         @setSpeed prefs.get 'speed', 6
         
@@ -77,9 +77,9 @@ class World
         
         # log 'animate', scaledDelta
         
-        @boxes.animate scaledDelta
         @spent.animate scaledDelta
         @tubes.animate scaledDelta
+        @boxes.render()
         
         for bot in @getBots()
             rts.handle.tickBot scaledDelta, bot

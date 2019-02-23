@@ -10,6 +10,7 @@
 
 { Stone, Bot } = require '../constants'
 
+SubMenu     = require './submenu'
 StoneMenu   = require './stonemenu'
 StoneButton = require './stonebutton'
 Materials   = require '../materials'
@@ -30,16 +31,20 @@ class TradeButton extends StoneButton
         TradeButton[@inOut] = @
         
         post.on @inOut, @onTrade
+        post.on 'scienceFinished', @onScienceFinished
         
     del: ->
 
         post.removeListener @inOut, @onTrade 
+        post.removeListener 'scienceFinished', @onScienceFinished
         super()
+                
+    onScienceFinished: (scienceKey) =>
         
-    update: -> 
-        TradeMenu = require './trademenu'
-        log 'TradeButton.update'
-        log BotButton.currentlyShown instanceof TradeMenu
+        if scienceKey == 'trade.sell' and @inOut == 'sell'
+            if SubMenu.current?.button == @
+                new StoneMenu @
+            @render()
         
     onTrade: (stone) =>
         

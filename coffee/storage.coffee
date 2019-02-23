@@ -6,28 +6,37 @@
 0000000      000      0000000   000   000  000   000   0000000   00000000
 ###
 
-{ post, clamp, menu, _ } = require 'kxk'
+{ post, clamp, menu, log, _ } = require 'kxk'
 
 { Stone } = require './constants'
 
 CanvasButton = require './menu/canvasbutton'
 Materials    = require './materials'
-Geometry     = require './geometry'
 Graph        = require './graph'
 Color        = require './color'
+Boxes        = require './boxes'
 
 class Storage extends CanvasButton
 
     constructor: (menu) ->
         
-        @name     = 'Storage'
-        @dirty    = true
-        @stones   = _.clone state.storage.stones
-        @temp     = [0,0,0,0]
+        @dirty     = false
+        @stones    = [0,0,0,0]
+        @temp      = [0,0,0,0]
+        @box       = [[],[],[],[]]
+        @stoneSize = 0.5
 
         @resetBalance()
         
         super menu.div
+        
+        @boxes = new Boxes @scene, 16*4*80, new THREE.BoxBufferGeometry
+        @name  = 'Storage'
+        
+        for stone in Stone.resources
+            @add stone, state.storage.stones[stone], 'init'
+            
+        @render()
         
     resetBalance: -> @balance = gains:[0,0,0,0], spent:[0,0,0,0]
         
@@ -87,7 +96,13 @@ class Storage extends CanvasButton
                 @balance.gains[stone] += delta
             else 
                 @balance.spent[stone] -= delta
-            
+
+        while @box[stone].length < @stones[stone]
+            @box[stone].push @boxes.add stone:stone, size:@stoneSize, pos:@posForStone stone, @box[stone].length+1
+
+        while @box[stone].length > @stones[stone]
+            @boxes.del @box[stone].pop()
+                
         @dirty = true
     
     #  0000000   0000000  00000000  000   000  00000000  
@@ -109,6 +124,16 @@ class Storage extends CanvasButton
         @camera.position.copy vec(0,2,1).normal().mul 22
         @camera.lookAt vec 0,7.6,0
         
+    posForStone: (stone, i) ->
+        
+        pos = vec()
+        pos.x = stone*1.5-2.5
+        pos.y = 1.2*Math.floor (i-1)/8
+        pos.x += @stoneSize if (i-1)%4 in [1,2]
+        pos.z += @stoneSize if (i-1)%4 in [2,3]
+        pos.y += @stoneSize if (i-1)%8 > 3
+        pos
+        
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
     # 0000000    0000000   000 0 000  000   000  0000000   0000000    
@@ -117,17 +142,7 @@ class Storage extends CanvasButton
     
     render: ->
 
-        for stone in Stone.resources
-            
-            @meshes[stone]?.parent?.remove @meshes[stone]
-            delete @meshes[stone]
-            
-            if @stones[stone]
-                bufg = Geometry.stoneAmount stone, @stones[stone]
-                mesh = new THREE.Mesh bufg, Materials.cost[stone]
-                @scene.add mesh
-                @meshes[stone] = mesh
-            
+        @boxes.render()
         super()
             
 module.exports = Storage

@@ -23,7 +23,7 @@ class BaseMenu extends BotMenu
         @addButton 'state', new ToggleButton @div, @onBaseToggle, state.base.state
         @addButton 'call',  new CallButton @div
                 
-    addButton: (key, button) -> @buttons[key] = button
+    # addButton: (key, button) -> @buttons[key] = button
         
     onBaseToggle: (baseState) => state.base.state = baseState
 

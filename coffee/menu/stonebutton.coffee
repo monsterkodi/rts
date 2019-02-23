@@ -30,6 +30,7 @@ class StoneButton extends CanvasButton
         @render()
         
     amount: -> 
+        
         if @inOut == 'buy' then return 1
         state.science.trade.sell
         

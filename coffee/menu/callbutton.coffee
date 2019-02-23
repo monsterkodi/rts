@@ -8,11 +8,16 @@
 
 { log, _ } = require 'kxk'
 
-class CallButton
+CanvasButton = require './canvasbutton'
+
+class CallButton extends CanvasButton
 
     constructor: (div) ->
         
-        super div, 'canvasButton'
+        super div, 'canvasButtonInline'
+        
+        @render()
 
+    click: -> log 'CallButton.click'
 
 module.exports = CallButton

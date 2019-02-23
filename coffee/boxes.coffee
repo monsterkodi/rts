@@ -19,17 +19,14 @@ Materials = require './materials'
 
 class Boxes
 
-    constructor: (@world) ->
+    constructor: (scene, @maxBoxes=50000, geom=Geometry.cornerBox()) ->
 
-        geom = Geometry.cornerBox()
-        
-        @maxBoxes = 50000
         @boxes = []
         @cluster = new THREE.InstancedMesh geom, Materials.white, @maxBoxes, true, true, true
         
         @cluster.receiveShadow = true
         @cluster.castShadow = true
-        @world.scene.add @cluster 
+        scene.add @cluster 
         
     numBoxes: -> @boxes.length
     lastBox:  -> @boxes[@lastIndex()]
@@ -87,7 +84,7 @@ class Boxes
         else
             log "Boxes.del dafuk? #{box.index} #{@lastIndex()}"
         
-    animate: (scaledDelta) ->
+    render: ->
 
         @cluster.needsUpdate() if @numBoxes()
 

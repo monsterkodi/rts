@@ -89,6 +89,7 @@ class BuyButton extends CanvasButton
     
     render: ->
 
+        log 'render', @name
         cost = @cost()
         have = rts.world.storage.stones
         

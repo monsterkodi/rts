@@ -14,7 +14,9 @@ module.exports =
             
         storage:
             capacity: 80
-            stones:[ 8 *8, 8 *8, 8 *8, 8 *8]
+            # stones:[ 8 *8, 8 *8, 8 *8, 8 *8]
+            stones:[80,77,13,79]
+            # stones:[ 5,6,7,8 ]
             
         cost: 
             brain: [ 4 *8, 2 *8, 0   , 0   ]
@@ -34,7 +36,7 @@ module.exports =
             health:   32
             resource: 256
             
-        base:  state: 'on'
+        base:  state: 'off'
         brain: state: 'on'
         build: state: 'build'
             

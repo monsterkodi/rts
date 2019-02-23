@@ -29,7 +29,7 @@ Color =
     stone: 
         red:             color 0x881111
         gelb:            color 0xffaa00
-        blue:            color 0x2222aa
+        blue:            color 0x4444ff
         white:           color 0x44aaff
         gray:            color 0x111111
         monster:         color 0x333333
@@ -39,21 +39,13 @@ Color =
         gelb:            color 0xaa4411
         blue:            color 0x2222aa
         white:           color 0x2288aa
-        
-    cost:
-        blue:            color 0x4444ff
-        
+                
     bot:
         gray:            color 0xccccdd
         
     path:                color 0xbbbbbb
     
     cage:                color 0x0f0f0f
-
-Color.cost.red   = Color.stone.red
-Color.cost.gelb  = Color.stone.gelb
-Color.cost.white = Color.stone.white
-Color.cost.gray  = Color.stone.gray
 
 Color.bot.red    = Color.stone.red
 Color.bot.gelb   = Color.stone.gelb

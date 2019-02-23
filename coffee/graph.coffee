@@ -57,7 +57,7 @@ class Graph
         @canvas.height = @canvas.height
         ctx = @canvas.getContext '2d'       
         
-        stoneStyles = Stone.resources.map (s) -> Color.cost[Stone.string s].getStyle()
+        stoneStyles = Stone.resources.map (s) -> Color.stone[Stone.string s].getStyle()
         spentStyles = Stone.resources.map (s) -> Color.spent[Stone.string s].getStyle()
 
         xoff = 0
