@@ -33,6 +33,7 @@ class Packet
     
     initialScale: (deltaSeconds) =>
 
+        return if not @box
         @lifeTime += deltaSeconds * rts.world.speed
         timeOrTravel = clamp 0, 1, Math.max @lifeTime, @moved*5
         size = Math.min timeOrTravel*0.1, 0.1
@@ -88,5 +89,6 @@ class Packet
     
         rts.world.boxes.del @box
         rts.world.storage.temp[@stone] -= 1
+        delete @box
             
 module.exports = Packet

@@ -39,7 +39,7 @@ module.exports =
         gray:       4
         monster:    5
         resources:  [0,1,2,3]
-        all:        [0..4]
+        all:        [0..5]
         
     Bend: new Enum
         flat:       0

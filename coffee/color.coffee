@@ -32,6 +32,7 @@ Color =
         blue:            color 0x2222aa
         white:           color 0x44aaff
         gray:            color 0x111111
+        monster:         color 0x333333
 
     spent: 
         red:             color 0x441111
@@ -48,7 +49,6 @@ Color =
     path:                color 0xbbbbbb
     
     cage:                color 0x0f0f0f
-    monster:             color 0x333333
 
 Color.cost.red   = Color.stone.red
 Color.cost.gelb  = Color.stone.gelb
@@ -60,6 +60,6 @@ Color.bot.gelb   = Color.stone.gelb
 Color.bot.blue   = Color.stone.blue
 Color.bot.white  = Color.stone.white
 
-Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.monster]
+Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.stone.monster]
         
 module.exports = Color

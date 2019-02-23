@@ -208,11 +208,11 @@ class Handle
             log 'no path'
             return
 
-        normal = hit.norm.applyQuaternion bot.mesh.quaternion
+        # normal = hit.norm.applyQuaternion bot.mesh.quaternion
         hitpos = bot.pos.to hit.point
 
         n = Vector.closestNormal hitpos
-        newFace = Vector.normals.indexOf n
+        newFace = Vector.normalIndex n
         newPos = bot.pos.plus n
         if @world.stoneAtPos(newPos)?
             log 'occupied negate'
@@ -232,7 +232,7 @@ class Handle
             @world.moveBot bot, newPos, newFace
             @world.construct.stones()
         else
-            log 'cant build'
+            log 'not enough stones'
 
     # 00     00   0000000   000   000  00000000
     # 000   000  000   000  000   000  000
@@ -252,7 +252,7 @@ class Handle
 
     monsterMoved: (monster) ->
 
-        if monster.pos.paris(@world.base.pos) < state.science.base.radius
+        if monster.pos.paris(@world.base.pos) <= state.science.base.radius
             Spark.spawn @world, @world.base.pos, monster
 
 module.exports = Handle

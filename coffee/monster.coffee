@@ -6,7 +6,7 @@
 000   000   0000000   000   000  0000000      000     00000000  000   000
 ###
 
-{ last, empty, deg2rad, randInt, log, _ } = require 'kxk'
+{ fade, last, empty, deg2rad, randInt, log, _ } = require 'kxk'
 
 { Stone } = require './constants'
 
@@ -44,13 +44,19 @@ class Monster
     del: -> 
         
         return if empty @boxes
+        
         for box in @boxes
             @world.boxes.del box
         @boxes = []
+        
         index = @world.monsters.indexOf @
         if index >= 0
             @world.monsters.splice index, 1
-        
+            @world.addStone @pos.x, @pos.y, @pos.z, Stone.monster
+            @world.construct.stones()
+        else
+            log 'dafuk?'
+            
     damage: (amount) ->
         
         if empty @trail
@@ -59,8 +65,20 @@ class Monster
         box = @trail.shift()
         @world.boxes.del box
         if empty @trail
-            @del()
+            @die()
+        else
+            @world.boxes.setStone @boxes[0], Stone.red
         
+    die: ->
+        
+        for box in @boxes
+            box.death =
+                pos:  @world.boxes.pos  box
+                size: @world.boxes.size box
+                rot:  @world.boxes.rot  box
+                
+        @dyingTime = 3
+            
     isInDist: (pos) -> @start.manhattan(pos) <= @maxDist
             
     # 000000000  00000000    0000000   000  000      
@@ -86,9 +104,26 @@ class Monster
     # 000   000  000  0000  000  000 0 000  000   000     000     000       
     # 000   000  000   000  000  000   000  000   000     000     00000000  
     
+    animateDying: (scaledDelta) ->
+        
+        @dyingTime -= scaledDelta
+        
+        if @dyingTime <= 0
+            @del()
+            return
+            
+        for box in @boxes
+            @world.boxes.setPos  box, box.death.pos.faded @pos, 1-@dyingTime/3
+            @world.boxes.setSize box, fade box.death.size, 1.1, 1-@dyingTime/3
+            @world.boxes.setRot  box, box.death.rot.slerp quat(), 1-@dyingTime/3
+    
     animate: (scaledDelta) ->
 
         return if empty @boxes
+        
+        if @dyingTime
+            @animateDying scaledDelta
+            return
         
         lastInc = Math.floor @moved * @length
         
@@ -104,6 +139,7 @@ class Monster
                 @addTrail @world.boxes.pos @boxes[@boxes.length-3]
                 newPos = @pos.plus @nxt.mul (i+1) * @dist
                 @world.boxes.setPos box, newPos
+                @world.boxes.setStone box, Stone.monster
                 @axes[0] = vec @nxt
 
         d = @moved * @length - nextInc

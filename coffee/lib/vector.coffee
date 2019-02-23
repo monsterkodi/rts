@@ -150,15 +150,24 @@ class Vector extends THREE.Vector3
     
     @normals = [Vector.unitX, Vector.unitY, Vector.unitZ, Vector.minusX, Vector.minusY, Vector.minusZ]
     
+    @normalIndex: (v) -> 
+    
+        cn = @closestNormal v
+        for i in [0...6]
+            if Vector.normals[i].equals cn
+                return i
+        -1
+    
     @closestNormal: (v) ->
+        
         vn = v.normal()
         angles = []
         for n in Vector.normals
             if n.equals vn
-                return n
+                return new Vector n
             angles.push [n.angle(vn), n]
                 
         angles.sort (a,b) -> a[0]-b[0]
-        angles[0][1]
+        new Vector angles[0][1]
     
 module.exports = Vector

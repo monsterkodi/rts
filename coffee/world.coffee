@@ -81,9 +81,10 @@ class World
         
         for bot in @getBots()
             rts.handle.tickBot scaledDelta, bot
-            
-        for monster in @monsters
-            monster.animate scaledDelta
+         
+        if valid @monsters
+            for i in [@monsters.length-1..0]
+                @monsters[i].animate scaledDelta
             
         @storage.animate scaledDelta
         
