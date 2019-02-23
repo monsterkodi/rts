@@ -62,8 +62,15 @@ class AStar
         # For the first node, that value is completely heuristic
         fScore.set start, @dist start, goal
     
+        steps = 0
+        
         while valid openSet
             
+            steps += 1
+            if steps > 10000
+                log 'dafuk? too many steps. bailing out.'
+                return @collectPath current
+                
             current = @lowestScore openSet, fScore # the node in openSet having the lowest fScore value
             if current == goal
                 return @collectPath current

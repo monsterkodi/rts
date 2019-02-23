@@ -8,10 +8,11 @@
 
 { valid, empty, first, last, log, _ } = require 'kxk'
 
+{ Stone, Bend } = require './constants'
+
 AStar    = require './lib/astar'
 Vector   = require './lib/vector'
 Packet   = require './packet'
-{ Bend } = require './constants'
 
 class Tubes
 
@@ -30,13 +31,16 @@ class Tubes
     # 000  000   000  0000000   00000000  000   000     000     
     
     insertPacket: (bot, stone) ->
+        
         if seg = @segmentBelowBot bot
             stone ?= @world.stoneBelowBot bot
+            # log 'insertPacket blocked', Stone.string(stone), @isInputBlocked seg
             if not @isInputBlocked seg
                 pck = new Packet stone, @world
                 @insertPacketIntoSegment pck, seg
                 pck.moveOnSegment seg
                 return true
+        # log 'insertPacketFAIL', Stone.string stone
         false
         
     insertPacketIntoSegment: (pck, seg) -> seg.packets.unshift pck

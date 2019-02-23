@@ -53,6 +53,7 @@ class Monster
         if index >= 0
             @world.monsters.splice index, 1
             @world.addStone @pos.x, @pos.y, @pos.z, Stone.monster
+            @world.addResource @pos.x, @pos.y, @pos.z, Stone.resources[randInt 4], state.monster.resource
             @world.construct.stones()
         else
             log 'dafuk?'

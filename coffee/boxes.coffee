@@ -23,7 +23,7 @@ class Boxes
 
         geom = Geometry.cornerBox()
         
-        @maxBoxes = 10000
+        @maxBoxes = 50000
         @boxes = []
         @cluster = new THREE.InstancedMesh geom, Materials.white, @maxBoxes, true, true, true
         

@@ -12,16 +12,13 @@ class FPS
 
     constructor: () ->
                     
-        @elem = elem class:'fps'
-
         @width = 180
         @height = 60
         
         @canvas = elem 'canvas', 
-            class:"fpsCanvas"
+            class:  'fps'
             height: 2*@height
             width:  2*@width
-        @elem.appendChild @canvas
 
         y = parseInt -@height/2
         x = parseInt  @width/2
@@ -30,7 +27,7 @@ class FPS
         @history = []
         @last = window.performance.now()
             
-        $("#main").appendChild @elem
+        $("#main").appendChild @canvas
             
     # 0000000    00000000    0000000   000   000
     # 000   000  000   000  000   000  000 0 000
@@ -51,13 +48,8 @@ class FPS
             green = parseInt 32 + (255-32)*clamp 0,1, (ms-32)/32
             ctx.fillStyle = "rgb(#{red}, #{green}, 32)"
             h = Math.min ms, 60
-            # ctx.fillRect 2*@width-@history.length+i, 2*@height-h, 2, h
             ctx.fillRect 2*@width-@history.length+i, 0, 2, h
         @last = time
-
-    toggle: -> 
-        
-        @elem.style.display = @elem.style.display == 'none' and 'unset' or 'none'       
 
 module.exports = FPS
 

@@ -30,8 +30,9 @@ module.exports =
         spark:
             speed:  0.5
         monster: 
-            speed:  0.2
-            health: 32
+            speed:    0.2
+            health:   32
+            resource: 256
             
         base:  state: 'on'
         brain: state: 'on'

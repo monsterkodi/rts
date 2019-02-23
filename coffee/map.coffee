@@ -39,17 +39,21 @@ class Map extends World
         @addMonster -d, d,  d
         @addMonster -d,-d,  d
         
-        # s = 6
-        # for i in [0..10]
-            # @addMonster randInt(s)-s/2, randInt(s)-s/2, 2+randInt(s)
+        s = 32
+        for i in [0..200]
+            @addMonster randInt(s)-s/2, randInt(s)-s/2, randInt(s)-s/2
 
         @addStone  0, 0, 0
+        @addStone  1, 0, 0
+        @addStone  2, 0, 0
         @addStone  3, 0, 0
         @addStone -2, 0, 0
         @addStone -3, 0, 0
-        @addStone  2, 0, 0
         
-        @addStone  1, 0, 0, Stone.red
+        @addResource 0, 0, 0, Stone.red,   32
+        @addResource 1, 0, 0, Stone.gelb,  64
+        @addResource 2, 0, 0, Stone.blue,  128
+        @addResource 3, 0, 0, Stone.white, 256
         
         @addBot  0, 0, 1, Bot.base
         

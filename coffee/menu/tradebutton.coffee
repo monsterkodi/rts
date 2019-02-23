@@ -36,6 +36,11 @@ class TradeButton extends StoneButton
         post.removeListener @inOut, @onTrade 
         super()
         
+    update: -> 
+        TradeMenu = require './trademenu'
+        log 'TradeButton.update'
+        log BotButton.currentlyShown instanceof TradeMenu
+        
     onTrade: (stone) =>
         
         @stone = stone

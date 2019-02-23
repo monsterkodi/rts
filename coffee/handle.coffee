@@ -184,10 +184,13 @@ class Handle
     sendPacket: (bot) =>
 
         stone = @world.stoneBelowBot bot
+        # log 'send', Stone.string stone
         if @world.storage.canTake stone
             if bot.path?
-                if @world.tubes.insertPacket bot
+                if @world.tubes.insertPacket bot, stone
                     @world.storage.willSend stone
+                    if resource = @world.resourceAtPos @world.posBelowBot bot
+                        resource.deduct()
                     return true
             else if bot.type == Bot.base
                 @world.storage.add stone
@@ -252,7 +255,9 @@ class Handle
 
     monsterMoved: (monster) ->
 
-        if monster.pos.paris(@world.base.pos) <= state.science.base.radius
+        # log 'monsterMoved', state.science.base.radius, Math.round(monster.pos.paris(@world.base.pos))
+        return if state.base.state == 'off'
+        if Math.round(monster.pos.paris(@world.base.pos)) <= state.science.base.radius
             Spark.spawn @world, @world.base.pos, monster
 
 module.exports = Handle

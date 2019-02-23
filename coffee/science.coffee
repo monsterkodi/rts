@@ -16,7 +16,7 @@ class Science
         base:
             speed:  x:0, y:0, v:[0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
             prod:   x:0, y:1, v:[[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]]
-            radius: x:0, y:2, v:[2, 3, 5, 8, 13, 21]
+            radius: x:0, y:2, v:[2, 3, 4, 5, 6, 7]
         brain:
             speed:  x:1, y:0, v:[0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
         trade:
@@ -122,6 +122,9 @@ class Science
         state.science[science][key] = @tree[science][key].v[info.stars]
         switch scienceKey
             when 'path.length' then rts.world.updateTubes()
+            when 'trade.sell'  
+                log 'rts.menu.buttons.trade', rts.menu.buttons.trade?
+                rts.menu.buttons.trade.update()
             
         post.emit 'scienceDequeued', info
             

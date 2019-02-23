@@ -16,7 +16,8 @@ Spent     = require './spent'
 Graph     = require './graph'
 Monster   = require './monster'
 Storage   = require './storage'
-Science   = require './science' 
+Science   = require './science'
+Resource  = require './resource'
 Construct = require './construct'
 
 { Stone, Bot, Face, Edge, Bend } = require './constants'
@@ -27,9 +28,10 @@ class World
         
         rts.world  = @
         
-        @stones = {}
-        @bots   = {}
-        @monsters = []
+        @stones    = {}
+        @bots      = {}
+        @resources = {}
+        @monsters  = []
         
         @tubes  = new Tubes @
         @spent  = new Spent @
@@ -94,7 +96,22 @@ class World
             @sample = 1.0
         
         post.emit 'tick'
-                 
+            
+    # 00000000   00000000   0000000   0000000   000   000  00000000    0000000  00000000  
+    # 000   000  000       000       000   000  000   000  000   000  000       000       
+    # 0000000    0000000   0000000   000   000  000   000  0000000    000       0000000   
+    # 000   000  000            000  000   000  000   000  000   000  000       000       
+    # 000   000  00000000  0000000    0000000    0000000   000   000   0000000  00000000  
+    
+    resourceAt: (index) -> @resources[index]
+    resourceAtPos: (pos) -> @resourceAt @indexAtPos pos
+    
+    addResource: (x, y, z, stone, amount) ->
+        
+        index = @indexAt x,y,z
+        if not @resourceAt index
+            @resources[index] = new Resource @, index, stone, amount
+        
     # 00     00   0000000   000   000   0000000  000000000  00000000  00000000   
     # 000   000  000   000  0000  000  000          000     000       000   000  
     # 000000000  000   000  000 0 000  0000000      000     0000000   0000000    
@@ -390,9 +407,16 @@ class World
         [face,index] = @splitFaceIndex faceIndex
         @posAtIndex index
     
-    stoneBelowBot: (bot) -> @stoneAtPos @posBelowBot bot
-    posBelowBot: (bot) -> bot.pos.minus Vector.normals[bot.face]            
     roundPos: (v) -> vec(v).round()
+    posBelowBot: (bot) -> bot.pos.minus Vector.normals[bot.face]            
+    stoneBelowBot: (bot) -> 
+        pos = @posBelowBot bot
+        stone = @stoneAtPos pos
+        if stone not in Stone.resources
+            index = @indexAtPos pos
+            if @resources[index]
+                return @resources[index].stone
+        stone
             
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     

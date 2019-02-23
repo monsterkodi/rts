@@ -18,12 +18,13 @@ class Packet
         
         @moved = 0
         
-        size = 0.001
+        # size = 0.001
+        size = 0.1
         
         @box = world.boxes.add stone:@stone, size:size, pos:vec(0,0,0)
         
         @lifeTime = 0
-        rts.animate @initialScale
+        # rts.animate @initialScale
         
     #  0000000   0000000   0000000   000      00000000  
     # 000       000       000   000  000      000       
