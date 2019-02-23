@@ -1,8 +1,8 @@
 ###
 000   000   0000000   000   000  0000000    000      00000000
-000   000  000   000  0000  000  000   000  000      000     
-000000000  000000000  000 0 000  000   000  000      0000000 
-000   000  000   000  000  0000  000   000  000      000     
+000   000  000   000  0000  000  000   000  000      000
+000000000  000000000  000 0 000  000   000  000      0000000
+000   000  000   000  000  0000  000   000  000      000
 000   000  000   000  000   000  0000000    0000000  00000000
 ###
 
@@ -11,32 +11,33 @@
 { Face, Bot, Stone } = require './constants'
 
 Science = require './science'
+Spark  = require './spark'
 Vector = require './lib/vector'
 
 class Handle
 
     constructor: (@world) ->
-        
+
     botButtonClick: (button) ->
-        
+
         if empty @world.botsOfType button.bot
             @buyBot button.bot
         else
             button.focusNextBot()
-        
-    botClicked: (bot) -> 
-    
+
+    botClicked: (bot) ->
+
         hit = rts.castRay()
-        
-        switch hit?.bot?.type 
+
+        switch hit?.bot?.type
             when Bot.build then @buildBotHit bot, hit
 
-    # 0000000    00000000  000       0000000   000   000  
-    # 000   000  000       000      000   000   000 000   
-    # 000   000  0000000   000      000000000    00000    
-    # 000   000  000       000      000   000     000     
-    # 0000000    00000000  0000000  000   000     000     
-    
+    # 0000000    00000000  000       0000000   000   000
+    # 000   000  000       000      000   000   000 000
+    # 000   000  0000000   000      000000000    00000
+    # 000   000  000       000      000   000     000
+    # 0000000    00000000  0000000  000   000     000
+
     delay: (delta, bot, speed, delay, func) ->
 
         # log "delay #{Bot.string(bot.type)} #{speed} #{delay} delay:#{bot[delay]}"#, state.science[Bot.string bot.type]
@@ -50,30 +51,30 @@ class Handle
                 bot[delay] += 1/s
             else
                 bot[delay] = 0
-            
-    # 000000000  000   0000000  000   000  
-    #    000     000  000       000  000   
-    #    000     000  000       0000000    
-    #    000     000  000       000  000   
-    #    000     000   0000000  000   000  
-    
+
+    # 000000000  000   0000000  000   000
+    #    000     000  000       000  000
+    #    000     000  000       0000000
+    #    000     000  000       000  000
+    #    000     000   0000000  000   000
+
     tickBot: (delta, bot) ->
-        
+
         @delay delta, bot, 'mine', 'mine', @sendPacket
-                            
-        switch bot.type 
+
+        switch bot.type
             when Bot.base  then @tickBase  delta, bot
             when Bot.brain then @tickBrain delta, bot
             when Bot.trade then @tickTrade delta, bot
-                
-    # 0000000     0000000    0000000  00000000  
-    # 000   000  000   000  000       000       
-    # 0000000    000000000  0000000   0000000   
-    # 000   000  000   000       000  000       
-    # 0000000    000   000  0000000   00000000  
-    
+
+    # 0000000     0000000    0000000  00000000
+    # 000   000  000   000  000       000
+    # 0000000    000000000  0000000   0000000
+    # 000   000  000   000       000  000
+    # 0000000    000   000  0000000   00000000
+
     tickBase: (delta, bot) ->
-        
+
         @delay delta, bot, 'speed', 'prod', =>
             gained = [0,0,0,0]
             storage = @world.storage
@@ -85,20 +86,20 @@ class Handle
                         gained[stone] += 1
             @world.spent.gainAtPosFace gained, bot.pos, bot.face
             true
-    
-    # 0000000    00000000    0000000   000  000   000  
-    # 000   000  000   000  000   000  000  0000  000  
-    # 0000000    0000000    000000000  000  000 0 000  
-    # 000   000  000   000  000   000  000  000  0000  
-    # 0000000    000   000  000   000  000  000   000  
-    
+
+    # 0000000    00000000    0000000   000  000   000
+    # 000   000  000   000  000   000  000  0000  000
+    # 0000000    0000000    000000000  000  000 0 000
+    # 000   000  000   000  000   000  000  000  0000
+    # 0000000    000   000  000   000  000  000   000
+
     tickBrain: (delta, bot) ->
-        
+
         return if state.brain.state != 'on'
         return if not bot.path
-        
+
         @delay delta, bot, 'speed', 'think', =>
-            
+
             if cost = Science.currentCost()
                 # log 'tickBrain', cost
                 storage = @world.storage
@@ -107,20 +108,20 @@ class Handle
                     storage.deduct cost
                     @world.spent.costAtBot cost, bot
                     true
-            
-    # 000000000  00000000    0000000   0000000    00000000  
-    #    000     000   000  000   000  000   000  000       
-    #    000     0000000    000000000  000   000  0000000   
-    #    000     000   000  000   000  000   000  000       
-    #    000     000   000  000   000  0000000    00000000  
-    
+
+    # 000000000  00000000    0000000   0000000    00000000
+    #    000     000   000  000   000  000   000  000
+    #    000     0000000    000000000  000   000  0000000
+    #    000     000   000  000   000  000   000  000
+    #    000     000   000  000   000  0000000    00000000
+
     tickTrade: (delta, bot) ->
-        
+
         return if state.trade.state != 'on'
         return if not bot.path
-        
+
         @delay delta, bot, 'speed', 'trade', =>
-            
+
             storage    = @world.storage
             sellStone  = state.trade.sell
             sellAmount = state.science.trade.sell
@@ -137,27 +138,27 @@ class Handle
                         cost[sellStone] = sellAmount
                         @world.spent.costAtBot cost, bot
                         true
-        
-    # 0000000    000   000  000   000  
-    # 000   000  000   000   000 000   
-    # 0000000    000   000    00000    
-    # 000   000  000   000     000     
-    # 0000000     0000000      000     
 
-    buyButtonClick: (button) -> @buyBot button.bot    
-    
+    # 0000000    000   000  000   000
+    # 000   000  000   000   000 000
+    # 0000000    000   000    00000
+    # 000   000  000   000     000
+    # 0000000     0000000      000
+
+    buyButtonClick: (button) -> @buyBot button.bot
+
     buyBot: (type) ->
-                
+
         cost = state.cost[Bot.string type]
         if not @world.storage.canAfford cost
             log 'WARNING handle.buyBot -- not enough stones for bot!'
             return
-        
+
         if type == Bot.mine
             if @world.botsOfType(type).length >= state.science.mine.limit
                 log 'WARNING handle.buyBot -- mine limit reached!'
                 return
-            
+
         [p, face] = @world.emptyPosFaceNearBot @world.base
         if not p?
             log 'WARNING handle.buyBot -- no space for new bot!'
@@ -171,17 +172,17 @@ class Handle
         rts.camera.focusOnPos p
         @world.highlightBot bot
         @world.updateTubes()
-                
+
         post.emit 'botCreated', bot
-                
-    #  0000000  00000000  000   000  0000000    
-    # 000       000       0000  000  000   000  
-    # 0000000   0000000   000 0 000  000   000  
-    #      000  000       000  0000  000   000  
-    # 0000000   00000000  000   000  0000000    
-    
+
+    #  0000000  00000000  000   000  0000000
+    # 000       000       0000  000  000   000
+    # 0000000   0000000   000 0 000  000   000
+    #      000  000       000  0000  000   000
+    # 0000000   00000000  000   000  0000000
+
     sendPacket: (bot) =>
-        
+
         stone = @world.stoneBelowBot bot
         if @world.storage.canTake stone
             if bot.path?
@@ -194,19 +195,19 @@ class Handle
                 gained[stone] = 1
                 @world.spent.gainAtPosFace gained, bot.pos, bot.face
                 return true
-                        
-    # 0000000    000   000  000  000      0000000    
-    # 000   000  000   000  000  000      000   000  
-    # 0000000    000   000  000  000      000   000  
-    # 000   000  000   000  000  000      000   000  
-    # 0000000     0000000   000  0000000  0000000    
-    
+
+    # 0000000    000   000  000  000      0000000
+    # 000   000  000   000  000  000      000   000
+    # 0000000    000   000  000  000      000   000
+    # 000   000  000   000  000  000      000   000
+    # 0000000     0000000   000  0000000  0000000
+
     buildBotHit: (bot, hit) ->
-             
+
         if not bot.path
             log 'no path'
-            return 
-        
+            return
+
         normal = hit.norm.applyQuaternion bot.mesh.quaternion
         hitpos = bot.pos.to hit.point
 
@@ -218,11 +219,11 @@ class Handle
             n.negate()
             newFace = (newFace+3) % 6
             newPos = bot.pos.plus n
-            
+
         if @world.stoneAtPos(newPos)? or @world.botAtPos(newPos)?
             log 'target occupied'
             return
-        
+
         if @world.storage.deductBuild()
             # log newPos, Face.string newFace
             rts.camera.focusOnPos rts.camera.center.plus n
@@ -233,20 +234,25 @@ class Handle
         else
             log 'cant build'
 
-    # 00     00   0000000   000   000  00000000  
-    # 000   000  000   000  000   000  000       
-    # 000000000  000   000   000 000   0000000   
-    # 000 0 000  000   000     000     000       
-    # 000   000   0000000       0      00000000  
-    
+    # 00     00   0000000   000   000  00000000
+    # 000   000  000   000  000   000  000
+    # 000000000  000   000   000 000   0000000
+    # 000 0 000  000   000     000     000
+    # 000   000   0000000       0      00000000
+
     moveBot: (bot, pos, face) ->
-        
+
         wbot = @world.botAtPos(pos)
         if not wbot or wbot == bot
             index = @world.indexAtPos pos
             if bot.face != face or bot.index != index
-                if @world.canBotMoveTo bot, face, index 
+                if @world.canBotMoveTo bot, face, index
                     @world.moveBot bot, pos, face
                     @world.highlightPos bot.pos
-            
+
+    monsterMoved: (monster) ->
+
+        if monster.pos.paris(@world.base.pos) < state.science.base.radius
+            Spark.spawn @world, @world.base.pos, monster
+
 module.exports = Handle

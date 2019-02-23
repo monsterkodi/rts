@@ -21,7 +21,7 @@ class Debug
         # @worldSpeed = @value text:'world', value: rts.world.speed.toFixed(1),          reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         # @tubeSpeed  = @value text:'tube ', value: state.science.tube.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
         # @tubesGap   = @value text:'gap  ', value: state.science.tube.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
-        @cageSize = @value text:'cage ', value: state.base.radius,           reset:@resetCage,       incr:@incrCage,       decr:@decrCage
+        @cageSize   = @value text:'cage ', value: state.science.base.radius,           reset:@resetCage,       incr:@incrCage,       decr:@decrCage
         @pathLength = @value text:'path ', value: state.science.path.length,           reset:@resetPath,       incr:@incrPath,       decr:@decrPath
         @button text:'fill  storage', cb: -> rts.world.storage.fill()
         @button text:'clear storage', cb: -> rts.world.storage.clear()
@@ -46,7 +46,7 @@ class Debug
     resetWorldSpeed: => rts.world.resetSpeed()
     resetTubeSpeed:  => @modTubeSpeed 0.5-state.science.tube.speed
     resetPath:       => @modPath 10-state.science.path.length
-    resetCage:       => @modCage 4-state.base.radius
+    resetCage:       => @modCage 4-state.science.base.radius
     resetGap:        => @modGap 0.12-state.science.tube.gap
     
     # 000000000  000   000  0000000    00000000  
@@ -59,7 +59,7 @@ class Debug
     decrTubeSpeed: => @modTubeSpeed -0.1
     modTubeSpeed: (d) -> 
         state.science.tube.speed = @clampZero state.science.tube.speed, d, 1
-        @tubeSpeed.children[2].innerHTML = state.science.tube.speed.toFixed 1
+        @tubeSpeed?.children[2].innerHTML = state.science.tube.speed.toFixed 1
 
     # 000   000   0000000   00000000   000      0000000    
     # 000 0 000  000   000  000   000  000      000   000  
@@ -69,7 +69,7 @@ class Debug
     
     incrWorldSpeed: => rts.world.incrSpeed()
     decrWorldSpeed: => rts.world.decrSpeed()
-    updateWorldSpeed: =>  @worldSpeed.children[2].innerHTML = rts.world.speed.toFixed 1
+    updateWorldSpeed: =>  @worldSpeed?.children[2].innerHTML = rts.world.speed.toFixed 1
 
     #  0000000    0000000   00000000   
     # 000        000   000  000   000  
@@ -82,7 +82,7 @@ class Debug
     modGap: (d) -> 
         state.science.tube.gap += d
         state.science.tube.gap = clamp 0.1, 0.5, state.science.tube.gap
-        @tubesGap.children[2].innerHTML = state.science.tube.gap.toFixed(2)
+        @tubesGap?.children[2].innerHTML = state.science.tube.gap.toFixed(2)
 
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  
@@ -95,15 +95,15 @@ class Debug
     modPath: (d) -> 
         state.science.path.length += d
         state.science.path.length = clamp 1, 40, state.science.path.length
-        @pathLength.children[2].innerHTML = state.science.path.length
+        @pathLength?.children[2].innerHTML = state.science.path.length
         rts.world.updateTubes()
 
     incrCage: => @modCage  1 
     decrCage: => @modCage -1
     modCage: (d) -> 
-        state.base.radius += d
-        state.base.radius = clamp 1, 32, state.base.radius
-        @cageSize.children[2].innerHTML = state.base.radius
+        state.science.base.radius += d
+        state.science.base.radius = clamp 1, 32, state.science.base.radius
+        @cageSize?.children[2].innerHTML = state.science.base.radius
         
     value: (cfg) ->
         

@@ -36,7 +36,7 @@ class Spent
                 s = Math.min 1.0, box.life
                 @world.boxes.setPos box, pos
                 @world.boxes.setSize box, s*0.05
-                @world.boxes.setRot box, rot.multiply box.rot
+                @world.boxes.setRot box, rot.multiply quat().setFromAxisAngle box.rot, deg2rad -60*delta
                 if box.life <= 0
                     @world.boxes.del box
                     @spent.splice i, 1
@@ -103,7 +103,8 @@ class Spent
         
         box = @world.boxes.add pos:startPos, size:0.05, stone:stone, rot:rot
         box.dir = dir
-        box.rot = quat().setFromAxisAngle Vector.normals[face], deg2rad -1
+        # box.rot = quat().setFromAxisAngle Vector.normals[face], deg2rad -1
+        box.rot = Vector.normals[face]
         box.life = box.maxLife = 6
         @spent.push box
 

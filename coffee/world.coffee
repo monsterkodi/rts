@@ -176,10 +176,12 @@ class World
         
         @tubes.build()
         @construct.tubes()
-        
+            
+    canBotMoveTo: (bot, face, index) -> @pathFromTo @faceIndex(bot.face, bot.index), @faceIndex(face, index)
+    
     pathFromTo: (fromIndex, toFaceIndex) -> @tubes.astar.findPath fromIndex, toFaceIndex
     
-    canBotMoveTo: (bot, face, index) -> @pathFromTo @faceIndex(bot.face, bot.index), @faceIndex(face, index)
+    pathFromPosToPos: (from, to) -> @tubes.astar.posPath from, to
         
     # 0000000    000   000  000  000      0000000    
     # 000   000  000   000  000  000      000   000  
@@ -323,7 +325,7 @@ class World
          [Vector.PX, Vector.PY, Vector.NX, Vector.NY]
         ][face%3]
     
-    neighborsOfFaceIndex: (faceIndex) -> 
+    neighborsOfFaceIndex: (faceIndex) => 
         
         [face, index] = @splitFaceIndex faceIndex
         pos = @posAtIndex index
@@ -352,10 +354,15 @@ class World
         
         neighbors
         
-    neighborsOfIndex: (index) -> 
+    neighborsOfIndex: (index) => 
         
         pos = @posAtIndex index
         Vector.normals.map (dir) => @indexAtPos pos.plus dir
+        
+    emptyNeighborsOfIndex: (index) =>
+        
+        @neighborsOfIndex(index).filter (n) =>
+            not @isItemAtPos @posAtIndex n
         
     # 000  000   000  0000000    00000000  000   000  
     # 000  0000  000  000   000  000        000 000   
@@ -408,13 +415,13 @@ class World
         if bot
             if bot == @highBot
                 @construct.orientFace bot.highlight, bot.face
-                @baseCage.position.copy bot.pos
+                @baseCage?.position.copy bot.pos
                 return
             @removeHighlight()
             @highBot = bot
             bot.highlight = @construct.highlight bot
             if bot.type == Bot.base
-                @baseCage = @construct.cage bot, state.base.radius
+                @baseCage = @construct.cage bot, state.science.base.radius
         else
             @removeHighlight()
                                 

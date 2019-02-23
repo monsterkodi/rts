@@ -47,6 +47,7 @@ Color =
         
     path:                color 0xbbbbbb
     
+    cage:                color 0x0f0f0f
     monster:             color 0x333333
 
 Color.cost.red   = Color.stone.red

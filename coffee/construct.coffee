@@ -314,9 +314,8 @@ class Construct
             for y in [-s..s]
                 for z in [-s..s]
                     v = vec x,y,z
-                    # if Math.round(v.length()) <= s
-                    # if Math.round(v.manhattan(vec())) == s
-                    if Math.round(v.paris(vec())) == s
+                    # if Math.round(v.paris(vec())) == s
+                    if Math.round(v.paris(vec())) <= s
                         geom.vertices.push v
                         
         mesh = new THREE.Points geom, Materials.cage

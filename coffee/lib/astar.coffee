@@ -14,8 +14,6 @@ class AStar
 
     constructor: (@world) ->
         
-        @cameFrom = new Map
-
     dist: (start, goal) ->
         
         s = @world.posAtIndex start
@@ -32,7 +30,14 @@ class AStar
         keys.sort (a,b) => @getScore(fScore, a) - @getScore(fScore, b)
         keys[0]
         
-    findPath: (start, goal) ->
+    findPath: (start, goal) -> @findWithNeighborFunc start, goal, @world.neighborsOfFaceIndex
+    posPath: (fromPos, toPos) -> 
+    
+        start = @world.indexAtPos fromPos
+        goal  = @world.indexAtPos toPos
+        @findWithNeighborFunc start, goal, @world.emptyNeighborsOfIndex
+        
+    findWithNeighborFunc: (start, goal, neighborFunc) ->
         
         closedSet = new Map # set of nodes already evaluated
     
@@ -54,7 +59,7 @@ class AStar
         # by passing by that node. That value is partly known, partly heuristic.
         fScore = new Map # map with default value of Infinity
     
-        # For the first node, that value is completely heuristic.
+        # For the first node, that value is completely heuristic
         fScore.set start, @dist start, goal
     
         while valid openSet
@@ -66,7 +71,7 @@ class AStar
             openSet.delete current
             closedSet.set current, current
     
-            for neighbor in @world.neighborsOfFaceIndex current
+            for neighbor in neighborFunc current
                 
                 if closedSet.get(neighbor) != undefined
                     continue # ignore the neighbor which is already evaluated.
@@ -89,7 +94,8 @@ class AStar
         path = [current]
         while @cameFrom.get(current)?
             current = @cameFrom.get(current)
-            path.push current
+            # path.push current
+            path.unshift current
         return path
         
 module.exports = AStar

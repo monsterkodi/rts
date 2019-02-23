@@ -28,11 +28,16 @@ class Map extends World
         
     pest: ->
 
-        d = state.base.radius
-        @addMonster  d, d, 1
-        @addMonster  d,-d, 1
-        @addMonster -d, d, 1
-        @addMonster -d,-d, 1
+        d = 3
+        @addMonster  d, d, -d
+        @addMonster  d,-d, -d
+        @addMonster -d, d, -d
+        @addMonster -d,-d, -d
+        
+        @addMonster  d, d,  d
+        @addMonster  d,-d,  d
+        @addMonster -d, d,  d
+        @addMonster -d,-d,  d
         
         # s = 6
         # for i in [0..10]
@@ -43,6 +48,8 @@ class Map extends World
         @addStone -2, 0, 0
         @addStone -3, 0, 0
         @addStone  2, 0, 0
+        
+        @addStone  1, 0, 0, Stone.red
         
         @addBot  0, 0, 1, Bot.base
         

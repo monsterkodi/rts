@@ -145,7 +145,7 @@ class Tubes
         @segments = {}
         for bot in @world.getBots()
             continue if bot == @world.base
-            @pathFromBotToBot @world.base, bot
+            @pathFromBotToBot bot, @world.base
             
             if bot.path?
                 fi = @world.faceIndex bot.path.points[0].face, bot.path.points[0].index
@@ -192,21 +192,21 @@ class Tubes
     # 00000000   000000000     000     000000000  
     # 000        000   000     000     000   000  
     # 000        000   000     000     000   000  
-                
+            
     pathFromBotToBot: (from, to) -> 
     
         path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
         
         if path and path.length <= state.science.path.length+1
-            to.path = 
+            from.path = 
                 points: @pathPoints path
                 length: path.length
-            to.path.pind = []
-            for pi in [0...to.path.points.length]
-                if to.path.points[pi].i == 0
-                    to.path.pind.push pi
+            from.path.pind = []
+            for pi in [0...from.path.points.length]
+                if from.path.points[pi].i == 0
+                    from.path.pind.push pi
         else
-            delete to.path
+            delete from.path
                                                     
     # 00000000    0000000   000  000   000  000000000   0000000  
     # 000   000  000   000  000  0000  000     000     000       

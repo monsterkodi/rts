@@ -27,10 +27,13 @@ module.exports =
             
         nonMineSpeed: 0.2
            
-        base:  
-            state: 'on'
-            radius: 4
-        
+        spark:
+            speed:  0.5
+        monster: 
+            speed:  0.2
+            health: 32
+            
+        base:  state: 'on'
         brain: state: 'on'
         build: state: 'build'
             

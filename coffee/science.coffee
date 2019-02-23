@@ -16,17 +16,17 @@ class Science
         base:
             speed:  x:0, y:0, v:[0.05, 0.1, 0.15, 0.2, 0.25, 0.3]
             prod:   x:0, y:1, v:[[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]]
+            radius: x:0, y:2, v:[2, 3, 5, 8, 13, 21]
         brain:
             speed:  x:1, y:0, v:[0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
-            price:  x:1, y:1, v:[1.0, 0.9, 0.8, 0.7, 0.6, 0.5]
         trade:
-            speed:  x:2, y:0, v:[0.1, 0.2, 0.4, 0.8, 1.2, 1.6]
+            speed:  x:2, y:0, v:[0.1, 0.2, 0.4, 0.8, 1.6, 2.4]
             sell:   x:2, y:1, v:[4, 3, 2, 1]
         mine:
             speed:  x:3, y:0, v:[0.8, 1.0, 1.2, 1.4, 1.6, 2.0]
             limit:  x:3, y:1, v:[2, 4, 8, 12, 16, 32]
         build:
-            cost:   x:0, y:2, v:[[0,0,0,32],[0,0,0,24],[0,0,0,20],[0,0,0,16],[0,0,0,12],[0,0,0,8]]
+            cost:   x:1, y:1, v:[[0,0,0,32],[0,0,0,24],[0,0,0,20],[0,0,0,16],[0,0,0,12],[0,0,0,8]]
         tube:
             speed:  x:1, y:2, v:[0.2, 0.3, 0.4, 0.5, 0.6, 0.8]
             gap:    x:2, y:2, v:[0.2, 0.14, 0.1, 0.07, 0.05, 0.0]
@@ -112,7 +112,7 @@ class Science
                 post.emit 'scienceUpdated', info
             
     @finished: (info) =>
-        log 'Science.finished', info
+        log 'Science.finished', info.scienceKey
         info.index = 0
         @queue.shift()
         

@@ -36,6 +36,7 @@ class RTS
         @fps = new FPS
         @paused = false
         @animations = []
+        @worldAnimations = []
         
         @renderer = new THREE.WebGLRenderer antialias: true
         @renderer.setPixelRatio window.devicePixelRatio
@@ -118,6 +119,10 @@ class RTS
         
         @animations.push func
         
+    animateWorld: (func) ->
+        
+        @worldAnimations.push func
+        
     togglePause: -> 
     
         @paused = not @paused
@@ -131,15 +136,20 @@ class RTS
         
         oldAnimations = @animations.clone()
         @animations = []
-        
         for animation in oldAnimations
             animation delta
         
         if not @paused
+            
             angle = -delta*0.05*@world.speed
             @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
             @light2Helper?.update()   
             @world.animate delta
+            
+            oldWorldAnimations = @worldAnimations.clone()
+            @worldAnimations = []
+            for animation in oldWorldAnimations
+                animation delta * @world.speed
                     
         @render()
         setTimeout @animationStep, 1000/60
