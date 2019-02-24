@@ -96,8 +96,17 @@ class BrainButton extends CanvasButton
             switch science 
                 when 'tube', 'path'
                     geom = Geometry.tube 0.6
+                when 'storage'
+                    geom = new THREE.Geometry 
+                    for y in [0..3]
+                        geom.merge Geometry.box 0.1, -0.06, y*0.12, 0
+                        geom.merge Geometry.box 0.1, -0.18, y*0.12, 0
+                        geom.merge Geometry.box 0.1,  0.06, y*0.12, 0
+                        geom.merge Geometry.box 0.1,  0.18, y*0.12, 0
+                    geom.translate 0,-0.18,0
                 else
-                    geom = new THREE.SphereGeometry 0.5, 12, 12
+                    geom = new THREE.SphereGeometry 0.3, 12, 12
+                    geom.computeFlatVertexNormals()
             
         mesh = new THREE.Mesh geom, mat
         

@@ -17,11 +17,12 @@ class Info
         @trias = elem class:'infotext', parent:@elem
         @lines = elem class:'infotext', parent:@elem
         @calls = elem class:'infotext', parent:@elem
+        @stone = elem class:'infotext', parent:@elem
         @boxes = elem class:'infotext', parent:@elem
         @pckts = elem class:'infotext', parent:@elem
         @segmt = elem class:'infotext', parent:@elem
-        @stones =elem class:'infotext', parent:@elem
-        @temp   =elem class:'infotext', parent:@elem
+        @store = elem class:'infotext', parent:@elem
+        @temp  = elem class:'infotext', parent:@elem
 
         document.body.appendChild @elem
           
@@ -42,11 +43,12 @@ class Info
         @calls.innerHTML = "calls: #{info.calls}"
         @trias.innerHTML = "trias: #{info.triangles}"
         @lines.innerHTML = "lines: #{info.lines}"
+        @stone.innerHTML = "stone: #{_.size rts.world.stones}"
         @boxes.innerHTML = "boxes: #{rts.world.boxes.numBoxes()}"
         @segmt.innerHTML = "segmt: #{rts.world.tubes.getSegments().length}"
         @pckts.innerHTML = "pckts: #{rts.world.tubes.getPackets().length}"
-        @stones.innerHTML = "store: #{rts.world.storage.stones}"
-        @temp.innerHTML   = "temps: #{rts.world.storage.temp}"
+        @store.innerHTML = "store: #{rts.world.storage.stones}"
+        @temp.innerHTML  = "temps: #{rts.world.storage.temp}"
 
 module.exports = Info
 

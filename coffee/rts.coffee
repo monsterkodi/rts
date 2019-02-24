@@ -220,8 +220,15 @@ class RTS
         if bot = @world.highBot
             log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
             switch bot.type
-                when Bot.brain then state.brain.state = state.brain.state == 'on' and 'off' or 'on'
-                when Bot.trade then state.trade.state = state.trade.state == 'on' and 'off' or 'on'
+                when Bot.base
+                    state.base.state = state.base.state == 'on' and 'off' or 'on'
+                    post.emit 'botState', 'base', state.base.state
+                when Bot.brain 
+                    state.brain.state = state.brain.state == 'on' and 'off' or 'on'
+                    post.emit 'botState', 'brain', state.brain.state
+                when Bot.trade 
+                    state.trade.state = state.trade.state == 'on' and 'off' or 'on'
+                    post.emit 'botState', 'trade', state.trade.state
                     
     calcMouse: (event) ->
         
@@ -255,8 +262,9 @@ class RTS
     castRay: (ignoreHighlight) ->
         
         @raycaster.setFromCamera @mouse, @camera
-        intersects = @raycaster.intersectObjects @scene.children, false 
+        intersects = @raycaster.intersectObjects @scene.children, false
 
+        # log intersects.length
         intersect = @filterHit intersects, ignoreHighlight
         
         return if empty intersect

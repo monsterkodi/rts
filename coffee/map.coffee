@@ -23,8 +23,8 @@ class Map extends World
         
         # @pest()
         # @grid()
-        # @sparse()
         @plenty()
+        # @sparse()
         
     pest: ->
 
@@ -65,20 +65,24 @@ class Map extends World
         @addStone -3, 0, 0
         @addStone  2, 0, 0
                 
-        for z in [0..0]
+        for z in [0, -255]
             for y in [-5..5]
-                @wall -20,y*4,z*2, 20,y*4,z*2
-                @wall y*4,-20,z*2, y*4,20,z*2
+                @wall -20,y*4,z, 20,y*4,z
+                @wall y*4,-20,z, y*4,20,z
 
         for x in [-2..2]
             for y in [-2..2]
+                for z in [0..0] by 2
                  
-                @addStone  x*8-1, y*8,   0, Stone.red
-                @addStone  x*8,   y*8-1, 0, Stone.gelb
-                @addStone  x*8,   y*8+1, 0, Stone.white
-                @addStone  x*8+1, y*8,   0, Stone.blue
-                @addStone  0,       2,   0, Stone.white
-                @addStone  0,      -2,   0, Stone.white
+                    @addStone  x*8-1, y*8,   z, Stone.red
+                    @addStone  x*8,   y*8-1, z, Stone.gelb
+                    @addStone  x*8,   y*8+1, z, Stone.white
+                    @addStone  x*8+1, y*8,   z, Stone.blue
+                    @addStone  0,       2,   z, Stone.white
+             
+        for x in [-20..20] by 8
+            for y in [-20..20] by 8
+                @wall x, y, 0, x, y, -256
                 
         @addBot  0, 0, 1, Bot.base
           

@@ -29,6 +29,7 @@ class World
         rts.world  = @
         
         @stones    = {}
+        @box       = {}
         @bots      = {}
         @resources = {}
         @monsters  = []
@@ -217,7 +218,15 @@ class World
                     @addStone x, y, z, stone
                     
     delStone: (x,y,z) -> delete @stones[@indexAt x,y,z]
-    addStone: (x,y,z, stone=Stone.gray) -> @stones[@indexAt x,y,z] = stone
+    addStone: (x,y,z, stone=Stone.gray) -> 
+    
+        index = @indexAt x,y,z
+        @stones[index] = stone
+        
+        # if @box[index]
+            # @boxes.del @box[index]
+
+        # @box[index] = @boxes.add pos:vec(x,y,z), stone:stone, size:1.1
         
     botAt:      (x,y,z) -> @bots[@indexAt x,y,z]
     botAtPos:   (v)     -> @bots[@indexAtPos v]

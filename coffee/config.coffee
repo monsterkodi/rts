@@ -13,8 +13,10 @@ module.exports =
     default:
             
         storage:
-            capacity: 80
-            stones:[ 8 *8, 8 *8, 8 *8, 8 *8]
+            capacity: 160
+            # stones:[ 8 *8, 8 *8, 8 *8, 8 *8]
+            stones:[ 80, 80, 80, 80 ]
+            # stones:[ 200,160,80,8 ]
             # stones:[80,77,13,79]
             # stones:[ 5,6,7,8 ]
             
