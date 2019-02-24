@@ -12,11 +12,11 @@ class Geometry
     
     @cache = {}
     
-    @cornerBox: ->
+    @cornerBox: (size=1, x=0, y=0, z=0) ->
                     
-        s = 0.45
-        o = 0.5
-        i = 0.4
+        o = size/2
+        s = 0.9*o
+        i = 0.8*o
         
         topside = new THREE.Geometry()
         
@@ -78,6 +78,7 @@ class Geometry
 
         bufg = new THREE.BufferGeometry()
         bufg.fromGeometry cube
+        bufg.translate x, y, z
         bufg
     
     #  0000000   0000000    0000000  000000000  
@@ -395,5 +396,21 @@ class Geometry
         geom1.merge geom2
         geom1.translate x, y, z
         geom1
+        
+    @botPaused: ->
+
+        size = 0.1
+        geom1 = new THREE.BoxGeometry size/2,size,size/4
+        geom1.translate -size/3, 0, 0     
+        geom2 = new THREE.BoxGeometry size/2,size,size/4
+        geom2.translate size/3, 0, 0
+        
+        geom = new THREE.Geometry
+        geom.merge geom1
+        geom.merge geom2
+        geom.translate 0.15,0.12,0.24
+        geom.rotateY deg2rad 5
+        geom.rotateX deg2rad 45
+        geom
             
 module.exports = Geometry

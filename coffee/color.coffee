@@ -18,6 +18,7 @@ Color =
         background:      color 0x181818
         backgroundHover: color 0x202020
         progress:        color 0x8888ff
+        disconnected:    color 0x000000
         active:          color 0xcccccc
         inactive:        color 0x333333
         activeHigh:      color 0xffffff
@@ -25,6 +26,7 @@ Color =
         state:
             off:         color 0xff0000
             on:          color 0x111111
+            paused:      color 0xff0000
 
     stone: 
         red:             color 0x881111

@@ -43,6 +43,7 @@ Materials =
     state: 
         off:    new THREE.MeshStandardMaterial color:Color.menu.state.off, metalness: 0.6, roughness: 0.5
         on:     new THREE.MeshPhongMaterial    color:Color.menu.state.on
+        paused: new THREE.MeshStandardMaterial color:Color.menu.state.paused, metalness: 0.5, roughness: 0.9
         
     menu:
         active:       new THREE.MeshStandardMaterial color:Color.menu.active,       metalness: 0.9, roughness: 0.75

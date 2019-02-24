@@ -14,8 +14,8 @@ module.exports =
             
         storage:
             capacity: 80
-            # stones:[ 8 *8, 8 *8, 8 *8, 8 *8]
-            stones:[80,77,13,79]
+            stones:[ 8 *8, 8 *8, 8 *8, 8 *8]
+            # stones:[80,77,13,79]
             # stones:[ 5,6,7,8 ]
             
         cost: 
@@ -41,7 +41,7 @@ module.exports =
         build: state: 'build'
             
         trade:
-            state: 'on'
+            state: 'off'
             sell:  Stone.red
             buy:   Stone.blue
             

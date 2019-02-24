@@ -18,8 +18,9 @@ class CanvasButton
 
     constructor: (div, clss='canvasButton') ->
         
-        @width  = 100
-        @height = 100
+        @width     = 100
+        @height    = 100
+        @stoneSize = 0.5
         
         @name = 'canvasbutton'
         
@@ -72,11 +73,21 @@ class CanvasButton
         @camera.updateProjectionMatrix()
         @render()
         
-    render: ->
+    render: =>
 
         CanvasButton.renderer.render @scene, @camera
         
         context = @canvas.getContext '2d'
         context.drawImage CanvasButton.renderer.domElement, 0, 0
+        
+    posForStone: (stone, i) ->
+        
+        pos = vec()
+        pos.x = stone*1.5-2.5
+        pos.y = 1.2*Math.floor (i-1)/8
+        pos.x += @stoneSize if (i-1)%4 in [1,2]
+        pos.z += @stoneSize if (i-1)%4 in [2,3]
+        pos.y += @stoneSize if (i-1)%8 > 3
+        pos
         
 module.exports = CanvasButton

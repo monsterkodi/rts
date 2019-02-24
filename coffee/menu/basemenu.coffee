@@ -6,7 +6,7 @@
 0000000    000   000  0000000   00000000  000   000  00000000  000   000   0000000 
 ###
 
-{ log } = require 'kxk'
+{ post, log } = require 'kxk'
 
 BotMenu      = require './botmenu'
 CallButton   = require './callbutton'
@@ -18,13 +18,12 @@ class BaseMenu extends BotMenu
     
         super botButton
         
-        # btn = @addButton 'pause', new ToggleButton @div, @onBaseToggle, rts.paused and 'off' or 'on'
-        # post.on 'pause', => @buttons.pause.setState rts.paused and 'off' or 'on'
         @addButton 'state', new ToggleButton @div, @onBaseToggle, state.base.state
         @addButton 'call',  new CallButton @div
                 
-    # addButton: (key, button) -> @buttons[key] = button
-        
-    onBaseToggle: (baseState) => state.base.state = baseState
+    onBaseToggle: (baseState) => 
+    
+        state.base.state = baseState
+        post.emit 'botState', 'base', baseState
 
 module.exports = BaseMenu

@@ -12,7 +12,7 @@
 
 CanvasButton = require './canvasbutton'
 Materials    = require '../materials'
-Geometry     = require '../geometry' 
+Boxes        = require '../boxes'
 
 class BuyButton extends CanvasButton
 
@@ -29,13 +29,44 @@ class BuyButton extends CanvasButton
         y = botButton.canvas.offsetTop - rts.menuBorderWidth
         @canvas.style = "left:100px; top:#{y}px"
         
-        @camera.updateProjectionMatrix()
-        @render()
+        @boxes = new Boxes @scene, 16*4*80, new THREE.BoxBufferGeometry
+        @box   = [[],[],[],[]]
+        
+        @init()
         
         post.on 'storageChanged', @onStorageChanged
         
         @canvas.addEventListener 'mouseout', @del
         
+    init: ->
+        
+        cost = @cost()
+        have = rts.world.storage.stones
+        
+        for stone in Stone.resources
+            
+            while @box[stone].length < cost[stone]
+                stoneOrNot = stone
+                if @box[stone].length >= have[stone]
+                    stoneOrNot = Stone.gray
+                @box[stone].push @boxes.add stone:stoneOrNot, size:@stoneSize, pos:@posForStone stone, @box[stone].length+1
+                
+        @render()
+                        
+    update: -> 
+        
+        have = rts.world.storage.stones
+        
+        for stone in Stone.resources
+            
+            for i in [0...@box[stone].length]
+                stoneOrNot = stone
+                if i >= have[stone]
+                    stoneOrNot = Stone.gray
+                @boxes.setStone @box[stone][i], stoneOrNot
+        
+        @render()
+                
     del: ->
         
         @canvas.removeEventListener 'mouseout', @del        
@@ -59,6 +90,7 @@ class BuyButton extends CanvasButton
         @camera.fov = 40
         @camera.position.copy vec(0,1,1).normal().mul 14
         @camera.lookAt vec 0,3,0
+        @camera.updateProjectionMatrix()
         
     highlight: -> 
 
@@ -85,35 +117,11 @@ class BuyButton extends CanvasButton
     # 000   000  000       000  0000  000   000  000       000   000  
     # 000   000  00000000  000   000  0000000    00000000  000   000  
     
-    onStorageChanged: => @render()
+    onStorageChanged: => @update()
     
     render: ->
 
-        log 'render', @name
-        cost = @cost()
-        have = rts.world.storage.stones
-        
-        for stone in Stone.resources
-            
-            @meshes[stone]?.parent?.remove @meshes[stone]
-            @meshes[stone+4]?.parent?.remove @meshes[stone+4]
-            delete @meshes[stone]
-            delete @meshes[stone+4]
-
-            if cost[stone]
-                
-                if have[stone]
-                    bufg = Geometry.stoneAmount stone, Math.min have[stone], cost[stone]
-                    mesh = new THREE.Mesh bufg, Materials.cost[stone]
-                    @scene.add mesh
-                    @meshes[stone] = mesh
-                
-                if cost[stone] > have[stone]
-                    bufg = Geometry.stonesMissing stone, have[stone], cost[stone]
-                    mesh = new THREE.Mesh bufg, Materials.cost[4]
-                    @scene.add mesh
-                    @meshes[stone+4] = mesh
-        
+        @boxes.render()        
         super()
                             
 module.exports = BuyButton

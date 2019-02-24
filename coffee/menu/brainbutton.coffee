@@ -73,6 +73,8 @@ class BrainButton extends CanvasButton
             mesh.parent?.remove mesh
         @meshes = {}
         
+        [science, key] = @scienceKey.split '.'
+        
         stars = @stars()
         if stars > Science.maxStars @scienceKey
             return super()
@@ -85,8 +87,6 @@ class BrainButton extends CanvasButton
         # 0000000    000   000     000     
         # 000   000  000   000     000     
         # 0000000     0000000      000     
-        
-        [science, key] = @scienceKey.split '.'
         
         bot = Bot.base
         if science in Bot.keys
@@ -178,9 +178,14 @@ class BrainButton extends CanvasButton
                     
         super()
         
-        ctx = @canvas.getContext '2d'
+        # 00000000   00000000    0000000    0000000   00000000   00000000   0000000   0000000  
+        # 000   000  000   000  000   000  000        000   000  000       000       000       
+        # 00000000   0000000    000   000  000  0000  0000000    0000000   0000000   0000000   
+        # 000        000   000  000   000  000   000  000   000  000            000       000  
+        # 000        000   000   0000000    0000000   000   000  00000000  0000000   0000000   
         
-        progress = 100*state.progress[science][key][stars]/state.scienceSteps[stars]
+        ctx = @canvas.getContext '2d'
+        progress = Science.progress @scienceKey, stars
         ctx.fillStyle = Color.menu.progress.getStyle()
         ctx.fillRect 100-progress, 199, 2*progress, 1
         

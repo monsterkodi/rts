@@ -100,7 +100,9 @@ class Science
                 true
             
     @currentCost: -> first(@queue)?.cost
+    
     @deduct: -> 
+        
         if info = first @queue
             [science,key] = @split info.scienceKey
             state.progress[science][key][info.stars] += 1
@@ -111,8 +113,19 @@ class Science
             else
                 post.emit 'scienceUpdated', info
             
+    @currentProgress: ->
+        
+        if info = first @queue
+            stars = info.stars
+            @progress info.scienceKey, info.stars
+           
+    @progress: (scienceKey, stars) ->
+        
+        [science, key] = @split scienceKey
+        100*state.progress[science][key][stars]/(state.scienceSteps[stars]-1)
+            
     @finished: (info) =>
-        log 'Science.finished', info.scienceKey
+        # log 'Science.finished', info.scienceKey
         info.index = 0
         @queue.shift()
         
@@ -123,6 +136,7 @@ class Science
         switch scienceKey
             when 'path.length' then rts.world.updateTubes()
             
+        post.emit 'scienceUpdated',  info
         post.emit 'scienceDequeued', info
         post.emit 'scienceFinished', scienceKey
             

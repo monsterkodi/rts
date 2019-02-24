@@ -6,7 +6,7 @@
    000     000   000  000   000  0000000    00000000  000   000  00000000  000   000   0000000 
 ###
 
-{ elem, $, log } = require 'kxk'
+{ post, elem, $, log } = require 'kxk'
 
 TradeButton  = require './tradebutton'
 ToggleButton = require './togglebutton'
@@ -25,5 +25,6 @@ class TradeMenu extends BotMenu
     onTradeToggle: (tradeState) =>
         
         state.trade.state = tradeState
+        post.emit 'botState', 'trade', tradeState
                     
 module.exports = TradeMenu

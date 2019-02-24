@@ -6,7 +6,7 @@
    000      0000000   0000000    00000000  0000000 
 ###
 
-{ valid, empty, first, last, log, _ } = require 'kxk'
+{ post, valid, empty, first, last, log, _ } = require 'kxk'
 
 { Stone, Bend } = require './constants'
 
@@ -147,11 +147,19 @@ class Tubes
         
         oldSegments = _.clone @segments
         @segments = {}
+        
         for bot in @world.getBots()
             continue if bot == @world.base
+            
+            hadPath = bot.path?
+            
             @pathFromBotToBot bot, @world.base
             
             if bot.path?
+                
+                if not hadPath
+                    post.emit 'botConnected', bot
+                
                 fi = @world.faceIndex bot.path.points[0].face, bot.path.points[0].index
                 si = @segIndex fi, fi
                 fakePoints = [_.cloneDeep(bot.path.points[0]), _.clone(bot.path.points[0])]
@@ -166,6 +174,10 @@ class Tubes
                     dist:   bot.path.length
                     in:     []
                     out:    null
+                    
+            else
+                if hadPath
+                    post.emit 'botDisconnected', bot
             
         for index,segment of oldSegments
             if @segments[index]

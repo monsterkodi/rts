@@ -22,9 +22,9 @@ class Map extends World
     build: ->
         
         # @pest()
-        @grid()
+        # @grid()
         # @sparse()
-        # @plenty()
+        @plenty()
         
     pest: ->
 

@@ -25,7 +25,6 @@ class BrainMenu extends BotMenu
         @queue = []
         
         border = "#{rts.menuBorderWidth}px transparent"
-        # border = "#{rts.menuBorderWidth}px solid #151500"
         
         btn = @addButton 'brain', new ToggleButton @div, @onBrainToggle, state.brain.state
         btn.canvas.style.borderBottom = border
@@ -84,6 +83,9 @@ class BrainMenu extends BotMenu
         
     addButton: (key, button) -> @buttons[key] = button
         
-    onBrainToggle: (brainState) => state.brain.state = brainState
+    onBrainToggle: (brainState) => 
+    
+        state.brain.state = brainState
+        post.emit 'botState', 'brain', brainState
                 
 module.exports = BrainMenu

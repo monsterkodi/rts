@@ -24,7 +24,6 @@ class Storage extends CanvasButton
         @stones    = [0,0,0,0]
         @temp      = [0,0,0,0]
         @box       = [[],[],[],[]]
-        @stoneSize = 0.5
 
         @resetBalance()
         
@@ -123,17 +122,7 @@ class Storage extends CanvasButton
         
         @camera.position.copy vec(0,2,1).normal().mul 22
         @camera.lookAt vec 0,7.6,0
-        
-    posForStone: (stone, i) ->
-        
-        pos = vec()
-        pos.x = stone*1.5-2.5
-        pos.y = 1.2*Math.floor (i-1)/8
-        pos.x += @stoneSize if (i-1)%4 in [1,2]
-        pos.z += @stoneSize if (i-1)%4 in [2,3]
-        pos.y += @stoneSize if (i-1)%8 > 3
-        pos
-        
+                
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
     # 0000000    0000000   000 0 000  000   000  0000000   0000000    
