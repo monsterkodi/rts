@@ -14,6 +14,7 @@ class Info
                     
         @elem = elem class:'info', style:'position:absolute; z-index:1; bottom:10px; right:20px'
 
+        @cycls = elem class:'infotext', parent:@elem
         @trias = elem class:'infotext', parent:@elem
         @lines = elem class:'infotext', parent:@elem
         @calls = elem class:'infotext', parent:@elem
@@ -40,6 +41,7 @@ class Info
         
         info = _.clone rts.renderer.info.render
         
+        @cycls.innerHTML = "cycls: #{rts.world.cycles}"
         @calls.innerHTML = "calls: #{info.calls}"
         @trias.innerHTML = "trias: #{info.triangles}"
         @lines.innerHTML = "lines: #{info.lines}"

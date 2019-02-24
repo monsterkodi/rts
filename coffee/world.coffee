@@ -40,7 +40,9 @@ class World
         
         @setSpeed prefs.get 'speed', 6
         
-        @sample = 0
+        @sample  = 0
+        @timeSum = 0
+        @cycles  = 0
         
         Science.initState config
                 
@@ -76,7 +78,9 @@ class World
         
         scaledDelta = delta * @speed
         
-        # log 'animate', scaledDelta
+        @timeSum += scaledDelta
+        
+        @cycles = Math.floor @timeSum/60
         
         @spent.animate scaledDelta
         @tubes.animate scaledDelta
