@@ -85,6 +85,12 @@ reloadWin = ->
     clearListeners()
     electron.remote.getCurrentWindow()?.webContents.reloadIgnoringCache()
 
+# 00000000   00000000   0000000  000  0000000  00000000  
+# 000   000  000       000       000     000   000       
+# 0000000    0000000   0000000   000    000    0000000   
+# 000   000  000            000  000   000     000       
+# 000   000  00000000  0000000   000  0000000  00000000  
+
 window.onresize = (event) -> 
     
     saveBounds()
@@ -92,11 +98,18 @@ window.onresize = (event) ->
     br = main.getBoundingClientRect()
     rts?.resized br.width, br.height
     
+# 000   000  00000000  000   000  
+# 000  000   000        000 000   
+# 0000000    0000000     00000    
+# 000  000   000          000     
+# 000   000  00000000     000     
+
 window.onkeydown = (event) ->
     
     # log 'keydown', keyinfo.forEvent event
     switch keyinfo.forEvent(event).key
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
+        when 'c'     then rts.handle.call()
         when 'd'     then prefs.set 'debug', not prefs.get 'debug'
         when 'f'     then rts.world.storage.fill()
         when 'k'     then rts.world.monsters[0]?.die()

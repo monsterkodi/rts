@@ -111,6 +111,21 @@ class World
     resourceAt: (index) -> @resources[index]
     resourceAtPos: (pos) -> @resourceAt @indexAtPos pos
     
+    stoneOrResourceAtPos: (pos) ->
+        stone = @stoneAtPos pos
+        if stone not in Stone.resources
+            index = @indexAtPos pos
+            if @resources[index]
+                return @resources[index].stone
+        stone
+        
+    stoneBelowBot: (bot) -> @stoneOrResourceAtPos @posBelowBot bot
+        
+    stoneAtFaceIndex: (faceIndex) ->
+        
+        [face,index] = @splitFaceIndex faceIndex
+        @stoneOrResourceAtPos @posAtIndex(index).minus Vector.normals[face]
+    
     addResource: (x, y, z, stone, amount) ->
         
         index = @indexAt x,y,z
@@ -323,6 +338,47 @@ class World
                         check.push neighbor
         [null,null]
         
+    emptyResourceNearBase: ->
+                
+        fi = @faceIndexForBot @base
+        
+        check = [fi]
+        known = {}
+        known[fi] = 
+            dist:0
+            faceIndex:fi
+            empty:false
+
+        while valid check
+            ci = check.shift()
+            known[ci] ?= faceIndex:ci
+            if @emptyFaceIndex(ci) and ci != fi
+                known[ci].empty = true
+                if @stoneAtFaceIndex(ci) in Stone.resources
+                    known[ci].resource = @stoneAtFaceIndex(ci)
+
+            dist = known[ci].dist
+            for neighbor in @neighborsOfFaceIndex ci
+                if not known[neighbor]
+                    minDist = dist+1
+                    for nn in @neighborsOfFaceIndex neighbor
+                        if known[nn]? and known[nn].dist+1 < minDist
+                            log 'found shorter'
+                            minDist = known[nn].dist+1
+                    if minDist <= state.science.path.length # limit to path length
+                        known[neighbor] ?= faceIndex:neighbor
+                        known[neighbor].dist = minDist
+                        check.push neighbor
+                
+        faces = Object.values known
+        faces.sort (a,b) -> a.dist-b.dist
+
+        empties = faces.filter (f) -> f.empty and not f.resource?
+        ressies = faces.filter (f) -> f.empty and f.resource?
+                 
+        empty:   empties.map (f) -> f.faceIndex
+        resource:ressies.map (f) -> f.faceIndex
+                    
     emptyPosFaceNearBot: (bot) ->
         
         fi = @faceIndexForBot bot
@@ -422,15 +478,7 @@ class World
     
     roundPos: (v) -> vec(v).round()
     posBelowBot: (bot) -> bot.pos.minus Vector.normals[bot.face]            
-    stoneBelowBot: (bot) -> 
-        pos = @posBelowBot bot
-        stone = @stoneAtPos pos
-        if stone not in Stone.resources
-            index = @indexAtPos pos
-            if @resources[index]
-                return @resources[index].stone
-        stone
-            
+                    
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
     # 000000000  000  000  0000  000000000  000      000  000  0000  000000000     000     

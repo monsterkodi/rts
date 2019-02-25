@@ -6,8 +6,12 @@
  0000000  000   000  0000000  0000000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ log, _ } = require 'kxk'
+{ deg2rad, log, str } = require 'kxk'
 
+{ Stone, Bot, Face } = require '../constants'
+
+Materials    = require '../materials'
+Geometry     = require '../geometry'
 CanvasButton = require './canvasbutton'
 
 class CallButton extends CanvasButton
@@ -17,7 +21,19 @@ class CallButton extends CanvasButton
         super div, 'canvasButtonInline'
         
         @render()
+        
+    click: -> rts.handle.call()
 
-    click: -> log 'CallButton.click'
-
+    initScene: ->
+        
+        @initLight()
+        
+        @camera.fov = 40
+        @camera.position.copy vec(0,0,1).normal().mul 2
+        @camera.lookAt vec 0,0,0
+        
+        mat = Materials.menu.active
+        mesh = new THREE.Mesh Geometry.call(), mat
+        @scene.add @meshes.icon = mesh
+        
 module.exports = CallButton

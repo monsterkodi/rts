@@ -48,14 +48,18 @@ class CanvasButton
         @camera.updateProjectionMatrix() 
         
     del: => @canvas.remove()
+    
+    initLight: ->
 
-    initScene: ->
-                
         @light = new THREE.DirectionalLight 0xffffff
         @light.position.set 0,10,6
         @scene.add @light
         
         @scene.add new THREE.AmbientLight 0xffffff
+
+    initScene: ->
+
+        @initLight()
         
         @camera.fov = 40
         @camera.position.copy vec(0.3,0.6,1).normal().mul 12

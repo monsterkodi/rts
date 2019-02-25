@@ -6,7 +6,7 @@
 000   000  000   000  000   000  0000000    0000000  00000000
 ###
 
-{ post, empty, log, str, _ } = require 'kxk'
+{ post, empty, valid, log, str, _ } = require 'kxk'
 
 { Face, Bot, Stone } = require './constants'
 
@@ -96,7 +96,8 @@ class Handle
     tickBrain: (delta, bot) ->
 
         return if state.brain.state != 'on'
-        return if not bot.path
+        if state.science.tube.free < 2
+            return if not bot.path
 
         @delay delta, bot, 'speed', 'think', =>
 
@@ -118,7 +119,8 @@ class Handle
     tickTrade: (delta, bot) ->
 
         return if state.trade.state != 'on'
-        return if not bot.path
+        if state.science.tube.free < 3
+            return if not bot.path
 
         @delay delta, bot, 'speed', 'trade', =>
 
@@ -207,9 +209,10 @@ class Handle
 
     buildBotHit: (bot, hit) ->
 
-        if not bot.path
-            log 'no path'
-            return
+        if state.science.tube.free < 1
+            if not bot.path
+                log 'no path'
+                return
 
         # normal = hit.norm.applyQuaternion bot.mesh.quaternion
         hitpos = bot.pos.to hit.point
@@ -260,4 +263,26 @@ class Handle
         if Math.round(monster.pos.paris(@world.base.pos)) <= state.science.base.radius
             Spark.spawn @world, @world.base.pos, monster
 
+    call: ->
+        
+        info = @world.emptyResourceNearBase()
+        # log info
+        
+        for type in [Bot.mine, Bot.brain, Bot.trade]
+            for bot in @world.botsOfType type
+                if @world.stoneBelowBot(bot) not in Stone.resources or not bot.path
+                    # log "move? #{Bot.string bot.type} #{str bot.pos}"
+                    if valid info.resource
+                        faceIndex = info.resource.shift()
+                        [face, index] = @world.splitFaceIndex faceIndex
+                        pos = @world.posAtIndex index
+                        @moveBot bot, pos, face
+                    else if valid info.empty
+                        faceIndex = info.empty.shift()
+                        [face, index] = @world.splitFaceIndex faceIndex
+                        pos = @world.posAtIndex index
+                        @moveBot bot, pos, face
+                    else
+                        log 'no resource or empty pos'
+            
 module.exports = Handle

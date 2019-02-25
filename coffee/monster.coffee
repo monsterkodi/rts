@@ -30,6 +30,7 @@ class Monster
         @pos       = pos ? vec()
         @nxt       = vec dir ? Vector.unitX
         @start     = vec @pos
+        @stone     = [Stone.red,Stone.red,Stone.red, Stone.white,Stone.white, Stone.gelb, Stone.blue][randInt 7]
         
         for i in [0...@length]
             size = (1-(i/@length))*@radius
@@ -53,7 +54,7 @@ class Monster
         if index >= 0
             @world.monsters.splice index, 1
             @world.addStone @pos.x, @pos.y, @pos.z, Stone.monster
-            @world.addResource @pos.x, @pos.y, @pos.z, Stone.resources[randInt 4], state.monster.resource
+            @world.addResource @pos.x, @pos.y, @pos.z, @stone, state.monster.resource
             @world.construct.stones()
         else
             log 'dafuk?'
@@ -68,7 +69,7 @@ class Monster
         if empty @trail
             @die()
         else
-            @world.boxes.setStone @boxes[0], Stone.red
+            @world.boxes.setStone @boxes[0], @stone
         
     die: ->
         

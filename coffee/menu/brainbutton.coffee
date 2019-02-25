@@ -145,6 +145,19 @@ class BrainButton extends CanvasButton
                 g.merge Geometry.box 0.09,  0.055
                 g
                 
+            when 'free'
+                mat = Materials.stone[Stone.white]
+                bot = switch stars
+                    when 1 then Bot.build
+                    when 2 then Bot.brain
+                    when 3 then Bot.trade
+                    else        Bot.base
+                g = construct.botGeoms[construct.geomForBotType bot].clone()
+                s = 0.3 
+                g.scale s,s,s
+                g.rotateX deg2rad -45
+                g
+                
             else
                 mat = Materials.stone[Stone.gelb]
                 g = new THREE.Geometry 

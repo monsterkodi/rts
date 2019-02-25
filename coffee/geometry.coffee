@@ -8,6 +8,8 @@
 
 { deg2rad, log, _ } = require 'kxk'
 
+{ Bot } = require './constants'
+
 class Geometry
     
     @cache = {}
@@ -219,11 +221,11 @@ class Geometry
     #    000     000   000  000   000  000       
     #    000      0000000   0000000    00000000  
     
-    @tube: (size=1, x=0, y=0, z=0) ->
+    @tube: (size=1, radius=0.1, x=0, y=0, z=0) ->
         
-        geom1 = new THREE.BoxGeometry size/10, size, size/10
+        geom1 = new THREE.BoxGeometry size*radius, size, size*radius
         geom1.rotateY deg2rad 45
-        geom2 = new THREE.BoxGeometry size, size/10, size/10
+        geom2 = new THREE.BoxGeometry size, size*radius, size*radius
         geom2.rotateX deg2rad 45
         geom1.merge geom2
         geom1.translate x, y, z
@@ -296,5 +298,47 @@ class Geometry
         geom.rotateY deg2rad 5
         geom.rotateX deg2rad 45
         geom
+        
+    @call: ->
+        
+        construct = rts.world.construct
+
+        geom = new THREE.Geometry
+        b = construct.botGeoms[construct.geomForBotType Bot.base].clone()
+        s = 0.75
+        b.scale s,s,s
+        b.rotateX deg2rad -45
+        geom.merge b
+
+        s = 0.5
+        b = construct.botGeoms[construct.geomForBotType Bot.mine].clone()
+        b.scale s,s,s
+        b.rotateX deg2rad -45
+        b.translate 0.35, 0.35, 0
+        geom.merge b
+
+        b = construct.botGeoms[construct.geomForBotType Bot.mine].clone()
+        b.scale s,s,s
+        b.rotateX deg2rad -45
+        b.translate -0.35, 0.35, 0
+        geom.merge b
+
+        b = construct.botGeoms[construct.geomForBotType Bot.mine].clone()
+        b.scale s,s,s
+        b.rotateX deg2rad -45
+        b.translate -0.35, -0.35, 0
+        geom.merge b
+        
+        b = construct.botGeoms[construct.geomForBotType Bot.mine].clone()
+        b.scale s,s,s
+        b.rotateX deg2rad -45
+        b.translate 0.35, -0.35, 0
+        geom.merge b
+        
+        b = Geometry.tube 1, 0.02
+        b.rotateZ deg2rad 45
+        geom.merge b
+        
+        bufg = new THREE.BufferGeometry().fromGeometry geom
             
 module.exports = Geometry
