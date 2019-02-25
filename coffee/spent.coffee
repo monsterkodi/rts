@@ -89,6 +89,18 @@ class Spent
                 @spawnCost stone, stoneIndex, numStones, pos, face, radius
                 stoneIndex += 1
 
+    costAtBuild: (cost, bot) ->
+        
+        radius = 0.5
+        numStones = 0
+        cost.map (c) -> numStones += c
+        stoneIndex = 0
+        rotCount -= 15
+        for stone in Stone.resources
+            for i in [0...cost[stone]]
+                @spawnCost stone, stoneIndex, numStones, bot.pos, bot.face, radius
+                stoneIndex += 1
+                
     spawnCost: (stone, stoneIndex, numStones, pos, face, radius) ->
 
         dir = Vector.normals[@world.dirsForFace(face)[0]].clone()

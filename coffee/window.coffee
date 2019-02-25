@@ -109,7 +109,9 @@ window.onkeydown = (event) ->
     # log 'keydown', keyinfo.forEvent event
     switch keyinfo.forEvent(event).key
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
-        when 'c'     then rts.handle.call()
+        when 'x'     then rts.handle.placeBase()
+        when 'b'     then rts.handle.placeBuild()
+        when 'c', 'enter' then rts.handle.call()
         when 'd'     then prefs.set 'debug', not prefs.get 'debug'
         when 'f'     then rts.world.storage.fill()
         when 'k'     then rts.world.monsters[0]?.die()

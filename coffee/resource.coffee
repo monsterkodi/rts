@@ -16,8 +16,6 @@ class Resource
 
     constructor: (@world, @index, @stone, @amount) ->
         
-        log 'resource', @index, Stone.string(@stone), @amount
-
         @boxes = []
         for i in [0...6]
             @boxes.push @world.boxes.add stone:@stone

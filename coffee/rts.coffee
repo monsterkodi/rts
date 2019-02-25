@@ -201,24 +201,21 @@ class RTS
         hit = @castRay event.buttons == 1
         
         if not @dragBot
-            
-            if hit and hit.bot?
-                @world.highlightPos hit.pos
-            else
-                @world.removeHighlight()
+                            
+            @handle.mouseMoveHit hit
                 
         else 
             moved = @downPos?.dist @mouse
             if moved < 0.01
                 return
             
-            if hit?.face? 
+            if hit?.face?
                 @handle.moveBot @dragBot, hit.pos, hit.face
 
     onDblClick: (event) =>
         
         if bot = @world.highBot
-            log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
+            # log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
             switch bot.type
                 when Bot.base
                     state.base.state = state.base.state == 'on' and 'off' or 'on'
@@ -229,6 +226,8 @@ class RTS
                 when Bot.trade 
                     state.trade.state = state.trade.state == 'on' and 'off' or 'on'
                     post.emit 'botState', 'trade', state.trade.state
+        else
+            @handle.placeBase()
                     
     calcMouse: (event) ->
         

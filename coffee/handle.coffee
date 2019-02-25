@@ -207,39 +207,94 @@ class Handle
     # 000   000  000   000  000  000      000   000
     # 0000000     0000000   000  0000000  0000000
 
-    buildBotHit: (bot, hit) ->
-
-        if state.science.tube.free < 1
-            if not bot.path
-                log 'no path'
-                return
-
-        # normal = hit.norm.applyQuaternion bot.mesh.quaternion
+    infoForBuildHit: (bot, hit) ->
+        
         hitpos = bot.pos.to hit.point
 
         n = Vector.closestNormal hitpos
         newFace = Vector.normalIndex n
         newPos = bot.pos.plus n
+        
         if @world.stoneAtPos(newPos)?
-            log 'occupied negate'
             n.negate()
             newFace = (newFace+3) % 6
             newPos = bot.pos.plus n
 
         if @world.stoneAtPos(newPos)? or @world.botAtPos(newPos)?
-            log 'target occupied'
             return
+            
+        pos:  newPos
+        face: newFace
+        norm: n
+    
+    canBuild: (norm) ->
+        
+        buildBot = @world.botOfType Bot.build
+        
+        return false if not buildBot
+        return false if not @world.storage.canAfford state.science.build.cost
+        
+        if state.science.tube.free < 1
+            if not buildBot.path
+                return false
+                
+        if norm and @world.itemAtPos buildBot.pos.plus norm
+            return false
+            
+        true
+        
+    buildBotHit: (bot, hit) ->
 
-        if @world.storage.deductBuild()
-            # log newPos, Face.string newFace
-            rts.camera.focusOnPos rts.camera.center.plus n
-            @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
-            @world.spent.costAtBot state.science.build.cost, bot
-            @world.moveBot bot, newPos, newFace
-            @world.construct.stones()
+        return if not @canBuild()
+        
+        if hitInfo = @infoForBuildHit bot, hit
+                
+            if @world.storage.deductBuild()
+
+                rts.camera.focusOnPos rts.camera.center.plus hitInfo.norm
+
+                @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
+                @world.spent.costAtBuild state.science.build.cost, bot
+                @world.moveBot bot, hitInfo.pos, hitInfo.face
+                @world.construct.stones()
+                if @canBuild hitInfo.norm
+                    @world.showBuildGuide bot, hitInfo
+            else
+                @world.removeBuildGuide()
+                log 'not enough stones'
+    
+    # 00     00   0000000   000   000  00000000        000   000  000  000000000  
+    # 000   000  000   000  000   000  000             000   000  000     000     
+    # 000000000  000   000   000 000   0000000         000000000  000     000     
+    # 000 0 000  000   000     000     000             000   000  000     000     
+    # 000   000   0000000       0      00000000        000   000  000     000     
+    
+    mouseMoveHit: (hit) ->
+        
+        @world.removeBuildGuide()
+        
+        if hit and hit.bot?
+            @world.highlightBot hit.bot
+            if hit.bot.type == Bot.build
+                if hitInfo = @infoForBuildHit hit.bot, hit
+                    if @canBuild hitInfo.norm
+                        @world.showBuildGuide hit.bot, hitInfo
         else
-            log 'not enough stones'
-
+            @world.removeHighlight()
+            
+    placeBase: ->
+        
+        if hit = rts.castRay true
+            if not hit.bot
+                @moveBot @world.base, hit.pos, hit.face
+                
+    placeBuild: ->
+        
+        if build = @world.botOfType Bot.build
+            if hit = rts.castRay true
+                if not hit.bot
+                    @moveBot build, hit.pos, hit.face
+            
     # 00     00   0000000   000   000  00000000
     # 000   000  000   000  000   000  000
     # 000000000  000   000   000 000   0000000
@@ -258,7 +313,6 @@ class Handle
 
     monsterMoved: (monster) ->
 
-        # log 'monsterMoved', state.science.base.radius, Math.round(monster.pos.paris(@world.base.pos))
         return if state.base.state == 'off'
         if Math.round(monster.pos.paris(@world.base.pos)) <= state.science.base.radius
             Spark.spawn @world, @world.base.pos, monster
@@ -266,12 +320,11 @@ class Handle
     call: ->
         
         info = @world.emptyResourceNearBase()
-        # log info
         
-        for type in [Bot.mine, Bot.brain, Bot.trade]
+        for type in [Bot.mine, Bot.brain, Bot.trade, Bot.build]
             for bot in @world.botsOfType type
                 if @world.stoneBelowBot(bot) not in Stone.resources or not bot.path
-                    # log "move? #{Bot.string bot.type} #{str bot.pos}"
+
                     if valid info.resource
                         faceIndex = info.resource.shift()
                         [face, index] = @world.splitFaceIndex faceIndex

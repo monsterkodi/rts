@@ -18,6 +18,8 @@ Monster   = require './monster'
 Storage   = require './storage'
 Science   = require './science'
 Resource  = require './resource'
+Geometry  = require './geometry'
+Materials = require './materials'
 Construct = require './construct'
 
 { Stone, Bot, Face, Edge, Bend } = require './constants'
@@ -57,6 +59,8 @@ class World
         
         if prefs.get 'graph', false
             Graph.toggle()
+            
+        post.on 'storageChanged', @onStorageChanged
         
     setSpeed: (speedIndex) -> 
         @speedIndex = clamp 0, 12, speedIndex
@@ -195,8 +199,6 @@ class World
     
     moveBot: (bot, toPos, toFace=bot.face) ->
         
-        # log 'moveBot', toPos
-        
         fromIndex = bot.index
         toIndex = @indexAtPos toPos
         delete @bots[fromIndex]
@@ -207,6 +209,7 @@ class World
         bot.delay = 1/bot.speed
         bot.pos = @roundPos toPos
         
+        @removeBuildGuide()
         @updateTubes()
         @construct.updateBot bot
         
@@ -254,6 +257,7 @@ class World
     isStoneAt: (x,y,z) -> @stones[@indexAt x,y,z] != undefined
     isItemAt:  (x,y,z) -> @isStoneAt(x,y,z) or @botAt(x,y,z) 
     isItemAtPos: (p) -> @isItemAt p.x,p.y,p.z
+    itemAtPos:   (p) -> @botAtPos(p) ? @stoneAtPos(p)
                 
     # 00000000   0000000    0000000  00000000  
     # 000       000   000  000       000       
@@ -493,6 +497,7 @@ class World
             delete @baseCage
         delete @highBot?.highlight
         delete @highBot
+        @removeBuildGuide()
     
     highlightPos: (v) -> @highlightBot @botAtPos @roundPos v
         
@@ -510,6 +515,35 @@ class World
                 @baseCage = @construct.cage bot, state.science.base.radius
         else
             @removeHighlight()
+            
+    onStorageChanged: =>
+
+        if @highBot?.type == Bot.build and not @buildGuide
+            hit = rts.castRay false
+            if hit?.bot?
+                if hitInfo = rts.handle.infoForBuildHit @highBot, hit
+                    if rts.handle.canBuild hitInfo.norm
+                        @showBuildGuide @highBot, hitInfo
+            
+    removeBuildGuide: ->
+  
+        @buildGuide?.parent.remove @buildGuide
+        delete @buildGuide
+        
+    showBuildGuide: (bot, hitInfo) ->
+        
+        stone = @stoneBelowBot bot
+        if stone in Stone.resources
+            mat = Materials.bot[stone]
+        else
+            mat = Materials.bot[Stone.gray]
+        
+        @buildGuide = new THREE.Mesh Geometry.buildGuide(), mat
+        @scene.add @buildGuide
+            
+        @buildGuide.bot = Bot.build
+        @buildGuide.position.copy bot.pos.plus hitInfo.norm.mul 0.3
+        @buildGuide.quaternion.copy quat().setFromUnitVectors vec(0,0,1), hitInfo.norm
                                 
     #  0000000  000000000  00000000   000  000   000   0000000   
     # 000          000     000   000  000  0000  000  000        

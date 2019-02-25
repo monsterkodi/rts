@@ -231,6 +231,13 @@ class Geometry
         geom1.translate x, y, z
         geom1
         
+    @buildGuide: ->
+        
+        geom = new THREE.ConeGeometry 0.2, 0.35, 12
+        geom.rotateX deg2rad 90
+        geom.computeFlatVertexNormals()
+        geom
+        
     # 00000000   000      000   000   0000000  
     # 000   000  000      000   000  000       
     # 00000000   000      000   000  0000000   
