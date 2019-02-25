@@ -32,7 +32,7 @@ class Map extends World
         @addCancer 0,  0, -10,  5
         @addCancer 0,  10,  0, 10
         @addCancer 0, -10,  0, 10
-        @addCancer 0,   0, -2,  3
+        @addCancer 0,   0, -1,  3
         
         @wall -3,0,0, 3,0,0
         @addResource -3, 0, 0, Stone.white, 256

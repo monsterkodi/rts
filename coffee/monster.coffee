@@ -42,6 +42,9 @@ class Monster
         for i in [0...@world.monsters.length%@length]
             @animate 0.5/@length
             
+        @age = 0
+        @ageTime = 20
+            
     del: -> 
         
         return if empty @boxes
@@ -98,7 +101,7 @@ class Monster
             box = @trail.shift()
             @trail.push box
         @world.boxes.setPos box, pos
-        @world.boxes.setSize box, Math.min @trailSize, @trail.length/10 * @trailSize
+        @world.boxes.setSize box, Math.min @trailSize, @trail.length/10 * @trailSize * Math.min 1, @age/@ageTime
             
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -129,6 +132,7 @@ class Monster
         
         lastInc = Math.floor @moved * @length
         
+        @age += scaledDelta
         @moved += scaledDelta * @speed
         
         nextInc = Math.floor @moved * @length
@@ -154,7 +158,7 @@ class Monster
                 fact = 1-((i+d)/@length)
                 asgn = -fact
                 
-            size = fact*@radius
+            size = fact*@radius * Math.min 1, @age/@ageTime
             box = @boxes[i]
             @world.boxes.setSize box, size
             @world.boxes.setRot  box, quat().setFromAxisAngle @axes[i], deg2rad 360 * asgn

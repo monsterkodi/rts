@@ -17,7 +17,7 @@ class Cancer
 
     @cells: {}
 
-    @isCellAt: (x,y,z) -> @cells[rts.world.indexAtPos vec x,y,z]?
+    @isCellAtIndex: (i) -> @cells[i]?
     
     constructor: (@world, @pos, @maxDist=10) ->
         
@@ -32,7 +32,7 @@ class Cancer
         
         growCell = @growCells[randInt @growCells.length]
         neighbors = @world.neighborsOfIndex growCell
-        neighbors = neighbors.filter (n) => not Cancer.cells[n] and not @world.itemAtIndex n
+        neighbors = neighbors.filter (n) => not Cancer.cells[n] and not @world.isItemAtIndex n
         if valid neighbors
             neighbor = neighbors[randInt neighbors.length]
             pos = @world.posAtIndex neighbor

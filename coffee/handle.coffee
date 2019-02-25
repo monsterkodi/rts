@@ -215,12 +215,12 @@ class Handle
         newFace = Vector.normalIndex n
         newPos = bot.pos.plus n
         
-        if @world.stoneAtPos(newPos)?
+        if @world.isStoneAtPos newPos
             n.negate()
             newFace = (newFace+3) % 6
             newPos = bot.pos.plus n
 
-        if @world.stoneAtPos(newPos)? or @world.botAtPos(newPos)?
+        if @world.isItemAtPos newPos
             return
             
         pos:  newPos
@@ -238,7 +238,7 @@ class Handle
             if not buildBot.path
                 return false
                 
-        if norm and @world.itemAtPos buildBot.pos.plus norm
+        if norm and @world.isItemAtPos buildBot.pos.plus norm
             return false
             
         true

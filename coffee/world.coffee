@@ -236,7 +236,10 @@ class World
         @tubes.build()
         @construct.tubes()
             
-    canBotMoveTo: (bot, face, index) -> @pathFromTo @faceIndex(bot.face, bot.index), @faceIndex(face, index)
+    canBotMoveTo: (bot, face, index) -> 
+        
+        return false if @isItemAtIndex index
+        @pathFromTo @faceIndex(bot.face, bot.index), @faceIndex(face, index)
     
     pathFromTo: (fromIndex, toFaceIndex) -> @tubes.astar.findPath fromIndex, toFaceIndex
     
@@ -268,15 +271,19 @@ class World
 
         # @box[index] = @boxes.add pos:vec(x,y,z), stone:stone, size:1.1
         
-    botAt:      (x,y,z) -> @bots[@indexAt x,y,z]
-    botAtPos:   (v)     -> @bots[@indexAtPos v]
-    stoneAtPos: (v)     -> @stones[@indexAtPos v]
+    botAt:    (x,y,z) -> @botAtIndex @indexAt x,y,z
+    botAtPos:     (v) -> @botAtIndex @indexAtPos v
+    botAtIndex:   (i) -> @bots[i]
+
+    stoneAtPos:   (v) -> @stoneAtIndex @indexAtPos v
+    stoneAtIndex: (i) -> @stones[i]
         
-    isStoneAt: (x,y,z) -> @stones[@indexAt x,y,z] != undefined
-    itemAtPos:   (p) -> @botAtPos(p) ? @stoneAtPos(p)
-    itemAtIndex: (i) -> @bots[i] ? @stones[i]
-    isItemAtPos: (p) -> @isItemAt p.x,p.y,p.z
-    isItemAt:  (x,y,z) -> @isStoneAt(x,y,z) or @botAt(x,y,z) or Cancer.isCellAt x,y,z
+    isStoneAt: (x,y,z)  -> @isStoneAtIndex @indexAt x,y,z
+    isStoneAtIndex: (i) -> @stoneAtIndex(i)?
+    
+    isItemAt:  (x,y,z) -> @isItemAtIndex @indexAt x,y,z
+    isItemAtPos:   (p) -> @isItemAtIndex @indexAtPos p
+    isItemAtIndex: (i) -> @isStoneAtIndex(i) or @botAtIndex(i) or Cancer.isCellAtIndex i
                 
     # 00000000   0000000    0000000  00000000  
     # 000       000   000  000       000       
