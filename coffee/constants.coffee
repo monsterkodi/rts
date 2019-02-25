@@ -38,6 +38,7 @@ module.exports =
         white:      3
         gray:       4
         monster:    5
+        cancer:     6
         resources:  [0,1,2,3]
         all:        [0..5]
         

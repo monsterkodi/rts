@@ -6,7 +6,7 @@
     0      00000000   0000000     000      0000000   000   000
 ###
 
-{ deg2rad, rad2deg, last, log } = require 'kxk'
+{ randRange, deg2rad, rad2deg, last, log } = require 'kxk'
 
 THREE = require 'three'
 
@@ -113,6 +113,8 @@ class Vector extends THREE.Vector3
     
     isZero: -> @x == @y == @z == 0
 
+    @random: -> vec(randRange(-1,1),randRange(-1,1),randRange(-1,1)).normalize()
+        
     @rayPlaneIntersection: (rayPos, rayDirection, planePos, planeNormal) ->
         x = planePos.minus(rayPos).dot(planeNormal) / rayDirection.dot(planeNormal)
         return rayPos.plus rayDirection.mul x

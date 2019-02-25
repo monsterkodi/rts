@@ -6,7 +6,7 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ post, prefs, deg2rad, randInt, clamp, first, valid, empty, str, log, _ } = require 'kxk'
+{ post, prefs, deg2rad, randInt, clamp, first, last, valid, empty, str, log, _ } = require 'kxk'
 
 Vector    = require './lib/vector'
 Packet    = require './packet'
@@ -14,6 +14,7 @@ Tubes     = require './tubes'
 Boxes     = require './boxes'
 Spent     = require './spent'
 Graph     = require './graph'
+Cancer    = require './cancer'
 Monster   = require './monster'
 Storage   = require './storage'
 Science   = require './science'
@@ -35,6 +36,7 @@ class World
         @bots      = {}
         @resources = {}
         @monsters  = []
+        @cancers   = []
         
         @tubes  = new Tubes @
         @spent  = new Spent @
@@ -96,6 +98,10 @@ class World
         if valid @monsters
             for i in [@monsters.length-1..0]
                 @monsters[i].animate scaledDelta
+                
+        if valid @cancers
+            for i in [@cancers.length-1..0]
+                @cancers[i].animate scaledDelta
             
         @storage.animate scaledDelta
         
@@ -142,11 +148,23 @@ class World
     # 000 0 000  000   000  000  0000       000     000     000       000   000  
     # 000   000   0000000   000   000  0000000      000     00000000  000   000  
     
-    addMonster: (x,y,z,d) ->
-        d ?= Vector.normals[randInt 6]
-        monster = new Monster @, vec(x,y,z), d
+    scatterMonsters: (x,y,z,r,n) ->
+        
+        for i in [0...n]
+            f = Math.random() * r
+            p = @roundPos vec(x,y,z).plus Vector.random().mul f
+            @addMonster p.x, p.y, p.z
+    
+    addMonster: (x,y,z) ->
+        
+        monster = new Monster @, vec(x,y,z), Vector.normals[randInt 6]
         @monsters.push monster
         monster
+        
+    addCancer: (x,y,z) ->
+        
+        @cancers.push new Cancer @, vec(x,y,z)
+        last @cancers
         
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
@@ -255,9 +273,10 @@ class World
     stoneAtPos: (v)     -> @stones[@indexAtPos v]
         
     isStoneAt: (x,y,z) -> @stones[@indexAt x,y,z] != undefined
-    isItemAt:  (x,y,z) -> @isStoneAt(x,y,z) or @botAt(x,y,z) 
-    isItemAtPos: (p) -> @isItemAt p.x,p.y,p.z
     itemAtPos:   (p) -> @botAtPos(p) ? @stoneAtPos(p)
+    itemAtIndex: (i) -> @bots[i] ? @stones[i]
+    isItemAtPos: (p) -> @isItemAt p.x,p.y,p.z
+    isItemAt:  (x,y,z) -> @isStoneAt(x,y,z) or @botAt(x,y,z) or Cancer.isCellAt x,y,z
                 
     # 00000000   0000000    0000000  00000000  
     # 000       000   000  000       000       

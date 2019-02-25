@@ -20,6 +20,10 @@ module.exports =
             # stones:[80,77,13,79]
             # stones:[ 5,6,7,8 ]
             
+        cancer: 
+            growTime: 40
+            ageTime:  20
+        
         cost: 
             brain: [ 4 *8, 2 *8, 0   , 0   ]
             trade: [ 3 *8, 4 *8, 3 *8, 2 *8]
@@ -31,10 +35,11 @@ module.exports =
             
         nonMineSpeed: 0.2
            
-        spark:
-            speed:  0.5
+        spark: speed:  0.5
+        
         monster: 
             speed:    0.2
+            # speed:    0.02
             health:   32
             resource: 256
             

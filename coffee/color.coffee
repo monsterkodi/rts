@@ -35,6 +35,7 @@ Color =
         white:           color 0x44aaff
         gray:            color 0x111111
         monster:         color 0x333333
+        cancer:          color 0x0f0f0f
 
     spent: 
         red:             color 0x441111
@@ -54,6 +55,6 @@ Color.bot.gelb   = Color.stone.gelb
 Color.bot.blue   = Color.stone.blue
 Color.bot.white  = Color.stone.white
 
-Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.stone.monster]
+Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.stone.monster, Color.stone.cancer]
         
 module.exports = Color
