@@ -314,7 +314,7 @@ class Handle
     monsterMoved: (monster) ->
 
         return if state.base.state == 'off'
-        if Math.round(monster.pos.paris(@world.base.pos)) <= state.science.base.radius
+        if Math.round(monster.pos.manhattan(@world.base.pos)) <= state.science.base.radius
             Spark.spawn @world, @world.base.pos, monster
 
     call: ->

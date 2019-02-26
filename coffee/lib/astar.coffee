@@ -67,7 +67,7 @@ class AStar
         while valid openSet
             
             steps += 1
-            if steps > 10000
+            if steps > 1000
                 log 'dafuk? too many steps. bailing out.'
                 return @collectPath current
                 

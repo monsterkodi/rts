@@ -12,8 +12,8 @@ Color = require './color'
 
 Materials = 
     
+    cage:       new THREE.MeshPhongMaterial    color:0x880000, emissive:0x880000, specular:0x880000, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
     spark:      new THREE.LineBasicMaterial    color:Color.stone.red, linewidth: 8
-    cage:       new THREE.PointsMaterial       color:Color.cage, size:0.04
     white:      new THREE.MeshStandardMaterial color:0xffffff
     highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2
     spent:      new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6, roughness: 0.7, side:THREE.DoubleSide

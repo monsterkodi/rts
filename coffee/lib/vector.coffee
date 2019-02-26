@@ -152,6 +152,16 @@ class Vector extends THREE.Vector3
     
     @normals = [Vector.unitX, Vector.unitY, Vector.unitZ, Vector.minusX, Vector.minusY, Vector.minusZ]
     
+    @perpNormals: (v) -> 
+        i = @normalIndex(v)
+        switch i
+            when @PX then [@unitY, @unitZ, @minusY, @minusZ]
+            when @PY then [@minusX, @unitZ, @unitX, @minusZ]
+            when @PZ then [@unitY, @minusX, @minusY, @unitX]
+            when @NX then [@unitY, @minusZ, @minusY, @unitZ]            
+            when @NY then [@minusX, @minusZ, @unitX, @unitZ]            
+            when @NZ then [@unitY, @unitX, @minusY, @minusX]            
+    
     @normalIndex: (v) -> 
     
         cn = @closestNormal v

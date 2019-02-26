@@ -62,7 +62,9 @@ class World
         if prefs.get 'graph', false
             Graph.toggle()
             
-        post.on 'storageChanged', @onStorageChanged
+        post.on 'scienceFinished', @onScienceFinished
+        post.on 'storageChanged',  @onStorageChanged
+        post.on 'botState',        @onBotState
         
     setSpeed: (speedIndex) -> 
         @speedIndex = clamp 0, 12, speedIndex
@@ -487,8 +489,8 @@ class World
     # 000  000  0000  000   000  000        000 000   
     # 000  000   000  0000000    00000000  000   000  
     
-    indexAt: (x,y,z) -> (x+256)+((y+256)<<9)+((z+256)<<18)
-    indexAtPos: (v) -> p = @roundPos(v); @indexAt p.x, p.y, p.z
+    indexAt: (x,y,z) -> (Math.round(x)+256)+((Math.round(y)+256)<<9)+((Math.round(z)+256)<<18)
+    indexAtPos: (v) -> @indexAt v.x, v.y, v.z
     
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       
@@ -515,14 +517,35 @@ class World
     # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
     # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
+    onScienceFinished: (scienceKey) =>
+        
+        if scienceKey == 'base.radius'
+            @updateBaseCage()
+    
+    onBotState: (bot, onOrOff) =>
+        
+        if bot == 'base'
+            @updateBaseCage()
+            
+    removeBaseCage: -> 
+        
+        @baseCage?.parent.remove @baseCage
+        delete @baseCage
+            
+    updateBaseCage: ->
+        
+        @removeBaseCage()
+        
+        if state.base.state == 'on' and @base == @highBot
+            @baseCage = @construct.cage @base, state.science.base.radius
+            @baseCage.position.copy @base.pos
+    
     removeHighlight: ->
         
         @highBot?.highlight?.parent.remove @highBot?.highlight
-        if @baseCage
-            @baseCage.parent.remove @baseCage
-            delete @baseCage
         delete @highBot?.highlight
         delete @highBot
+        @removeBaseCage()
         @removeBuildGuide()
     
     highlightPos: (v) -> @highlightBot @botAtPos @roundPos v
@@ -530,15 +553,13 @@ class World
     highlightBot: (bot) ->
         
         if bot
-            if bot == @highBot
+            @updateBaseCage() if bot.type == Bot.base
+            if bot == @highBot 
                 @construct.orientFace bot.highlight, bot.face
-                @baseCage?.position.copy bot.pos
                 return
             @removeHighlight()
             @highBot = bot
             bot.highlight = @construct.highlight bot
-            if bot.type == Bot.base
-                @baseCage = @construct.cage bot, state.science.base.radius
         else
             @removeHighlight()
             

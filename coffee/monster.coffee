@@ -65,7 +65,6 @@ class Monster
     damage: (amount) ->
         
         if empty @trail
-            log 'empty?', @health, empty @boxes
             return
         box = @trail.shift()
         @world.boxes.del box

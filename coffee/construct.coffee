@@ -6,7 +6,7 @@
  0000000   0000000   000   000  0000000      000     000   000   0000000    0000000     000   
 ###
 
-{ deg2rad, log, _ } = require 'kxk'
+{ deg2rad, valid, empty, first, last, log, _ } = require 'kxk'
 
 THREE     = require 'three'
 Vector    = require './lib/vector'
@@ -22,7 +22,62 @@ class Construct
         
         @segmentMesh = null
         @stoneMeshes = {}
-                        
+
+    envelope: (insidePos, isInside) ->
+        
+        geom = new THREE.Geometry
+        
+        x = 0
+        while isInside insidePos.plus vec x+1,0,0
+            x += 1
+
+        index = @world.indexAtPos vec x,0,0
+        
+        visited = {}
+        visited[index] = 1
+        check = [index]
+        while valid check
+            index = check.shift()
+            checkPos = @world.posAtIndex index
+            for neighbor in @world.neighborsOfIndex index
+                neighborPos = @world.posAtIndex neighbor
+                if not isInside neighborPos
+                    checkToNeighbor = checkPos.to neighborPos
+                    n = Vector.perpNormals checkToNeighbor
+                    geom.vertices.push checkPos.plus checkToNeighbor.mul(0.5).plus(n[0].mul(0.5)).plus(n[1].mul(0.5))
+                    geom.vertices.push checkPos.plus checkToNeighbor.mul(0.5).plus(n[1].mul(0.5)).plus(n[2].mul(0.5))
+                    geom.vertices.push checkPos.plus checkToNeighbor.mul(0.5).plus(n[2].mul(0.5)).plus(n[3].mul(0.5))
+                    geom.vertices.push checkPos.plus checkToNeighbor.mul(0.5).plus(n[3].mul(0.5)).plus(n[0].mul(0.5))
+                    geom.faces.push new THREE.Face3 geom.vertices.length-1, geom.vertices.length-4, geom.vertices.length-2
+                    geom.faces.push new THREE.Face3 geom.vertices.length-4, geom.vertices.length-3, geom.vertices.length-2
+                else 
+                    if not visited[neighbor]
+                        visited[neighbor] = 1
+                        check.push neighbor
+                    
+        geom.mergeVertices()
+        geom.computeFaceNormals()
+        geom.computeFlatVertexNormals()
+        bufg = new THREE.BufferGeometry().fromGeometry geom
+        bufg
+        
+    #  0000000   0000000    0000000   00000000  
+    # 000       000   000  000        000       
+    # 000       000000000  000  0000  0000000   
+    # 000       000   000  000   000  000       
+    #  0000000  000   000   0000000   00000000  
+    
+    cage: (bot, s) ->
+        
+        # isInside = (s) -> (pos) -> Math.round(pos.paris(vec())) <= s
+        isInside = (s) -> (pos) -> Math.round(pos.manhattan(vec())) <= s
+                    
+        log s, bot.pos
+        geom = @envelope bot.pos, isInside(s)
+        mesh = new THREE.Mesh geom, Materials.cage
+        @world.scene.add mesh
+        mesh
+        
     # 000000000  000   000  0000000    00000000  
     #    000     000   000  000   000  000       
     #    000     000   000  0000000    0000000   
@@ -299,31 +354,7 @@ class Construct
         @orientFace mesh, bot.face
         @world.scene.add mesh
         mesh
-        
-    #  0000000   0000000    0000000   00000000  
-    # 000       000   000  000        000       
-    # 000       000000000  000  0000  0000000   
-    # 000       000   000  000   000  000       
-    #  0000000  000   000   0000000   00000000  
-    
-    cage: (bot, s) ->
-        
-        geom = new THREE.Geometry
-        
-        for x in [-s..s]
-            for y in [-s..s]
-                for z in [-s..s]
-                    v = vec x,y,z
-                    # if Math.round(v.paris(vec())) == s
-                    if Math.round(v.paris(vec())) <= s
-                        geom.vertices.push v
-                        
-        mesh = new THREE.Points geom, Materials.cage
-        mesh.position.copy bot.pos
-        @orientFace mesh, bot.face
-        @world.scene.add mesh
-        mesh
-            
+                    
     #  0000000  000000000   0000000   000   000  00000000   0000000    
     # 000          000     000   000  0000  000  000       000         
     # 0000000      000     000   000  000 0 000  0000000   0000000     
