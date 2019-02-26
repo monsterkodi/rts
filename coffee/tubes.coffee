@@ -8,7 +8,7 @@
 
 { post, valid, empty, first, last, log, _ } = require 'kxk'
 
-{ Stone, Bend } = require './constants'
+{ Stone, Bend, Bot } = require './constants'
 
 AStar    = require './lib/astar'
 Vector   = require './lib/vector'
@@ -36,7 +36,7 @@ class Tubes
             stone ?= @world.stoneBelowBot bot
             # log 'insertPacket blocked', Stone.string(stone), @isInputBlocked seg
             if not @isInputBlocked seg
-                pck = new Packet stone, @world
+                pck = new Packet stone, bot.player, @world
                 @insertPacketIntoSegment pck, seg
                 pck.moveOnSegment seg
                 return true
@@ -124,7 +124,7 @@ class Tubes
                     pck.move delta * @speed()
                     if pck.moved >= seg.moves
                         pck = seg.packets.pop()
-                        @world.storage.add pck.stone
+                        @world.storage[pck.player].add pck.stone
                         pck.del()
                     else
                         pck.moveOnSegment seg
@@ -149,11 +149,11 @@ class Tubes
         @segments = {}
         
         for bot in @world.getBots()
-            continue if bot == @world.base
+            continue if bot.type == Bot.base
             
             hadPath = bot.path?
             
-            @pathFromBotToBot bot, @world.base
+            @pathFromBot bot
             
             if bot.path?
                 
@@ -209,7 +209,9 @@ class Tubes
     # 000        000   000     000     000   000  
     # 000        000   000     000     000   000  
             
-    pathFromBotToBot: (from, to) -> 
+    pathFromBot: (from) -> 
+        
+        to = @world.baseForBot from
     
         path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
         

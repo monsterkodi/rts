@@ -30,6 +30,7 @@ class World
     constructor: (@scene, config) ->
         
         rts.world  = @
+        Science.initState config
         
         @stones    = {}
         @box       = {}
@@ -37,6 +38,8 @@ class World
         @resources = {}
         @monsters  = []
         @cancers   = []
+        @bases     = []
+        @storage   = [new Storage(@,0), new Storage(@,1)]
         
         @tubes  = new Tubes @
         @spent  = new Spent @
@@ -48,8 +51,6 @@ class World
         @timeSum = 0
         @cycles  = 0
         
-        Science.initState config
-                
         @build()
         
         @construct = new Construct @
@@ -104,12 +105,10 @@ class World
         if valid @cancers
             for i in [@cancers.length-1..0]
                 @cancers[i].animate scaledDelta
-            
-        @storage.animate scaledDelta
-        
+                    
         @sample -= scaledDelta
         if @sample <= 0
-            Graph.sampleStorage @storage
+            Graph.sampleStorage @storage[0]
             @sample = 1.0
         
         post.emit 'tick'
@@ -174,7 +173,7 @@ class World
     # 000   000  000   000     000     
     # 0000000     0000000      000     
     
-    addBot: (x,y,z, type=Bot.mine, face=null) -> 
+    addBot: (x,y,z, type=Bot.mine, player=0, face=null) -> 
         
         p = @roundPos vec x,y,z
         
@@ -186,30 +185,34 @@ class World
         
         index = @indexAtPos p
         bot = 
-            type:  type
-            pos:   p
-            face:  face
-            index: index
+            type:   type
+            pos:    p
+            face:   face
+            index:  index
+            player: player
             
         bot.mine = 1/Science.mineSpeed type
                 
         switch type 
             when Bot.base
-                @base = bot
+                if player == 0
+                    @base = bot
+                @bases[player] = bot
                 bot.prod = 1/state.science.base.speed
             when Bot.trade
                 bot.trade = 1/state.science.trade.speed
             when Bot.brain
                 bot.think = 1/state.science.brain.speed
             
-        # log 'addBot', bot
         @bots[index] = bot
         bot
 
+    baseForBot: (bot) -> log bot.player; @bases[bot.player]
+        
     getBots: -> Object.values @bots
     
-    botsOfType: (type) -> @getBots().filter (b) -> b.type == type
-    botOfType:  (type) -> first @botsOfType type
+    botsOfType: (type, player=0) -> @getBots().filter (b) -> b.type == type and b.player == player
+    botOfType:  (type, player=0) -> first @botsOfType type, player
         
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       
@@ -563,8 +566,10 @@ class World
         else
             @removeHighlight()
             
-    onStorageChanged: =>
+    onStorageChanged: (storage, stone, amount) =>
 
+        return if storage.player != 0
+        
         if @highBot?.type == Bot.build and not @buildGuide
             hit = rts.castRay false
             if hit?.bot?

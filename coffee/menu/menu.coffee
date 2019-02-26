@@ -10,12 +10,12 @@
 
 { Bot }   = require '../constants'
 
-Color     = require '../color'
-Storage   = require '../storage'
-BotButton = require './botbutton'
-BuyButton = require './buybutton'
-SpeedButton = require './speedbutton'
-SubMenu   = require './submenu'
+Color         = require '../color'
+StorageButton = require './storagebutton'
+BotButton     = require './botbutton'
+BuyButton     = require './buybutton'
+SpeedButton   = require './speedbutton'
+SubMenu       = require './submenu'
 
 class Menu
 
@@ -25,9 +25,7 @@ class Menu
         @div = elem class:'buttons', style:"left:0px; top:0px"
         main.appendChild @div
         
-        rts.world.storage = new Storage @
-        
-        @buttons = storage:rts.world.storage
+        @buttons = storage:new StorageButton @
          
         bots = [
             Bot.base
@@ -77,4 +75,8 @@ class Menu
             button.scene.background = Color.menu.background
             button.render()                
         
+    animate: (delta) ->
+        
+        @buttons.storage.animate delta
+            
 module.exports = Menu

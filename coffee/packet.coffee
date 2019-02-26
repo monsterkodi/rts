@@ -14,7 +14,7 @@ Materials = require './materials'
 
 class Packet
 
-    constructor: (@stone, world) ->
+    constructor: (@stone, @player, world) ->
         
         @moved = 0
         
@@ -89,7 +89,7 @@ class Packet
     del: -> 
     
         rts.world.boxes.del @box
-        rts.world.storage.temp[@stone] -= 1
+        rts.world.storage[@player].temp[@stone] -= 1
         delete @box
             
 module.exports = Packet

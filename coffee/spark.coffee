@@ -14,20 +14,23 @@ Materials = require './materials'
 
 class Spark
 
-    @spawn: (world, startPos, monster) ->
+    @spawn: (world, base, monster) ->
+        
+        storage = world.storage[base.player]
         
         func = -> 
-            if world.storage.canAfford([1,0,0,0]) and monster.health > 0
-                new Spark world, startPos, monster
+            if storage.canAfford([1,0,0,0]) and monster.health > 0
+                new Spark world, base, monster
         for i in [0...8]
             setTimeout func, 1000*i/(world.speed*4)
     
-    constructor: (@world, startPos, @monster) ->
+    constructor: (@world, base, @monster) ->
         
         @monster.health -= 1
         # log "monster.health #{@monster.health}"
-        @world.storage.deduct [1,0,0,0]
-        @path = @world.pathFromPosToPos startPos, @monster.pos
+        storage = @world.storage[base.player]
+        storage.deduct [1,0,0,0]
+        @path = @world.pathFromPosToPos base.pos, @monster.pos
         geom = new THREE.Geometry
                 
         @box = @world.boxes.add pos:@world.posAtIndex(@path[0]), size:0.05, stone:Stone.red

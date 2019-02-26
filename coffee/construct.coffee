@@ -239,6 +239,7 @@ class Construct
             when Bot.build then Geom.tubecross
             when Bot.trade then Geom.toruscone
             when Bot.brain then Geom.knot
+            when Bot.ai    then Geom.dodicos
     
     bots: ->
                         

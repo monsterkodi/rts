@@ -23,8 +23,8 @@ class Debug
         # @tubesGap   = @value text:'gap  ', value: state.science.tube.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
         @cageSize   = @value text:'cage ', value: state.science.base.radius,           reset:@resetCage,       incr:@incrCage,       decr:@decrCage
         @pathLength = @value text:'path ', value: state.science.path.length,           reset:@resetPath,       incr:@incrPath,       decr:@decrPath
-        @button text:'fill  storage', cb: -> rts.world.storage.fill()
-        @button text:'clear storage', cb: -> rts.world.storage.clear()
+        @button text:'fill  storage', cb: -> rts.world.storage[0].fill()
+        @button text:'clear storage', cb: -> rts.world.storage[0].clear()
         @toggle text:'cheap science', obj:window.debug, key:'cheapScience'
         @toggle text:'fast  science', obj:window.debug, key:'fastScience'
 

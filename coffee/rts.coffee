@@ -145,6 +145,7 @@ class RTS
             @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
             @light2Helper?.update()   
             @world.animate delta
+            @menu.animate delta
             
             oldWorldAnimations = @worldAnimations.clone()
             @worldAnimations = []

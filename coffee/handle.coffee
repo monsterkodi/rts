@@ -77,7 +77,7 @@ class Handle
 
         @delay delta, bot, 'speed', 'prod', =>
             gained = [0,0,0,0]
-            storage = @world.storage
+            storage = @world.storage[bot.player]
             for stone in Stone.resources
                 amount = state.science.base.prod[stone]
                 for i in [0...amount]
@@ -103,7 +103,7 @@ class Handle
 
             if cost = Science.currentCost()
                 # log 'tickBrain', cost
-                storage = @world.storage
+                storage = @world.storage[bot.player]
                 if storage.canAfford cost
                     Science.deduct cost
                     storage.deduct cost
@@ -124,7 +124,7 @@ class Handle
 
         @delay delta, bot, 'speed', 'trade', =>
 
-            storage    = @world.storage
+            storage    = @world.storage[bot.player]
             sellStone  = state.trade.sell
             sellAmount = state.science.trade.sell
             # log "sell #{sellAmount} #{Stone.string sellStone}"
@@ -134,7 +134,7 @@ class Handle
                 if storage.canTake buyStone
                     # log "trade #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
                     if @world.tubes.insertPacket bot, buyStone
-                        @world.storage.willSend buyStone
+                        storage.willSend buyStone
                         storage.add sellStone, -sellAmount
                         cost = [0,0,0,0]
                         cost[sellStone] = sellAmount
@@ -151,8 +151,9 @@ class Handle
 
     buyBot: (type) ->
 
+        storage = @world.storage[0]
         cost = state.cost[Bot.string type]
-        if not @world.storage.canAfford cost
+        if not storage.canAfford cost
             log 'WARNING handle.buyBot -- not enough stones for bot!'
             return
 
@@ -167,8 +168,8 @@ class Handle
             return
         # log "handle.buyBot #{Bot.string type}"
 
-        @world.storage.deduct cost, 'buy'
-        bot = @world.addBot p.x,p.y,p.z, type, face
+        storage.deduct cost, 'buy'
+        bot = @world.addBot p.x,p.y,p.z, type, 0, face
         @world.spent.costAtBot cost, bot
         @world.construct.botAtPos bot, p
         rts.camera.focusOnPos p
@@ -187,15 +188,16 @@ class Handle
 
         stone = @world.stoneBelowBot bot
         # log 'send', Stone.string stone
-        if @world.storage.canTake stone
+        storage = @world.storage[bot.player]
+        if storage.canTake stone
             if bot.path?
                 if @world.tubes.insertPacket bot, stone
-                    @world.storage.willSend stone
+                    storage.willSend stone
                     if resource = @world.resourceAtPos @world.posBelowBot bot
                         resource.deduct()
                     return true
             else if bot.type == Bot.base
-                @world.storage.add stone
+                storage.add stone
                 gained = [0,0,0,0]
                 gained[stone] = 1
                 @world.spent.gainAtPosFace gained, bot.pos, bot.face
@@ -231,8 +233,10 @@ class Handle
         
         buildBot = @world.botOfType Bot.build
         
+        storage = @world.storage[0]
+        
         return false if not buildBot
-        return false if not @world.storage.canAfford state.science.build.cost
+        return false if not storage.canAfford state.science.build.cost
         
         if state.science.tube.free < 1
             if not buildBot.path
@@ -248,8 +252,9 @@ class Handle
         return if not @canBuild()
         
         if hitInfo = @infoForBuildHit bot, hit
-                
-            if @world.storage.deductBuild()
+
+            storage = @world.storage[0]
+            if storage.deductBuild()
 
                 rts.camera.focusOnPos rts.camera.center.plus hitInfo.norm
 
@@ -273,7 +278,7 @@ class Handle
         
         @world.removeBuildGuide()
         
-        if hit and hit.bot?
+        if hit and hit.bot? and hit.bot.player == 0
             @world.highlightBot hit.bot
             if hit.bot.type == Bot.build
                 if hitInfo = @infoForBuildHit hit.bot, hit
@@ -315,7 +320,7 @@ class Handle
 
         return if state.base.state == 'off'
         if Math.round(monster.pos.manhattan(@world.base.pos)) <= state.science.base.radius
-            Spark.spawn @world, @world.base.pos, monster
+            Spark.spawn @world, @world.base, monster
 
     call: ->
         

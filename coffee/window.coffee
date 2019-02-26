@@ -113,7 +113,7 @@ window.onkeydown = (event) ->
         when 'b'     then rts.handle.placeBuild()
         when 'c', 'enter' then rts.handle.call()
         when 'd'     then prefs.set 'debug', not prefs.get 'debug'
-        when 'f'     then rts.world.storage.fill()
+        when 'f'     then rts.world.storage[0].fill()
         when 'k'     then rts.world.monsters[0]?.die()
         when 'space' then rts.togglePause()
         when '='     then rts.world.incrSpeed(); rts.world.incrSpeed()

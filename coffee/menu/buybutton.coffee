@@ -41,7 +41,7 @@ class BuyButton extends CanvasButton
     init: ->
         
         cost = @cost()
-        have = rts.world.storage.stones
+        have = rts.world.storage[0].stones
         
         for stone in Stone.resources
             
@@ -55,7 +55,7 @@ class BuyButton extends CanvasButton
                         
     update: -> 
         
-        have = rts.world.storage.stones
+        have = rts.world.storage[0].stones
         
         for stone in Stone.resources
             
@@ -108,7 +108,7 @@ class BuyButton extends CanvasButton
         
     click: -> rts.handle.buyButtonClick @
                     
-    canAfford: -> rts.world.storage.canAfford @cost()
+    canAfford: -> rts.world.storage[0].canAfford @cost()
     cost: -> state.cost[Bot.string @bot]
         
     # 00000000   00000000  000   000  0000000    00000000  00000000   
@@ -117,7 +117,10 @@ class BuyButton extends CanvasButton
     # 000   000  000       000  0000  000   000  000       000   000  
     # 000   000  00000000  000   000  0000000    00000000  000   000  
     
-    onStorageChanged: => @update()
+    onStorageChanged: (storage, stone, amount) => 
+        
+        return if storage.player != 0
+        @update()
     
     render: ->
 

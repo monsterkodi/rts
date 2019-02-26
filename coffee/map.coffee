@@ -44,6 +44,7 @@ class Map extends World
         @addResource  3, 0, 0, Stone.white, 256
         
         @addBot  0, 0, 1, Bot.base
+        @addBot -1, 0, 1, Bot.base, 1
         
     grid: ->
         
