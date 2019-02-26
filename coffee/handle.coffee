@@ -149,34 +149,35 @@ class Handle
 
     buyButtonClick: (button) -> @buyBot button.bot
 
-    buyBot: (type) ->
+    buyBot: (type, player=0) ->
 
-        storage = @world.storage[0]
+        storage = @world.storage[player]
         cost = state.cost[Bot.string type]
         if not storage.canAfford cost
-            log 'WARNING handle.buyBot -- not enough stones for bot!'
+            if player == 0
+                log "WARNING handle.buyBot player:#{player} -- not enough stones for bot!"
             return
 
         if type == Bot.mine
-            if @world.botsOfType(type).length >= state.science.mine.limit
-                log 'WARNING handle.buyBot -- mine limit reached!'
+            if @world.botsOfType(type, player).length >= state.science.mine.limit
+                log 'WARNING handle.buyBot player:#{player} -- mine limit reached!'
                 return
 
-        [p, face] = @world.emptyPosFaceNearBot @world.base
+        [p, face] = @world.emptyPosFaceNearBot @world.bases[player]
         if not p?
-            log 'WARNING handle.buyBot -- no space for new bot!'
+            log 'WARNING handle.buyBot player:#{player} -- no space for new bot!'
             return
-        # log "handle.buyBot #{Bot.string type}"
 
         storage.deduct cost, 'buy'
-        bot = @world.addBot p.x,p.y,p.z, type, 0, face
+        bot = @world.addBot p.x,p.y,p.z, type, player, face
         @world.spent.costAtBot cost, bot
         @world.construct.botAtPos bot, p
-        rts.camera.focusOnPos p
-        @world.highlightBot bot
         @world.updateTubes()
-
-        post.emit 'botCreated', bot
+        
+        if player == 0
+            rts.camera.focusOnPos p
+            @world.highlightBot bot
+            post.emit 'botCreated', bot
 
     #  0000000  00000000  000   000  0000000
     # 000       000       0000  000  000   000

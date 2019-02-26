@@ -34,6 +34,12 @@ Materials =
                 new THREE.MeshStandardMaterial color:Color.bot.white # white
                 new THREE.MeshStandardMaterial color:Color.bot.gray,  metalness: 0.9, roughness: 0.5 # gray
     ]
+    ai: [
+                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.3
+                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.3
+                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.3
+                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.3
+    ]
     cost: [   
                 new THREE.MeshStandardMaterial color:Color.stone.red   # red
                 new THREE.MeshStandardMaterial color:Color.stone.gelb  # gelb

@@ -276,13 +276,15 @@ class Construct
         bot.dot.position.copy bot.pos.minus Vector.normals[bot.face].mul 0.35
         
     colorBot: (bot) ->
-        
-        stone = @world.stoneBelowBot bot
-        # log 'colorBot', Bot.string(bot.type), bot.pos, @world.posBelowBot(bot), Stone.string(@world.stoneBelowBot bot)
-        if stone in Stone.resources
-            bot.mesh.material = Materials.bot[stone]
+
+        if bot.player == 0
+            stone = @world.stoneBelowBot bot
+            if stone in Stone.resources
+                bot.mesh.material = Materials.bot[stone]
+            else
+                bot.mesh.material = Materials.bot[Stone.gray]
         else
-            bot.mesh.material = Materials.bot[Stone.gray]
+            bot.mesh.material = Materials.ai[bot.player-1]
             
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     

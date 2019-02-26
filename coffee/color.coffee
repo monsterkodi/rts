@@ -46,6 +46,8 @@ Color =
     bot:
         gray:            color 0xccccdd
         
+    ai:                  color 0x777777
+        
     path:                color 0xbbbbbb
     
     cage:                color 0x0f0f0f

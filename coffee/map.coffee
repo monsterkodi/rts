@@ -34,6 +34,7 @@ class Map extends World
         @addCancer 0, -10,  0, 10
         @addCancer 0,   0, -1,  3
         
+        @wall 0,-3,0, 0,3,0
         @wall -3,0,0, 3,0,0
         @addResource -3, 0, 0, Stone.white, 256
         @addResource -2, 0, 0, Stone.red,   128
@@ -44,7 +45,8 @@ class Map extends World
         @addResource  3, 0, 0, Stone.white, 256
         
         @addBot  0, 0, 1, Bot.base
-        @addBot -1, 0, 1, Bot.base, 1
+        @addBot -1, 0, 1, Bot.base
+        @addBot -2, 0, 1, Bot.base
         
     grid: ->
         

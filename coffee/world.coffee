@@ -8,6 +8,7 @@
 
 { post, prefs, deg2rad, randInt, clamp, first, last, valid, empty, str, log, _ } = require 'kxk'
 
+AI        = require './ai'
 Vector    = require './lib/vector'
 Packet    = require './packet'
 Tubes     = require './tubes'
@@ -39,7 +40,8 @@ class World
         @monsters  = []
         @cancers   = []
         @bases     = []
-        @storage   = [new Storage(@,0), new Storage(@,1)]
+        @storage   = [new Storage(@,0)]
+        @ai        = []
         
         @tubes  = new Tubes @
         @spent  = new Spent @
@@ -105,6 +107,10 @@ class World
         if valid @cancers
             for i in [@cancers.length-1..0]
                 @cancers[i].animate scaledDelta
+                
+        if valid @ai
+            for ai in @ai
+                ai.animate scaledDelta
                     
         @sample -= scaledDelta
         if @sample <= 0
@@ -167,6 +173,11 @@ class World
         @cancers.push new Cancer @, vec(x,y,z)
         last @cancers
         
+    addAI: (bot) ->
+        
+        @ai.push new AI @, bot
+        @storage.push new Storage @, @storage.length        
+        
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
     # 0000000    000   000     000     
@@ -183,6 +194,9 @@ class World
                 log 'no empty space for bot!'
                 return
         
+        if player == 0 and type == Bot.base and @bases.length
+            player = @bases.length
+                
         index = @indexAtPos p
         bot = 
             type:   type
@@ -197,6 +211,8 @@ class World
             when Bot.base
                 if player == 0
                     @base = bot
+                else 
+                    @addAI bot
                 @bases[player] = bot
                 bot.prod = 1/state.science.base.speed
             when Bot.trade

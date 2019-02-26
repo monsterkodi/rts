@@ -19,10 +19,10 @@ class Storage
 
         @resetBalance()
         
-        if @player == 0
-            for stone in Stone.resources
-                @add stone, state.storage.stones[stone], 'init'
-            
+        # if @player == 0
+        for stone in Stone.resources
+            @add stone, state.storage.stones[stone], 'init'
+        
         post.on 'scienceFinished', @onScienceFinished
                     
     onScienceFinished: (scienceKey) =>

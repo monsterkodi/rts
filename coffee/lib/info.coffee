@@ -14,23 +14,9 @@ class Info
                     
         @elem = elem class:'info', style:'position:absolute; z-index:1; bottom:10px; right:20px'
 
-        @cycls = elem class:'infoText', parent:@elem
-        @trias = elem class:'infoText', parent:@elem
-        @lines = elem class:'infoText', parent:@elem
-        @calls = elem class:'infoText', parent:@elem
-        @stone = elem class:'infoText', parent:@elem
-        @boxes = elem class:'infoText', parent:@elem
-        @pckts = elem class:'infoText', parent:@elem
-        @segmt = elem class:'infoText', parent:@elem
-        @ai    = elem class:'infoText', parent:@elem
-        @store = elem class:'infoText', parent:@elem
-        @temp  = elem class:'infoText', parent:@elem
-
         document.body.appendChild @elem
           
-    del: ->
-        
-        @elem.remove()
+    del: -> @elem.remove()
         
     # 0000000    00000000    0000000   000   000
     # 000   000  000   000  000   000  000 0 000
@@ -41,18 +27,21 @@ class Info
     draw: (info) =>
         
         info = _.clone rts.renderer.info.render
-        
-        @cycls.innerHTML = "cycls: #{rts.world.cycles}"
-        @calls.innerHTML = "calls: #{info.calls}"
-        @trias.innerHTML = "trias: #{info.triangles}"
-        @lines.innerHTML = "lines: #{info.lines}"
-        @stone.innerHTML = "stone: #{_.size rts.world.stones}"
-        @boxes.innerHTML = "boxes: #{rts.world.boxes.numBoxes()}"
-        @segmt.innerHTML = "segmt: #{rts.world.tubes.getSegments().length}"
-        @pckts.innerHTML = "pckts: #{rts.world.tubes.getPackets().length}"
-        @ai.innerHTML    = "ai:    #{rts.world.storage[1].stones}"
-        @store.innerHTML = "store: #{rts.world.storage[0].stones}"
-        @temp.innerHTML  = "temps: #{rts.world.storage[0].temp}"
+        @elem.innerHTML = ''
+        world = rts.world
+        add = (text) => elem class:'infoText', parent:@elem, text:text
+        add "cycls: #{world.cycles}"
+        add "calls: #{info.calls}"
+        add "trias: #{info.triangles}"
+        # add "lines: #{info.lines}"
+        add "stone: #{_.size rts.world.stones}"
+        add "boxes: #{world.boxes.numBoxes()}"
+        add "segmt: #{world.tubes.getSegments().length}"
+        add "pckts: #{world.tubes.getPackets().length}"
+        add "store: #{world.storage[0].stones}"
+        # add "temps: #{world.storage[0].temp}"
+        for ai in world.ai
+            add "ai #{ai.player}:  #{world.storage[ai.player].stones}"
 
 module.exports = Info
 
