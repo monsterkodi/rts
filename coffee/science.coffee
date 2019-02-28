@@ -36,43 +36,45 @@ class Science
         storage:
             capacity: x:4, y:0, v:[80, 120, 160, 200, 240, 320]
         
-            
-    @queue = []
+    @queue    = []
+    @players  = []
     @maxQueue = 5
 
-    @initState: (config) ->
+    @science: (player=0) -> Science.players[player].science
+    
+    @addPlayer: ->
         
-        window.state = _.clone config
-                
-        state.science = {}
-        state.progress = {}
+        player =
+            science:  {}
+            progress: {}
         
         for science,cfg of Science.tree
-            state.science[science] = {}
-            state.progress[science] = {}
+            player.science[science]  = {}
+            player.progress[science] = {}
             for key,values of cfg
-                state.science[science][key] = values.v[0]
-                state.progress[science][key] = [0,0,0,0,0,0]
+                player.science[science][key] = values.v[0]
+                player.progress[science][key] = [0,0,0,0,0,0]
                 
-        # log 'initState', state.science
-
-    @mineSpeed: (type) ->
+        @queue.push []
+        @players.push player
+                
+    @mineSpeed: (bot) ->
         
-        switch type
-            when Bot.mine then state.science.mine.speed
+        switch bot.type
+            when Bot.mine then @science(bot.player).mine.speed
             else state.nonMineSpeed
         
     @split: (scienceKey) -> scienceKey.split '.'
         
-    @stars: (scienceKey) -> 
+    @stars: (scienceKey, player=0) -> 
         
         [science,key] = @split scienceKey
-        @tree[science][key].v.indexOf state.science[science][key]
+        @tree[science][key].v.indexOf @science(player)[science][key]
         
-    @nextStars: (scienceKey) ->
+    @nextStars: (scienceKey, player=0) ->
         
-        next = @stars(scienceKey)+1
-        for info in @queue
+        next = @stars(scienceKey, player)+1
+        for info in @queue[player]
             if info.scienceKey == scienceKey
                 next = info.stars+1
         next
@@ -82,34 +84,35 @@ class Science
         [science,key] = @split scienceKey
         @tree[science][key].v.length-1
             
-    @enqueue: (scienceKey) ->
+    @enqueue: (scienceKey, player=0) ->
         
         stars = @nextStars scienceKey
         [science, key] = @split scienceKey
-        if stars <= @maxStars(scienceKey) and @queue.length < @maxQueue
+        if stars <= @maxStars(scienceKey,player) and @queue[player].length < @maxQueue
             c     = window.debug?.cheapScience and 1 or state.scienceCost[stars]
-            times = window.debug?.fastScience and 1 or state.scienceSteps[stars]-state.progress[science][key][stars]
+            times = window.debug?.fastScience and 1 or state.scienceSteps[stars]-@players[player].progress[science][key][stars]
             cost  = [c,c,c,c]
-            @queue.push scienceKey:scienceKey, stars:stars, cost:cost, times:times
-            post.emit 'scienceQueued', last @queue
+            @queue[player].push scienceKey:scienceKey, stars:stars, cost:cost, times:times, player:player
+            post.emit 'scienceQueued', last @queue[player]
             true
             
     @dequeue: (info) -> 
         
-        for i in [@queue.length-1..0]
-            if @queue[i].scienceKey == info.scienceKey and @queue[i].stars >= info.stars
-                @queue.splice i, 1
+        player = info.player
+        for i in [@queue[player].length-1..0]
+            if @queue[player][i].scienceKey == info.scienceKey and @queue[player][i].stars >= info.stars
+                @queue[player].splice i, 1
                 info.index = i
                 post.emit 'scienceDequeued', info
                 true
             
-    @currentCost: -> first(@queue)?.cost
+    @currentCost: (player=0) -> first(@queue[player])?.cost
     
-    @deduct: -> 
+    @deduct: (player=0) -> 
         
-        if info = first @queue
+        if info = first @queue[player]
             [science,key] = @split info.scienceKey
-            state.progress[science][key][info.stars] += 1
+            @players[player].progress[science][key][info.stars] += 1
             info.times -= 1
             info.index = 0
             if info.times == 0
@@ -117,26 +120,29 @@ class Science
             else
                 post.emit 'scienceUpdated', info
             
-    @currentProgress: ->
+    @currentProgress: (player=0) ->
         
-        if info = first @queue
+        if info = first @queue[player]
             stars = info.stars
-            @progress info.scienceKey, info.stars
+            @progress info.scienceKey, info.stars, player
            
-    @progress: (scienceKey, stars) ->
+    @progress: (scienceKey, stars, player=0) ->
         
         [science, key] = @split scienceKey
-        100*state.progress[science][key][stars]/(state.scienceSteps[stars]-1)
+        100*@players[player].progress[science][key][stars]/(state.scienceSteps[stars]-1)
             
     @finished: (info) =>
         # log 'Science.finished', info.scienceKey
+        
+        player = info.player
+        
         info.index = 0
-        @queue.shift()
+        @queue[player].shift()
         
         scienceKey = info.scienceKey
         [science,key] = @split scienceKey
         
-        state.science[science][key] = @tree[science][key].v[info.stars]
+        @science(player)[science][key] = @tree[science][key].v[info.stars]
         switch scienceKey
             when 'path.length' then rts.world.updateTubes()
             

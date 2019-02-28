@@ -12,7 +12,7 @@ module.exports =
     
     default:
             
-        ai: delay: 2
+        ai: delay: 20
         
         storage:
             # stones:[ 8 *8, 8 *8, 8 *8, 8 *8]

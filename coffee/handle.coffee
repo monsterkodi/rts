@@ -40,14 +40,13 @@ class Handle
 
     delay: (delta, bot, speed, delay, func) ->
 
-        # log "delay #{Bot.string(bot.type)} #{speed} #{delay} delay:#{bot[delay]}"#, state.science[Bot.string bot.type]
         bot[delay] -= delta
         if bot[delay] <= 0
             if func bot
                 if speed == 'mine'
-                    s = Science.mineSpeed bot.type
+                    s = Science.mineSpeed bot
                 else
-                    s = state.science[Bot.string bot.type][speed]
+                    s = science(bot.player)[Bot.string bot.type][speed]
                 bot[delay] += 1/s
             else
                 bot[delay] = 0
@@ -79,7 +78,7 @@ class Handle
             gained = [0,0,0,0]
             storage = @world.storage[bot.player]
             for stone in Stone.resources
-                amount = state.science.base.prod[stone]
+                amount = science(bot.player).base.prod[stone]
                 for i in [0...amount]
                     if storage.canTake stone
                         storage.add stone
@@ -96,7 +95,7 @@ class Handle
     tickBrain: (delta, bot) ->
 
         return if bot.state != 'on'
-        if state.science.tube.free < 2
+        if science(bot.player).tube.free < 2
             return if not bot.path
 
         @delay delta, bot, 'speed', 'think', =>
@@ -119,7 +118,7 @@ class Handle
     tickTrade: (delta, bot) ->
 
         return if bot.state != 'on'
-        if state.science.tube.free < 3
+        if science(bot.player).tube.free < 3
             return if not bot.path
 
         @delay delta, bot, 'speed', 'trade', =>
@@ -127,7 +126,7 @@ class Handle
             # log "bot.trade #{bot.player}"
             storage    = @world.storage[bot.player]
             sellStone  = bot.sell
-            sellAmount = state.science.trade.sell
+            sellAmount = science(bot.player).trade.sell
             # log "sell #{sellAmount} #{Stone.string sellStone}"
             if storage.has sellStone, sellAmount
                 buyStone = bot.buy
@@ -160,7 +159,7 @@ class Handle
             return
 
         if type == Bot.mine
-            if @world.botsOfType(type, player).length >= state.science.mine.limit
+            if @world.botsOfType(type, player).length >= science(player).mine.limit
                 log 'WARNING handle.buyBot player:#{player} -- mine limit reached!'
                 return
 
@@ -179,6 +178,8 @@ class Handle
             rts.camera.focusOnPos p
             @world.highlightBot bot
             post.emit 'botCreated', bot
+            
+        true
 
     #  0000000  00000000  000   000  0000000
     # 000       000       0000  000  000   000
@@ -231,16 +232,16 @@ class Handle
         face: newFace
         norm: n
     
-    canBuild: (norm) ->
+    canBuild: (norm, player=0) ->
         
         buildBot = @world.botOfType Bot.build
         
-        storage = @world.storage[0]
+        storage = @world.storage[player]
         
         return false if not buildBot
-        return false if not storage.canAfford state.science.build.cost
+        return false if not storage.canAfford science(player).build.cost
         
-        if state.science.tube.free < 1
+        if science(player).tube.free < 1
             if not buildBot.path
                 return false
                 
@@ -253,15 +254,17 @@ class Handle
 
         return if not @canBuild()
         
+        player = 0
+        
         if hitInfo = @infoForBuildHit bot, hit
 
-            storage = @world.storage[0]
+            storage = @world.storage[player]
             if storage.deductBuild()
 
                 rts.camera.focusOnPos rts.camera.center.plus hitInfo.norm
 
                 @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
-                @world.spent.costAtBuild state.science.build.cost, bot
+                @world.spent.costAtBuild science(player).build.cost, bot
                 @world.moveBot bot, hitInfo.pos, hitInfo.face
                 @world.construct.stones()
                 if @canBuild hitInfo.norm
@@ -279,7 +282,7 @@ class Handle
         if storage.deductBuild()
 
             @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
-            @world.spent.costAtBuild state.science.build.cost, bot
+            @world.spent.costAtBuild science(bot.player).build.cost, bot
             @world.moveBot bot, pos, face
             @world.construct.stones()
             
@@ -346,9 +349,10 @@ class Handle
 
     monsterMoved: (monster) ->
 
-        return if state.base.state == 'off'
-        if Math.round(monster.pos.manhattan(@world.base.pos)) <= state.science.base.radius
-            Spark.spawn @world, @world.base, monster
+        for base in @world.bases
+            if base.state == 'on'
+                if Math.round(monster.pos.manhattan(base.pos)) <= science(base.player).base.radius
+                    Spark.spawn @world, base, monster
 
     call: (player=0) ->
         

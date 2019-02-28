@@ -166,8 +166,8 @@ class BotButton extends CanvasButton
 
                 s = 0.07
                 geom = new THREE.Geometry
-                for i in [0...state.science.trade.sell]
-                    x = 0.1*i - 0.1*(state.science.trade.sell-1)/2
+                for i in [0...science().trade.sell]
+                    x = 0.1*i - 0.1*(science().trade.sell-1)/2
                     geom.merge new THREE.Geometry().fromBufferGeometry Geometry.cornerBox s, x, -0.25, 0.05
                 @scene.add @meshes.sell = new THREE.Mesh geom, Materials.stone[trade.sell]
                 
@@ -196,7 +196,7 @@ class BotButton extends CanvasButton
             if progress = Science.currentProgress()
                 ctx.fillRect 100-progress, 199, 2*progress+2, 1
                 
-            for i in [0...Science.queue.length]
-                ctx.fillRect 100 + i*10 - ((Science.queue.length-1)*10/2), 192, 3, 3
+            for i in [0...Science.queue[0].length]
+                ctx.fillRect 100 + i*10 - ((Science.queue[0].length-1)*10/2), 192, 3, 3
                         
 module.exports = BotButton

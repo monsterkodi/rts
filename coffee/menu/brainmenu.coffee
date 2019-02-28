@@ -46,7 +46,7 @@ class BrainMenu extends BotMenu
                 if values.y == 2
                     btn.canvas.style.borderBottom = border
                     
-        for info in Science.queue
+        for info in Science.queue[0]
             @addToQueue info
                 
         @div.style.width  = "500px"
@@ -68,6 +68,7 @@ class BrainMenu extends BotMenu
         
     addToQueue: (info) -> 
     
+        # log 'addToQueue', info
         btn = new QueueButton @div, info
         btn.canvas.style.left = "#{@queue.length*100+100}px"
         btn.canvas.style.top  = "0"

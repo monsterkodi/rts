@@ -37,12 +37,12 @@ class Map extends World
         @wall  5,-3,0, 5, 3,0
         @wall -5,-3,0,-5, 3,0
 
-        @wall -2, 5,3, 2, 5,3
-        @wall -2,-5,3, 2,-5,3
+        @wall  0, 5,3, 0, 5,6
+        @wall  0,-5,5, 0,-5,8
         @wall  5,-2,3, 5, 2,3
         @wall -5,-2,3,-5, 2,3
         
-        res = 8
+        res = 80
                 
         @addResource -3, 5, 0, Stone.white, res
         @addResource -2, 5, 0, Stone.red,   res
@@ -64,21 +64,25 @@ class Map extends World
         # @addResource -5,  2, 0, Stone.gelb,  res
         # @addResource -5,  3, 0, Stone.blue,  res
 
-        @addResource -5, -1, 3, Stone.white, res
-        @addResource -5, -2, 3, Stone.red,   res
-        @addResource -5,  2, 3, Stone.gelb,  res
-        @addResource -5,  1, 3, Stone.blue,  res
+        @addResource -5, -2, 3, Stone.white, res
+        @addResource -5,  2, 3, Stone.white, res
+        
+        @addResource  0,  5, 5, Stone.white, res
+        @addResource  0, -5, 5, Stone.white, res
 
         @addResource  5, -1, 3, Stone.white, res
-        @addResource  5, -2, 3, Stone.red,   res
-        @addResource  5,  2, 3, Stone.gelb,  res
-        @addResource  5,  1, 3, Stone.blue,  res
+        @addResource  5, -2, 3, Stone.white, res
+        @addResource  5,  2, 3, Stone.white, res
+        @addResource  5,  1, 3, Stone.white, res
         
         @addBot  0, 0, 1, Bot.base
         @addBot  5, 0, 1, Bot.base
         # @addBot  0, 5, 1, Bot.base
         # @addBot  0,-5, 1, Bot.base
         # @addBot -5, 0, 1, Bot.base
+        
+        @addCancer 0,  0,  10, 15
+        @addCancer 0,  0, -3,  10
         
     pest: ->
 

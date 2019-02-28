@@ -70,7 +70,7 @@ class Graph
                     stones.push stones.shift()
                 for stone in stones
                     ctx.fillStyle = stoneStyles[stone.stone]
-                    h = 196*stone.amount/state.storage.capacity
+                    h = 196*stone.amount/rts.world.storage[0].capacity()
                     ctx.fillRect i*4, h, 4, 4
 
         for stone in Stone.resources     

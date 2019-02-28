@@ -18,12 +18,12 @@ class BaseMenu extends BotMenu
     
         super botButton
         
-        @addButton 'state', new ToggleButton @div, @onBaseToggle, state.base.state
+        @addButton 'state', new ToggleButton @div, @onBaseToggle, rts.world.bases[0].state
         @addButton 'call',  new CallButton @div
                 
     onBaseToggle: (baseState) => 
     
-        state.base.state = baseState
+        rts.world.bases[0].state = baseState
         post.emit 'botState', 'base', baseState
 
 module.exports = BaseMenu

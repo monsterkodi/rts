@@ -31,7 +31,9 @@ class World
     constructor: (@scene, config) ->
         
         rts.world  = @
-        Science.initState config
+        
+        window.state   = _.clone config # clone needed?
+        window.science = Science.science
         
         @stones    = {}
         @box       = {}
@@ -40,7 +42,7 @@ class World
         @monsters  = []
         @cancers   = []
         @bases     = []
-        @storage   = [new Storage(@,0)]
+        @storage   = []
         @ai        = []
         
         @tubes  = new Tubes @
@@ -178,16 +180,14 @@ class World
             found.sort (a,b) => @posAtIndex(a).manhattan(cfg.sortPos)-@posAtIndex(b).manhattan(cfg.sortPos)
         found
             
-    facesReachableFromPosFace: (pos, face) ->
-        
-        fi = @faceIndex face, @indexAtPos pos
+    facesReachableFromFaceIndex: (faceIndex) ->
         
         maxDist = 1000
-        check = [fi]
+        check = [faceIndex]
         known = {}
-        known[fi] = 
+        known[faceIndex] = 
             dist:0
-            faceIndex:fi
+            faceIndex:faceIndex
 
         while valid check
             ci = check.shift()
@@ -209,16 +209,12 @@ class World
         faces = faces.map (k) -> k.faceIndex
         faces
         
-    faceIndexClosestToFaceIndexReachableFromPosFace: (targetFaceIndex, pos, face) ->
+    faceIndexClosestToFaceIndexReachableFromFaceIndex: (targetFaceIndex, sourceFaceIndex) ->
         
         targetPos = @posAtIndex targetFaceIndex
-        faces = @facesReachableFromPosFace pos, face
+        faces = @facesReachableFromFaceIndex sourceFaceIndex
         if valid faces
             faces.sort (a,b) => @posAtIndex(a).manhattan(targetPos)-@posAtIndex(b).manhattan(targetPos)
-            # log "targetFaceIndex #{@stringForFaceIndex targetFaceIndex}"
-            # log "facesReachableFromPosFace #{str pos} #{Face.string face}", targetPos
-            # for f in faces
-                # log @stringForFaceIndex(f), @posAtIndex(f).manhattan(targetPos)
             first faces
         
     # 00     00   0000000   000   000   0000000  000000000  00000000  00000000   
@@ -248,8 +244,7 @@ class World
     addAI: (bot) ->
         
         @ai.push new AI @, bot
-        @storage.push new Storage @, @storage.length        
-        
+                
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
     # 0000000    000   000     000     
@@ -277,25 +272,27 @@ class World
             index:  index
             player: player
             
-        bot.mine = 1/Science.mineSpeed type
+        bot.mine = 1/Science.mineSpeed bot
                 
         if type in Bot.switchable
             bot.state = 'off'
         
         switch type 
             when Bot.base
+                Science.addPlayer()
+                @storage.push new Storage @, player
                 if player == 0
                     @base = bot
                 else 
                     @addAI bot
                 @bases[player] = bot
-                bot.prod = 1/state.science.base.speed
+                bot.prod = 1/science(player).base.speed
             when Bot.trade
-                bot.trade = 1/state.science.trade.speed
+                bot.trade = 1/science(player).trade.speed
                 bot.sell  = Stone.red
                 bot.buy   = Stone.blue
             when Bot.brain
-                bot.think = 1/state.science.brain.speed
+                bot.think = 1/science(player).brain.speed
             
         @bots[index] = bot
         bot
@@ -467,7 +464,7 @@ class World
                         check.push neighbor
         [null,null]
         
-    emptyResourceNearBase: (player=0) -> @emptyResourceNearBot @bases[player], state.science.path.length
+    emptyResourceNearBase: (player=0) -> @emptyResourceNearBot @bases[player], science(player).path.length
         
     emptyResourceNearBot: (bot, maxDist=1000) ->
                 
@@ -633,10 +630,12 @@ class World
             
     updateBaseCage: ->
         
+        player = 0
+        
         @removeBaseCage()
         
         if @base.state == 'on' and @base == @highBot
-            @baseCage = @construct.cage @base, state.science.base.radius
+            @baseCage = @construct.cage @base, science(player).base.radius
             @baseCage.position.copy @base.pos
     
     removeHighlight: ->

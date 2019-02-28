@@ -29,10 +29,10 @@ class StoneButton extends CanvasButton
         @camera.updateProjectionMatrix()
         @render()
         
-    amount: -> 
+    amount: ->
         
         if @inOut == 'buy' then return 1
-        state.science.trade.sell
+        science().trade.sell
         
     click: -> post.emit @inOut, @stone
     

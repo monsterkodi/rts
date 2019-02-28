@@ -19,7 +19,8 @@ class Storage
 
         @resetBalance()
         
-        # if @player == 0
+        # log "new Storage #{@player}"
+        
         for stone in Stone.resources
             @add stone, state.storage.stones[stone], 'init'
         
@@ -35,7 +36,7 @@ class Storage
                         
     resetBalance: -> @balance = gains:[0,0,0,0], spent:[0,0,0,0]
         
-    capacity: -> state.science.storage.capacity
+    capacity: -> science(@player).storage.capacity
                        
     has: (stone, amount) -> @stones[stone] >= amount
             
@@ -48,8 +49,8 @@ class Storage
         
     deductBuild: -> 
         
-        if @canAfford state.science.build.cost
-            @deduct state.science.build.cost
+        if @canAfford science(@player).build.cost
+            @deduct science(@player).build.cost
             @dirty = true
             return true
         false

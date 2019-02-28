@@ -21,8 +21,8 @@ class Tubes
         @astar    = new AStar @world
         @segments = {}
 
-    speed: -> state.science.tube.speed
-    gap:   -> state.science.tube.gap + 0.1
+    speed: (player=0) -> science(player).tube.speed
+    gap:   (player=0) -> science(player).tube.gap + 0.1
         
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
@@ -45,7 +45,7 @@ class Tubes
         
     insertPacketIntoSegment: (pck, seg) -> seg.packets.unshift pck
         
-    isInputBlocked: (seg) -> first(seg.packets)?.moved < @gap()
+    isInputBlocked: (seg) -> first(seg.packets)?.moved < @gap(seg.player)
                 
     isCrossingBlocked: (seg, pck) -> 
         
@@ -54,7 +54,7 @@ class Tubes
             inSeg = @segments[index]
             if last(inSeg.packets) == pck
                 continue
-            if last(inSeg.packets)?.moved >= inSeg.moves - @gap()
+            if last(inSeg.packets)?.moved >= inSeg.moves - @gap(seg.player)
                 waiting += 1
                 
         if waiting > 0
@@ -67,16 +67,16 @@ class Tubes
         
     distToNext: (pck, seg, outSeg) ->
         
-        if pck.moved < seg.moves - @gap()
-            return @gap()
+        if pck.moved < seg.moves - @gap(seg.player)
+            return @gap(seg.player)
             
         if @isCrossingBlocked outSeg, pck
             return 0
         
         if valid outSeg.packets
-            return seg.moves - pck.moved + outSeg.packets[0].moved - @gap()
+            return seg.moves - pck.moved + outSeg.packets[0].moved - @gap(seg.player)
             
-        return @gap()
+        return @gap(seg.player)
 
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -105,9 +105,9 @@ class Tubes
                     if pckIndex == seg.packets.length-1
                         nextDist = @distToNext pck, seg, outSeg
                     else
-                        nextDist = (seg.packets[pckIndex+1].moved - @gap()) - pck.moved
+                        nextDist = (seg.packets[pckIndex+1].moved - @gap(seg.player)) - pck.moved
                         
-                    moveDist = Math.min delta * @speed(), nextDist
+                    moveDist = Math.min delta * @speed(seg.player), nextDist
                     pck.move moveDist 
                     
                     if pck.moved >= seg.moves
@@ -121,7 +121,7 @@ class Tubes
                         pck.moveOnSegment seg
                 else
                     
-                    pck.move delta * @speed()
+                    pck.move delta * @speed(seg.player)
                     if pck.moved >= seg.moves
                         pck = seg.packets.pop()
                         @world.storage[pck.player].add pck.stone
@@ -170,6 +170,7 @@ class Tubes
                     to:     fi
                     moves:  1
                     packets:[]
+                    player: bot.player
                     points: fakePoints
                     dist:   bot.path.length
                     in:     []
@@ -209,22 +210,22 @@ class Tubes
     # 000        000   000     000     000   000  
     # 000        000   000     000     000   000  
             
-    pathFromBot: (from) -> 
+    pathFromBot: (fromBot) -> 
         
-        to = @world.baseForBot from
+        toBot = @world.baseForBot fromBot
     
-        path = @astar.findPath @world.faceIndex(from.face, from.index), @world.faceIndex(to.face, to.index)
+        path = @astar.findPath @world.faceIndex(fromBot.face, fromBot.index), @world.faceIndex(toBot.face, toBot.index)
         
-        if path and path.length <= state.science.path.length+1
-            from.path = 
-                points: @pathPoints path
+        if path and path.length <= science(fromBot.player).path.length+1
+            fromBot.path = 
+                points: @pathPoints path, fromBot.player
                 length: path.length
-            from.path.pind = []
-            for pi in [0...from.path.points.length]
-                if from.path.points[pi].i == 0
-                    from.path.pind.push pi
+            fromBot.path.pind = []
+            for pi in [0...fromBot.path.points.length]
+                if fromBot.path.points[pi].i == 0
+                    fromBot.path.pind.push pi
         else
-            delete from.path
+            delete fromBot.path
                                                     
     # 00000000    0000000   000  000   000  000000000   0000000  
     # 000   000  000   000  000  0000  000     000     000       
@@ -232,7 +233,7 @@ class Tubes
     # 000        000   000  000  000  0000     000          000  
     # 000         0000000   000  000   000     000     0000000   
     
-    pathPoints: (path) ->
+    pathPoints: (path, player) ->
         
         points = []
         [lastFace, lastIndex] = @world.splitFaceIndex path[0]
@@ -274,6 +275,7 @@ class Tubes
                     to:     path[i] 
                     packets:[] 
                     points: segPoints
+                    player: player
                     dist:   path.length-i
                     moves:  moves
                     in:     []
