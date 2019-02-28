@@ -22,7 +22,8 @@ class TradeButton extends StoneButton
     
     constructor: (div, inOut) ->
         
-        stone = state.trade[inOut]
+        trade = rts.world.botOfType Bot.trade
+        stone = trade[inOut]
         
         super div, stone, inOut, 'tradeButton canvasButtonInline'
         
@@ -49,7 +50,8 @@ class TradeButton extends StoneButton
     onTrade: (stone) =>
         
         @stone = stone
-        state.trade[@inOut] = @stone
+        trade = rts.world.botOfType Bot.trade
+        trade[@inOut] = @stone
         new StoneMenu @
         @render()
         

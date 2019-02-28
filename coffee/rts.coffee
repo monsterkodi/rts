@@ -217,16 +217,9 @@ class RTS
         
         if bot = @world.highBot
             # log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
-            switch bot.type
-                when Bot.base
-                    state.base.state = state.base.state == 'on' and 'off' or 'on'
-                    post.emit 'botState', 'base', state.base.state
-                when Bot.brain 
-                    state.brain.state = state.brain.state == 'on' and 'off' or 'on'
-                    post.emit 'botState', 'brain', state.brain.state
-                when Bot.trade 
-                    state.trade.state = state.trade.state == 'on' and 'off' or 'on'
-                    post.emit 'botState', 'trade', state.trade.state
+            if bot.type in [Bot.base, Bot.brain, Bot.trade]
+                bot.state = bot.state == 'on' and 'off' or 'on'
+                post.emit 'botState', Bot.string(bot.type), bot.state
         else
             @handle.placeBase()
                     

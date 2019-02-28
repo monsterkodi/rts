@@ -137,18 +137,15 @@ class BotButton extends CanvasButton
             
     render: =>
         
-        if @bot in [Bot.base, Bot.trade, Bot.brain]
+        if @bot in Bot.switchable
             
-            if valid @world.botsOfType @bot
-                
-                s = state[Bot.string @bot].state
-                
+            if bot = @world.botOfType @bot
+            
                 @meshes.state?.parent.remove @meshes.state
                 delete @meshes.state
                 
-                if s == 'off'
+                if bot.state == 'off'
                     @scene.add @meshes.state = new THREE.Mesh Geometry.botPaused(), Materials.state.paused
-        
                     
         # 000000000  00000000    0000000   0000000    00000000  
         #    000     000   000  000   000  000   000  000       
@@ -164,19 +161,20 @@ class BotButton extends CanvasButton
             @meshes.buy?.parent.remove @meshes.buy
             delete @meshes.buy
             
-            if rts.world.botOfType(@bot)?.path
+            trade = rts.world.botOfType @bot
+            if trade?.path
 
                 s = 0.07
                 geom = new THREE.Geometry
                 for i in [0...state.science.trade.sell]
                     x = 0.1*i - 0.1*(state.science.trade.sell-1)/2
                     geom.merge new THREE.Geometry().fromBufferGeometry Geometry.cornerBox s, x, -0.25, 0.05
-                @scene.add @meshes.sell = new THREE.Mesh geom, Materials.stone[state.trade.sell]
+                @scene.add @meshes.sell = new THREE.Mesh geom, Materials.stone[trade.sell]
                 
                 s = 0.1
                 geom = Geometry.cornerBox s, 0, 0, 0.2
                 geom.rotateZ deg2rad 45
-                @scene.add @meshes.buy  = new THREE.Mesh geom, Materials.stone[state.trade.buy]
+                @scene.add @meshes.buy  = new THREE.Mesh geom, Materials.stone[trade.buy]
                     
         super()
         

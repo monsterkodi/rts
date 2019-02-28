@@ -23,7 +23,8 @@ class Camera extends THREE.PerspectiveCamera
         
         @size    = vec width, height 
         @elem    = opt.view
-        @dist    = @far/64
+        # @dist    = @far/64
+        @dist    = 10
         @maxDist = @far/4
         @minDist = 0.9
         @center  = vec 0, 0, 0

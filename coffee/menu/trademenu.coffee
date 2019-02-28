@@ -8,6 +8,8 @@
 
 { post, elem, $, log } = require 'kxk'
 
+{ Bot } = require '../constants'
+
 TradeButton  = require './tradebutton'
 ToggleButton = require './togglebutton'
 BotMenu      = require './botmenu'
@@ -18,13 +20,15 @@ class TradeMenu extends BotMenu
 
         super botButton
 
-        @addButton 'trade', new ToggleButton @div, @onTradeToggle, state.trade.state
+        trade = rts.world.botOfType Bot.trade
+        @addButton 'trade', new ToggleButton @div, @onTradeToggle, trade.state
         @addButton 'sell',  new TradeButton  @div, 'sell'
         @addButton 'buy',   new TradeButton  @div, 'buy'
         
     onTradeToggle: (tradeState) =>
         
-        state.trade.state = tradeState
+        trade = rts.world.botOfType Bot.trade
+        trade.state = tradeState
         post.emit 'botState', 'trade', tradeState
                     
 module.exports = TradeMenu

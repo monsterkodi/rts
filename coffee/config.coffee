@@ -12,6 +12,8 @@ module.exports =
     
     default:
             
+        ai: delay: 2
+        
         storage:
             # stones:[ 8 *8, 8 *8, 8 *8, 8 *8]
             stones:[ 56, 64, 72, 64 ]
@@ -42,12 +44,5 @@ module.exports =
             health:   32
             resource: 256
             
-        base:  state: 'off'
-        brain: state: 'on'
-        build: state: 'build'
             
-        trade:
-            state: 'off'
-            sell:  Stone.red
-            buy:   Stone.blue
             

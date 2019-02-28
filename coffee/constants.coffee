@@ -30,7 +30,7 @@ module.exports =
         trade:      3
         build:      4
         brain:      5
-        ai:         6
+        switchable: [1,3,5]
     
     Stone: new Enum
         red:        0

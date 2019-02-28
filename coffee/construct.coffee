@@ -72,7 +72,7 @@ class Construct
         # isInside = (s) -> (pos) -> Math.round(pos.paris(vec())) <= s
         isInside = (s) -> (pos) -> Math.round(pos.manhattan(vec())) <= s
                     
-        log s, bot.pos
+        # log s, bot.pos
         geom = @envelope bot.pos, isInside(s)
         mesh = new THREE.Mesh geom, Materials.cage
         @world.scene.add mesh
@@ -278,8 +278,8 @@ class Construct
     colorBot: (bot) ->
 
         if bot.player == 0
-            stone = @world.stoneBelowBot bot
-            if stone in Stone.resources
+            stone = @world.resourceBelowBot bot
+            if stone
                 bot.mesh.material = Materials.bot[stone]
             else
                 bot.mesh.material = Materials.bot[Stone.gray]

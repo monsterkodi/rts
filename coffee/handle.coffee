@@ -95,7 +95,7 @@ class Handle
 
     tickBrain: (delta, bot) ->
 
-        return if state.brain.state != 'on'
+        return if bot.state != 'on'
         if state.science.tube.free < 2
             return if not bot.path
 
@@ -118,21 +118,22 @@ class Handle
 
     tickTrade: (delta, bot) ->
 
-        return if state.trade.state != 'on'
+        return if bot.state != 'on'
         if state.science.tube.free < 3
             return if not bot.path
 
         @delay delta, bot, 'speed', 'trade', =>
 
+            # log "bot.trade #{bot.player}"
             storage    = @world.storage[bot.player]
-            sellStone  = state.trade.sell
+            sellStone  = bot.sell
             sellAmount = state.science.trade.sell
             # log "sell #{sellAmount} #{Stone.string sellStone}"
             if storage.has sellStone, sellAmount
-                buyStone = state.trade.buy
+                buyStone = bot.buy
                 # log "buy #{Stone.string buyStone}"
                 if storage.canTake buyStone
-                    # log "trade #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
+                    # log "trade #{bot.player} #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
                     if @world.tubes.insertPacket bot, buyStone
                         storage.willSend buyStone
                         storage.add sellStone, -sellAmount
@@ -268,6 +269,26 @@ class Handle
             else
                 @world.removeBuildGuide()
                 log 'not enough stones'
+                
+    build: (bot, norm) ->
+        
+        pos = bot.pos.plus norm
+        face = Vector.normalIndex norm
+
+        storage = @world.storage[bot.player]
+        if storage.deductBuild()
+
+            @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
+            @world.spent.costAtBuild state.science.build.cost, bot
+            @world.moveBot bot, pos, face
+            @world.construct.stones()
+            
+            if bot.player == 0
+                rts.camera.focusOnPos rts.camera.center.plus norm
+                if @canBuild norm
+                    @world.showBuildGuide bot, hitInfo
+                    
+            true
     
     # 00     00   0000000   000   000  00000000        000   000  000  000000000  
     # 000   000  000   000  000   000  000             000   000  000     000     
@@ -307,6 +328,12 @@ class Handle
     # 000 0 000  000   000     000     000
     # 000   000   0000000       0      00000000
 
+    moveBotToFaceIndex: (bot, faceIndex) ->
+        
+        [face, index] = @world.splitFaceIndex faceIndex
+        pos = @world.posAtIndex index
+        @moveBot bot, pos, face
+        
     moveBot: (bot, pos, face) ->
 
         wbot = @world.botAtPos(pos)
@@ -315,7 +342,7 @@ class Handle
             if bot.face != face or bot.index != index
                 if @world.canBotMoveTo bot, face, index
                     @world.moveBot bot, pos, face
-                    @world.highlightPos bot.pos
+                    @world.highlightBot bot
 
     monsterMoved: (monster) ->
 
@@ -323,24 +350,18 @@ class Handle
         if Math.round(monster.pos.manhattan(@world.base.pos)) <= state.science.base.radius
             Spark.spawn @world, @world.base, monster
 
-    call: ->
+    call: (player=0) ->
         
-        info = @world.emptyResourceNearBase()
+        info = @world.emptyResourceNearBase player
         
         for type in [Bot.mine, Bot.brain, Bot.trade, Bot.build]
-            for bot in @world.botsOfType type
-                if @world.stoneBelowBot(bot) not in Stone.resources or not bot.path
+            for bot in @world.botsOfType type, player
+                if @world.noResourceBelowBot(bot) or not bot.path
 
                     if valid info.resource
-                        faceIndex = info.resource.shift()
-                        [face, index] = @world.splitFaceIndex faceIndex
-                        pos = @world.posAtIndex index
-                        @moveBot bot, pos, face
+                        @moveBotToFaceIndex bot, info.resource.shift()
                     else if valid info.empty
-                        faceIndex = info.empty.shift()
-                        [face, index] = @world.splitFaceIndex faceIndex
-                        pos = @world.posAtIndex index
-                        @moveBot bot, pos, face
+                        @moveBotToFaceIndex bot, info.empty.shift()
                     else
                         log 'no resource or empty pos'
             

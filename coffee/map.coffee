@@ -21,10 +21,64 @@ class Map extends World
         
     build: ->
         
-        @pest()
+        @ais()
+        # @pest()
         # @grid()
         # @plenty()
         # @sparse()
+        
+    ais: ->
+        
+        @wall  0,-5,0, 0, 5,0
+        @wall -5, 0,0, 5, 0,0
+        
+        @wall -3, 5,0, 3, 5,0
+        @wall -3,-5,0, 3,-5,0
+        @wall  5,-3,0, 5, 3,0
+        @wall -5,-3,0,-5, 3,0
+
+        @wall -2, 5,3, 2, 5,3
+        @wall -2,-5,3, 2,-5,3
+        @wall  5,-2,3, 5, 2,3
+        @wall -5,-2,3,-5, 2,3
+        
+        res = 8
+                
+        @addResource -3, 5, 0, Stone.white, res
+        @addResource -2, 5, 0, Stone.red,   res
+        @addResource -1, 5, 0, Stone.gelb,  res
+        @addResource  0, 5, 0, Stone.blue,  res
+
+        # @addResource -3, -5, 0, Stone.white, res
+        # @addResource -2, -5, 0, Stone.red,   res
+        # @addResource  2, -5, 0, Stone.gelb,  res
+        # @addResource  3, -5, 0, Stone.blue,  res
+
+        # @addResource  5, -2, 0, Stone.white, res
+        # @addResource  5, -1, 0, Stone.red,   res
+        # @addResource  5,  1, 0, Stone.gelb,  res
+        # @addResource  5,  2, 0, Stone.blue,  res
+#                          
+        # @addResource -5, -3, 0, Stone.white, res
+        # @addResource -5, -2, 0, Stone.red,   res
+        # @addResource -5,  2, 0, Stone.gelb,  res
+        # @addResource -5,  3, 0, Stone.blue,  res
+
+        @addResource -5, -1, 3, Stone.white, res
+        @addResource -5, -2, 3, Stone.red,   res
+        @addResource -5,  2, 3, Stone.gelb,  res
+        @addResource -5,  1, 3, Stone.blue,  res
+
+        @addResource  5, -1, 3, Stone.white, res
+        @addResource  5, -2, 3, Stone.red,   res
+        @addResource  5,  2, 3, Stone.gelb,  res
+        @addResource  5,  1, 3, Stone.blue,  res
+        
+        @addBot  0, 0, 1, Bot.base
+        @addBot  5, 0, 1, Bot.base
+        # @addBot  0, 5, 1, Bot.base
+        # @addBot  0,-5, 1, Bot.base
+        # @addBot -5, 0, 1, Bot.base
         
     pest: ->
 
@@ -45,8 +99,6 @@ class Map extends World
         @addResource  3, 0, 0, Stone.white, 256
         
         @addBot  0, 0, 1, Bot.base
-        @addBot -1, 0, 1, Bot.base
-        @addBot -2, 0, 1, Bot.base
         
     grid: ->
         

@@ -127,6 +127,8 @@ class World
     
     resourceAt: (index) -> @resources[index]
     resourceAtPos: (pos) -> @resourceAt @indexAtPos pos
+    isResourceAtIndex: (i) -> @resourceAt i
+    isResourceAtPos:   (p) -> @resourceAt @indexAtPos p
     
     stoneOrResourceAtPos: (pos) ->
         stone = @stoneAtPos pos
@@ -137,6 +139,14 @@ class World
         stone
         
     stoneBelowBot: (bot) -> @stoneOrResourceAtPos @posBelowBot bot
+    resourceBelowBot: (bot) -> 
+        stone = @stoneBelowBot bot
+        if stone in Stone.resources
+            return stone
+        null
+        
+    noResourceBelowBot: (bot) -> not @isResourceBelowBot bot
+    isResourceBelowBot: (bot) -> null != @resourceBelowBot bot
         
     stoneAtFaceIndex: (faceIndex) ->
         
@@ -148,6 +158,68 @@ class World
         index = @indexAt x,y,z
         if not @resourceAt index
             @resources[index] = new Resource @, index, stone, amount
+        
+    emptyResources: (cfg) ->
+        
+        positions = []
+        for index,resource of @resources
+            positions.push @posAtIndex index
+        for index,stone of @stones
+            positions.push @posAtIndex index if stone in Stone.resources
+        
+        found = []
+        
+        for pos in positions
+            for n in [0...6]
+                if not @isItemAtPos pos.plus Vector.normals[n]
+                    found.push @faceIndex n, @indexAtPos pos.plus Vector.normals[n]
+        
+        if cfg?.sortPos
+            found.sort (a,b) => @posAtIndex(a).manhattan(cfg.sortPos)-@posAtIndex(b).manhattan(cfg.sortPos)
+        found
+            
+    facesReachableFromPosFace: (pos, face) ->
+        
+        fi = @faceIndex face, @indexAtPos pos
+        
+        maxDist = 1000
+        check = [fi]
+        known = {}
+        known[fi] = 
+            dist:0
+            faceIndex:fi
+
+        while valid check
+            ci = check.shift()
+            known[ci] ?= faceIndex:ci
+
+            dist = known[ci].dist
+            for neighbor in @neighborsOfFaceIndex ci
+                if not known[neighbor]
+                    minDist = dist+1
+                    for nn in @neighborsOfFaceIndex neighbor
+                        if known[nn]? and known[nn].dist+1 < minDist
+                            minDist = known[nn].dist+1
+                    if minDist <= maxDist and @emptyFaceIndex(neighbor) # limit path length
+                        known[neighbor] ?= faceIndex:neighbor
+                        known[neighbor].dist = minDist
+                        check.push neighbor
+                
+        faces = Object.values(known)
+        faces = faces.map (k) -> k.faceIndex
+        faces
+        
+    faceIndexClosestToFaceIndexReachableFromPosFace: (targetFaceIndex, pos, face) ->
+        
+        targetPos = @posAtIndex targetFaceIndex
+        faces = @facesReachableFromPosFace pos, face
+        if valid faces
+            faces.sort (a,b) => @posAtIndex(a).manhattan(targetPos)-@posAtIndex(b).manhattan(targetPos)
+            # log "targetFaceIndex #{@stringForFaceIndex targetFaceIndex}"
+            # log "facesReachableFromPosFace #{str pos} #{Face.string face}", targetPos
+            # for f in faces
+                # log @stringForFaceIndex(f), @posAtIndex(f).manhattan(targetPos)
+            first faces
         
     # 00     00   0000000   000   000   0000000  000000000  00000000  00000000   
     # 000   000  000   000  0000  000  000          000     000       000   000  
@@ -207,6 +279,9 @@ class World
             
         bot.mine = 1/Science.mineSpeed type
                 
+        if type in Bot.switchable
+            bot.state = 'off'
+        
         switch type 
             when Bot.base
                 if player == 0
@@ -217,13 +292,15 @@ class World
                 bot.prod = 1/state.science.base.speed
             when Bot.trade
                 bot.trade = 1/state.science.trade.speed
+                bot.sell  = Stone.red
+                bot.buy   = Stone.blue
             when Bot.brain
                 bot.think = 1/state.science.brain.speed
             
         @bots[index] = bot
         bot
 
-    baseForBot: (bot) -> log bot.player; @bases[bot.player]
+    baseForBot: (bot) -> @bases[bot.player]
         
     getBots: -> Object.values @bots
     
@@ -300,11 +377,15 @@ class World
     stoneAtIndex: (i) -> @stones[i]
         
     isStoneAt: (x,y,z)  -> @isStoneAtIndex @indexAt x,y,z
+    isStoneAtPos:   (p) -> @isStoneAtIndex @indexAtPos p 
     isStoneAtIndex: (i) -> @stoneAtIndex(i)?
     
     isItemAt:  (x,y,z) -> @isItemAtIndex @indexAt x,y,z
     isItemAtPos:   (p) -> @isItemAtIndex @indexAtPos p
     isItemAtIndex: (i) -> @isStoneAtIndex(i) or @botAtIndex(i) or Cancer.isCellAtIndex i
+    
+    noItemAtPos:   (p) -> not @isItemAtPos p
+    noItemAtIndex: (i) -> not @isItemAtIndex i
                 
     # 00000000   0000000    0000000  00000000  
     # 000       000   000  000       000       
@@ -363,11 +444,8 @@ class World
     emptyFaceIndex: (faceIndex) -> 
         
         [face,index] = @splitFaceIndex faceIndex
-        @emptyIndex index
+        @noItemAtIndex index
         
-    emptyIndex: (index) ->
-        not @bots[index] and not @stones[index]
-    
     emptyPosFaceNearPos: (pos) ->
         
         pi = @indexAtPos pos
@@ -377,7 +455,7 @@ class World
         
         while valid check
             ci = check.shift()
-            if @emptyIndex ci
+            if @noItemAtIndex ci
                 pos = @posAtIndex ci
                 for face in [Face.PZ, Face.PX, Face.PY, Face.NX, Face.NY, Face.NZ]
                     if @stoneAtPos pos.minus Vector.normals[face]
@@ -389,9 +467,11 @@ class World
                         check.push neighbor
         [null,null]
         
-    emptyResourceNearBase: ->
+    emptyResourceNearBase: (player=0) -> @emptyResourceNearBot @bases[player], state.science.path.length
+        
+    emptyResourceNearBot: (bot, maxDist=1000) ->
                 
-        fi = @faceIndexForBot @base
+        fi = @faceIndexForBot bot
         
         check = [fi]
         known = {}
@@ -416,7 +496,7 @@ class World
                         if known[nn]? and known[nn].dist+1 < minDist
                             log 'found shorter'
                             minDist = known[nn].dist+1
-                    if minDist <= state.science.path.length # limit to path length
+                    if minDist <= maxDist # limit path length
                         known[neighbor] ?= faceIndex:neighbor
                         known[neighbor].dist = minDist
                         check.push neighbor
@@ -429,7 +509,7 @@ class World
                  
         empty:   empties.map (f) -> f.faceIndex
         resource:ressies.map (f) -> f.faceIndex
-                    
+              
     emptyPosFaceNearBot: (bot) ->
         
         fi = @faceIndexForBot bot
@@ -475,7 +555,7 @@ class World
             return neighbors
         
         if not @stoneAtPos(pos.minus Vector.normals[face])?
-            log "no stone below #{vec pos} face #{Face.string face}!"
+            log "no stone below face #{Face.string face} faceIndex #{faceIndex} pos #{str pos} !"
             return neighbors
             
         for dir in @dirsForFace face
@@ -555,7 +635,7 @@ class World
         
         @removeBaseCage()
         
-        if state.base.state == 'on' and @base == @highBot
+        if @base.state == 'on' and @base == @highBot
             @baseCage = @construct.cage @base, state.science.base.radius
             @baseCage.position.copy @base.pos
     
@@ -571,6 +651,7 @@ class World
         
     highlightBot: (bot) ->
         
+        return if bot.player != 0
         if bot
             @updateBaseCage() if bot.type == Bot.base
             if bot == @highBot 

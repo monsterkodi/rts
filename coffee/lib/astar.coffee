@@ -69,7 +69,7 @@ class AStar
             steps += 1
             if steps > 1000
                 log 'dafuk? too many steps. bailing out.'
-                return @collectPath current
+                return #@collectPath current
                 
             current = @lowestScore openSet, fScore # the node in openSet having the lowest fScore value
             if current == goal

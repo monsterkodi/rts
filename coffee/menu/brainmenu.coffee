@@ -8,6 +8,8 @@
 
 { post, log } = require 'kxk'
 
+{ Bot } = require '../constants'
+
 QueueButton  = require './queuebutton'
 BrainButton  = require './brainbutton'
 ToggleButton = require './togglebutton'
@@ -26,7 +28,8 @@ class BrainMenu extends BotMenu
         
         border = "#{rts.menuBorderWidth}px transparent"
         
-        btn = @addButton 'brain', new ToggleButton @div, @onBrainToggle, state.brain.state
+        brain = rts.world.botOfType Bot.brain
+        btn = @addButton 'brain', new ToggleButton @div, @onBrainToggle, brain.state
         btn.canvas.style.borderBottom = border
                 
         for science,cfg of Science.tree
@@ -85,7 +88,8 @@ class BrainMenu extends BotMenu
         
     onBrainToggle: (brainState) => 
     
-        state.brain.state = brainState
+        brain = rts.world.botOfType Bot.brain
+        brain.state = brainState
         post.emit 'botState', 'brain', brainState
                 
 module.exports = BrainMenu
