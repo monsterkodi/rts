@@ -47,8 +47,9 @@ class AI
         
         build = @world.botOfType Bot.build, @player
         return if not build
-            
-        if faceIndices = @world.emptyResources(sortPos:build.pos)
+           
+        faceIndices = @world.emptyResources sortPos:build.pos
+        if valid faceIndices
             @target = first faceIndices
             @moveBotToFaceClosestToTarget build, @target
             return true
@@ -83,16 +84,16 @@ class AI
                 nextPos = build.pos.plus n
                 if @world.noItemAtPos nextPos
                     break
-            log 'lastPos', nextPos
+            # log 'lastPos', nextPos
         if not nextPos
             log 'no nextPos?'
             return false
                     
         n = Vector.normalIndex build.pos.to nextPos
         rts.handle.build build, Vector.normals[n]
-        log 'built to', nextPos
+        # log 'built to', nextPos
         if path.length < 2
-            log 'target reached!'
+            # log 'target reached!'
             delete @target
         true
         
