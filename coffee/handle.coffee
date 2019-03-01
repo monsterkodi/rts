@@ -161,12 +161,12 @@ class Handle
         switch type 
             when Bot.mine
                 if @world.botsOfType(type, player).length >= science(player).mine.limit
-                    log 'WARNING handle.buyBot player:#{player} -- mine limit reached!'
+                    log "WARNING handle.buyBot player:#{player} -- mine limit reached!"
                     return
                     
         [p, face] = @world.emptyPosFaceNearBot @world.bases[player]
         if not p?
-            log 'WARNING handle.buyBot player:#{player} -- no space for new bot!'
+            log "WARNING handle.buyBot player:#{player} -- no space for new bot!"
             return
 
         storage.deduct cost, 'buy'

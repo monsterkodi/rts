@@ -18,6 +18,7 @@ Materials =
     highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2
     spent:      new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6, roughness: 0.7, side:THREE.DoubleSide
     path:       new THREE.MeshStandardMaterial color:Color.path, metalness: 0.9, roughness: 0.5
+    segs:       new THREE.MeshStandardMaterial color:Color.segs, metalness: 0.9, roughness: 0.5
     stone: [   
                 new THREE.MeshStandardMaterial color:Color.stone.red,     dithering:true # red
                 new THREE.MeshStandardMaterial color:Color.stone.gelb,    dithering:true # gelb
@@ -35,10 +36,10 @@ Materials =
                 new THREE.MeshStandardMaterial color:Color.bot.gray,  metalness: 0.9, roughness: 0.5 # gray
     ]
     ai: [
-                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.3
-                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.3
-                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.3
-                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.3
+                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.6
+                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.6
+                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.6
+                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.6
     ]
     cost: [   
                 new THREE.MeshStandardMaterial color:Color.stone.red   # red

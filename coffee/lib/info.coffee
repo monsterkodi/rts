@@ -40,8 +40,8 @@ class Info
         # add "lines: #{info.lines}"
         add "stone: #{_.size rts.world.stones}"
         add "boxes: #{world.boxes.numBoxes()}"
-        add "segmt: #{world.tubes.getSegments().length}"
-        add "pckts: #{world.tubes.getPackets().length}"
+        add "segmt: #{world.tubes.getSegments(0).length}"
+        add "pckts: #{world.tubes.getPackets(0).length}"
         add "store: #{world.storage[0].stones}"
         # add "temps: #{world.storage[0].temp}"
         for ai in world.ai

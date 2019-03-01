@@ -43,6 +43,7 @@ class World
         @cancers   = []
         @bases     = []
         @storage   = []
+        @players   = []
         @ai        = []
         
         @tubes  = new Tubes @
@@ -301,6 +302,7 @@ class World
             when Bot.base
                 Science.addPlayer()
                 @storage.push new Storage @, player
+                @players.push player
                 if player == 0
                     @base = bot
                 else 
@@ -346,10 +348,7 @@ class World
         @updateTubes()
         @construct.updateBot bot
         
-    updateTubes: ->
-        
-        @tubes.build()
-        @construct.tubes()
+    updateTubes: -> @tubes.build()
             
     canBotMoveTo: (bot, face, index) -> 
         

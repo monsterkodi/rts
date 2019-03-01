@@ -116,10 +116,11 @@ class Monster
             @del()
             return
             
+        f = 1-@dyingTime/3
         for box in @boxes
-            @world.boxes.setPos  box, box.death.pos.faded @pos, 1-@dyingTime/3
-            @world.boxes.setSize box, fade box.death.size, 1.1, 1-@dyingTime/3
-            @world.boxes.setRot  box, box.death.rot.slerp quat(), 1-@dyingTime/3
+            @world.boxes.setPos  box, box.death.pos.faded @pos, f
+            @world.boxes.setSize box, fade box.death.size, 1.1, f
+            @world.boxes.setRot  box, box.death.rot.slerp quat(), f
     
     animate: (scaledDelta) ->
 
@@ -136,6 +137,7 @@ class Monster
         
         nextInc = Math.floor @moved * @length
         
+        pos = vec()
         if nextInc > lastInc
             newPos = vec()
             for i in [lastInc...nextInc]
@@ -143,15 +145,16 @@ class Monster
                 @axes.unshift @axes.pop()
                 box = @boxes[0]
                 @addTrail @world.boxes.pos @boxes[@boxes.length-3]
-                newPos.copy @nxt
-                newPos.scale (i+1) * @dist
-                newPos.add @pos
-                @world.boxes.setPos box, newPos
+                pos.copy @nxt
+                pos.scale (i+1) * @dist
+                pos.add @pos
+                @world.boxes.setPos box, pos
                 @world.boxes.setStone box, Stone.monster
                 @axes[0].copy @nxt
 
         d = @moved * @length - nextInc
         
+        rot = quat()
         for i in [0...@length]
             if i < @length/2
                 fact = (i+d)/@length
@@ -159,25 +162,28 @@ class Monster
             else
                 fact = 1-((i+d)/@length)
                 asgn = -fact
-                
+        
             size = fact*@radius * Math.min 1, @age/@ageTime
             box = @boxes[i]
             @world.boxes.setSize box, size
-            @world.boxes.setRot  box, quat().setFromAxisAngle @axes[i], deg2rad 360 * asgn
+            @world.boxes.setRot  box, rot.setFromAxisAngle @axes[i], deg2rad 360 * asgn
                 
         if @trail.length >= @health
             for i in [0...Math.min(@trail.length, 10)]
                 @world.boxes.setSize @trail[i], (((i+1)-d)/10) * @trailSize
             
+            
         if @moved > 1
+            dir = @nxt.clone().negate()
             @moved -= 1
             @pos.add @nxt
             rts.handle.monsterMoved @
-            choices = _.shuffle Vector.normals.filter (v) => not v.equals @nxt.neg()
+            choices = _.shuffle Vector.normals.filter (v) => not v.equals dir
             for choice in choices
-                choicePos = @pos.plus choice
-                if not @world.isItemAtPos choicePos
-                    if @isInDist choicePos
+                pos.copy @pos
+                pos.add choice
+                if not @world.isItemAtPos pos
+                    if @isInDist pos
                         @nxt.copy choice
                         return
             @nxt.negate()

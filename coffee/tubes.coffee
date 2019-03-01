@@ -19,7 +19,7 @@ class Tubes
     constructor: (@world) ->
         
         @astar    = new AStar @world
-        @segments = {}
+        @segments = [{},{},{},{}]
 
     speed: (player=0) -> science(player).tube.speed
     gap:   (player=0) -> science(player).tube.gap + 0.1
@@ -51,7 +51,7 @@ class Tubes
         
         waiting = 0
         for index in seg.in
-            inSeg = @segments[index]
+            inSeg = @segments[seg.player][index]
             if last(inSeg.packets) == pck
                 continue
             if last(inSeg.packets)?.moved >= inSeg.moves - @gap(seg.player)
@@ -86,48 +86,49 @@ class Tubes
         
     animate: (delta) ->
 
-        segs = @getSegments()
-        segs.sort (a,b) -> a.dist - b.dist
-        
-        for seg in segs
+        for player in @world.players
+            segs = @getSegments player
+            segs.sort (a,b) -> a.dist - b.dist
             
-            continue if empty seg.packets
-            
-            if seg.out
-                outSeg = @segments[seg.out]
-            
-            for pckIndex in [seg.packets.length-1..0]
+            for seg in segs
                 
-                pck = seg.packets[pckIndex]
+                continue if empty seg.packets
                 
-                if outSeg
+                if seg.out
+                    outSeg = @segments[player][seg.out]
+                
+                for pckIndex in [seg.packets.length-1..0]
                     
-                    if pckIndex == seg.packets.length-1
-                        nextDist = @distToNext pck, seg, outSeg
-                    else
-                        nextDist = (seg.packets[pckIndex+1].moved - @gap(seg.player)) - pck.moved
+                    pck = seg.packets[pckIndex]
+                    
+                    if outSeg
                         
-                    moveDist = Math.min delta * @speed(seg.player), nextDist
-                    pck.move moveDist 
-                    
-                    if pck.moved >= seg.moves
-                        if pck == first outSeg.queue
-                            outSeg.queue.shift()
-                        @insertPacketIntoSegment pck, outSeg
-                        seg.packets.pop()
-                        pck.move -seg.moves
-                        pck.moveOnSegment outSeg
+                        if pckIndex == seg.packets.length-1
+                            nextDist = @distToNext pck, seg, outSeg
+                        else
+                            nextDist = (seg.packets[pckIndex+1].moved - @gap(seg.player)) - pck.moved
+                            
+                        moveDist = Math.min delta * @speed(seg.player), nextDist
+                        pck.move moveDist 
+                        
+                        if pck.moved >= seg.moves
+                            if pck == first outSeg.queue
+                                outSeg.queue.shift()
+                            @insertPacketIntoSegment pck, outSeg
+                            seg.packets.pop()
+                            pck.move -seg.moves
+                            pck.moveOnSegment outSeg
+                        else
+                            pck.moveOnSegment seg
                     else
-                        pck.moveOnSegment seg
-                else
-                    
-                    pck.move delta * @speed(seg.player)
-                    if pck.moved >= seg.moves
-                        pck = seg.packets.pop()
-                        @world.storage[pck.player].add pck.stone
-                        pck.del()
-                    else
-                        pck.moveOnSegment seg
+                        
+                        pck.move delta * @speed(seg.player)
+                        if pck.moved >= seg.moves
+                            pck = seg.packets.pop()
+                            @world.storage[pck.player].add pck.stone
+                            pck.del()
+                        else
+                            pck.moveOnSegment seg
                 
     segmentBelowBot: (bot) ->
         
@@ -135,7 +136,7 @@ class Tubes
             path = bot.path
             fi = @world.faceIndex path.points[0].face, path.points[0].index
             si = @segIndex fi, fi
-            @segments[si]
+            @segments[bot.player][si]
         
     # 0000000    000   000  000  000      0000000    
     # 000   000  000   000  000  000      000   000  
@@ -145,10 +146,15 @@ class Tubes
     
     build: ->
         
-        oldSegments = _.clone @segments
-        @segments = {}
+        for player in @world.players
+            @tubesForPlayer player
+            
+    tubesForPlayer: (player) ->
         
-        for bot in @world.getBots()
+        oldSegments = @segments[player]
+        @segments[player] = {}
+        
+        for bot in @world.getBots player
             continue if bot.type == Bot.base
             
             hadPath = bot.path?
@@ -164,7 +170,7 @@ class Tubes
                 si = @segIndex fi, fi
                 fakePoints = [_.cloneDeep(bot.path.points[0]), _.clone(bot.path.points[0])]
                 fakePoints[0].pos.add Vector.normals[bot.face].mul 0.7
-                @segments[si] = 
+                @segments[player][si] = 
                     index:  si
                     from:   0
                     to:     fi
@@ -181,13 +187,13 @@ class Tubes
                     post.emit 'botDisconnected', bot
             
         for index,segment of oldSegments
-            if @segments[index]
-                @segments[index].packets = segment.packets
+            if @segments[player][index]
+                @segments[player][index].packets = segment.packets
             else
                 for pck in segment.packets
                     pck.del()
                  
-        segs = @getSegments()
+        segs = @getSegments player
         segs.sort (a,b) -> a.dist - b.dist
                     
         for index in [0...segs.length]
@@ -202,6 +208,7 @@ class Tubes
                     seg.in.push next.index
                 nextIndex += 1
         
+        @world.construct.tubes player          
         # log 'build', segs.map (s) -> dist:s.dist, in:s.in, out:s.out, index:s.index, from:s.from, to:s.to#, points:s.points
                     
     # 00000000    0000000   000000000  000   000  
@@ -264,12 +271,12 @@ class Tubes
             points.push i:0, face:nextFace, index:nextIndex, pos:nextPos
             
             si = @segIndex path[i-1], path[i]
-            if not @segments[si]
+            if not @segments[player][si]
                 p = 2
                 if lastFace != nextFace
                     p = 4
                 segPoints = points.slice points.length-p, points.length
-                @segments[si] = 
+                @segments[player][si] = 
                     index:  si 
                     from:   path[i-1] 
                     to:     path[i] 
@@ -288,11 +295,11 @@ class Tubes
     segIndex: (fromFaceIndex,toFaceIndex) -> "#{@faceString fromFaceIndex} #{@faceString toFaceIndex}"
     faceString: (faceIndex) -> @world.stringForFaceIndex faceIndex
         
-    getSegments: -> Object.values @segments
-    getPackets:  -> 
+    getSegments: (player) -> Object.values @segments[player]
+    getPackets:  (player) -> 
         
         packets = []
-        for seg in @getSegments()
+        for seg in @getSegments player
             packets = packets.concat seg.packets
         packets
         

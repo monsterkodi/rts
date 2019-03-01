@@ -20,8 +20,8 @@ class Construct
 
     constructor: (@world) ->
         
-        @segmentMesh = null
-        @stoneMeshes = {}
+        @segmentMesh = [null,null,null,null]
+        @stoneMeshes = {}        
 
     envelope: (insidePos, isInside) ->
         
@@ -84,13 +84,13 @@ class Construct
     #    000     000   000  000   000  000       
     #    000      0000000   0000000    00000000  
          
-    tubes: ->
+    tubes: (player=0) ->
         
-        @segmentMesh?.parent?.remove @segmentMesh
+        @segmentMesh[player]?.parent?.remove @segmentMesh[player]
         
         tube = new THREE.Geometry
         
-        for seg in @world.tubes.getSegments()
+        for seg in @world.tubes.getSegments player
             if seg.points.length >= 2
                 for i in [1...seg.points.length]
                     tube.merge @tubeFaces seg.points[i-1], seg.points[i]
@@ -100,12 +100,14 @@ class Construct
         
         tubeBuffer = new THREE.BufferGeometry
         tubeBuffer.fromGeometry tube
-        mesh = new THREE.Mesh tubeBuffer, Materials.path
+        mat = Materials.path
+        mat = Materials.segs if player
+        mesh = new THREE.Mesh tubeBuffer, mat
         mesh.castShadow = true
                         
         @world.scene.add mesh
         
-        @segmentMesh = mesh
+        @segmentMesh[player] = mesh
         
         mesh
                 
@@ -294,47 +296,49 @@ class Construct
     
     dot: (bot) ->
         
-        if false
-            box1   = new THREE.Mesh new THREE.BoxGeometry 0.1, 0.1, 0.4
-            box2   = new THREE.Mesh new THREE.BoxGeometry 0.1, 0.4, 0.1
-            box3   = new THREE.Mesh new THREE.BoxGeometry 0.4, 0.1, 0.1
-            sphere = new THREE.Mesh new THREE.Geometry().fromBufferGeometry Geometry.cornerBox()
-            sphere.geometry.rotateX deg2rad 90
-            s = 0.2
-            sphere.geometry.scale s,s,s
-     
-            sBSP = new ThreeBSP sphere
-            b1 = new ThreeBSP box1
-            b2 = new ThreeBSP box2
-            b3 = new ThreeBSP box3
-     
-            sub = sBSP.subtract(b1).subtract(b2).subtract(b3)
-            newMesh = sub.toMesh()
-            geom = new THREE.Geometry
-            geom.copy newMesh.geometry
-            
-            bot.dot = new THREE.Mesh geom, Materials.path
-            bot.dot.castShadow = true
-            bot.dot.receiveShadow = true
-            @world.scene.add bot.dot
-            
-            sphere = new THREE.SphereGeometry 0.1, 6, 6
-            sphere.computeFaceNormals()
-            sphere.rotateX deg2rad 90
-            sphere.computeFlatVertexNormals()
-        
-            bot.dot = new THREE.Mesh geom, Materials.path
-            bot.dot.castShadow = true
-            bot.dot.receiveShadow = true
-            @world.scene.add bot.dot
-            return
+        # if false
+            # box1   = new THREE.Mesh new THREE.BoxGeometry 0.1, 0.1, 0.4
+            # box2   = new THREE.Mesh new THREE.BoxGeometry 0.1, 0.4, 0.1
+            # box3   = new THREE.Mesh new THREE.BoxGeometry 0.4, 0.1, 0.1
+            # sphere = new THREE.Mesh new THREE.Geometry().fromBufferGeometry Geometry.cornerBox()
+            # sphere.geometry.rotateX deg2rad 90
+            # s = 0.2
+            # sphere.geometry.scale s,s,s
+#      
+            # sBSP = new ThreeBSP sphere
+            # b1 = new ThreeBSP box1
+            # b2 = new ThreeBSP box2
+            # b3 = new ThreeBSP box3
+#      
+            # sub = sBSP.subtract(b1).subtract(b2).subtract(b3)
+            # newMesh = sub.toMesh()
+            # geom = new THREE.Geometry
+            # geom.copy newMesh.geometry
+#             
+            # bot.dot = new THREE.Mesh geom, Materials.path
+            # bot.dot.castShadow = true
+            # bot.dot.receiveShadow = true
+            # @world.scene.add bot.dot
+#             
+            # sphere = new THREE.SphereGeometry 0.1, 6, 6
+            # sphere.computeFaceNormals()
+            # sphere.rotateX deg2rad 90
+            # sphere.computeFlatVertexNormals()
+#         
+            # bot.dot = new THREE.Mesh geom, Materials.path
+            # bot.dot.castShadow = true
+            # bot.dot.receiveShadow = true
+            # @world.scene.add bot.dot
+            # return
         
         sphere = new THREE.SphereGeometry 0.1, 6, 6
         sphere.computeFaceNormals()
         sphere.rotateX deg2rad 90
         sphere.computeFlatVertexNormals()
         
-        bot.dot = new THREE.Mesh sphere, Materials.path
+        mat = Materials.path
+        mat = Materials.segs if bot.player
+        bot.dot = new THREE.Mesh sphere, mat
         bot.dot.castShadow = true
         bot.dot.receiveShadow = true
         @world.scene.add bot.dot

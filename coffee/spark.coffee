@@ -33,6 +33,7 @@ class Spark
         @path = @world.pathFromPosToPos base.pos, @monster.pos
         if not @path
             log "dafuk! no path for spark? #{str base.pos} #{str @monster.pos}"
+            @monster.damage 1
             return
                 
         @box = @world.boxes.add pos:@world.posAtIndex(@path[0]), size:0.05, stone:Stone.red
@@ -56,6 +57,9 @@ class Spark
                 return
             if @path.length < 2
                 @path = @world.pathFromPosToPos pos, @monster.pos
+                if not @path
+                    @del()
+                    return
                 
         p = @world.posAtIndex @path[0]
         n = @world.posAtIndex @path[1]
