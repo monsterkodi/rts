@@ -92,6 +92,14 @@ class World
     animate: (delta) ->
         
         scaledDelta = delta * @speed
+        @simulate scaledDelta
+        # while scaledDelta > 0
+            # @simulate Math.min 0.1, scaledDelta
+            # scaledDelta -= Math.min 0.1, scaledDelta
+        @boxes.render()
+        post.emit 'tick'
+        
+    simulate: (scaledDelta) ->
         
         @timeSum += scaledDelta
         
@@ -99,7 +107,6 @@ class World
         
         @spent.animate scaledDelta
         @tubes.animate scaledDelta
-        @boxes.render()
         
         for bot in @getBots()
             rts.handle.tickBot scaledDelta, bot
@@ -120,9 +127,7 @@ class World
         if @sample <= 0
             Graph.sampleStorage @storage[0]
             @sample = 1.0
-        
-        post.emit 'tick'
-            
+                    
     # 00000000   00000000   0000000   0000000   000   000  00000000    0000000  00000000  
     # 000   000  000       000       000   000  000   000  000   000  000       000       
     # 0000000    0000000   0000000   000   000  000   000  0000000    000       0000000   

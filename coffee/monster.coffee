@@ -131,21 +131,24 @@ class Monster
         
         lastInc = Math.floor @moved * @length
         
-        @age += scaledDelta
+        @age   += scaledDelta
         @moved += scaledDelta * @speed
         
         nextInc = Math.floor @moved * @length
         
         if nextInc > lastInc
+            newPos = vec()
             for i in [lastInc...nextInc]
                 @boxes.unshift @boxes.pop()
                 @axes.unshift @axes.pop()
                 box = @boxes[0]
                 @addTrail @world.boxes.pos @boxes[@boxes.length-3]
-                newPos = @pos.plus @nxt.mul (i+1) * @dist
+                newPos.copy @nxt
+                newPos.scale (i+1) * @dist
+                newPos.add @pos
                 @world.boxes.setPos box, newPos
                 @world.boxes.setStone box, Stone.monster
-                @axes[0] = vec @nxt
+                @axes[0].copy @nxt
 
         d = @moved * @length - nextInc
         
@@ -172,9 +175,10 @@ class Monster
             rts.handle.monsterMoved @
             choices = _.shuffle Vector.normals.filter (v) => not v.equals @nxt.neg()
             for choice in choices
-                if not @world.isItemAtPos @pos.plus choice
-                    if @isInDist @pos.plus choice
-                        @nxt = vec choice
+                choicePos = @pos.plus choice
+                if not @world.isItemAtPos choicePos
+                    if @isInDist choicePos
+                        @nxt.copy choice
                         return
             @nxt.negate()
 

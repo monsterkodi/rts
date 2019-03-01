@@ -203,7 +203,7 @@ class AI
     moveToHuntingSpot: ->
         
         if monster = @world.monsterClosestToPos @base.pos
-            log 'hunt', monster.pos
+            # log 'hunt', monster.pos
             return @moveBotToFaceClosestToPos @base, monster.pos
         else
             log "no monster close to #{str @base.pos}?"
