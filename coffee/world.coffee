@@ -72,8 +72,10 @@ class World
         post.on 'botState',        @onBotState
         
     setSpeed: (speedIndex) -> 
-        @speedIndex = clamp 0, 12, speedIndex
-        @speed = [1/8, 3/16, 1/4, 3/8, 1/2, 3/4, 1, 3/2, 2, 3, 4, 6, 8][@speedIndex]
+        
+        @speedIndex = clamp 0, state.world.speed.length-1, speedIndex
+        @speed = state.world.speed[@speedIndex]
+        log "speed #{@speedIndex} #{@speed}"
         prefs.set 'speed',      @speedIndex
         post.emit 'worldSpeed', @speed, @speedIndex
 
@@ -212,11 +214,15 @@ class World
     faceIndexClosestToFaceIndexReachableFromFaceIndex: (targetFaceIndex, sourceFaceIndex) ->
         
         targetPos = @posAtIndex targetFaceIndex
+        @faceIndexClosestToPosReachableFromFaceIndex targetPos, sourceFaceIndex
+
+    faceIndexClosestToPosReachableFromFaceIndex: (targetPos, sourceFaceIndex) ->
+        
         faces = @facesReachableFromFaceIndex sourceFaceIndex
         if valid faces
             faces.sort (a,b) => @posAtIndex(a).manhattan(targetPos)-@posAtIndex(b).manhattan(targetPos)
             first faces
-        
+            
     # 00     00   0000000   000   000   0000000  000000000  00000000  00000000   
     # 000   000  000   000  0000  000  000          000     000       000   000  
     # 000000000  000   000  000 0 000  0000000      000     0000000   0000000    
@@ -235,6 +241,15 @@ class World
         monster = new Monster @, vec(x,y,z), Vector.normals[randInt 6]
         @monsters.push monster
         monster
+        
+    monsterClosestToPos: (pos) ->
+        
+        minDist = Number.MAX_VALUE
+        for monster in @monsters
+            if monster.pos.manhattan(pos) < minDist
+                minDist = monster.pos.manhattan(pos)
+                minMonster = monster
+        minMonster
         
     addCancer: (x,y,z) ->
         

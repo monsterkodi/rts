@@ -18,12 +18,7 @@ class StoneMenu extends SubMenu
 
         super tradeButton
 
-        filter = (s) -> 
-        
-            return false if s == tradeButton.stone
-            other = if tradeButton.inOut == 'sell' then 'buy' else 'sell'
-            TradeButton = require './tradebutton'
-            TradeButton[other].stone != s
+        filter = (s) -> s != tradeButton.stone
         
         for stone in Stone.resources.filter filter
             

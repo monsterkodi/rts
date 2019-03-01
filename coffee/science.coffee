@@ -56,6 +56,7 @@ class Science
                 player.progress[science][key] = [0,0,0,0,0,0]
                 
         @queue.push []
+        
         @players.push player
                 
     @mineSpeed: (bot) ->
@@ -85,7 +86,7 @@ class Science
         @tree[science][key].v.length-1
             
     @enqueue: (scienceKey, player=0) ->
-        
+        log "enqueue #{player} #{scienceKey}"
         stars = @nextStars scienceKey
         [science, key] = @split scienceKey
         if stars <= @maxStars(scienceKey,player) and @queue[player].length < @maxQueue
@@ -93,7 +94,8 @@ class Science
             times = window.debug?.fastScience and 1 or state.scienceSteps[stars]-@players[player].progress[science][key][stars]
             cost  = [c,c,c,c]
             @queue[player].push scienceKey:scienceKey, stars:stars, cost:cost, times:times, player:player
-            post.emit 'scienceQueued', last @queue[player]
+            if player == 0
+                post.emit 'scienceQueued', last @queue[player]
             true
             
     @dequeue: (info) -> 
@@ -103,7 +105,8 @@ class Science
             if @queue[player][i].scienceKey == info.scienceKey and @queue[player][i].stars >= info.stars
                 @queue[player].splice i, 1
                 info.index = i
-                post.emit 'scienceDequeued', info
+                if player == 0
+                    post.emit 'scienceDequeued', info
                 true
             
     @currentCost: (player=0) -> first(@queue[player])?.cost
@@ -118,12 +121,12 @@ class Science
             if info.times == 0
                 @finished info
             else
-                post.emit 'scienceUpdated', info
+                if player == 0
+                    post.emit 'scienceUpdated', info
             
     @currentProgress: (player=0) ->
         
         if info = first @queue[player]
-            stars = info.stars
             @progress info.scienceKey, info.stars, player
            
     @progress: (scienceKey, stars, player=0) ->
@@ -132,7 +135,7 @@ class Science
         100*@players[player].progress[science][key][stars]/(state.scienceSteps[stars]-1)
             
     @finished: (info) =>
-        # log 'Science.finished', info.scienceKey
+        log "Science.finished #{info.player}", info.scienceKey
         
         player = info.player
         
@@ -146,8 +149,9 @@ class Science
         switch scienceKey
             when 'path.length' then rts.world.updateTubes()
             
-        post.emit 'scienceUpdated',  info
-        post.emit 'scienceDequeued', info
-        post.emit 'scienceFinished', scienceKey
+        if player == 0
+            post.emit 'scienceUpdated',  info
+            post.emit 'scienceDequeued', info
+            post.emit 'scienceFinished', scienceKey
             
 module.exports = Science

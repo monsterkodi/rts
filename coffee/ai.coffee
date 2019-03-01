@@ -32,6 +32,60 @@ class AI
             'tube.gap'
             'trade.speed'
             'storage.capacity'
+            'base.speed'
+            'base.prod'
+            'trade.sell'
+            'mine.speed'
+            'mine.limit'
+            'path.length'
+            'tube.free'
+            'build.cost'
+            'base.radius'
+            'brain.speed'
+            'tube.speed'
+            'tube.gap'
+            'trade.speed'
+            'storage.capacity'
+            'base.speed'
+            'base.prod'
+            'trade.sell'
+            'mine.speed'
+            'mine.limit'
+            'path.length'
+            'tube.free'
+            'build.cost'
+            'base.radius'
+            'brain.speed'
+            'tube.speed'
+            'tube.gap'
+            'trade.speed'
+            'storage.capacity'
+            'base.speed'
+            'base.prod'
+            'mine.speed'
+            'mine.limit'
+            'path.length'
+            'tube.free'
+            'build.cost'
+            'base.radius'
+            'brain.speed'
+            'tube.speed'
+            'tube.gap'
+            'trade.speed'
+            'storage.capacity'
+            'base.speed'
+            'base.prod'
+            'mine.speed'
+            'mine.limit'
+            'path.length'
+            'tube.free'
+            'build.cost'
+            'base.radius'
+            'brain.speed'
+            'tube.speed'
+            'tube.gap'
+            'trade.speed'
+            'storage.capacity'
         ]
         @player = @base.player
         @actionDelay = state.ai.delay
@@ -58,14 +112,25 @@ class AI
         return if @doScience()
         
         log "idle #{@player}"
+    
+    brain: -> @world.botOfType Bot.brain, @player
         
     doScience: ->
         
-        if @amountOf(@lowestStone()) > 8
-            if Science.queue[@player].length < Science.maxQueue
-                scienceKey = @scienceOrder.shift()
-                log 'doScience', scienceKey
-                Science.enqueue scienceKey, @player
+        if empty @scienceOrder
+            log 'no science left?'
+            return false
+            
+        if brain = @brain()
+            if @amountOf(@lowestStone()) > 8
+                brain.state = 'on'
+                if Science.queue[@player].length < Science.maxQueue
+                    scienceKey = @scienceOrder.shift()
+                    # log 'doScience', scienceKey
+                    Science.enqueue scienceKey, @player
+                return true
+            else
+                brain.state = 'off'
                 return true
         
     # 0000000     0000000    0000000  00000000  
@@ -114,7 +179,6 @@ class AI
                 return true
             else
                 return @searchForResource()
-                # log "no resources available #{@player}"#, info
         false
         
     #  0000000  00000000   0000000   00000000    0000000  000   000  
@@ -133,6 +197,16 @@ class AI
             @target = first faceIndices
             @moveBotToFaceClosestToTarget build
             return true
+            
+        @moveToHuntingSpot()
+        
+    moveToHuntingSpot: ->
+        
+        if monster = @world.monsterClosestToPos @base.pos
+            log 'hunt', monster.pos
+            return @moveBotToFaceClosestToPos @base, monster.pos
+        else
+            log "no monster close to #{str @base.pos}?"
         false
     
     # 00     00   0000000   000   000  00000000  
@@ -140,6 +214,16 @@ class AI
     # 000000000  000   000   000 000   0000000   
     # 000 0 000  000   000     000     000       
     # 000   000   0000000       0      00000000  
+    
+    moveBotToFaceClosestToPos: (bot, pos) ->
+        
+        sourceFaceIndex  = @world.faceIndex bot.face, @world.indexAtPos bot.pos
+        shorterPathFound = true
+        closestFaceIndex = @world.faceIndexClosestToPosReachableFromFaceIndex pos, sourceFaceIndex
+        
+        if closestFaceIndex
+            rts.handle.moveBotToFaceIndex bot, closestFaceIndex
+            true
     
     moveBotToFaceClosestToTarget: (bot) ->
         
@@ -162,10 +246,16 @@ class AI
             closestNeighbors.push closestFaceIndex
             
             targetPath = @world.pathFromPosToPos @world.posAtIndex(closestFaceIndex), @world.posAtIndex(@target)
+            if not targetPath
+                log 'really? no targetPath?'
+                break
             
             for targetNeighbor in targetNeighbors
                 for closestNeighbor in closestNeighbors
                     closestPath = @world.pathFromPosToPos @world.posAtIndex(closestNeighbor), @world.posAtIndex(targetNeighbor)
+                    if not closestPath
+                        log 'really? not closestPath?'
+                        break
                     if closestPath.length < targetPath.length
                         shorterPathFound = true
                         @target = targetNeighbor
@@ -247,19 +337,19 @@ class AI
                 if @amountOf(stone) == @storageCapacity()
                     buyStone = @lowestStoneExceptStone stone
                     if @amountOf(buyStone) < @storageCapacity()-4
-                        log "trade surplus #{Stone.string stone} for #{Stone.string buyStone}"
+                        # log "trade surplus #{Stone.string stone} for #{Stone.string buyStone}"
                         @buyStone buyStone
                         return true
                         
             if trade.state == 'on'
-                if @amountOf(trade.sell) <= @amountOf(trade.buy)
+                if @amountOf(trade.sell) <= Math.max 40, @amountOf(trade.buy) - 16
                     @stopBuyingStone trade.buy
-                    log "stop trade surplus"
+                    # log "stop trade surplus"
                     return true
                     
                 if @amountOf(trade.sell) < @amountOf(@highestStone()) - 16
                     @buyStone trade.buy
-                    log "switch trade surplus"
+                    # log "switch trade surplus"
                     return true
                 
     buyStone: (stone) ->

@@ -100,11 +100,11 @@ class Handle
 
         @delay delta, bot, 'speed', 'think', =>
 
-            if cost = Science.currentCost()
-                # log 'tickBrain', cost
+            if cost = Science.currentCost bot.player
+                # log "tickBrain #{bot.player}", cost
                 storage = @world.storage[bot.player]
                 if storage.canAfford cost
-                    Science.deduct cost
+                    Science.deduct bot.player
                     storage.deduct cost
                     @world.spent.costAtBot cost, bot
                     true
@@ -158,11 +158,12 @@ class Handle
                 log "WARNING handle.buyBot player:#{player} -- not enough stones for bot!"
             return
 
-        if type == Bot.mine
-            if @world.botsOfType(type, player).length >= science(player).mine.limit
-                log 'WARNING handle.buyBot player:#{player} -- mine limit reached!'
-                return
-
+        switch type 
+            when Bot.mine
+                if @world.botsOfType(type, player).length >= science(player).mine.limit
+                    log 'WARNING handle.buyBot player:#{player} -- mine limit reached!'
+                    return
+                    
         [p, face] = @world.emptyPosFaceNearBot @world.bases[player]
         if not p?
             log 'WARNING handle.buyBot player:#{player} -- no space for new bot!'
@@ -173,6 +174,10 @@ class Handle
         @world.spent.costAtBot cost, bot
         @world.construct.botAtPos bot, p
         @world.updateTubes()
+        
+        switch type 
+            when Bot.brain
+                bot.state = 'on'
         
         if player == 0
             rts.camera.focusOnPos p

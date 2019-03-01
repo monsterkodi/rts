@@ -192,7 +192,7 @@ class BotButton extends CanvasButton
             
             if not rts.world.botOfType(@bot)?.path
                 ctx.fillStyle = Color.menu.disconnected.getStyle()
-            
+
             if progress = Science.currentProgress()
                 ctx.fillRect 100-progress, 199, 2*progress+2, 1
                 

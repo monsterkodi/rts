@@ -6,7 +6,7 @@
    000     000   000  000   000  0000000    00000000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ post, log, _ } = require 'kxk'
+{ post, first, log, _ } = require 'kxk'
 
 { Stone, Bot } = require '../constants'
 
@@ -48,10 +48,15 @@ class TradeButton extends StoneButton
             @render()
         
     onTrade: (stone) =>
-        
+        log "onTrade #{@inOut} #{Stone.string stone}"
         @stone = stone
         trade = rts.world.botOfType Bot.trade
         trade[@inOut] = @stone
+        
+        other = if @inOut == 'sell' then 'buy' else 'sell'
+        if trade[other] == @stone
+            post.emit other, first Stone.resources.filter (s) => s != @stone
+        
         new StoneMenu @
         @render()
         

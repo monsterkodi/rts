@@ -6,7 +6,7 @@
 0000000   000        000   000  000   000  000   000
 ###
 
-{ empty, log, _ } = require 'kxk'
+{ empty, str, log, _ } = require 'kxk'
 
 { Stone } = require './constants'
 
@@ -31,10 +31,11 @@ class Spark
         storage = @world.storage[base.player]
         storage.deduct [1,0,0,0]
         @path = @world.pathFromPosToPos base.pos, @monster.pos
-        geom = new THREE.Geometry
+        if not @path
+            log "dafuk! no path for spark? #{str base.pos} #{str @monster.pos}"
+            return
                 
         @box = @world.boxes.add pos:@world.posAtIndex(@path[0]), size:0.05, stone:Stone.red
-        
         @life = 0
         @animate 0
             

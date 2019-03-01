@@ -279,7 +279,7 @@ class Construct
 
         if bot.player == 0
             stone = @world.resourceBelowBot bot
-            if stone
+            if stone?
                 bot.mesh.material = Materials.bot[stone]
             else
                 bot.mesh.material = Materials.bot[Stone.gray]
