@@ -18,7 +18,10 @@ class AStar
         
         s = @world.posAtIndex start
         g = @world.posAtIndex goal
-        1 + s.manhattan g 
+        d = s.manhattan g
+        if d == 1
+            d += 1 if @world.splitFaceIndex(start)[0] != @world.splitFaceIndex(goal)[0]
+        d
         
     neighborCost: (start, neighbor) -> 1
                 
@@ -35,6 +38,7 @@ class AStar
     
         start = @world.indexAtPos fromPos
         goal  = @world.indexAtPos toPos
+        # log "posPath #{@world.stringForIndex start} posPath"
         @findWithNeighborFunc start, goal, @world.emptyNeighborsOfIndex
         
     findWithNeighborFunc: (start, goal, neighborFunc) ->
@@ -67,8 +71,18 @@ class AStar
         while valid openSet
             
             steps += 1
-            if steps > 1000
-                log 'dafuk? too many steps. bailing out.'
+            if steps > 2000
+                log "dafuk? too many steps. bailing out. openSet:#{openSet.size} closedSet:#{closedSet.size} cameFrom:#{@cameFrom.size}"
+                log "start: #{@world.stringForFaceIndex start} goal:#{@world.stringForFaceIndex goal}"
+                # for open in Array.from openSet.keys()
+                    # log open, @world.stringForFaceIndex open
+                @world.drawBrokenPath
+                    start:    start
+                    goal:     goal
+                    open:     Array.from openSet.keys()
+                    closed:   Array.from closedSet.keys()
+                    cameFrom: Array.from @cameFrom.keys()
+                rts.togglePause()
                 return #@collectPath current
                 
             current = @lowestScore openSet, fScore # the node in openSet having the lowest fScore value

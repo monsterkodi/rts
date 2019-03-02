@@ -238,6 +238,15 @@ class Geometry
         geom.computeFlatVertexNormals()
         geom
         
+    @coordinateCross: (s=0.05, x=0, y=0, z=0) -> 
+        
+        geom = new THREE.Geometry
+        geom.merge new THREE.BoxGeometry 1000, s, s
+        geom.merge new THREE.BoxGeometry s, 1000, s
+        geom.merge new THREE.BoxGeometry s, s, 1000
+        geom.translate x, y, z
+        geom
+        
     # 00000000   000      000   000   0000000  
     # 000   000  000      000   000  000       
     # 00000000   000      000   000  0000000   

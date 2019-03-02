@@ -72,6 +72,24 @@ class World
         post.on 'storageChanged',  @onStorageChanged
         post.on 'botState',        @onBotState
         
+    drawBrokenPath: (info) ->
+        
+        # log info
+        g = new THREE.Geometry
+        for open in info.open
+            p = @posAtIndex open
+            g.merge Geometry.box 0.1, p.x, p.y, p.z
+            
+        @scene.add new THREE.Mesh g, Materials.segs
+        
+        p = @posAtIndex info.start
+        g = Geometry.coordinateCross 0.05, p.x, p.y, p.z
+        @scene.add new THREE.Mesh g, Materials.stone[0]
+
+        p = @posAtIndex info.goal
+        g = Geometry.coordinateCross 0.05, p.x, p.y, p.z
+        @scene.add new THREE.Mesh g, Materials.stone[1]
+        
     setSpeed: (speedIndex) -> 
         
         @speedIndex = clamp 0, state.world.speed.length-1, speedIndex
@@ -352,12 +370,24 @@ class World
             
     canBotMoveTo: (bot, face, index) -> 
         
-        return false if @isItemAtIndex index
-        @pathFromTo @faceIndex(bot.face, bot.index), @faceIndex(face, index)
+        return false if @isItemAtIndex(index) and @botAtIndex(index) != bot
+        @pathFromFaceToFace @faceIndexForBot(bot), @faceIndex(face, index)
     
-    pathFromTo: (fromIndex, toFaceIndex) -> @tubes.astar.findPath fromIndex, toFaceIndex
+    pathFromFaceToFace: (fromFaceIndex, toFaceIndex) -> @tubes.astar.findPath fromFaceIndex, toFaceIndex
     
-    pathFromPosToPos: (from, to) -> @tubes.astar.posPath from, to
+    pathFromPosToPos: (from, to) -> 
+    
+        if @noItemAtPos(to) 
+            return @tubes.astar.posPath from, to
+        else
+            log "pathFromPosToPos item! stone:#{Stone.string @stoneAtPos to} bot:#{Bot.string @botAtPos(to)?.type}", to
+        null
+    
+    distanceFromFaceToFace: (fromFaceIndex, toFaceIndex) ->
+        
+        # log "distanceFromFaceToFace #{@stringForFaceIndex fromFaceIndex} #{@stringForFaceIndex toFaceIndex}"
+        
+        @pathFromFaceToFace(fromFaceIndex, toFaceIndex)?.length ? Number.MAX_VALUE
         
     # 0000000    000   000  000  000      0000000    
     # 000   000  000   000  000  000      000   000  
@@ -400,6 +430,7 @@ class World
     isItemAtPos:   (p) -> @isItemAtIndex @indexAtPos p
     isItemAtIndex: (i) -> @isStoneAtIndex(i) or @botAtIndex(i) or Cancer.isCellAtIndex i
     
+    noStoneAtPos:  (p) -> not @isStoneAtPos p
     noItemAtPos:   (p) -> not @isItemAtPos p
     noItemAtIndex: (i) -> not @isItemAtIndex i
                 
@@ -566,12 +597,12 @@ class World
         
         neighbors = []
 
-        if @stoneAtPos(pos)?
-            log 'stone above face!'
+        if @isStoneAtPos pos
+            log "stone at face #{@stringForFaceIndex faceIndex} #{Stone.string @stoneAtPos pos}!"
             return neighbors
         
-        if not @stoneAtPos(pos.minus Vector.normals[face])?
-            log "no stone below face #{Face.string face} faceIndex #{faceIndex} pos #{str pos} !"
+        if @noStoneAtPos pos.minus Vector.normals[face]
+            log "no stone below #{@stringForFaceIndex faceIndex}!"
             return neighbors
             
         for dir in @dirsForFace face
@@ -586,6 +617,9 @@ class World
             else
                 neighbors.push @faceIndex dir, @indexAtPos dpos
         
+        # log "neighbors of #{@stringForFaceIndex faceIndex}"
+        # for neighbor in neighbors
+            # log "         #{@stringForFaceIndex neighbor}"
         neighbors
         
     neighborsOfIndex: (index) => 
@@ -595,8 +629,7 @@ class World
         
     emptyNeighborsOfIndex: (index) =>
         
-        @neighborsOfIndex(index).filter (n) =>
-            not @isItemAtPos @posAtIndex n
+        @neighborsOfIndex(index).filter (n) => @noItemAtPos @posAtIndex n
         
     # 000  000   000  0000000    00000000  000   000  
     # 000  0000  000  000   000  000        000 000   
@@ -720,6 +753,7 @@ class World
     
     stringForBot: (bot) -> Bot.string bot
             
+    stringForIndex: (index) -> pos = @posAtIndex index; "#{pos.x} #{pos.y} #{pos.z}"
     stringForFaceIndex: (faceIndex) ->
         
         [face,index] = @splitFaceIndex faceIndex

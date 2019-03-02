@@ -32,8 +32,7 @@ class Spark
         storage.deduct [1,0,0,0]
         @path = @world.pathFromPosToPos base.pos, @monster.pos
         if not @path
-            log "dafuk! no path for spark? #{str base.pos} #{str @monster.pos}"
-            @monster.damage 1
+            # log "ok? no path for spark? #{str base.pos} #{str @monster.pos}"
             return
                 
         @box = @world.boxes.add pos:@world.posAtIndex(@path[0]), size:0.05, stone:Stone.red
@@ -55,9 +54,10 @@ class Spark
             if @monster.pos.equals(pos) or @monster.pos.plus(@monster.nxt.mul @monster.moved).dist(pos) < 0.2
                 @del()
                 return
-            if @path.length < 2
+            if @path.length < 2 
                 @path = @world.pathFromPosToPos pos, @monster.pos
                 if not @path
+                    # log "ok? no path for spark animation? #{str pos} #{str @monster.pos}"
                     @del()
                     return
                 

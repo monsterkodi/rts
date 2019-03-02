@@ -221,7 +221,7 @@ class Tubes
         
         toBot = @world.baseForBot fromBot
     
-        path = @astar.findPath @world.faceIndex(fromBot.face, fromBot.index), @world.faceIndex(toBot.face, toBot.index)
+        path = @astar.findPath @world.faceIndexForBot(fromBot), @world.faceIndexForBot(toBot)
         
         if path and path.length <= science(fromBot.player).path.length+1
             fromBot.path = 

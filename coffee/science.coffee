@@ -86,8 +86,8 @@ class Science
         @tree[science][key].v.length-1
             
     @enqueue: (scienceKey, player=0) ->
-        log "enqueue #{player} #{scienceKey}"
-        stars = @nextStars scienceKey
+        # log "enqueue #{player} #{scienceKey}"
+        stars = @nextStars scienceKey, player
         [science, key] = @split scienceKey
         if stars <= @maxStars(scienceKey,player) and @queue[player].length < @maxQueue
             c     = window.debug?.cheapScience and 1 or state.scienceCost[stars]

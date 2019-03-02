@@ -45,10 +45,14 @@ class Info
         add "store: #{world.storage[0].stones}"
         # add "temps: #{world.storage[0].temp}"
         for ai in world.ai
+            science = Science.queue[ai.player][0]
             add "base#{ai.player}: #{ai.base.state}"
-            add "trde#{ai.player}: #{ai.trade()?.state ? ''} #{Stone.string(ai.trade()?.sell) ? ''} #{Stone.string(ai.trade()?.buy) ? ''}"
-            add "brin#{ai.player}: #{ai.brain()?.state ? ''} #{Science.queue[ai.player][0]?.scienceKey ? ''}"
+            add "trde#{ai.player}: #{ai.trade?.state ? ''} #{Stone.string(ai.trade?.sell) ? ''} #{Stone.string(ai.trade?.buy) ? ''}"
+            add "brin#{ai.player}: #{ai.brain?.state ? ''} #{science?.scienceKey ? ''} #{science?.stars ? ''}"
+            add "task#{ai.player}: #{ai.tick} #{ai.task}"
             add "strg#{ai.player}: #{world.storage[ai.player].stones}"
+            add "temp#{ai.player}: #{world.storage[ai.player].temp}"
+        add '........................................'
 
 module.exports = Info
 

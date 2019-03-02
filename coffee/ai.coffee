@@ -17,6 +17,10 @@ class AI
 
     constructor: (@world, @base) ->
         
+        @brain = null
+        @trade = null
+        @build = null
+        
         @scienceOrder = [
             'base.speed'
             'base.prod'
@@ -87,6 +91,9 @@ class AI
             'trade.speed'
             'storage.capacity'
         ]
+        
+        @tick = 0
+        @task = ''
         @player = @base.player
         @actionDelay = state.ai.delay
         @actionQueue = []
@@ -102,7 +109,7 @@ class AI
         @actionDelay -= scaledDelta
         return if @actionDelay > 0
         @actionDelay += state.ai.delay
-        
+        @tick++
         return if @dequeueAction()
         return if @moveToTarget()
         return if @moveToResource()
@@ -110,29 +117,37 @@ class AI
         return if @switchBase()
         return if @tradeSurplus()
         return if @doScience()
-        
-        log "idle #{@player}"
+        return if @idleCall()
+        @did 'relax'
     
-    brain: -> @world.botOfType Bot.brain, @player
+    did: (@task) -> log "#{@player} #{@tick} #{@task}"; true
+    queue: (action) -> @actionQueue.push action
         
+    #  0000000   0000000  000  00000000  000   000   0000000  00000000  
+    # 000       000       000  000       0000  000  000       000       
+    # 0000000   000       000  0000000   000 0 000  000       0000000   
+    #      000  000       000  000       000  0000  000       000       
+    # 0000000    0000000  000  00000000  000   000   0000000  00000000  
+    
     doScience: ->
         
         if empty @scienceOrder
             log 'no science left?'
             return false
             
-        if brain = @brain()
+        if @brain
             if @amountOf(@lowestStone()) > 8
-                brain.state = 'on'
+                @brain.state = 'on'
                 if Science.queue[@player].length < Science.maxQueue
                     scienceKey = @scienceOrder.shift()
                     # log 'doScience', scienceKey
                     Science.enqueue scienceKey, @player
-                return true
+                    return @did "queue:#{scienceKey}"
             else
-                brain.state = 'off'
-                return true
-        
+                if @brain.state == 'on'
+                    @brain.state = 'off'
+                    return @did 'brain:off'
+                    
     # 0000000     0000000    0000000  00000000  
     # 000   000  000   000  000       000       
     # 0000000    000000000  0000000   0000000   
@@ -141,15 +156,17 @@ class AI
     
     switchBase: ->
         
-        if @amountOf(Stone.red) > 40
+        redStones = @amountOf Stone.red
+        
+        if redStones > 40
             if @base.state == 'off'
                 @base.state = 'on'
-                log 'base.on'
-                return true
-        else if @base.state == 'on'
+                return @did 'base:on'
+                
+        if redStones < 10 and @base.state == 'on' and @brain?.state == 'on'
+            
             @base.state = 'off'
-            log 'base.off'
-            return true
+            return @did 'base:off'
         
     #  0000000   000   000  00000000  000   000  00000000  
     # 000   000  000   000  000       000   000  000       
@@ -174,11 +191,11 @@ class AI
         if @world.noResourceBelowBot @base
             info = @world.emptyResourceNearBot @base
             if valid info.resource
-                rts.handle.moveBotToFaceIndex @base, first info.resource
-                @actionQueue.push @call
-                return true
+                if rts.handle.moveBotToFaceIndex @base, first info.resource
+                    @queue @call
+                    return @did "move base:#{@world.stringForFaceIndex first info.resource}"
             else
-                return @searchForResource()
+                @queue @searchForResource
         false
         
     #  0000000  00000000   0000000   00000000    0000000  000   000  
@@ -187,24 +204,29 @@ class AI
     #      000  000       000   000  000   000  000       000   000  
     # 0000000   00000000  000   000  000   000   0000000  000   000  
     
-    searchForResource: ->
+    searchForResource: =>
         
-        build = @world.botOfType Bot.build, @player
-        return if not build
+        if @build
            
-        faceIndices = @world.emptyResources sortPos:build.pos
-        if valid faceIndices
-            @target = first faceIndices
-            @moveBotToFaceClosestToTarget build
-            return true
+            faceIndices = @world.emptyResources sortPos:@build.pos
+            if valid faceIndices
+                @target = first faceIndices
+                @did "set target resource to #{@world.stringForFaceIndex @target}"
+                if @moveBotToFaceClosestToTarget @build
+                    @did "move build closer #{@world.stringForFaceIndex @world.faceIndexForBot @build}"
+                    return @did 'search for resource'
             
-        @moveToHuntingSpot()
+        @queue @moveToHuntingSpot
+        false
         
-    moveToHuntingSpot: ->
+    moveToHuntingSpot: =>
         
         if monster = @world.monsterClosestToPos @base.pos
-            # log 'hunt', monster.pos
-            return @moveBotToFaceClosestToPos @base, monster.pos
+            if @moveBotToFaceClosestToPos @base, monster.pos
+                @base.state  = 'on'
+                @brain.state = 'off'
+                @did 'base:on brain:off'
+                return @did 'hunt'
         else
             log "no monster close to #{str @base.pos}?"
         false
@@ -222,12 +244,13 @@ class AI
         closestFaceIndex = @world.faceIndexClosestToPosReachableFromFaceIndex pos, sourceFaceIndex
         
         if closestFaceIndex
-            rts.handle.moveBotToFaceIndex bot, closestFaceIndex
-            true
+            return rts.handle.moveBotToFaceIndex bot, closestFaceIndex
+        else 
+            log 'no closestFace'
     
     moveBotToFaceClosestToTarget: (bot) ->
         
-        sourceFaceIndex  = @world.faceIndex bot.face, @world.indexAtPos bot.pos
+        sourceFaceIndex  = @world.faceIndexForBot bot
         shorterPathFound = true
         closestFaceIndex = @world.faceIndexClosestToFaceIndexReachableFromFaceIndex @target, sourceFaceIndex
         
@@ -248,13 +271,13 @@ class AI
             targetPath = @world.pathFromPosToPos @world.posAtIndex(closestFaceIndex), @world.posAtIndex(@target)
             if not targetPath
                 log 'really? no targetPath?'
-                break
+                return
             
             for targetNeighbor in targetNeighbors
                 for closestNeighbor in closestNeighbors
                     closestPath = @world.pathFromPosToPos @world.posAtIndex(closestNeighbor), @world.posAtIndex(targetNeighbor)
                     if not closestPath
-                        log 'really? not closestPath?'
+                        log "really? not closestPath? closestNeighbor:#{@world.stringForIndex closestNeighbor} targetNeighbor:#{@world.stringForIndex targetNeighbor}"
                         break
                     if closestPath.length < targetPath.length
                         shorterPathFound = true
@@ -262,7 +285,8 @@ class AI
                         closestFaceIndex = closestNeighbor
         
         if closestFaceIndex
-            rts.handle.moveBotToFaceIndex bot, closestFaceIndex
+            log "closestFaceIndex #{@world.stringForFaceIndex closestFaceIndex}"
+            return rts.handle.moveBotToFaceIndex bot, closestFaceIndex
         
     # 000000000   0000000   00000000    0000000   00000000  000000000  
     #    000     000   000  000   000  000        000          000     
@@ -273,25 +297,31 @@ class AI
     moveToTarget: ->
         
         return if not @target
+        return if not @build
+        
+        targetPos = @world.posAtIndex @target
+        if targetPos.equals @build.pos
+            log 'target reached'
+            delete @target
+            return
         
         if not @world.storage[@player].canAfford science(@player).build.cost
-            @buyStone Stone.white
-            return true
+            return @buyStone Stone.white
 
         @stopBuyingStone Stone.white
-            
-        build = @world.botOfType Bot.build, @player
-        path = @world.pathFromPosToPos build.pos, @world.posAtIndex @target
+
+        path = @world.pathFromPosToPos @build.pos, targetPos
         
-        if empty path
-            log 'dafuk? no path?'
+        if not path
+            log 'moveToTarget dafuk? no path?', @build.pos, @world.posAtIndex @target
+            delete @target
             return false
         
         if path.length >= 2
             nextPos = @world.posAtIndex path[1]
         else
-            for n in Vector.perpNormals Vector.normals[build.face]
-                nextPos = build.pos.plus n
+            for n in Vector.perpNormals Vector.normals[@build.face]
+                nextPos = @build.pos.plus n
                 if @world.noItemAtPos nextPos
                     break
             
@@ -299,13 +329,15 @@ class AI
             log 'dafuk -- no nextPos?'
             return false
                     
-        n = Vector.normalIndex build.pos.to nextPos
-        rts.handle.build build, Vector.normals[n]
-        # log 'built to', nextPos
-        if path.length < 2
-            # log 'target reached!'
-            delete @target
-        true
+        n = Vector.normalIndex @build.pos.to nextPos
+        if rts.handle.build @build, Vector.normals[n]
+            # log 'built to', nextPos
+            if path.length < 2
+                log 'target reached!'
+                delete @target
+            return @did "build #{@world.stringForFaceIndex @world.faceIndexForBot @build}"
+            
+        false
         
     # 000000000  00000000    0000000   0000000    00000000  
     #    000     000   000  000   000  000   000  000       
@@ -313,7 +345,6 @@ class AI
     #    000     000   000  000   000  000   000  000       
     #    000     000   000  000   000  0000000    00000000  
 
-    trade: -> @world.botOfType Bot.trade, @player
     amountOf: (stone) -> @world.storage[@player].stones[stone]
     storageCapacity: -> science(@player).storage.capacity
     
@@ -332,38 +363,41 @@ class AI
         
     tradeSurplus: ->
         
-        if trade = @trade()
+        if @trade
             for stone in Stone.resources
                 if @amountOf(stone) == @storageCapacity()
                     buyStone = @lowestStoneExceptStone stone
                     if @amountOf(buyStone) < @storageCapacity()-4
                         # log "trade surplus #{Stone.string stone} for #{Stone.string buyStone}"
-                        @buyStone buyStone
-                        return true
+                        return @buyStone buyStone
                         
-            if trade.state == 'on'
-                if @amountOf(trade.sell) <= Math.max 40, @amountOf(trade.buy) - 16
-                    @stopBuyingStone trade.buy
-                    # log "stop trade surplus"
-                    return true
+            if @trade.state == 'on'
+                if @amountOf(@trade.sell) <= Math.max 40, @amountOf(@trade.buy) - 16
+                    return @stopBuyingStone @trade.buy
                     
-                if @amountOf(trade.sell) < @amountOf(@highestStone()) - 16
-                    @buyStone trade.buy
-                    # log "switch trade surplus"
-                    return true
+                if @amountOf(@trade.sell) < @amountOf(@highestStone()) - 16
+                    return @buyStone @trade.buy
+        false
                 
     buyStone: (stone) ->
         
-        if trade = @trade()
-            trade.buy = stone
-            trade.sell = @highestStoneExceptStone stone
-            trade.state = 'on'
+        if @trade
+            
+            if @trade.buy != stone or @trade.state == 'off'
+                @trade.state = 'on'
+                @trade.buy = stone
+                @trade.sell = @highestStoneExceptStone stone
+                return @did "buy #{Stone.string stone} for #{Stone.string @trade.sell}"
+        false
 
     stopBuyingStone: (stone) ->
         
-        if trade = @trade()
-            if trade.buy == stone
-                trade.state = 'off'
+        if @trade
+            
+            if @trade.buy == stone and @trade.state == 'on'
+                @trade.state = 'off'
+                return @did "stop buying #{Stone.string stone}"
+        false
             
     # 0000000    000   000  000   000  0000000     0000000   000000000  
     # 000   000  000   000   000 000   000   000  000   000     000     
@@ -373,14 +407,29 @@ class AI
     
     buyBot: ->
         
-        # for bot in [Bot.mine, Bot.trade, Bot.brain, Bot.build]
-        for bot in [Bot.mine, Bot.trade, Bot.build, Bot.brain]
+        for bot in [Bot.mine, Bot.trade, Bot.brain, Bot.build]
             if not @world.botOfType bot, @player
-                if rts.handle.buyBot bot, @player
-                    @actionQueue.push @call
-                    return true
+                if newBot = rts.handle.buyBot bot, @player
+                    if bot != Bot.mine
+                        @[Bot.string bot] = newBot
+                    @queue @call
+                    return @did "buy #{Bot.string bot}"
+                    
+        if @world.botsOfType(Bot.mine, @player).length < science(@player).mine.limit
+            if rts.handle.buyBot Bot.mine, @player
+                @queue @call
+                return @did "buy #{Bot.string Bot.mine}"
         false
+    
+    idleCall: ->
+
+        return if @target
+        if rts.handle.call @player, {moveWhenOnResource:true, moveBuild:not @target}
+            @did 'idle call'
         
-    call: => rts.handle.call @player
+    call: => 
+        
+        if rts.handle.call @player, {moveWhenOnResource:true, moveBuild:not @target}
+            @did 'call'
                             
 module.exports = AI

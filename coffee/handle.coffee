@@ -6,7 +6,7 @@
 000   000  000   000  000   000  0000000    0000000  00000000
 ###
 
-{ post, empty, valid, log, str, _ } = require 'kxk'
+{ post, empty, valid, first, log, str, _ } = require 'kxk'
 
 { Face, Bot, Stone } = require './constants'
 
@@ -163,6 +163,10 @@ class Handle
                 if @world.botsOfType(type, player).length >= science(player).mine.limit
                     log "WARNING handle.buyBot player:#{player} -- mine limit reached!"
                     return
+            else
+                if @world.botOfType(type, player)
+                    log "WARNING handle.buyBot player:#{player} -- already has a #{Bot.string type}!"
+                    return
                     
         [p, face] = @world.emptyPosFaceNearBot @world.bases[player]
         if not p?
@@ -184,7 +188,7 @@ class Handle
             @world.highlightBot bot
             post.emit 'botCreated', bot
             
-        true
+        bot
 
     #  0000000  00000000  000   000  0000000
     # 000       000       0000  000  000   000
@@ -340,17 +344,17 @@ class Handle
         
         [face, index] = @world.splitFaceIndex faceIndex
         pos = @world.posAtIndex index
-        @moveBot bot, pos, face
+        return @moveBot bot, pos, face
         
     moveBot: (bot, pos, face) ->
 
-        wbot = @world.botAtPos(pos)
-        if not wbot or wbot == bot
+        if not @world.isItemAtPos(pos) or @world.botAtPos(pos) == bot
             index = @world.indexAtPos pos
             if bot.face != face or bot.index != index
                 if @world.canBotMoveTo bot, face, index
                     @world.moveBot bot, pos, face
                     @world.highlightBot bot
+                    return true
 
     monsterMoved: (monster) ->
 
@@ -359,19 +363,38 @@ class Handle
                 if Math.round(monster.pos.manhattan(base.pos)) <= science(base.player).base.radius
                     Spark.spawn @world, base, monster
 
-    call: (player=0) ->
+    call: (player=0, cfg={moveWhenOnResource:true, moveBuild:true}) ->
         
         info = @world.emptyResourceNearBase player
         
+        botMoved = false
+        baseIndex = @world.faceIndexForBot @world.bases[player]
         for type in [Bot.mine, Bot.brain, Bot.trade, Bot.build]
+            
+            if type == Bot.build and not cfg.moveBuild
+                break
+            
             for bot in @world.botsOfType type, player
-                if @world.noResourceBelowBot(bot) or not bot.path
-
-                    if valid info.resource
-                        @moveBotToFaceIndex bot, info.resource.shift()
-                    else if valid info.empty
-                        @moveBotToFaceIndex bot, info.empty.shift()
-                    else
-                        log 'no resource or empty pos'
+                
+                isOnResource = @world.isResourceBelowBot bot
+                
+                if not cfg.moveWhenOnResource and isOnResource
+                    log 'dont move on resource'
+                    continue
+                    
+                if faceIndex = first(info.resource) ? first(info.empty)
+                    botIndex = @world.faceIndexForBot bot
+                    # log "distanceFrom face #{@world.stringForFaceIndex faceIndex} base #{@world.stringForFaceIndex baseIndex} bot #{@world.stringForFaceIndex botIndex}"
+                    if ((not isOnResource) and valid(info.resource)) or @world.distanceFromFaceToFace(faceIndex,baseIndex) < @world.distanceFromFaceToFace(botIndex,baseIndex)
+                        if valid info.resource then info.resource.shift()
+                        else info.empty.shift()
+                        moved = @moveBotToFaceIndex bot, faceIndex
+                        # log "move:#{Bot.string bot.type}" if moved
+                        botMoved = botMoved or moved
+                    # else
+                        # log "stay:#{Bot.string bot.type} #{@world.distanceFromFaceToFace(faceIndex,baseIndex)} >= #{@world.distanceFromFaceToFace(botIndex,baseIndex)}"
+                else
+                    log 'no resource and no empty'
+        botMoved
             
 module.exports = Handle

@@ -44,10 +44,10 @@ class Map extends World
         
         res = 80
                 
-        @addResource -3, 5, 0, Stone.white, res
-        @addResource -2, 5, 0, Stone.red,   res
-        @addResource -1, 5, 0, Stone.gelb,  res
-        @addResource  0, 5, 0, Stone.blue,  res
+        @addResource -3, -5, 0, Stone.white, res
+        @addResource -2, -5, 0, Stone.red,   res
+        @addResource -1, -5, 0, Stone.gelb,  res
+        @addResource  0, -5, 0, Stone.blue,  res
 
         # @addResource -3, -5, 0, Stone.white, res
         # @addResource -2, -5, 0, Stone.red,   res
@@ -75,8 +75,8 @@ class Map extends World
         @addResource  5,  2, 3, Stone.white, res
         @addResource  5,  1, 3, Stone.white, res
         
-        @addBot  0, 0, 1, Bot.base
-        @addBot  5, 0, 1, Bot.base
+        @addBot 0,  0, 1, Bot.base
+        @addBot 0, -5, 1, Bot.base
         # @addBot  0, 5, 1, Bot.base
         # @addBot  0,-5, 1, Bot.base
         # @addBot -5, 0, 1, Bot.base
