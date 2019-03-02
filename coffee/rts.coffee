@@ -172,10 +172,14 @@ class RTS
                 @dragBot = @world.highBot
             else
                 delete @dragBot
-                
         else
             @camMove = true
-        
+            
+        if event.button == 2
+            if @rightUp and window.performance.now() - @rightUp < 500
+                @handle.doubleRightClick()
+            delete @rightUp
+                
     onMouseUp: (event) =>
 
         if not @camMove
@@ -192,6 +196,9 @@ class RTS
             else
                 if bot = @world.highBot
                     @handle.botClicked bot
+                    
+            if event.button == 2
+                @rightUp = window.performance.now()
     
     onMouseMove: (event) =>
 

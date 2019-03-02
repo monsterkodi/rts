@@ -10,7 +10,6 @@
 
 BotMenu      = require './botmenu'
 CallButton   = require './callbutton'
-ToggleButton = require './togglebutton'
 
 class BaseMenu extends BotMenu
 
@@ -18,7 +17,6 @@ class BaseMenu extends BotMenu
     
         super botButton
         
-        # @addButton 'state', new ToggleButton @div, @onBaseToggle, rts.world.bases[0].state
         @addButton 'call',  new CallButton @div
                 
     onBaseToggle: (baseState) => 

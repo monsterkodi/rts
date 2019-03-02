@@ -190,8 +190,8 @@ class Construct
             new THREE.DodecahedronGeometry 0.275, 0        # dodicos
             new THREE.BoxGeometry 0.25, 0.25, 0.25         # octacube
             new THREE.TorusGeometry 0.2, 0.075, 8, 12      # toruscone
-            new THREE.CylinderGeometry 0.1, 0.1, 0.5, 12   # tubecross
-            new Geometry.hollowCubeCross 0.5, 0,0,0, 0.075   # cubecross
+            new Geometry.hollowCylinderCross()             # tubecross
+            new Geometry.cubeCross()                       # cubecross
         ]
         
         @botGeoms[Geom.dodicos].rotateX deg2rad 60
@@ -203,13 +203,7 @@ class Construct
         cone = new THREE.ConeGeometry 0.25, 0.5, 12
         cone.rotateX deg2rad 90
         @botGeoms[Geom.toruscone].merge cone
-        
-        tube = new THREE.CylinderGeometry 0.1, 0.1, 0.5, 12
-        tube.rotateX deg2rad 90
-        @botGeoms[Geom.tubecross].merge tube
-        tube.rotateY deg2rad 90
-        @botGeoms[Geom.tubecross].merge tube
-                
+                        
         @botGeoms[Geom.octacube].merge new THREE.OctahedronGeometry 0.25, 0
         
         knot = new THREE.TorusKnotGeometry 0.1, 0.075
@@ -238,10 +232,10 @@ class Construct
         switch type
             when Bot.base  then Geom.dodicos
             when Bot.mine  then Geom.octacube
-            when Bot.build then Geom.tubecross
+            when Bot.build then Geom.cubecross
             when Bot.trade then Geom.toruscone
             when Bot.brain then Geom.knot
-            when Bot.berta then Geom.cubecross
+            when Bot.berta then Geom.tubecross
     
     bots: ->
                         

@@ -62,6 +62,12 @@ class Monster
         else
             log 'dafuk?'
             
+    # 0000000     0000000   00     00   0000000    0000000   00000000  
+    # 000   000  000   000  000   000  000   000  000        000       
+    # 000   000  000000000  000000000  000000000  000  0000  0000000   
+    # 000   000  000   000  000 0 000  000   000  000   000  000       
+    # 0000000    000   000  000   000  000   000   0000000   00000000  
+    
     damage: (amount) ->
         
         if empty @trail
@@ -73,6 +79,12 @@ class Monster
         else
             @world.boxes.setStone @boxes[0], @stone
         
+    # 0000000    000  00000000  
+    # 000   000  000  000       
+    # 000   000  000  0000000   
+    # 000   000  000  000       
+    # 0000000    000  00000000  
+    
     die: ->
         
         for box in @boxes
@@ -172,20 +184,30 @@ class Monster
             for i in [0...Math.min(@trail.length, 10)]
                 @world.boxes.setSize @trail[i], (((i+1)-d)/10) * @trailSize
             
-            
-        if @moved > 1
-            dir = @nxt.clone().negate()
+        if @moved > 1 
             @moved -= 1
-            @pos.add @nxt
-            rts.handle.monsterMoved @
-            choices = _.shuffle Vector.normals.filter (v) => not v.equals dir
-            for choice in choices
-                pos.copy @pos
-                pos.add choice
-                if not @world.isItemAtPos pos
-                    if @isInDist pos
-                        @nxt.copy choice
-                        return
-            @nxt.negate()
+            @findNextDirection()
+        
+    # 000   000  00000000  000   000  000000000  
+    # 0000  000  000        000 000      000     
+    # 000 0 000  0000000     00000       000     
+    # 000  0000  000        000 000      000     
+    # 000   000  00000000  000   000     000     
+    
+    findNextDirection: ->
+        
+        @pos.add @nxt
+        dir = @nxt.clone().negate()
+        pos = vec()
+        rts.handle.monsterMoved @
+        choices = _.shuffle Vector.normals.filter (v) => not v.equals dir
+        for choice in choices
+            pos.copy @pos
+            pos.add choice
+            if @isInDist pos
+                if @world.noItemAtPos(pos) and @world.noStoneAroundPosInDirection(pos, @nxt)                   
+                    @nxt.copy choice
+                    return
+        @nxt.negate()
 
 module.exports = Monster

@@ -118,7 +118,7 @@ class BotButton extends CanvasButton
     # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
     highlight: ->
-
+        
         SubMenu.close()
         
         if @bot in [Bot.mine, Bot.berta] or not @world.botOfType @bot

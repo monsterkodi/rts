@@ -436,6 +436,15 @@ class World
     noItemAtPos:   (p) -> not @isItemAtPos p
     noItemAtIndex: (i) -> not @isItemAtIndex i
                 
+    noStoneAroundPosInDirection: (pos, dir) ->
+        
+        return false if @isStoneAtPos pos.plus dir
+        for n in Vector.perpNormals dir
+            return false if @isStoneAtPos pos.plus n
+            return false if @isStoneAtPos pos.plus(dir).plus n
+            return false if @isStoneAtPos pos.plus(dir).plus(n).plus dir.cross(n)
+        true
+    
     # 00000000   0000000    0000000  00000000  
     # 000       000   000  000       000       
     # 000000    000000000  000       0000000   
@@ -740,7 +749,8 @@ class World
         else
             mat = Materials.bot[Stone.gray]
         
-        @buildGuide = new THREE.Mesh Geometry.buildGuide(), mat
+        geom = Geometry.cornerBoxGeom 0.3
+        @buildGuide = new THREE.Mesh geom, mat
         @scene.add @buildGuide
             
         @buildGuide.bot = Bot.build

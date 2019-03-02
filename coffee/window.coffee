@@ -8,6 +8,8 @@
 
 { win, prefs, post, keyinfo, stopEvent, log, $ } = require 'kxk'
 
+{ Bot } = require './constants'
+
 RTS    = require './rts'
 Vector = require './lib/vector'
 Quaternion =require './lib/quaternion'
@@ -110,7 +112,12 @@ window.onkeydown = (event) ->
     switch keyinfo.forEvent(event).key
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
         when 'x'     then rts.handle.placeBase()
-        when 'b'     then rts.handle.placeBuild()
+        when 'z'     then rts.handle.placeBuild()
+        when '1'     then rts.handle.buyBot Bot.brain
+        when '2','t' then rts.handle.buyBot Bot.trade
+        when '3','b' then rts.handle.buyBot Bot.berta
+        when '4','m' then rts.handle.buyBot Bot.mine
+        when '5'     then rts.handle.buyBot Bot.build
         when 'c', 'enter' then rts.handle.call()
         when 'd'     then prefs.set 'debug', not prefs.get 'debug'
         when 'f'     then rts.world.storage[0].fill()

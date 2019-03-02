@@ -123,12 +123,18 @@ class BrainButton extends CanvasButton
         #    000     000   000  000        000  000       
         #    000      0000000   000        000   0000000  
                 
-        geom = switch key 
-            when 'limit', 'length', 'radius'
+        geom = switch key
+            
+            when 'limit', 'length'
                 mat = Materials.stone[Stone.white]
                 g = new THREE.Geometry 
                 g.merge Geometry.plus 0.1, -0.05
                 g.merge Geometry.plus 0.1,  0.05
+                g
+                
+            when 'radius'
+                mat = Materials.stone[Stone.white]
+                g = new THREE.OctahedronGeometry 0.1, 0 
                 g
                 
             when 'speed'

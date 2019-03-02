@@ -53,7 +53,8 @@ class Menu
     onBotCreated: (bot) => 
         
         @buttons[Bot.string bot.type].update()
-        @buttons[Bot.string bot.type].highlight()
+        if SubMenu.current?.button == @buttons[Bot.string bot.type]
+            @buttons[Bot.string bot.type].highlight()
         
     onClick:      (event) => event.target.button?.click? event
     onMouseOver:  (event) => event.target.button?.highlight? event

@@ -309,6 +309,14 @@ class Handle
                     
             true
     
+    doubleRightClick: ->
+        
+        hit = rts.castRay()
+        if hit?.bot?.type == Bot.base
+            @call()
+        else
+            @placeBuild()
+    
     # 00     00   0000000   000   000  00000000        000   000  000  000000000  
     # 000   000  000   000  000   000  000             000   000  000     000     
     # 000000000  000   000   000 000   0000000         000000000  000     000     
@@ -373,7 +381,7 @@ class Handle
     call: (player=0, cfg={moveWhenOnResource:true, moveBuild:true}) ->
         
         info = @world.emptyResourceNearBase player
-        
+                
         botMoved = false
         baseIndex = @world.faceIndexForBot @world.bases[player]
         for type in [Bot.mine, Bot.brain, Bot.trade, Bot.berta, Bot.build]
@@ -402,6 +410,7 @@ class Handle
                         # log "stay:#{Bot.string bot.type} #{@world.distanceFromFaceToFace(faceIndex,baseIndex)} >= #{@world.distanceFromFaceToFace(botIndex,baseIndex)}"
                 else
                     log 'no resource and no empty'
+                    return botMoved
         botMoved
             
 module.exports = Handle

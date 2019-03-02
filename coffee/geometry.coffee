@@ -109,12 +109,7 @@ class Geometry
         geom.translate x, y, z
         geom
        
-    @hollowCubeCross: (size=1, x=0, y=0, z=0, hole=0.25) ->
-        
-        h = hole
-        box1 = new THREE.Mesh new THREE.BoxGeometry h, h, 2*size
-        box2 = new THREE.Mesh new THREE.BoxGeometry h, 2*size, h
-        box3 = new THREE.Mesh new THREE.BoxGeometry 2*size, h, h
+    @cubeCross: (size=0.5, x=0, y=0, z=0) ->
         
         geom = new THREE.Geometry
         offs = size/3
@@ -125,7 +120,20 @@ class Geometry
         geom.merge Geometry.cornerBoxGeom size/3, 0, 0,  offs
         geom.merge Geometry.cornerBoxGeom size/3, 0, 0, -offs
         geom.merge Geometry.cornerBoxGeom size/3, 0, 0, 0
-        cbox = new THREE.Mesh geom
+        geom.translate x, y, z
+        geom
+        
+    @hollowCylinderCross: (size=0.5, x=0, y=0, z=0) ->
+    
+        r = size/5
+        cylinder = new THREE.CylinderGeometry r, r, size, 12
+        
+        h = 0.1
+        box1 = new THREE.Mesh new THREE.BoxGeometry h, h, 2*size
+        box2 = new THREE.Mesh new THREE.BoxGeometry h, 2*size, h
+        box3 = new THREE.Mesh new THREE.BoxGeometry 2*size, h, h
+        
+        cbox = new THREE.Mesh cylinder
 
         cb = new ThreeBSP cbox
         b1 = new ThreeBSP box1
@@ -135,10 +143,15 @@ class Geometry
         sub = cb.subtract(b1).subtract(b2).subtract(b3)
         newMesh = sub.toMesh()
         geom = new THREE.Geometry
-        geom.copy newMesh.geometry
+        geom.merge newMesh.geometry
+        
+        newMesh.geometry.rotateX deg2rad 90
+        geom.merge newMesh.geometry
+        newMesh.geometry.rotateY deg2rad 90
+        geom.merge newMesh.geometry
+        
         geom.translate x, y, z
         geom
-        
         
     #  0000000  000000000   0000000   000000000  00000000  
     # 000          000     000   000     000     000       
@@ -287,14 +300,7 @@ class Geometry
         geom1.merge geom2
         geom1.translate x, y, z
         geom1
-        
-    @buildGuide: ->
-        
-        geom = new THREE.ConeGeometry 0.2, 0.35, 12
-        geom.rotateX deg2rad 90
-        geom.computeFlatVertexNormals()
-        geom
-        
+            
     @coordinateCross: (s=0.05, x=0, y=0, z=0) -> 
         
         geom = new THREE.Geometry

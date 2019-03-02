@@ -11,7 +11,6 @@
 { Bot } = require '../constants'
 
 TradeButton  = require './tradebutton'
-ToggleButton = require './togglebutton'
 BotMenu      = require './botmenu'
 
 class TradeMenu extends BotMenu
@@ -21,7 +20,6 @@ class TradeMenu extends BotMenu
         super botButton
 
         trade = rts.world.botOfType Bot.trade
-        # @addButton 'trade', new ToggleButton @div, @onTradeToggle, trade.state
         @addButton 'sell',  new TradeButton  @div, 'sell'
         @addButton 'buy',   new TradeButton  @div, 'buy'
         

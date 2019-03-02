@@ -12,7 +12,6 @@
 
 QueueButton  = require './queuebutton'
 BrainButton  = require './brainbutton'
-ToggleButton = require './togglebutton'
 BotMenu      = require './botmenu'
 Science      = require '../science'
 
@@ -29,8 +28,6 @@ class BrainMenu extends BotMenu
         border = "#{rts.menuBorderWidth}px transparent"
         
         brain = rts.world.botOfType Bot.brain
-        # btn = @addButton 'brain', new ToggleButton @div, @onBrainToggle, brain.state
-        # btn.canvas.style.borderBottom = border
                 
         for science,cfg of Science.tree
             for key,values of cfg
@@ -68,7 +65,6 @@ class BrainMenu extends BotMenu
         
     addToQueue: (info) -> 
     
-        # log 'addToQueue', info
         btn = new QueueButton @div, info
         btn.canvas.style.left = "#{@queue.length*100}px"
         btn.canvas.style.top  = "0"
@@ -83,7 +79,7 @@ class BrainMenu extends BotMenu
         @buttons[info.scienceKey]?.render()
         
         for i in [0...@queue.length]
-            @queue[i].canvas.style.left = "#{i*100+100}px"
+            @queue[i].canvas.style.left = "#{i*100}px"
         
     addButton: (key, button) -> @buttons[key] = button
         

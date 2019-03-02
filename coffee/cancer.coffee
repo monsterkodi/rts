@@ -26,13 +26,20 @@ class Cancer
         @growCells = []
         @growTime  = Math.random() * state.cancer.growTime
         @ageTime   = state.cancer.ageTime
+        @cellsSinceLastMonster = 0
         @spawnAtPos @pos
                     
     grow: ->
         
         growCell = @growCells[randInt @growCells.length]
         neighbors = @world.neighborsOfIndex growCell
-        neighbors = neighbors.filter (n) => not Cancer.cells[n] and not @world.isItemAtIndex n
+        neighbors = neighbors.filter (n) => 
+            return false if Cancer.cells[n] 
+            return false if @world.isItemAtIndex n 
+            npos = @world.posAtIndex n
+            cpos = @world.posAtIndex growCell
+            return @world.noStoneAroundPosInDirection npos, cpos.to npos
+        
         if valid neighbors
             neighbor = neighbors[randInt neighbors.length]
             pos = @world.posAtIndex neighbor
@@ -43,7 +50,10 @@ class Cancer
                             
     spawnAtPos: (pos) ->
         
-        @world.addMonster pos.x, pos.y, pos.z
+        @cellsSinceLastMonster += 1
+        if @cellsSinceLastMonster >= state.cancer.cellsPerMonster
+            @cellsSinceLastMonster = 0
+            @world.addMonster pos.x, pos.y, pos.z
         
         numGrow = 4
         index = @world.indexAtPos pos
@@ -73,7 +83,7 @@ class Cancer
                 rot = @world.boxes.rot box
                 box.age += scaledDelta
                 @world.boxes.setSize box, Math.min 1, box.age / @ageTime
-                @world.boxes.setRot  box, rot.multiply quat().setFromAxisAngle box.axis, deg2rad 10*scaledDelta
+                @world.boxes.setRot  box, rot.multiply quat().setFromAxisAngle box.axis, deg2rad state.cancer.rotSpeed*scaledDelta
                 if box.age >= @ageTime
                     delete @growBoxes[index]
             

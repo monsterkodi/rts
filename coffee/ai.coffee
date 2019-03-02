@@ -301,8 +301,13 @@ class AI
         
         targetPos = @world.posAtIndex @target
         if targetPos.equals @build.pos
-            log 'target reached'
+            choices = Vector.perpNormals(Vector.normals[@build.face]).filter (n) => @world.noItemAtPos @build.pos.plus n
+            log "target reached. #{choices.length} choices"
             delete @target
+            if valid choices
+                if rts.handle.build @build, first choices
+                    return @did "build #{@world.stringForFaceIndex @world.faceIndexForBot @build}"
+            log "couldn't build last stone!"
             return
         
         if not @world.storage[@player].canAfford science(@player).build.cost

@@ -25,8 +25,10 @@ module.exports =
             # stones:[ 5,6,7,8 ]
             
         cancer: 
-            growTime: 40
-            ageTime:  20
+            growTime: 240
+            ageTime:  120
+            rotSpeed: 1
+            cellsPerMonster: 2
         
         cost: 
             brain: [ 4 *8, 2 *8, 0   , 0   ]
