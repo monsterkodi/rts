@@ -30,9 +30,10 @@ module.exports =
         
         cost: 
             brain: [ 4 *8, 2 *8, 0   , 0   ]
-            trade: [ 3 *8, 4 *8, 3 *8, 2 *8]
+            trade: [ 2 *8, 3 *8, 4 *8, 3 *8]
             build: [ 2 *8, 3 *8, 4 *8, 5 *8]
             mine:  [ 2 *8, 2 *8, 2 *8, 2 *8]
+            berta: [ 4 *8, 5 *8, 3 *8, 2 *8]
             
         scienceCost:  [0,1,2,3,4,5]
         scienceSteps: [0,8,16,32,64,128]

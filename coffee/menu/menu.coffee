@@ -31,8 +31,9 @@ class Menu
             Bot.base
             Bot.brain
             Bot.trade
-            Bot.build
+            Bot.berta
             Bot.mine
+            Bot.build
         ]
         
         for bot in bots
@@ -68,9 +69,9 @@ class Menu
         
         BotButton.currentlyShown?.del()
         delete BotButton.currentlyShown
-          
+           
         SubMenu.close()
-        
+         
         for key,button of @buttons
             button.scene.background = Color.menu.background
             button.render()                

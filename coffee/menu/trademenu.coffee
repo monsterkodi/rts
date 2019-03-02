@@ -21,7 +21,7 @@ class TradeMenu extends BotMenu
         super botButton
 
         trade = rts.world.botOfType Bot.trade
-        @addButton 'trade', new ToggleButton @div, @onTradeToggle, trade.state
+        # @addButton 'trade', new ToggleButton @div, @onTradeToggle, trade.state
         @addButton 'sell',  new TradeButton  @div, 'sell'
         @addButton 'buy',   new TradeButton  @div, 'buy'
         

@@ -12,6 +12,7 @@
 
 CanvasButton = require './canvasbutton'
 BuyButton    = require './buybutton'
+BertaMenu    = require './bertamenu'
 BaseMenu     = require './basemenu'
 SubMenu      = require './submenu'
 TradeMenu    = require './trademenu'
@@ -58,7 +59,7 @@ class BotButton extends CanvasButton
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,0
 
-        if @bot in [Bot.base, Bot.brain, Bot.trade]
+        if @bot in Bot.switchable
             post.on 'botState', @render
 
         if @bot in [Bot.brain, Bot.trade]
@@ -82,6 +83,12 @@ class BotButton extends CanvasButton
         @camera.far = 10
         @camera.fov = 30
         
+    # 00000000   0000000    0000000  000   000   0000000  000   000  00000000  000   000  000000000  
+    # 000       000   000  000       000   000  000       0000  000  000        000 000      000     
+    # 000000    000   000  000       000   000  0000000   000 0 000  0000000     00000       000     
+    # 000       000   000  000       000   000       000  000  0000  000        000 000      000     
+    # 000        0000000    0000000   0000000   0000000   000   000  00000000  000   000     000     
+    
     focusNextBot: ->
         
         bots = @world.botsOfType @bot
@@ -93,16 +100,28 @@ class BotButton extends CanvasButton
         
     click: -> rts.handle.botButtonClick @
     
+    #  0000000  000   000   0000000   000   000  
+    # 000       000   000  000   000  000 0 000  
+    # 0000000   000000000  000   000  000000000  
+    #      000  000   000  000   000  000   000  
+    # 0000000   000   000   0000000   00     00  
+    
     show: (clss) ->
         
         BotButton.currentlyShown?.del()
         BotButton.currentlyShown = new clss @ 
     
+    # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
+    # 000   000  000  000        000   000  000      000  000        000   000     000     
+    # 000000000  000  000  0000  000000000  000      000  000  0000  000000000     000     
+    # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
+    # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
+    
     highlight: ->
 
         SubMenu.close()
         
-        if @bot == Bot.mine or not @world.botOfType @bot
+        if @bot in [Bot.mine, Bot.berta] or not @world.botOfType @bot
             @show BuyButton
         else 
             switch @bot
@@ -110,6 +129,7 @@ class BotButton extends CanvasButton
                 when Bot.trade then @show TradeMenu
                 when Bot.build then @show BuildMenu
                 when Bot.brain then @show BrainMenu
+                when Bot.berta then @show BertaMenu
             
         @camera.fov = 28
         @camera.updateProjectionMatrix()
@@ -135,6 +155,12 @@ class BotButton extends CanvasButton
         else
             if highlight then Materials.menu.activeHigh else Materials.menu.active
             
+    # 00000000   00000000  000   000  0000000    00000000  00000000   
+    # 000   000  000       0000  000  000   000  000       000   000  
+    # 0000000    0000000   000 0 000  000   000  0000000   0000000    
+    # 000   000  000       000  0000  000   000  000       000   000  
+    # 000   000  00000000  000   000  0000000    00000000  000   000  
+    
     render: =>
         
         if @bot in Bot.switchable

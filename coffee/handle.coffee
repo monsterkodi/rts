@@ -65,6 +65,7 @@ class Handle
             when Bot.base  then @tickBase  delta, bot
             when Bot.brain then @tickBrain delta, bot
             when Bot.trade then @tickTrade delta, bot
+            when Bot.berta then @tickBerta delta, bot
 
     # 0000000     0000000    0000000  00000000
     # 000   000  000   000  000       000
@@ -84,6 +85,12 @@ class Handle
                         storage.add stone
                         gained[stone] += 1
             @world.spent.gainAtPosFace gained, bot.pos, bot.face
+            true
+            
+    tickBerta: (delta, bot) ->
+        
+        @delay delta, bot, 'speed', 'shoot', =>
+            log 'berta shoot'
             true
 
     # 0000000    00000000    0000000   000  000   000
@@ -159,9 +166,9 @@ class Handle
             return
 
         switch type 
-            when Bot.mine
-                if @world.botsOfType(type, player).length >= science(player).mine.limit
-                    log "WARNING handle.buyBot player:#{player} -- mine limit reached!"
+            when Bot.mine, Bot.berta
+                if @world.botsOfType(type, player).length >= science(player)[Bot.string type].limit
+                    log "WARNING handle.buyBot player:#{player} -- #{Bot.string type} limit reached!"
                     return
             else
                 if @world.botOfType(type, player)
@@ -369,7 +376,7 @@ class Handle
         
         botMoved = false
         baseIndex = @world.faceIndexForBot @world.bases[player]
-        for type in [Bot.mine, Bot.brain, Bot.trade, Bot.build]
+        for type in [Bot.mine, Bot.brain, Bot.trade, Bot.berta, Bot.build]
             
             if type == Bot.build and not cfg.moveBuild
                 break

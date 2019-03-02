@@ -29,8 +29,8 @@ class BrainMenu extends BotMenu
         border = "#{rts.menuBorderWidth}px transparent"
         
         brain = rts.world.botOfType Bot.brain
-        btn = @addButton 'brain', new ToggleButton @div, @onBrainToggle, brain.state
-        btn.canvas.style.borderBottom = border
+        # btn = @addButton 'brain', new ToggleButton @div, @onBrainToggle, brain.state
+        # btn.canvas.style.borderBottom = border
                 
         for science,cfg of Science.tree
             for key,values of cfg
@@ -70,7 +70,7 @@ class BrainMenu extends BotMenu
     
         # log 'addToQueue', info
         btn = new QueueButton @div, info
-        btn.canvas.style.left = "#{@queue.length*100+100}px"
+        btn.canvas.style.left = "#{@queue.length*100}px"
         btn.canvas.style.top  = "0"
         @queue.push btn
     

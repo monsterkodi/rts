@@ -217,7 +217,7 @@ class RTS
         
         if bot = @world.highBot
             # log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
-            if bot.type in [Bot.base, Bot.brain, Bot.trade]
+            if bot.type in Bot.switchable
                 bot.state = bot.state == 'on' and 'off' or 'on'
                 post.emit 'botState', Bot.string(bot.type), bot.state
         else

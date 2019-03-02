@@ -10,11 +10,14 @@
 
 { Bot } = require './constants'
 
+THREE     = require 'three'
+ThreeBSP  = require('three-js-csg')(THREE)
+
 class Geometry
     
     @cache = {}
     
-    @cornerBox: (size=1, x=0, y=0, z=0) ->
+    @cornerBoxGeom: (size=1, x=0, y=0, z=0) ->
                     
         o = size/2
         s = 0.9*o
@@ -77,12 +80,66 @@ class Geometry
         cube.merge bottomside
         cube.merge leftside
         cube.merge frontside
+        cube.translate x, y, z
+        cube
 
+    @cornerBox: (size=1, x=0, y=0, z=0) ->
+        
         bufg = new THREE.BufferGeometry()
-        bufg.fromGeometry cube
-        bufg.translate x, y, z
+        bufg.fromGeometry @cornerBoxGeom size, x, y, z
         bufg
     
+    @hollowCornerBox: (size=1, x=0, y=0, z=0) ->
+        
+        h = 0.5*size
+        box1 = new THREE.Mesh new THREE.BoxGeometry h, h, 2*size
+        box2 = new THREE.Mesh new THREE.BoxGeometry h, 2*size, h
+        box3 = new THREE.Mesh new THREE.BoxGeometry 2*size, h, h
+        cbox = new THREE.Mesh new THREE.Geometry().fromBufferGeometry Geometry.cornerBox size
+
+        cb = new ThreeBSP cbox
+        b1 = new ThreeBSP box1
+        b2 = new ThreeBSP box2
+        b3 = new ThreeBSP box3
+      
+        sub = cb.subtract(b1).subtract(b2).subtract(b3)
+        newMesh = sub.toMesh()
+        geom = new THREE.Geometry
+        geom.copy newMesh.geometry
+        geom.translate x, y, z
+        geom
+       
+    @hollowCubeCross: (size=1, x=0, y=0, z=0, hole=0.25) ->
+        
+        h = hole
+        box1 = new THREE.Mesh new THREE.BoxGeometry h, h, 2*size
+        box2 = new THREE.Mesh new THREE.BoxGeometry h, 2*size, h
+        box3 = new THREE.Mesh new THREE.BoxGeometry 2*size, h, h
+        
+        geom = new THREE.Geometry
+        offs = size/3
+        geom.merge Geometry.cornerBoxGeom size/3,  offs, 0, 0
+        geom.merge Geometry.cornerBoxGeom size/3, -offs, 0, 0
+        geom.merge Geometry.cornerBoxGeom size/3, 0,  offs, 0
+        geom.merge Geometry.cornerBoxGeom size/3, 0, -offs, 0
+        geom.merge Geometry.cornerBoxGeom size/3, 0, 0,  offs
+        geom.merge Geometry.cornerBoxGeom size/3, 0, 0, -offs
+        geom.merge Geometry.cornerBoxGeom size/3, 0, 0, 0
+        cbox = new THREE.Mesh geom
+
+        cb = new ThreeBSP cbox
+        b1 = new ThreeBSP box1
+        b2 = new ThreeBSP box2
+        b3 = new ThreeBSP box3
+      
+        sub = cb.subtract(b1).subtract(b2).subtract(b3)
+        newMesh = sub.toMesh()
+        geom = new THREE.Geometry
+        geom.copy newMesh.geometry
+        geom.translate x, y, z
+        geom
+        
+        
     #  0000000  000000000   0000000   000000000  00000000  
     # 000          000     000   000     000     000       
     # 0000000      000     000000000     000     0000000   

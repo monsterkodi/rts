@@ -30,7 +30,8 @@ module.exports =
         trade:      3
         build:      4
         brain:      5
-        switchable: [1,3,5]
+        berta:      6
+        switchable: [1,3,5,6]
     
     Stone: new Enum
         red:        0
@@ -71,4 +72,5 @@ module.exports =
         octacube:   12
         toruscone:  13
         tubecross:  14
+        cubecross:  15
 

@@ -16,9 +16,9 @@ Boxes        = require '../boxes'
 
 class BuyButton extends CanvasButton
 
-    constructor: (botButton) ->
+    constructor: (botButton, div) ->
         
-        div = botButton.canvas.parentElement
+        div ?= botButton.canvas.parentElement
         
         super div, 'buyButton'
         

@@ -12,7 +12,6 @@ THREE     = require 'three'
 Vector    = require './lib/vector'
 Geometry  = require './geometry'
 Materials = require './materials'
-ThreeBSP  = require('three-js-csg')(THREE)
 
 { Stone, Bot, Geom, Face } = require './constants'
 
@@ -192,6 +191,7 @@ class Construct
             new THREE.BoxGeometry 0.25, 0.25, 0.25         # octacube
             new THREE.TorusGeometry 0.2, 0.075, 8, 12      # toruscone
             new THREE.CylinderGeometry 0.1, 0.1, 0.5, 12   # tubecross
+            new Geometry.hollowCubeCross 0.5, 0,0,0, 0.075   # cubecross
         ]
         
         @botGeoms[Geom.dodicos].rotateX deg2rad 60
@@ -209,7 +209,7 @@ class Construct
         @botGeoms[Geom.tubecross].merge tube
         tube.rotateY deg2rad 90
         @botGeoms[Geom.tubecross].merge tube
-        
+                
         @botGeoms[Geom.octacube].merge new THREE.OctahedronGeometry 0.25, 0
         
         knot = new THREE.TorusKnotGeometry 0.1, 0.075
@@ -241,7 +241,7 @@ class Construct
             when Bot.build then Geom.tubecross
             when Bot.trade then Geom.toruscone
             when Bot.brain then Geom.knot
-            when Bot.ai    then Geom.dodicos
+            when Bot.berta then Geom.cubecross
     
     bots: ->
                         
@@ -295,42 +295,7 @@ class Construct
     # 0000000     0000000      000     
     
     dot: (bot) ->
-        
-        # if false
-            # box1   = new THREE.Mesh new THREE.BoxGeometry 0.1, 0.1, 0.4
-            # box2   = new THREE.Mesh new THREE.BoxGeometry 0.1, 0.4, 0.1
-            # box3   = new THREE.Mesh new THREE.BoxGeometry 0.4, 0.1, 0.1
-            # sphere = new THREE.Mesh new THREE.Geometry().fromBufferGeometry Geometry.cornerBox()
-            # sphere.geometry.rotateX deg2rad 90
-            # s = 0.2
-            # sphere.geometry.scale s,s,s
-#      
-            # sBSP = new ThreeBSP sphere
-            # b1 = new ThreeBSP box1
-            # b2 = new ThreeBSP box2
-            # b3 = new ThreeBSP box3
-#      
-            # sub = sBSP.subtract(b1).subtract(b2).subtract(b3)
-            # newMesh = sub.toMesh()
-            # geom = new THREE.Geometry
-            # geom.copy newMesh.geometry
-#             
-            # bot.dot = new THREE.Mesh geom, Materials.path
-            # bot.dot.castShadow = true
-            # bot.dot.receiveShadow = true
-            # @world.scene.add bot.dot
-#             
-            # sphere = new THREE.SphereGeometry 0.1, 6, 6
-            # sphere.computeFaceNormals()
-            # sphere.rotateX deg2rad 90
-            # sphere.computeFlatVertexNormals()
-#         
-            # bot.dot = new THREE.Mesh geom, Materials.path
-            # bot.dot.castShadow = true
-            # bot.dot.receiveShadow = true
-            # @world.scene.add bot.dot
-            # return
-        
+                
         sphere = new THREE.SphereGeometry 0.1, 6, 6
         sphere.computeFaceNormals()
         sphere.rotateX deg2rad 90

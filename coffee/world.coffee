@@ -333,6 +333,8 @@ class World
                 bot.buy   = Stone.blue
             when Bot.brain
                 bot.think = 1/science(player).brain.speed
+            when Bot.berta
+                bot.shoot = 1/science(player).berta.speed
             
         @bots[index] = bot
         bot

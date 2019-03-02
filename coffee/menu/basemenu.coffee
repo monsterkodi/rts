@@ -18,7 +18,7 @@ class BaseMenu extends BotMenu
     
         super botButton
         
-        @addButton 'state', new ToggleButton @div, @onBaseToggle, rts.world.bases[0].state
+        # @addButton 'state', new ToggleButton @div, @onBaseToggle, rts.world.bases[0].state
         @addButton 'call',  new CallButton @div
                 
     onBaseToggle: (baseState) => 
