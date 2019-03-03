@@ -10,12 +10,12 @@
 
 class BotMenu
 
-    constructor: (botButton) ->
+    constructor: (@botButton) ->
 
-        y = botButton.canvas.offsetTop - rts.menuBorderWidth
+        y = @botButton.canvas.offsetTop - rts.menuBorderWidth
         @div = elem class:'botMenu', style:"left:100px; top:#{y}px"
         
-        botButton.canvas.parentElement.appendChild @div
+        @botButton.canvas.parentElement.appendChild @div
         
         @buttons = {}
                 

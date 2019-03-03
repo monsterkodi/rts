@@ -128,7 +128,8 @@ class Geometry
         r = size/5
         cylinder = new THREE.CylinderGeometry r, r, size, 12
         
-        h = 0.05
+        # h = 0.05
+        h = 0.06
         box1 = new THREE.Mesh new THREE.BoxGeometry h, h, 2*size
         box2 = new THREE.Mesh new THREE.BoxGeometry h, 2*size, h
         box3 = new THREE.Mesh new THREE.BoxGeometry 2*size, h, h
@@ -376,6 +377,22 @@ class Geometry
         geom.translate 0.15,0.12,0.24
         geom.rotateY deg2rad 5
         geom.rotateX deg2rad 45
+        geom
+        
+    @botLimited: (bot) ->
+        
+        geom = new THREE.Geometry 
+        geom.merge Geometry.plus 0.1, -0.05
+        geom.merge Geometry.plus 0.1,  0.05
+        
+        if bot.type == Bot.berta
+            geom.translate -0.15,0.12,0.24
+            geom.rotateY deg2rad -5
+            geom.rotateX deg2rad 45
+        else
+            geom.translate -0.1,0.1,0.24
+            geom.rotateY deg2rad -5
+            geom.rotateX deg2rad 45
         geom
         
     @call: ->

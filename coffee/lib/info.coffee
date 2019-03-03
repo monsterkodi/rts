@@ -8,7 +8,7 @@
 
 { elem, log, $, _ }  = require 'kxk'
 
-{ Stone } = require '../constants'
+{ Bot, Stone } = require '../constants'
 
 Science = require '../science'
 
@@ -45,13 +45,19 @@ class Info
         add "store: #{world.storage[0].stones}"
         # add "temps: #{world.storage[0].temp}"
         for ai in world.ai
-            science = Science.queue[ai.player][0]
-            add "base#{ai.player}: #{ai.base.state}"
-            add "trde#{ai.player}: #{ai.trade?.state ? ''} #{Stone.string(ai.trade?.sell) ? ''} #{Stone.string(ai.trade?.buy) ? ''}"
-            add "brin#{ai.player}: #{ai.brain?.state ? ''} #{science?.scienceKey ? ''} #{science?.stars ? ''}"
-            add "task#{ai.player}: #{ai.tick} #{ai.task}"
             add "strg#{ai.player}: #{world.storage[ai.player].stones}"
-            add "temp#{ai.player}: #{world.storage[ai.player].temp}"
+            # add "temp#{ai.player}: #{world.storage[ai.player].temp}"
+        for ai in world.ai
+            add "base#{ai.player}: #{ai.base.state} #{world.botOfType(Bot.base, ai.player)?.hitPoints}"
+        for ai in world.ai
+            add "bert#{ai.player}: #{world.botsOfType(Bot.berta, ai.player)?.length ? ''} #{world.botOfType(Bot.berta, ai.player)?.state ? ''}"
+        for ai in world.ai
+            add "trde#{ai.player}: #{ai.trade?.state ? ''} #{Stone.string(ai.trade?.sell) ? ''} #{Stone.string(ai.trade?.buy) ? ''}"
+        for ai in world.ai
+            science = Science.queue[ai.player][0]
+            add "brin#{ai.player}: #{ai.brain?.state ? ''} #{science?.scienceKey ? ''} #{science?.stars ? ''}"
+        for ai in world.ai
+            add "task#{ai.player}: #{ai.tick} #{ai.task}"
         add '........................................'
 
 module.exports = Info

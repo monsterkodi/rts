@@ -21,6 +21,11 @@ class Enum
         for k in @keys
             if @[k] == v
                 return k
+                
+    keyForValue: (v) ->
+        
+        for key in @keys
+            return key if @[key] == v
 
 module.exports = 
 
@@ -33,6 +38,7 @@ module.exports =
         berta:      6
         switchable: [1,3,5,6]
         caged:      [1,6]
+        limited:    [2,6]
     
     Stone: new Enum
         red:        0
@@ -42,8 +48,9 @@ module.exports =
         gray:       4
         monster:    5
         cancer:     6
+        silver:     7
         resources:  [0,1,2,3]
-        all:        [0..5]
+        all:        [0..5] # world.construct stones
         
     Bend: new Enum
         flat:       0

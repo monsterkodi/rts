@@ -43,13 +43,12 @@ class AStar
         
     bulletPath: (fromBot, toBot) ->
 
-        start = @world.indexAtPos fromBot.pos
-        goal  = @world.indexAtPos toBot.pos
+        start = @world.indexAtBot fromBot
+        goal  = @world.indexAtBot toBot
         
         filterFunc = (world, acceptBot) -> (index) -> 
-            result = world.emptyOrBotNeighborsOfIndex(index).filter (ni) -> world.botAtIndex(ni) == acceptBot or world.noBotAtIndex(ni)
-            # log index, result
-            result
+            world.emptyOrBotNeighborsOfIndex(index).filter (ni) -> 
+                world.botAtIndex(ni) == acceptBot or world.noBotAtIndex(ni)
         
         @findWithNeighborFunc start, goal, filterFunc(@world,toBot)
         
@@ -88,13 +87,13 @@ class AStar
                 log "start: #{@world.stringForFaceIndex start} goal:#{@world.stringForFaceIndex goal}"
                 # for open in Array.from openSet.keys()
                     # log open, @world.stringForFaceIndex open
-                @world.drawBrokenPath
-                    start:    start
-                    goal:     goal
-                    open:     Array.from openSet.keys()
-                    closed:   Array.from closedSet.keys()
-                    cameFrom: Array.from @cameFrom.keys()
-                rts.togglePause()
+                # @world.drawBrokenPath
+                    # start:    start
+                    # goal:     goal
+                    # open:     Array.from openSet.keys()
+                    # closed:   Array.from closedSet.keys()
+                    # cameFrom: Array.from @cameFrom.keys()
+                # rts.togglePause()
                 return #@collectPath current
                 
             current = @lowestScore openSet, fScore # the node in openSet having the lowest fScore value

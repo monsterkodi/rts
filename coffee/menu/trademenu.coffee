@@ -23,10 +23,4 @@ class TradeMenu extends BotMenu
         @addButton 'sell',  new TradeButton  @div, 'sell'
         @addButton 'buy',   new TradeButton  @div, 'buy'
         
-    onTradeToggle: (tradeState) =>
-        
-        trade = rts.world.botOfType Bot.trade
-        trade.state = tradeState
-        post.emit 'botState', 'trade', tradeState
-                    
 module.exports = TradeMenu

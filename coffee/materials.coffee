@@ -11,10 +11,15 @@ THREE = require 'three'
 Color = require './color'
 
 Materials = 
-    
-    cage:       
-        base:   new THREE.MeshPhongMaterial    color:Color.cage.base,  emissive:Color.cage.base,  specular:Color.cage.base, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
-        berta:  new THREE.MeshPhongMaterial    color:Color.cage.berta, emissive:Color.cage.berta, specular:Color.cage.berta, transparent:true, opacity:0.05, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+    transparent: new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.1
+    cage:   
+        player:
+            base:   new THREE.MeshPhongMaterial    color:Color.cage.player.base,  emissive:Color.cage.player.base,  specular:Color.cage.player.base, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+            berta:  new THREE.MeshPhongMaterial    color:Color.cage.player.berta, emissive:Color.cage.player.berta, specular:Color.cage.player.berta, transparent:true, opacity:0.05, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+        enemy:
+            base:   new THREE.MeshPhongMaterial    color:Color.cage.enemy.base,  emissive:Color.cage.enemy.base,  specular:Color.cage.enemy.base, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+            berta:  new THREE.MeshPhongMaterial    color:Color.cage.enemy.berta, emissive:Color.cage.enemy.berta, specular:Color.cage.enemy.berta, transparent:true, opacity:0.05, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+            
     spark:      new THREE.LineBasicMaterial    color:Color.stone.red, linewidth: 8
     white:      new THREE.MeshStandardMaterial color:0xffffff
     highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2
@@ -38,10 +43,10 @@ Materials =
                 new THREE.MeshStandardMaterial color:Color.bot.gray,  metalness: 0.9, roughness: 0.5 # gray
     ]
     ai: [
-                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.6
-                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.6
-                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.6
-                new THREE.MeshStandardMaterial color:Color.ai,  metalness: 0.9, roughness: 0.6
+                new THREE.MeshStandardMaterial color:Color.ai1,  metalness: 0.9, roughness: 0.6
+                new THREE.MeshStandardMaterial color:Color.ai2,  metalness: 0.9, roughness: 0.6
+                new THREE.MeshStandardMaterial color:Color.ai3,  metalness: 0.9, roughness: 0.6
+                new THREE.MeshStandardMaterial color:Color.ai4,  metalness: 0.9, roughness: 0.6
     ]
     cost: [   
                 new THREE.MeshStandardMaterial color:Color.stone.red   # red

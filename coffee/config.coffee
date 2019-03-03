@@ -42,12 +42,22 @@ module.exports =
             
         nonMineSpeed: 0.2
            
-        berta: health: 80
-        spark:  speed:  0.5
+        base:  health: 4*80
+        build: health: 128
+        trade: health: 128
+        brain: health: 64
+        berta: health: 64
+        mine:  health: 32
+        
+        spark:  
+            speed: 0.5
+            stone: Stone.blue
+            
         bullet: 
-            speed:  0.1
-            count:  8
-            delay:  0.8
+            stone: Stone.gelb
+            speed: 0.1
+            count: 8
+            delay: 0.8
         
         monster: 
             speed:    0.2

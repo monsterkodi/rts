@@ -45,7 +45,8 @@ class BotButton extends CanvasButton
         switch @bot
             when Bot.mine
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.1
-                @camera.lookAt vec 0,0,0                
+                @camera.lookAt vec 0,0,0          
+                post.on 'scienceFinished', @render
             when Bot.trade
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,-0.05
@@ -55,12 +56,19 @@ class BotButton extends CanvasButton
                 post.on 'scienceUpdated',  @render
                 post.on 'scienceQueued',   @render
                 post.on 'scienceDequeued', @render
-            else
+            when Bot.berta
+                @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
+                @camera.lookAt vec 0,0,0
+                post.on 'scienceFinished', @render
+            when Bot.build
+                @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
+                @camera.lookAt vec 0,0,0
+            when Bot.base
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,0
 
         if @bot in Bot.switchable
-            post.on 'botState', @render
+            post.on 'botState', (type,state,player) => @render() if player == 0
 
         if @bot in [Bot.brain, Bot.trade]
             post.on 'botDisconnected', @render
@@ -201,6 +209,13 @@ class BotButton extends CanvasButton
                 geom = Geometry.cornerBox s, 0, 0, 0.2
                 geom.rotateZ deg2rad 45
                 @scene.add @meshes.buy  = new THREE.Mesh geom, Materials.stone[trade.buy]
+                
+        if @bot in Bot.limited
+            
+            @meshes.limit?.parent.remove @meshes.limit
+            delete @meshes.limit
+            if @world.botsOfType(@bot).length >= science()[Bot.string @bot].limit
+                @scene.add @meshes.limit = new THREE.Mesh Geometry.botLimited(@world.botOfType @bot), Materials.menu.inactive
                     
         super()
         

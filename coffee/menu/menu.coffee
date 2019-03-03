@@ -49,11 +49,18 @@ class Menu
         @div.addEventListener 'click',      @onClick
                 
         post.on 'botCreated', @onBotCreated
+        post.on 'botRemoved', @onBotRemoved
+
+    onBotRemoved: (type, player) =>
+        if player == 0
+            @buttons[Bot.string type].update()
+            if BotButton.currentlyShown?.botButton == @buttons[Bot.string type]
+                @buttons[Bot.string type].highlight()
         
     onBotCreated: (bot) => 
-        
+        # log "onBotCreated #{Bot.string bot.type}", SubMenu.current?, BotButton.currentlyShown?.botButton == @buttons[Bot.string bot.type]
         @buttons[Bot.string bot.type].update()
-        if SubMenu.current?.button == @buttons[Bot.string bot.type]
+        if BotButton.currentlyShown?.botButton == @buttons[Bot.string bot.type]
             @buttons[Bot.string bot.type].highlight()
         
     onClick:      (event) => event.target.button?.click? event

@@ -6,12 +6,13 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ post, prefs, deg2rad, randInt, clamp, first, last, valid, empty, str, log, _ } = require 'kxk'
+{ post, prefs, randInt, clamp, first, last, valid, empty, str, log, _ } = require 'kxk'
 
 AI        = require './ai'
 Vector    = require './lib/vector'
 Packet    = require './packet'
 Tubes     = require './tubes'
+Cages     = require './cages'
 Boxes     = require './boxes'
 Spent     = require './spent'
 Graph     = require './graph'
@@ -46,6 +47,7 @@ class World
         @players   = []
         @ai        = []
         
+        @cages  = new Cages @ 
         @tubes  = new Tubes @
         @spent  = new Spent @
         @boxes  = new Boxes @scene 
@@ -68,9 +70,12 @@ class World
         if prefs.get 'graph', false
             Graph.toggle()
             
-        post.on 'scienceFinished', @onScienceFinished
         post.on 'storageChanged',  @onStorageChanged
-        post.on 'botState',        @onBotState
+        
+    toggleStones: ->
+        
+        for stone in Stone.all
+            @construct.stoneMeshes[stone].material = Materials.transparent
         
     drawBrokenPath: (info) ->
         
@@ -321,6 +326,7 @@ class World
             player: player
             
         bot.mine = 1/Science.mineSpeed bot
+        bot.hitPoints = bot.health = state[Bot.string type].health
                 
         if type in Bot.switchable
             bot.state = 'off'
@@ -345,19 +351,62 @@ class World
                 bot.think = 1/science(player).brain.speed
             when Bot.berta
                 bot.shoot = 1/science(player).berta.speed
-                bot.hitPoints = bot.health = state.berta.health
-            
+                if @botOfType(Bot.berta,player)?.state == 'on'
+                    bot.state = 'on'
+                    
         @bots[index] = bot
         bot
 
+    #  0000000   0000000   000       0000000   00000000   
+    # 000       000   000  000      000   000  000   000  
+    # 000       000   000  000      000   000  0000000    
+    # 000       000   000  000      000   000  000   000  
+    #  0000000   0000000   0000000   0000000   000   000  
+    
+    colorBot: (bot) ->
+
+        return if not bot.mesh
+        if bot.player == 0
+            stone = @resourceBelowBot bot
+            if stone?
+                bot.mesh.material = Materials.bot[stone]
+            else
+                bot.mesh.material = Materials.bot[Stone.gray]
+        else
+            bot.mesh.material = Materials.ai[bot.player-1]
+        
     baseForBot: (bot) -> @bases[bot.player]
         
     getBots: -> Object.values @bots
-    enemiesOfBot: (bot) -> @getBots().filter (e) -> e.player != bot.player and e.type in [Bot.base, Bot.berta]
+    botsOfPlayer: (player=0) -> @getBots().filter (bot) -> bot.player == player
+    enemiesOfBot: (bot) -> @getBots().filter (e) -> e.player != bot.player #and e.type in [Bot.base, Bot.berta]
     
     botsOfType: (type, player=0) -> @getBots().filter (b) -> b.type == type and b.player == player
     botOfType:  (type, player=0) -> first @botsOfType type, player
         
+    removePlayer: (player) ->
+        
+        for bot in @botsOfPlayer player 
+            @removeBot bot
+            
+        @tubes.build()
+
+        for ai in @ai
+            if ai.player == player
+                @ai.splice @ai.indexOf(ai), 1
+                break
+            
+    removeBot: (bot) ->
+        
+        @cages.removeCage bot
+        index = @indexAtBot bot
+        bot.mesh?.parent.remove bot.mesh
+        bot.dot?.parent.remove bot.dot
+        delete bot.mesh
+        delete bot.dot
+        delete @bots[index]
+        post.emit 'botRemoved', bot.type, bot.player
+    
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       
     # 000000000  000   000   000 000   0000000   
@@ -379,6 +428,7 @@ class World
         @removeBuildGuide()
         @updateTubes()
         @construct.updateBot bot
+        @cages.moveBot bot
         
     updateTubes: -> @tubes.build()
             
@@ -674,6 +724,7 @@ class World
     
     indexAt: (x,y,z) -> (Math.round(x)+256)+((Math.round(y)+256)<<9)+((Math.round(z)+256)<<18)
     indexAtPos: (v) -> @indexAt v.x, v.y, v.z
+    indexAtBot: (bot) -> @indexAtPos bot.pos
     
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       
@@ -695,44 +746,18 @@ class World
     
     roundPos: (v) -> vec(v).round()
     posBelowBot: (bot) -> bot.pos.minus Vector.normals[bot.face]            
-                    
+                
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
     # 000000000  000  000  0000  000000000  000      000  000  0000  000000000     000     
     # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
     # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
-    onScienceFinished: (scienceKey) =>
-        
-        if scienceKey.endsWith('radius') and @highBot
-            @updateCage @highBot
-    
-    onBotState: (bot, onOrOff) =>
-        
-        if bot in ['base', 'berta'] and @highBot
-            @updateCage @highBot
-            
-    removeCage: -> 
-        
-        @baseCage?.parent.remove @baseCage
-        delete @baseCage
-            
-    updateCage: (bot) ->
-        
-        player = 0
-        
-        @removeCage()
-        
-        if bot.state == 'on' and bot == @highBot
-            @baseCage = @construct.cage bot, science(bot.player)[Bot.string bot.type].radius
-            @baseCage.position.copy bot.pos
-    
     removeHighlight: ->
         
         @highBot?.highlight?.parent.remove @highBot?.highlight
         delete @highBot?.highlight
         delete @highBot
-        @removeCage()
         @removeBuildGuide()
     
     highlightPos: (v) -> @highlightBot @botAtPos @roundPos v
@@ -741,7 +766,6 @@ class World
         
         return if bot.player != 0
         if bot
-            @updateCage(bot) if bot.type in Bot.caged
             if bot == @highBot 
                 @construct.orientFace bot.highlight, bot.face
                 return
@@ -751,6 +775,12 @@ class World
         else
             @removeHighlight()
             
+    # 0000000    000   000  000  000      0000000    
+    # 000   000  000   000  000  000      000   000  
+    # 0000000    000   000  000  000      000   000  
+    # 000   000  000   000  000  000      000   000  
+    # 0000000     0000000   000  0000000  0000000    
+    
     onStorageChanged: (storage, stone, amount) =>
 
         return if storage.player != 0

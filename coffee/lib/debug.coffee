@@ -25,6 +25,7 @@ class Debug
         @pathLength = @value text:'path ', value: science().path.length,           reset:@resetPath,       incr:@incrPath,       decr:@decrPath
         @button text:'fill  storage', cb: -> rts.world.storage[0].fill()
         @button text:'clear storage', cb: -> rts.world.storage[0].clear()
+        @button text:'stones',        cb: -> rts.world.toggleStones()
         @toggle text:'cheap science', obj:window.debug, key:'cheapScience'
         @toggle text:'fast  science', obj:window.debug, key:'fastScience'
 

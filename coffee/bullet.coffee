@@ -19,7 +19,7 @@ class Bullet
         storage = world.storage[berta.player]
         
         func = -> 
-            if storage.canAfford([0,1,0,0]) and enemy.health > 0
+            if storage.has(state.bullet.stone) and enemy.health > 0
                 new Bullet world, berta, enemy
         for i in [0...state.bullet.count]
             setTimeout func, 1000*state.bullet.delay*i/world.speed
@@ -29,17 +29,26 @@ class Bullet
         @enemy.health -= 1
         # log "enemy.health #{@enemy.health}"
         storage = @world.storage[berta.player]
-        storage.deduct [0,1,0,0]
-        @path = @world.bulletPath berta, @enemy
+        storage.sub state.bullet.stone
+        @pos = vec berta.pos
+        @updatePath()
         if not @path
             # log "ok? no path for bullet? #{str berta.pos} #{str @enemy.pos}"
             return
+        @dir = vec()
+        @updateDir()
                 
-        @pos = @world.posAtIndex @path[0]
-        @dir = @pos.to @world.posAtIndex @path[1]
-        @box = @world.boxes.add pos:@pos, size:0.05, stone:Stone.gelb
+        @box = @world.boxes.add pos:@pos, size:0.05, stone:state.bullet.stone
         @life = 0
         @animate 0
+        
+    updatePath: -> @path = @world.bulletPath @, @enemy
+    updateDir: ->
+        
+        @world.indexToPos @path[1], @dir
+        @dir.sub @pos
+        if @path.length == 2
+            @dir.scale 0.75
             
     del: -> 
         rts.handle.enemyDamage @enemy, 1
@@ -57,14 +66,12 @@ class Bullet
                 @del()
                 return
             if @path.length < 2 
-                @path = @world.bulletPath @, @enemy
+                @updatePath()
                 if not @path
-                    # log "ok? no path for bullet animation? #{str pos} #{str @enemy.pos}"
                     @del()
                     return
-            @world.indexToPos @path[1], @dir
-            @dir.sub @pos
-                
+            @updateDir()
+
         @world.boxes.setPos @box, @pos.plus @dir.mul @life
 
         rts.animateWorld @animate

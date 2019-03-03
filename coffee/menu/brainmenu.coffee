@@ -83,10 +83,4 @@ class BrainMenu extends BotMenu
         
     addButton: (key, button) -> @buttons[key] = button
         
-    onBrainToggle: (brainState) => 
-    
-        brain = rts.world.botOfType Bot.brain
-        brain.state = brainState
-        post.emit 'botState', 'brain', brainState
-                
 module.exports = BrainMenu

@@ -16,17 +16,17 @@ Boxes        = require '../boxes'
 
 class BuyButton extends CanvasButton
 
-    constructor: (botButton, div) ->
+    constructor: (@botButton, div) ->
         
-        div ?= botButton.canvas.parentElement
+        div ?= @botButton.canvas.parentElement
         
         super div, 'buyButton'
         
-        @bot = botButton.bot
+        @bot = @botButton.bot
         
         @name = "BuyButton #{Bot.string @bot}"
         
-        y = botButton.canvas.offsetTop - rts.menuBorderWidth
+        y = @botButton.canvas.offsetTop - rts.menuBorderWidth
         @canvas.style = "left:100px; top:#{y}px"
         
         @boxes = new Boxes @scene, 16*4*80, new THREE.BoxBufferGeometry

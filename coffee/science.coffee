@@ -18,9 +18,9 @@ class Science
             prod:   x:0, y:1, v:[[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]]
             radius: x:0, y:2, v:[2, 3, 4, 5, 6, 7]
         berta:
-            radius: x:0, y:3, v:[3, 4, 5, 6, 7, 8]
-            speed:  x:1, y:3, v:[0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
-            limit:  x:2, y:3, v:[2, 4, 8, 12, 16, 32]
+            radius: x:0, y:3, v:[1, 2, 3, 4, 5, 6]
+            speed:  x:1, y:3, v:[0.02, 0.04, 0.08, 0.16, 0.32, 0.64]
+            limit:  x:2, y:3, v:[1, 2, 3, 4, 5, 6]
         brain:
             speed:  x:1, y:0, v:[0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
         trade:
@@ -45,7 +45,7 @@ class Science
     @maxQueue = 6
 
     @science: (player=0) -> Science.players[player].science
-    
+
     @addPlayer: ->
         
         player =
@@ -62,7 +62,13 @@ class Science
         @queue.push []
         
         @players.push player
-                
+
+    @needsTube: (bot) -> 
+        level = switch bot.type
+            when Bot.build then 1
+            when Bot.berta then 2
+        science(bot.player).tube.free < level
+        
     @mineSpeed: (bot) ->
         
         switch bot.type
@@ -156,6 +162,6 @@ class Science
         if player == 0
             post.emit 'scienceUpdated',  info
             post.emit 'scienceDequeued', info
-            post.emit 'scienceFinished', scienceKey
+            post.emit 'scienceFinished', info
             
 module.exports = Science

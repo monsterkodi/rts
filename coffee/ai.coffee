@@ -6,7 +6,7 @@
 000   000  000
 ###
 
-{ first, last, valid, empty, str, log, _ } = require 'kxk'
+{ post, first, last, valid, empty, str, log, _ } = require 'kxk'
 
 { Bot, Stone } = require './constants'
 
@@ -36,6 +36,9 @@ class AI
             'tube.gap'
             'trade.speed'
             'storage.capacity'
+            'berta.limit'
+            'berta.speed'
+            'berta.radius'
             'base.speed'
             'base.prod'
             'trade.sell'
@@ -50,6 +53,9 @@ class AI
             'tube.gap'
             'trade.speed'
             'storage.capacity'
+            'berta.limit'
+            'berta.speed'
+            'berta.radius'
             'base.speed'
             'base.prod'
             'trade.sell'
@@ -64,6 +70,9 @@ class AI
             'tube.gap'
             'trade.speed'
             'storage.capacity'
+            'berta.limit'
+            'berta.speed'
+            'berta.radius'            
             'base.speed'
             'base.prod'
             'mine.speed'
@@ -77,6 +86,9 @@ class AI
             'tube.gap'
             'trade.speed'
             'storage.capacity'
+            'berta.limit'
+            'berta.speed'
+            'berta.radius'            
             'base.speed'
             'base.prod'
             'mine.speed'
@@ -90,6 +102,9 @@ class AI
             'tube.gap'
             'trade.speed'
             'storage.capacity'
+            'berta.limit'
+            'berta.speed'
+            'berta.radius'
         ]
         
         @tick = 0
@@ -97,6 +112,17 @@ class AI
         @player = @base.player
         @actionDelay = state.ai.delay
         @actionQueue = []
+        
+        post.on 'botRemoved', @onBotRemoved
+        
+    onBotRemoved: (type, player) =>
+        
+        if player == @player
+            switch type
+                when @brain then @brain = null
+                when @trade then @trade = null
+                when @build then @build = null
+                when @base  then @base  = null
         
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -115,6 +141,7 @@ class AI
         return if @moveToResource()
         return if @buyBot()
         return if @switchBase()
+        return if @switchBerta()
         return if @tradeSurplus()
         return if @doScience()
         return if @idleCall()
@@ -137,7 +164,8 @@ class AI
             
         if @brain
             if @amountOf(@lowestStone()) > 8
-                @brain.state = 'on'
+                if @brain.state == 'off'
+                    rts.handle.toggleBotState @brain
                 if Science.queue[@player].length < Science.maxQueue
                     scienceKey = @scienceOrder.shift()
                     # log 'doScience', scienceKey
@@ -145,7 +173,7 @@ class AI
                     return @did "queue:#{scienceKey}"
             else
                 if @brain.state == 'on'
-                    @brain.state = 'off'
+                    rts.handle.toggleBotState @brain
                     return @did 'brain:off'
                     
     # 0000000     0000000    0000000  00000000  
@@ -156,17 +184,33 @@ class AI
     
     switchBase: ->
         
-        redStones = @amountOf Stone.red
+        sparkStones = @amountOf state.spark.stone
         
-        if redStones > 40
+        if sparkStones > 40
             if @base.state == 'off'
-                @base.state = 'on'
+                rts.handle.toggleBotState @base
                 return @did 'base:on'
                 
-        if redStones < 10 and @base.state == 'on' and @brain?.state == 'on'
-            
-            @base.state = 'off'
+        if sparkStones < 10 and @base.state == 'on' and @brain?.state == 'on'
+            rts.handle.toggleBotState @base
             return @did 'base:off'
+        
+    switchBerta: ->
+
+        bertas = @world.botsOfType Bot.berta, @player
+        
+        if valid bertas
+        
+            bulletStones = @amountOf state.bullet.stone
+            
+            if bulletStones > 40
+                if bertas[0].state == 'off'
+                    rts.handle.toggleBotState bertas[0]
+                    return @did 'berta:on'
+                    
+            if bulletStones < 10 and bertas[0].state == 'on' and @brain?.state == 'on'
+                rts.handle.toggleBotState bertas[0]
+                return @did 'berta:off'
         
     #  0000000   000   000  00000000  000   000  00000000  
     # 000   000  000   000  000       000   000  000       
@@ -223,9 +267,12 @@ class AI
         
         if monster = @world.monsterClosestToPos @base.pos
             if @moveBotToFaceClosestToPos @base, monster.pos
-                @base.state  = 'on'
-                @brain.state = 'off'
-                @did 'base:on brain:off'
+                if @base.state == 'off'
+                    rts.handle.toggleBotState @base
+                    @did 'base:on'
+                if @brain?.state == 'on'
+                    rts.handle.toggleBotState @brain
+                    @did 'brain:off'
                 return @did 'hunt'
         else
             log "no monster close to #{str @base.pos}?"
@@ -239,7 +286,7 @@ class AI
     
     moveBotToFaceClosestToPos: (bot, pos) ->
         
-        sourceFaceIndex  = @world.faceIndex bot.face, @world.indexAtPos bot.pos
+        sourceFaceIndex  = @world.faceIndex bot.face, @world.indexAtBot bot
         shorterPathFound = true
         closestFaceIndex = @world.faceIndexClosestToPosReachableFromFaceIndex pos, sourceFaceIndex
         
@@ -389,7 +436,7 @@ class AI
         if @trade
             
             if @trade.buy != stone or @trade.state == 'off'
-                @trade.state = 'on'
+                rts.handle.toggleBotState @trade
                 @trade.buy = stone
                 @trade.sell = @highestStoneExceptStone stone
                 return @did "buy #{Stone.string stone} for #{Stone.string @trade.sell}"
@@ -400,7 +447,7 @@ class AI
         if @trade
             
             if @trade.buy == stone and @trade.state == 'on'
-                @trade.state = 'off'
+                rts.handle.toggleBotState @trade
                 return @did "stop buying #{Stone.string stone}"
         false
             
@@ -424,6 +471,12 @@ class AI
             if rts.handle.buyBot Bot.mine, @player
                 @queue @call
                 return @did "buy #{Bot.string Bot.mine}"
+                
+        if @world.botsOfType(Bot.berta, @player).length < science(@player).berta.limit
+            if rts.handle.buyBot Bot.berta, @player
+                @queue @call
+                return @did "buy #{Bot.string Bot.berta}"
+            
         false
     
     idleCall: ->

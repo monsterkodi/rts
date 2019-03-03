@@ -8,8 +8,6 @@
 
 { empty, str, log, _ } = require 'kxk'
 
-{ Stone } = require './constants'
-
 Materials = require './materials'
 
 class Spark
@@ -19,7 +17,7 @@ class Spark
         storage = world.storage[base.player]
         
         func = -> 
-            if storage.canAfford([1,0,0,0]) and monster.health > 0
+            if storage.has(state.spark.stone) and monster.health > 0
                 new Spark world, base, monster
                 
         for i in [0...8]
@@ -30,13 +28,13 @@ class Spark
         @monster.health -= 1
         # log "monster.health #{@monster.health}"
         storage = @world.storage[base.player]
-        storage.deduct [1,0,0,0]
+        storage.sub state.spark.stone
         @path = @world.pathFromPosToPos base.pos, @monster.pos
         if not @path
             # log "ok? no path for spark? #{str base.pos} #{str @monster.pos}"
             return
                 
-        @box = @world.boxes.add pos:@world.posAtIndex(@path[0]), size:0.05, stone:Stone.red
+        @box = @world.boxes.add pos:@world.posAtIndex(@path[0]), size:0.05, stone:state.spark.stone
         @life = 0
         @animate 0
             

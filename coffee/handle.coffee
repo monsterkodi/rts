@@ -40,9 +40,13 @@ class Handle
     toggleBotState: (bot) ->
         
         if bot.type in Bot.switchable
-            bot.state = bot.state == 'on' and 'off' or 'on'
-            post.emit 'botState', Bot.string(bot.type), bot.state
-            bot.state
+            oldState = bot.state
+            newState = oldState == 'on' and 'off' or 'on'
+            for bot in @world. botsOfType bot.type, bot.player
+                bot.state = newState
+            # log "toggleBotState #{Bot.string(bot.type)} #{bot.player} #{newState}"
+            post.emit 'botState', bot.type, newState, bot.player
+            newState
             
     botClicked: (bot) ->
 
@@ -115,8 +119,7 @@ class Handle
     tickBerta: (delta, berta) ->
         
         return if berta.state != 'on'
-        if science(berta.player).tube.free < 2
-            return if not berta.path
+        return if Science.needsTube(berta) and not berta.path
         
         @delay delta, berta, 'speed', 'shoot', =>
             storage = @world.storage[berta.player]
@@ -135,13 +138,21 @@ class Handle
 
     enemyDamage: (enemy, damage) ->
         
+        return if not enemy.mesh
         enemy.hitPoints -= damage
-        log "enemyDamage #{Bot.string enemy.type} #{enemy.health} #{enemy.hitPoints}"
+        # log "damage #{Bot.string enemy.type} #{enemy.player} #{enemy.hitPoints}"
         enemy.mesh.material = Materials.stone[Stone.gelb]
-        restoreMat = (enemy) -> -> rts.world.construct.colorBot enemy
+        restoreMat = (enemy) -> -> rts.world.colorBot enemy
         setTimeout restoreMat(enemy), 1000*0.5/@world.speed
         if enemy.hitPoints <= 0
-            log 'enemy dead!'
+            @enemyDeath enemy
+
+    enemyDeath: (enemy) ->
+        
+        if enemy.type == Bot.base
+            @world.removePlayer enemy.player
+        else
+            @world.removeBot enemy
             
     # 0000000    00000000    0000000   000  000   000
     # 000   000  000   000  000   000  000  0000  000
@@ -194,7 +205,7 @@ class Handle
                         cost = [0,0,0,0]
                         cost[sellStone] = sellAmount
                         @world.spent.costAtBot cost, trade
-                        true
+            true
 
     # 0000000    000   000  000   000
     # 000   000  000   000   000 000
@@ -216,7 +227,7 @@ class Handle
         switch type 
             when Bot.mine, Bot.berta
                 if @world.botsOfType(type, player).length >= science(player)[Bot.string type].limit
-                    log "WARNING handle.buyBot player:#{player} -- #{Bot.string type} limit reached!"
+                    # log "WARNING handle.buyBot player:#{player} -- #{Bot.string type} limit reached!"
                     return
             else
                 if @world.botOfType(type, player)
@@ -233,6 +244,7 @@ class Handle
         @world.spent.costAtBot cost, bot
         @world.construct.botAtPos bot, p
         @world.updateTubes()
+        @world.cages.updateCage bot
         
         switch type 
             when Bot.brain
@@ -305,9 +317,8 @@ class Handle
         return false if not buildBot
         return false if not storage.canAfford science(player).build.cost
         
-        if science(player).tube.free < 1
-            if not buildBot.path
-                return false
+        if Science.needsTube(buildBot) and not buildBot.path
+            return false
                 
         if norm and @world.isItemAtPos buildBot.pos.plus norm
             return false

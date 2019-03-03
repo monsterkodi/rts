@@ -36,6 +36,7 @@ Color =
         gray:            color 0x111111
         monster:         color 0x333333
         cancer:          color 0x0f0f0f
+        silver:          color 0xaaaaaa
 
     spent: 
         red:             color 0x441111
@@ -46,18 +47,25 @@ Color =
     bot:
         gray:            color 0xccccdd
         
-    ai:                  color 0x111111
+    ai1:                 color 0x111111
+    ai2:                 color 0x551111
+    ai3:                 color 0x111133
+    ai4:                 color 0x003322
     segs:                color 0x111111
     path:                color 0xbbbbbb
     cage:                
-        base:            color 0x880000
-        berta:           color 0x888800
+        player:
+            base:            color 0x000044
+            berta:           color 0x666666
+        enemy:
+            base:            color 0x000011
+            berta:           color 0xff0000
 
 Color.bot.red    = Color.stone.red
 Color.bot.gelb   = Color.stone.gelb
 Color.bot.blue   = Color.stone.blue
 Color.bot.white  = Color.stone.white
 
-Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.stone.monster, Color.stone.cancer]
+Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.stone.monster, Color.stone.cancer, Color.stone.silver]
         
 module.exports = Color

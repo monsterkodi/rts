@@ -29,8 +29,8 @@ class Map extends World
         
     ais: ->
         
-        @wall  0,-5,0, 0, 5,0
-        @wall -5, 0,0, 5, 0,0
+        @wall  0,-3,0, 0, 3,0
+        @wall -3, 0,0, 3, 0,0
         
         @wall -3, 5,0, 3, 5,0
         @wall -3,-5,0, 3,-5,0
@@ -49,20 +49,20 @@ class Map extends World
         @addResource -1, -5, 0, Stone.gelb,  res
         @addResource  0, -5, 0, Stone.blue,  res
 
-        # @addResource -3, -5, 0, Stone.white, res
-        # @addResource -2, -5, 0, Stone.red,   res
-        # @addResource  2, -5, 0, Stone.gelb,  res
-        # @addResource  3, -5, 0, Stone.blue,  res
+        @addResource  3,  5, 0, Stone.white, res
+        @addResource  2,  5, 0, Stone.red,   res
+        @addResource  1,  5, 0, Stone.gelb,  res
+        @addResource  0,  5, 0, Stone.blue,  res
 
-        # @addResource  5, -2, 0, Stone.white, res
-        # @addResource  5, -1, 0, Stone.red,   res
-        # @addResource  5,  1, 0, Stone.gelb,  res
-        # @addResource  5,  2, 0, Stone.blue,  res
-#                          
-        # @addResource -5, -3, 0, Stone.white, res
-        # @addResource -5, -2, 0, Stone.red,   res
-        # @addResource -5,  2, 0, Stone.gelb,  res
-        # @addResource -5,  3, 0, Stone.blue,  res
+        @addResource  5, -2, 0, Stone.white, res
+        @addResource  5, -1, 0, Stone.red,   res
+        @addResource  5,  1, 0, Stone.gelb,  res
+        @addResource  5,  2, 0, Stone.blue,  res
+                          
+        @addResource -5, -3, 0, Stone.white, res
+        @addResource -5, -2, 0, Stone.red,   res
+        @addResource -5,  2, 0, Stone.gelb,  res
+        @addResource -5,  3, 0, Stone.blue,  res
 
         @addResource -5, -2, 3, Stone.white, res
         @addResource -5,  2, 3, Stone.white, res
@@ -74,12 +74,11 @@ class Map extends World
         @addResource  5, -2, 3, Stone.white, res
         @addResource  5,  2, 3, Stone.white, res
         @addResource  5,  1, 3, Stone.white, res
-        
-        @addBot 0,  0, 1, Bot.base
-        @addBot 0, -5, 1, Bot.base
-        # @addBot  0, 5, 1, Bot.base
-        # @addBot  0,-5, 1, Bot.base
-        # @addBot -5, 0, 1, Bot.base
+
+        @addBot  0,-5, 1, Bot.base
+        @addBot -5, 0, 1, Bot.base
+        @addBot  0, 5, 1, Bot.base
+        @addBot  5, 0, 1, Bot.base
         
         @addCancer  0,  0, 10, 25
         @addCancer  3,  3,  0, 15

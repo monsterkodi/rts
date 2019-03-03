@@ -30,7 +30,7 @@ class Monster
         @pos       = pos ? vec()
         @nxt       = vec dir ? Vector.unitX
         @start     = vec @pos
-        @stone     = [Stone.red,Stone.red,Stone.red, Stone.white,Stone.white, Stone.gelb, Stone.blue][randInt 7]
+        @stone     = [Stone.red,Stone.red, Stone.gelb,Stone.gelb, Stone.white,Stone.white, Stone.blue][randInt 7]
         
         for i in [0...@length]
             size = (1-(i/@length))*@radius

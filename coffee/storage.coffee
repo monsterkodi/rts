@@ -26,9 +26,9 @@ class Storage
         
         post.on 'scienceFinished', @onScienceFinished
                     
-    onScienceFinished: (scienceKey) =>
+    onScienceFinished: (info) =>
         
-        if scienceKey == 'storage.capacity'
+        if info.scienceKey == 'storage.capacity'
             stones = _.clone @stones
             @deduct @stones, 'reset'
             for stone in Stone.resources
@@ -38,7 +38,7 @@ class Storage
         
     capacity: -> science(@player).storage.capacity
                        
-    has: (stone, amount) -> @stones[stone] >= amount
+    has: (stone, amount=1) -> @stones[stone] >= amount
             
     canTake: (stone, amount=1) -> 
         
@@ -70,6 +70,7 @@ class Storage
         for stone in Stone.resources
             @add stone, -cost[stone], reason
     
+    sub: (stone, amount=1) -> @add stone, -amount
     add: (stone, amount=1, reason=null) ->
         
         oldStones = @stones[stone]

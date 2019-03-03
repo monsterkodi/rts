@@ -21,63 +21,7 @@ class Construct
         
         @segmentMesh = [null,null,null,null]
         @stoneMeshes = {}        
-
-    envelope: (insidePos, isInside) ->
-        
-        geom = new THREE.Geometry
-        
-        x = 0
-        while isInside insidePos.plus vec x+1,0,0
-            x += 1
-
-        index = @world.indexAtPos vec x,0,0
-        
-        visited = {}
-        visited[index] = 1
-        check = [index]
-        while valid check
-            index = check.shift()
-            checkPos = @world.posAtIndex index
-            for neighbor in @world.neighborsOfIndex index
-                neighborPos = @world.posAtIndex neighbor
-                if not isInside neighborPos
-                    checkToNeighbor = checkPos.to neighborPos
-                    n = Vector.perpNormals checkToNeighbor
-                    geom.vertices.push checkPos.plus checkToNeighbor.mul(0.5).plus(n[0].mul(0.5)).plus(n[1].mul(0.5))
-                    geom.vertices.push checkPos.plus checkToNeighbor.mul(0.5).plus(n[1].mul(0.5)).plus(n[2].mul(0.5))
-                    geom.vertices.push checkPos.plus checkToNeighbor.mul(0.5).plus(n[2].mul(0.5)).plus(n[3].mul(0.5))
-                    geom.vertices.push checkPos.plus checkToNeighbor.mul(0.5).plus(n[3].mul(0.5)).plus(n[0].mul(0.5))
-                    geom.faces.push new THREE.Face3 geom.vertices.length-1, geom.vertices.length-4, geom.vertices.length-2
-                    geom.faces.push new THREE.Face3 geom.vertices.length-4, geom.vertices.length-3, geom.vertices.length-2
-                else 
-                    if not visited[neighbor]
-                        visited[neighbor] = 1
-                        check.push neighbor
-                    
-        geom.mergeVertices()
-        geom.computeFaceNormals()
-        geom.computeFlatVertexNormals()
-        bufg = new THREE.BufferGeometry().fromGeometry geom
-        bufg
-        
-    #  0000000   0000000    0000000   00000000  
-    # 000       000   000  000        000       
-    # 000       000000000  000  0000  0000000   
-    # 000       000   000  000   000  000       
-    #  0000000  000   000   0000000   00000000  
-    
-    cage: (bot, s) ->
-        
-        # isInside = (s) -> (pos) -> Math.round(pos.paris(vec())) <= s
-        isInside = (s) -> (pos) -> Math.round(pos.manhattan(vec())) <= s
-                    
-        # log s, bot.pos
-        geom = @envelope bot.pos, isInside(s)
-        mat = Materials.cage[Bot.string bot.type]
-        mesh = new THREE.Mesh geom, mat
-        @world.scene.add mesh
-        mesh
-        
+                
     # 000000000  000   000  0000000    00000000  
     #    000     000   000  000   000  000       
     #    000     000   000  0000000    0000000   
@@ -259,10 +203,11 @@ class Construct
 
     updateBot: (bot) ->
         
+        return if not bot.mesh
         bot.mesh.position.copy bot.pos
         bot.highlight?.position.copy bot.pos
         @orientBot bot
-        @colorBot bot
+        @world.colorBot bot
         
     orientFace: (obj, face) -> obj.quaternion.copy quat().setFromUnitVectors vec(0,0,1), Vector.normals[face]
     
@@ -271,18 +216,7 @@ class Construct
         @orientFace bot.mesh, bot.face
         @orientFace bot.dot,  bot.face
         bot.dot.position.copy bot.pos.minus Vector.normals[bot.face].mul 0.35
-        
-    colorBot: (bot) ->
-
-        if bot.player == 0
-            stone = @world.resourceBelowBot bot
-            if stone?
-                bot.mesh.material = Materials.bot[stone]
-            else
-                bot.mesh.material = Materials.bot[Stone.gray]
-        else
-            bot.mesh.material = Materials.ai[bot.player-1]
-            
+                    
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
     # 000   000  000   000     000     

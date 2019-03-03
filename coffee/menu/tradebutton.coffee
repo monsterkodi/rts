@@ -40,9 +40,9 @@ class TradeButton extends StoneButton
         post.removeListener 'scienceFinished', @onScienceFinished
         super()
                 
-    onScienceFinished: (scienceKey) =>
+    onScienceFinished: (info) =>
         
-        if scienceKey == 'trade.sell' and @inOut == 'sell'
+        if info.scienceKey == 'trade.sell' and @inOut == 'sell'
             if SubMenu.current?.button == @
                 new StoneMenu @
             @render()
