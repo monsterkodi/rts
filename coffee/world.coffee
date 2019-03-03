@@ -275,6 +275,15 @@ class World
                 minMonster = monster
         minMonster
         
+    enemyClosestToBot: (bot) ->
+        
+        minDist = Number.MAX_VALUE
+        for enemy in @enemiesOfBot bot
+            if enemy.pos.manhattan(bot.pos) < minDist
+                minDist = enemy.pos.manhattan(bot.pos)
+                minEnemy = enemy
+        minEnemy
+        
     addCancer: (x,y,z) ->
         
         @cancers.push new Cancer @, vec(x,y,z)
@@ -327,6 +336,7 @@ class World
                     @addAI bot
                 @bases[player] = bot
                 bot.prod = 1/science(player).base.speed
+                bot.hitPoints = bot.health = science(player).storage.capacity * 4
             when Bot.trade
                 bot.trade = 1/science(player).trade.speed
                 bot.sell  = Stone.red
@@ -335,6 +345,7 @@ class World
                 bot.think = 1/science(player).brain.speed
             when Bot.berta
                 bot.shoot = 1/science(player).berta.speed
+                bot.hitPoints = bot.health = state.berta.health
             
         @bots[index] = bot
         bot
@@ -342,6 +353,7 @@ class World
     baseForBot: (bot) -> @bases[bot.player]
         
     getBots: -> Object.values @bots
+    enemiesOfBot: (bot) -> @getBots().filter (e) -> e.player != bot.player and e.type in [Bot.base, Bot.berta]
     
     botsOfType: (type, player=0) -> @getBots().filter (b) -> b.type == type and b.player == player
     botOfType:  (type, player=0) -> first @botsOfType type, player
@@ -385,6 +397,8 @@ class World
             log "pathFromPosToPos item! stone:#{Stone.string @stoneAtPos to} bot:#{Bot.string @botAtPos(to)?.type}", to
         null
     
+    bulletPath: (fromBot, toBot) -> @tubes.astar.bulletPath fromBot, toBot
+        
     distanceFromFaceToFace: (fromFaceIndex, toFaceIndex) ->
         
         # log "distanceFromFaceToFace #{@stringForFaceIndex fromFaceIndex} #{@stringForFaceIndex toFaceIndex}"
@@ -420,6 +434,8 @@ class World
     botAt:    (x,y,z) -> @botAtIndex @indexAt x,y,z
     botAtPos:     (v) -> @botAtIndex @indexAtPos v
     botAtIndex:   (i) -> @bots[i]
+    isBotAtPos:   (p) -> @botAtPos p
+    isBotAtIndex: (i) -> @botAtIndex i
 
     stoneAtPos:   (v) -> @stoneAtIndex @indexAtPos v
     stoneAtIndex: (i) -> @stones[i]
@@ -432,9 +448,11 @@ class World
     isItemAtPos:   (p) -> @isItemAtIndex @indexAtPos p
     isItemAtIndex: (i) -> @isStoneAtIndex(i) or @botAtIndex(i) or Cancer.isCellAtIndex i
     
+    noBotAtPos:    (p) -> not @isBotAtPos p
     noStoneAtPos:  (p) -> not @isStoneAtPos p
     noItemAtPos:   (p) -> not @isItemAtPos p
     noItemAtIndex: (i) -> not @isItemAtIndex i
+    noBotAtIndex:  (i) -> not @isBotAtIndex i
                 
     noStoneAroundPosInDirection: (pos, dir) ->
         
@@ -641,6 +659,12 @@ class World
     emptyNeighborsOfIndex: (index) =>
         
         @neighborsOfIndex(index).filter (n) => @noItemAtPos @posAtIndex n
+
+    emptyOrBotNeighborsOfIndex: (index) =>
+        
+        @neighborsOfIndex(index).filter (n) => 
+            p = @posAtIndex n
+            @isBotAtPos(p) or @noItemAtPos(p)
         
     # 000  000   000  0000000    00000000  000   000  
     # 000  0000  000  000   000  000        000 000   
@@ -657,11 +681,13 @@ class World
     # 000        000   000       000  
     # 000         0000000   0000000   
         
-    posAtIndex: (index) -> 
-        new Vector 
-            x:( index      & 0b111111111)-256
-            y:((index>>9 ) & 0b111111111)-256
-            z:((index>>18) & 0b111111111)-256
+    indexToPos: (index,pos) -> 
+        pos.x = ( index      & 0b111111111)-256
+        pos.y = ((index>>9 ) & 0b111111111)-256
+        pos.z = ((index>>18) & 0b111111111)-256
+        pos
+        
+    posAtIndex: (index) -> @indexToPos index, vec()
             
     posAtFaceIndex: (faceIndex) -> 
         [face,index] = @splitFaceIndex faceIndex
@@ -678,35 +704,35 @@ class World
     
     onScienceFinished: (scienceKey) =>
         
-        if scienceKey == 'base.radius'
-            @updateBaseCage()
+        if scienceKey.endsWith('radius') and @highBot
+            @updateCage @highBot
     
     onBotState: (bot, onOrOff) =>
         
-        if bot == 'base'
-            @updateBaseCage()
+        if bot in ['base', 'berta'] and @highBot
+            @updateCage @highBot
             
-    removeBaseCage: -> 
+    removeCage: -> 
         
         @baseCage?.parent.remove @baseCage
         delete @baseCage
             
-    updateBaseCage: ->
+    updateCage: (bot) ->
         
         player = 0
         
-        @removeBaseCage()
+        @removeCage()
         
-        if @base.state == 'on' and @base == @highBot
-            @baseCage = @construct.cage @base, science(player).base.radius
-            @baseCage.position.copy @base.pos
+        if bot.state == 'on' and bot == @highBot
+            @baseCage = @construct.cage bot, science(bot.player)[Bot.string bot.type].radius
+            @baseCage.position.copy bot.pos
     
     removeHighlight: ->
         
         @highBot?.highlight?.parent.remove @highBot?.highlight
         delete @highBot?.highlight
         delete @highBot
-        @removeBaseCage()
+        @removeCage()
         @removeBuildGuide()
     
     highlightPos: (v) -> @highlightBot @botAtPos @roundPos v
@@ -715,7 +741,7 @@ class World
         
         return if bot.player != 0
         if bot
-            @updateBaseCage() if bot.type == Bot.base
+            @updateCage(bot) if bot.type in Bot.caged
             if bot == @highBot 
                 @construct.orientFace bot.highlight, bot.face
                 return

@@ -128,7 +128,7 @@ class Geometry
         r = size/5
         cylinder = new THREE.CylinderGeometry r, r, size, 12
         
-        h = 0.1
+        h = 0.05
         box1 = new THREE.Mesh new THREE.BoxGeometry h, h, 2*size
         box2 = new THREE.Mesh new THREE.BoxGeometry h, 2*size, h
         box3 = new THREE.Mesh new THREE.BoxGeometry 2*size, h, h

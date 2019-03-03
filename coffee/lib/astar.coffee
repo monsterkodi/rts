@@ -41,6 +41,18 @@ class AStar
         # log "posPath #{@world.stringForIndex start} posPath"
         @findWithNeighborFunc start, goal, @world.emptyNeighborsOfIndex
         
+    bulletPath: (fromBot, toBot) ->
+
+        start = @world.indexAtPos fromBot.pos
+        goal  = @world.indexAtPos toBot.pos
+        
+        filterFunc = (world, acceptBot) -> (index) -> 
+            result = world.emptyOrBotNeighborsOfIndex(index).filter (ni) -> world.botAtIndex(ni) == acceptBot or world.noBotAtIndex(ni)
+            # log index, result
+            result
+        
+        @findWithNeighborFunc start, goal, filterFunc(@world,toBot)
+        
     findWithNeighborFunc: (start, goal, neighborFunc) ->
         
         closedSet = new Map # set of nodes already evaluated

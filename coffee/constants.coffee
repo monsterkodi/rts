@@ -32,6 +32,7 @@ module.exports =
         brain:      5
         berta:      6
         switchable: [1,3,5,6]
+        caged:      [1,6]
     
     Stone: new Enum
         red:        0

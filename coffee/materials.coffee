@@ -12,7 +12,9 @@ Color = require './color'
 
 Materials = 
     
-    cage:       new THREE.MeshPhongMaterial    color:0x880000, emissive:0x880000, specular:0x880000, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+    cage:       
+        base:   new THREE.MeshPhongMaterial    color:Color.cage.base,  emissive:Color.cage.base,  specular:Color.cage.base, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+        berta:  new THREE.MeshPhongMaterial    color:Color.cage.berta, emissive:Color.cage.berta, specular:Color.cage.berta, transparent:true, opacity:0.05, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
     spark:      new THREE.LineBasicMaterial    color:Color.stone.red, linewidth: 8
     white:      new THREE.MeshStandardMaterial color:0xffffff
     highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2

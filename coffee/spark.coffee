@@ -21,6 +21,7 @@ class Spark
         func = -> 
             if storage.canAfford([1,0,0,0]) and monster.health > 0
                 new Spark world, base, monster
+                
         for i in [0...8]
             setTimeout func, 1000*i/(world.speed*4)
     

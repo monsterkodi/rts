@@ -73,7 +73,8 @@ class Construct
                     
         # log s, bot.pos
         geom = @envelope bot.pos, isInside(s)
-        mesh = new THREE.Mesh geom, Materials.cage
+        mat = Materials.cage[Bot.string bot.type]
+        mesh = new THREE.Mesh geom, mat
         @world.scene.add mesh
         mesh
         

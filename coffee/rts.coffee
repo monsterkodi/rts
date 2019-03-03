@@ -220,16 +220,8 @@ class RTS
             if hit?.face?
                 @handle.moveBot @dragBot, hit.pos, hit.face
 
-    onDblClick: (event) =>
-        
-        if bot = @world.highBot
-            # log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
-            if bot.type in Bot.switchable
-                bot.state = bot.state == 'on' and 'off' or 'on'
-                post.emit 'botState', Bot.string(bot.type), bot.state
-        else
-            @handle.placeBase()
-                    
+    onDblClick: (event) => @handle.doubleClick()
+                            
     calcMouse: (event) ->
         
         br = @view.getBoundingClientRect()

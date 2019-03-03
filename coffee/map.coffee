@@ -81,11 +81,11 @@ class Map extends World
         # @addBot  0,-5, 1, Bot.base
         # @addBot -5, 0, 1, Bot.base
         
-        @addCancer 0,  0,  10, 15 #15
-        @addCancer 3, 3, 0, 10 #10
-        @addCancer -3, -3, 0, 10 #10
-        @addCancer -3, 3, 0, 10 #10
-        @addCancer 3, -3, 0, 10 #10
+        @addCancer  0,  0, 10, 25
+        @addCancer  3,  3,  0, 15
+        @addCancer -3, -3,  0, 15
+        @addCancer -3,  3,  0, 15
+        @addCancer  3, -3,  0, 15
         
     pest: ->
 

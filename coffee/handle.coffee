@@ -10,9 +10,11 @@
 
 { Face, Bot, Stone } = require './constants'
 
-Science = require './science'
-Spark  = require './spark'
-Vector = require './lib/vector'
+Science   = require './science'
+Materials = require './materials'
+Spark     = require './spark'
+Bullet    = require './bullet'
+Vector    = require './lib/vector'
 
 class Handle
 
@@ -20,11 +22,28 @@ class Handle
 
     botButtonClick: (button) ->
 
-        if empty @world.botsOfType button.bot
+        if button.bot == Bot.mine or empty @world.botsOfType button.bot
             @buyBot button.bot
+        else 
+            @toggleBotState @world.botOfType button.bot
+            # button.focusNextBot()
+           
+    doubleClick: ->
+        
+        if @world.highBot
+            # log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
+            @toggleBotState @world.highBot       
         else
-            button.focusNextBot()
+            log 'placeBase'
+            @placeBase()
 
+    toggleBotState: (bot) ->
+        
+        if bot.type in Bot.switchable
+            bot.state = bot.state == 'on' and 'off' or 'on'
+            post.emit 'botState', Bot.string(bot.type), bot.state
+            bot.state
+            
     botClicked: (bot) ->
 
         hit = rts.castRay()
@@ -73,47 +92,77 @@ class Handle
     # 000   000  000   000       000  000
     # 0000000    000   000  0000000   00000000
 
-    tickBase: (delta, bot) ->
+    tickBase: (delta, base) ->
 
-        @delay delta, bot, 'speed', 'prod', =>
+        @delay delta, base, 'speed', 'prod', =>
             gained = [0,0,0,0]
-            storage = @world.storage[bot.player]
+            storage = @world.storage[base.player]
             for stone in Stone.resources
-                amount = science(bot.player).base.prod[stone]
+                amount = science(base.player).base.prod[stone]
                 for i in [0...amount]
                     if storage.canTake stone
                         storage.add stone
                         gained[stone] += 1
-            @world.spent.gainAtPosFace gained, bot.pos, bot.face
+            @world.spent.gainAtPosFace gained, base.pos, base.face
             true
             
-    tickBerta: (delta, bot) ->
+    # 0000000    00000000  00000000   000000000   0000000   
+    # 000   000  000       000   000     000     000   000  
+    # 0000000    0000000   0000000       000     000000000  
+    # 000   000  000       000   000     000     000   000  
+    # 0000000    00000000  000   000     000     000   000  
+    
+    tickBerta: (delta, berta) ->
         
-        @delay delta, bot, 'speed', 'shoot', =>
-            log 'berta shoot'
+        return if berta.state != 'on'
+        if science(berta.player).tube.free < 2
+            return if not berta.path
+        
+        @delay delta, berta, 'speed', 'shoot', =>
+            storage = @world.storage[berta.player]
+            if storage.stones[Stone.gelb]
+                if enemy = @world.enemyClosestToBot berta
+                    if Math.round(enemy.pos.manhattan(berta.pos)) <= science(berta.player).berta.radius
+                        # log "shoot at #{Bot.string enemy.type}"
+                        Bullet.spawn @world, berta, enemy
+                    # else 
+                        # log "enemy too far #{Bot.string enemy.type}"
+                else 
+                    log 'no enemy'
+            else
+                log 'no stones'
             true
 
+    enemyDamage: (enemy, damage) ->
+        
+        enemy.hitPoints -= damage
+        log "enemyDamage #{Bot.string enemy.type} #{enemy.health} #{enemy.hitPoints}"
+        enemy.mesh.material = Materials.stone[Stone.gelb]
+        restoreMat = (enemy) -> -> rts.world.construct.colorBot enemy
+        setTimeout restoreMat(enemy), 1000*0.5/@world.speed
+        if enemy.hitPoints <= 0
+            log 'enemy dead!'
+            
     # 0000000    00000000    0000000   000  000   000
     # 000   000  000   000  000   000  000  0000  000
     # 0000000    0000000    000000000  000  000 0 000
     # 000   000  000   000  000   000  000  000  0000
     # 0000000    000   000  000   000  000  000   000
 
-    tickBrain: (delta, bot) ->
+    tickBrain: (delta, brain) ->
 
-        return if bot.state != 'on'
-        if science(bot.player).tube.free < 2
-            return if not bot.path
+        return if brain.state != 'on'
+        return if not brain.path
 
-        @delay delta, bot, 'speed', 'think', =>
+        @delay delta, brain, 'speed', 'think', =>
 
-            if cost = Science.currentCost bot.player
-                # log "tickBrain #{bot.player}", cost
-                storage = @world.storage[bot.player]
+            if cost = Science.currentCost brain.player
+                # log "tickBrain #{brain.player}", cost
+                storage = @world.storage[brain.player]
                 if storage.canAfford cost
-                    Science.deduct bot.player
+                    Science.deduct brain.player
                     storage.deduct cost
-                    @world.spent.costAtBot cost, bot
+                    @world.spent.costAtBot cost, brain
                     true
 
     # 000000000  00000000    0000000   0000000    00000000
@@ -122,30 +171,29 @@ class Handle
     #    000     000   000  000   000  000   000  000
     #    000     000   000  000   000  0000000    00000000
 
-    tickTrade: (delta, bot) ->
+    tickTrade: (delta, trade) ->
 
-        return if bot.state != 'on'
-        if science(bot.player).tube.free < 3
-            return if not bot.path
+        return if trade.state != 'on'
+        return if not trade.path
 
-        @delay delta, bot, 'speed', 'trade', =>
+        @delay delta, trade, 'speed', 'trade', =>
 
-            # log "bot.trade #{bot.player}"
-            storage    = @world.storage[bot.player]
-            sellStone  = bot.sell
-            sellAmount = science(bot.player).trade.sell
+            # log "trade.trade #{trade.player}"
+            storage    = @world.storage[trade.player]
+            sellStone  = trade.sell
+            sellAmount = science(trade.player).trade.sell
             # log "sell #{sellAmount} #{Stone.string sellStone}"
             if storage.has sellStone, sellAmount
-                buyStone = bot.buy
+                buyStone = trade.buy
                 # log "buy #{Stone.string buyStone}"
                 if storage.canTake buyStone
-                    # log "trade #{bot.player} #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
-                    if @world.tubes.insertPacket bot, buyStone
+                    # log "trade #{trade.player} #{sellAmount} #{Stone.string sellStone} for 1 #{Stone.string buyStone}"
+                    if @world.tubes.insertPacket trade, buyStone
                         storage.willSend buyStone
                         storage.add sellStone, -sellAmount
                         cost = [0,0,0,0]
                         cost[sellStone] = sellAmount
-                        @world.spent.costAtBot cost, bot
+                        @world.spent.costAtBot cost, trade
                         true
 
     # 0000000    000   000  000   000
@@ -371,6 +419,12 @@ class Handle
                     @world.highlightBot bot
                     return true
 
+    # 00     00   0000000   000   000   0000000  000000000  00000000  00000000   
+    # 000   000  000   000  0000  000  000          000     000       000   000  
+    # 000000000  000   000  000 0 000  0000000      000     0000000   0000000    
+    # 000 0 000  000   000  000  0000       000     000     000       000   000  
+    # 000   000   0000000   000   000  0000000      000     00000000  000   000  
+    
     monsterMoved: (monster) ->
 
         for base in @world.bases
@@ -378,6 +432,12 @@ class Handle
                 if Math.round(monster.pos.manhattan(base.pos)) <= science(base.player).base.radius
                     Spark.spawn @world, base, monster
 
+    #  0000000   0000000   000      000      
+    # 000       000   000  000      000      
+    # 000       000000000  000      000      
+    # 000       000   000  000      000      
+    #  0000000  000   000  0000000  0000000  
+    
     call: (player=0, cfg={moveWhenOnResource:true, moveBuild:true}) ->
         
         info = @world.emptyResourceNearBase player

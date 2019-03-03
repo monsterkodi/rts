@@ -49,7 +49,9 @@ Color =
     ai:                  color 0x111111
     segs:                color 0x111111
     path:                color 0xbbbbbb
-    cage:                color 0x0f0f0f
+    cage:                
+        base:            color 0x880000
+        berta:           color 0x888800
 
 Color.bot.red    = Color.stone.red
 Color.bot.gelb   = Color.stone.gelb

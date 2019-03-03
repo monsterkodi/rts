@@ -42,7 +42,12 @@ module.exports =
             
         nonMineSpeed: 0.2
            
-        spark: speed:  0.5
+        berta: health: 80
+        spark:  speed:  0.5
+        bullet: 
+            speed:  0.1
+            count:  8
+            delay:  0.8
         
         monster: 
             speed:    0.2
