@@ -6,8 +6,6 @@
 0000000    000   000  0000000   00000000  000   000  00000000  000   000   0000000 
 ###
 
-{ post, log } = require 'kxk'
-
 BotMenu      = require './botmenu'
 CallButton   = require './callbutton'
 

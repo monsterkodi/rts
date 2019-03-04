@@ -6,10 +6,6 @@
  0000000   0000000   0000000   0000000   000   000
 ###
 
-{ log, _ } = require 'kxk'
-
-THREE = require 'three'
-
 color = (v) -> new THREE.Color v
 
 Color =

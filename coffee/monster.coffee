@@ -6,11 +6,7 @@
 000   000   0000000   000   000  0000000      000     00000000  000   000
 ###
 
-{ fade, last, empty, deg2rad, randInt, log, _ } = require 'kxk'
-
-{ Stone } = require './constants'
-
-Vector = require './lib/vector'
+{ fade } = require 'kxk'
 
 class Monster
 
@@ -19,8 +15,8 @@ class Monster
         @boxes     = []
         @axes      = []
         @trail     = []
-        @health    = state.monster.health
-        @speed     = state.monster.speed
+        @health    = config.monster.health
+        @speed     = config.monster.speed
         @maxDist   = 4
         @trailSize = 0.04
         @length    = 16
@@ -57,7 +53,7 @@ class Monster
         if index >= 0
             @world.monsters.splice index, 1
             @world.addStone @pos.x, @pos.y, @pos.z, Stone.monster
-            @world.addResource @pos.x, @pos.y, @pos.z, @stone, state.monster.resource
+            @world.addResource @pos.x, @pos.y, @pos.z, @stone, config.monster.resource
             @world.construct.stones()
         else
             log 'dafuk?'

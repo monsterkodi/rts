@@ -6,12 +6,6 @@
  0000000   000   000  000   000  000        000   000
 ###
 
-{ first, last, post, prefs, elem, log, $, _ } = require 'kxk'
-
-{ Stone } = require './constants'
-
-Color = require './color'
-
 class Graph
 
     @graph      = null

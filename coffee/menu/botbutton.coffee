@@ -6,10 +6,6 @@
 0000000     0000000      000           0000000     0000000      000        000      0000000   000   000
 ###
 
-{ post, deg2rad, valid, first, empty, elem, log, $, _ } = require 'kxk'
-
-{ Stone, Bot } = require '../constants'
-
 CanvasButton = require './canvasbutton'
 BuyButton    = require './buybutton'
 BertaMenu    = require './bertamenu'
@@ -18,10 +14,6 @@ SubMenu      = require './submenu'
 TradeMenu    = require './trademenu'
 BuildMenu    = require './buildmenu'
 BrainMenu    = require './brainmenu'
-Materials    = require '../materials'
-Geometry     = require '../geometry'
-Science      = require '../science'
-Color        = require '../color'
 
 class BotButton extends CanvasButton
 
@@ -137,7 +129,6 @@ class BotButton extends CanvasButton
                 when Bot.trade then @show TradeMenu
                 when Bot.build then @show BuildMenu
                 when Bot.brain then @show BrainMenu
-                when Bot.berta then @show BertaMenu
             
         @camera.fov = 28
         @camera.updateProjectionMatrix()

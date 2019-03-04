@@ -6,10 +6,6 @@
    000     000   000  000   000  0000000    00000000  000   000  00000000  000   000   0000000 
 ###
 
-{ post, elem, $, log } = require 'kxk'
-
-{ Bot } = require '../constants'
-
 TradeButton  = require './tradebutton'
 BotMenu      = require './botmenu'
 

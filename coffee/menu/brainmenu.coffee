@@ -6,14 +6,9 @@
 0000000    000   000  000   000  000  000   000  000   000  00000000  000   000   0000000 
 ###
 
-{ post, log } = require 'kxk'
-
-{ Bot } = require '../constants'
-
 QueueButton  = require './queuebutton'
 BrainButton  = require './brainbutton'
 BotMenu      = require './botmenu'
-Science      = require '../science'
 
 class BrainMenu extends BotMenu
 

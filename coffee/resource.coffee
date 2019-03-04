@@ -6,19 +6,13 @@
 000   000  00000000  0000000    0000000    0000000   000   000   0000000  00000000
 ###
 
-{ clamp, log, _ } = require 'kxk'
-
-{ Stone } = require './constants'
-
-Vector = require './lib/vector'
-
 class Resource
 
     constructor: (@world, @index, @stone, @amount) ->
         
         @boxes = []
         for i in [0...6]
-            @boxes.push @world.boxes.add stone:@stone
+            @boxes.push @world.resourceBoxes.add stone:@stone
         
         @deduct 0
             
@@ -38,13 +32,13 @@ class Resource
         r = 0.6 - size/2
         for i in [0...6]            
             box = @boxes[i]
-            @world.boxes.setSize box, size
-            @world.boxes.setPos  box, pos.plus Vector.normals[i].mul r
+            @world.resourceBoxes.setSize box, size
+            @world.resourceBoxes.setPos  box, pos.plus Vector.normals[i].mul r
             
     del: ->
         
         for box in @boxes
-            @world.boxes.del box
+            @world.resourceBoxes.del box
         @boxes = []
         delete @world.resources[@index]
         for neighbor in @world.neighborsOfIndex @index

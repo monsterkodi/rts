@@ -6,14 +6,6 @@
 0000000    000   000  000   000  000  000   000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ first, last, deg2rad, log, _ } = require 'kxk'
-
-{ Bot, Stone } = require '../constants'
-
-Color        = require '../color'
-Science      = require '../science'
-Geometry     = require '../geometry'
-Materials    = require '../materials'
 CanvasButton = require './canvasbutton'
 
 class BrainButton extends CanvasButton
@@ -60,7 +52,17 @@ class BrainButton extends CanvasButton
         @camera.updateProjectionMatrix()
     
     stars: -> Science.nextStars @scienceKey, 0
+      
+    transMat: (mat) ->
         
+        if not @high
+            mat = mat.clone()
+            mat.transparent = true
+            mat.opacity     = 0.5
+            mat
+        else 
+            mat
+    
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
     # 0000000    0000000   000 0 000  000   000  0000000   0000000    
@@ -80,8 +82,7 @@ class BrainButton extends CanvasButton
             return super()
         
         construct = rts.world.construct
-        mat = Materials.menu.active
-
+        
         # 0000000     0000000   000000000  
         # 000   000  000   000     000     
         # 0000000    000   000     000     
@@ -108,7 +109,7 @@ class BrainButton extends CanvasButton
                     geom = new THREE.SphereGeometry 0.3, 12, 12
                     geom.computeFlatVertexNormals()
             
-        mesh = new THREE.Mesh geom, mat
+        mesh = new THREE.Mesh geom, @transMat Materials.menu.active
         
         switch science
             when 'trade', 'brain'
@@ -116,7 +117,9 @@ class BrainButton extends CanvasButton
         
         @scene.add mesh
         @meshes.bot = mesh
-            
+        
+        topicMaterial = (stone) => @transMat Materials.stone[stone]
+        
         # 000000000   0000000   00000000   000   0000000  
         #    000     000   000  000   000  000  000       
         #    000     000   000  00000000   000  000       
@@ -126,33 +129,33 @@ class BrainButton extends CanvasButton
         geom = switch key
             
             when 'limit', 'length'
-                mat = Materials.stone[Stone.white]
+                mat = topicMaterial Stone.white
                 g = new THREE.Geometry 
                 g.merge Geometry.plus 0.1, -0.05
                 g.merge Geometry.plus 0.1,  0.05
                 g
                 
             when 'radius'
-                mat = Materials.stone[Stone.white]
+                mat = topicMaterial Stone.white
                 g = new THREE.OctahedronGeometry 0.1, 0 
                 g
                 
             when 'speed'
-                mat = Materials.stone[Stone.red]
+                mat = topicMaterial Stone.red
                 g = new THREE.Geometry 
                 g.merge Geometry.speed 0.1, -0.05
                 g.merge Geometry.speed 0.1,  0.05
                 g
                 
             when 'gap'
-                mat = Materials.stone[Stone.red]
+                mat = topicMaterial Stone.red
                 g = new THREE.Geometry 
                 g.merge Geometry.box 0.09, -0.055
                 g.merge Geometry.box 0.09,  0.055
                 g
                 
             when 'free'
-                mat = Materials.stone[Stone.white]
+                mat = topicMaterial Stone.white
                 bot = switch stars
                     when 1 then Bot.build
                     when 2 then Bot.berta
@@ -164,7 +167,7 @@ class BrainButton extends CanvasButton
                 g
                 
             else
-                mat = Materials.stone[Stone.gelb]
+                mat = topicMaterial Stone.gelb
                 g = new THREE.Geometry 
                 g.merge Geometry.box 0.05, -0.03
                 g.merge Geometry.box 0.05, -0.03, -0.055

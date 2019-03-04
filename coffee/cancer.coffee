@@ -6,13 +6,6 @@
  0000000  000   000  000   000   0000000  00000000  000   000
 ###
 
-{ valid, randInt, deg2rad, log, _ } = require 'kxk'
-
-{ Stone } = require './constants'
-
-Vector    = require './lib/vector'
-Materials = require './materials'
-
 class Cancer
 
     @cells: {}
@@ -24,8 +17,8 @@ class Cancer
         @boxes     = []
         @growBoxes = {}
         @growCells = []
-        @growTime  = Math.random() * state.cancer.growTime
-        @ageTime   = state.cancer.ageTime
+        @growTime  = Math.random() * config.cancer.growTime
+        @ageTime   = config.cancer.ageTime
         @cellsSinceLastMonster = 0
         @spawnAtPos @pos
                     
@@ -51,7 +44,7 @@ class Cancer
     spawnAtPos: (pos) ->
         
         @cellsSinceLastMonster += 1
-        if @cellsSinceLastMonster >= state.cancer.cellsPerMonster
+        if @cellsSinceLastMonster >= config.cancer.cellsPerMonster
             @cellsSinceLastMonster = 0
             @world.addMonster pos.x, pos.y, pos.z
         
@@ -62,11 +55,11 @@ class Cancer
         @growBoxes[index] = []
         
         for i in [0...numGrow]
-            box  = @world.boxes.add stone:Stone.cancer, size:0.001, pos:pos
+            box  = @world.resourceBoxes.add stone:Stone.cancer, size:0.001, pos:pos
             box.axis = Vector.random()
             box.age = 0
             
-            @world.boxes.setRot box, quat().setFromUnitVectors vec(0,0,1), box.axis
+            @world.resourceBoxes.setRot box, quat().setFromUnitVectors vec(0,0,1), box.axis
             
             @boxes.push box
             @growBoxes[index].push box
@@ -75,15 +68,15 @@ class Cancer
         
         @growTime -= scaledDelta
         if @growTime <= 0
-            @growTime = state.cancer.growTime - @growTime
+            @growTime = config.cancer.growTime - @growTime
             @grow()
             
         for index,boxes of @growBoxes
             for box in boxes
-                rot = @world.boxes.rot box
+                rot = @world.resourceBoxes.rot box
                 box.age += scaledDelta
-                @world.boxes.setSize box, Math.min 1, box.age / @ageTime
-                @world.boxes.setRot  box, rot.multiply quat().setFromAxisAngle box.axis, deg2rad state.cancer.rotSpeed*scaledDelta
+                @world.resourceBoxes.setSize box, Math.min 1, box.age / @ageTime
+                @world.resourceBoxes.setRot  box, rot.multiply quat().setFromAxisAngle box.axis, deg2rad config.cancer.rotSpeed*scaledDelta
                 if box.age >= @ageTime
                     delete @growBoxes[index]
             

@@ -6,20 +6,11 @@
 0000000     0000000   000   000  00000000  0000000 
 ###
 
-{ last, log } = require 'kxk'
-
-{ Stone } = require './constants'
-
-THREE = require 'three'
 require('three-instanced-mesh')(THREE)
-
-Color     = require './color'
-Geometry  = require './geometry'
-Materials = require './materials'
 
 class Boxes
 
-    constructor: (scene, @maxBoxes=50000, geom=Geometry.cornerBox()) ->
+    constructor: (scene, @maxBoxes=1000, geom=Geometry.cornerBox()) ->
 
         @boxes = []
         @cluster = new THREE.InstancedMesh geom, Materials.white, @maxBoxes, true, true, true

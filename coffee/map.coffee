@@ -6,10 +6,6 @@
 000   000  000   000  000      
 ###
 
-{ randInt, log, _ } = require 'kxk'
-
-{ Stone, Bot, Face } = require './constants'
-
 Config = require './config'
 World  = require './world'
 
@@ -172,5 +168,6 @@ class Map extends World
         @wall -1,-1,-2, 1,1,-2
         
         @addBot  0, 0, 1, Bot.base
+        @addBot  1, 1, -2, Bot.base
         
 module.exports = Map

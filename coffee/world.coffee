@@ -6,10 +6,7 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-{ post, prefs, randInt, clamp, first, last, valid, empty, str, log, _ } = require 'kxk'
-
 AI        = require './ai'
-Vector    = require './lib/vector'
 Packet    = require './packet'
 Tubes     = require './tubes'
 Cages     = require './cages'
@@ -19,13 +16,8 @@ Graph     = require './graph'
 Cancer    = require './cancer'
 Monster   = require './monster'
 Storage   = require './storage'
-Science   = require './science'
 Resource  = require './resource'
-Geometry  = require './geometry'
-Materials = require './materials'
 Construct = require './construct'
-
-{ Stone, Bot, Face, Edge, Bend } = require './constants'
 
 class World
     
@@ -33,7 +25,7 @@ class World
         
         rts.world  = @
         
-        window.state   = _.clone config # clone needed?
+        window.config  = config
         window.science = Science.science
         
         @stones    = {}
@@ -50,10 +42,9 @@ class World
         @cages  = new Cages @ 
         @tubes  = new Tubes @
         @spent  = new Spent @
-        @boxes  = new Boxes @scene 
-        
-        @setSpeed prefs.get 'speed', 6
-        
+        @boxes         = new Boxes @scene, 10000
+        @resourceBoxes = new Boxes @scene, 10000
+                
         @sample  = 0
         @timeSum = 0
         @cycles  = 0
@@ -70,13 +61,11 @@ class World
         if prefs.get 'graph', false
             Graph.toggle()
             
-        post.on 'storageChanged',  @onStorageChanged
+        post.on 'storageChanged', @onStorageChanged
         
-    toggleStones: ->
-        
-        for stone in Stone.all
-            @construct.stoneMeshes[stone].material = Materials.transparent
-        
+        @setSpeed   prefs.get 'speed', 6
+        @setOpacity prefs.get 'opacity', 6
+                
     drawBrokenPath: (info) ->
         
         # log info
@@ -95,11 +84,36 @@ class World
         g = Geometry.coordinateCross 0.05, p.x, p.y, p.z
         @scene.add new THREE.Mesh g, Materials.stone[1]
         
+    #  0000000   00000000    0000000    0000000  000  000000000  000   000  
+    # 000   000  000   000  000   000  000       000     000      000 000   
+    # 000   000  00000000   000000000  000       000     000       00000    
+    # 000   000  000        000   000  000       000     000        000     
+    #  0000000   000        000   000   0000000  000     000        000     
+    
+    setOpacity: (opacityIndex) ->
+        
+        @opacityIndex = clamp 0, config.world.opacity.length-1, opacityIndex
+        @opacity = config.world.opacity[@opacityIndex]
+
+        prefs.set 'opacity', @opacityIndex
+        
+        for stone in Stone.all
+            @construct.stoneMeshes[stone].material.transparent = true
+            @construct.stoneMeshes[stone].material.opacity = @opacity
+        
+        @resourceBoxes.cluster.material.transparent = true
+        @resourceBoxes.cluster.material.opacity = @opacity
+        post.emit 'worldOpacity', @opacity, @opacityIndex
+        
+    resetOpacity: -> @setOpacity 6
+    incrOpacity:  -> @setOpacity @opacityIndex + 1
+    decrOpacity:  -> @setOpacity @opacityIndex - 1
+        
     setSpeed: (speedIndex) -> 
         
-        @speedIndex = clamp 0, state.world.speed.length-1, speedIndex
-        @speed = state.world.speed[@speedIndex]
-        log "speed #{@speedIndex} #{@speed}"
+        @speedIndex = clamp 0, config.world.speed.length-1, speedIndex
+        @speed = config.world.speed[@speedIndex]
+        # log "speed #{@speedIndex} #{@speed}"
         prefs.set 'speed',      @speedIndex
         post.emit 'worldSpeed', @speed, @speedIndex
 
@@ -121,6 +135,7 @@ class World
             # @simulate Math.min 0.1, scaledDelta
             # scaledDelta -= Math.min 0.1, scaledDelta
         @boxes.render()
+        @resourceBoxes.render()
         post.emit 'tick'
         
     simulate: (scaledDelta) ->
@@ -132,7 +147,7 @@ class World
         @spent.animate scaledDelta
         @tubes.animate scaledDelta
         
-        for bot in @getBots()
+        for bot in @getAllBots()
             rts.handle.tickBot scaledDelta, bot
          
         if valid @monsters
@@ -326,7 +341,7 @@ class World
             player: player
             
         bot.mine = 1/Science.mineSpeed bot
-        bot.hitPoints = bot.health = state[Bot.string type].health
+        bot.hitPoints = bot.health = config[Bot.string type].health
                 
         if type in Bot.switchable
             bot.state = 'off'
@@ -377,11 +392,11 @@ class World
         
     baseForBot: (bot) -> @bases[bot.player]
         
-    getBots: -> Object.values @bots
-    botsOfPlayer: (player=0) -> @getBots().filter (bot) -> bot.player == player
-    enemiesOfBot: (bot) -> @getBots().filter (e) -> e.player != bot.player #and e.type in [Bot.base, Bot.berta]
+    getAllBots: -> Object.values @bots
+    botsOfPlayer: (player=0) -> @getAllBots().filter (bot) -> bot.player == player
+    enemiesOfBot: (bot) -> @getAllBots().filter (e) -> e.player != bot.player #and e.type in [Bot.base, Bot.berta]
     
-    botsOfType: (type, player=0) -> @getBots().filter (b) -> b.type == type and b.player == player
+    botsOfType: (type, player=0) -> @botsOfPlayer(player).filter (b) -> b.type == type
     botOfType:  (type, player=0) -> first @botsOfType type, player
         
     removePlayer: (player) ->

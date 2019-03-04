@@ -6,17 +6,11 @@
   000  000   000  000        0000000   
 ###
 
-{ elem, log, $, _ }  = require 'kxk'
-
-{ Bot, Stone } = require '../constants'
-
-Science = require '../science'
-
 class Info
 
     constructor: ->
                     
-        @elem = elem class:'info', style:'position:absolute; z-index:1; bottom:10px; right:20px'
+        @elem = elem class:'info', style:'position:absolute; z-index:1; bottom:10px; right:20px; pointer-events: none;'
 
         document.body.appendChild @elem
           
@@ -39,13 +33,22 @@ class Info
         # add "trias: #{info.triangles}"
         # add "lines: #{info.lines}"
         add "stone: #{_.size rts.world.stones}"
-        add "boxes: #{world.boxes.numBoxes()}"
+        add "boxes: #{world.boxes.numBoxes()} / #{world.boxes.maxBoxes}"
+        add "resbx: #{world.resourceBoxes.numBoxes()} / #{world.resourceBoxes.maxBoxes}"
+        add "stgbx: #{rts.menu.buttons.storage.boxes.numBoxes()} / #{rts.menu.buttons.storage.boxes.maxBoxes}"
+        
         add "segmt: #{world.tubes.getSegments(0).length}"
+        for ai in world.ai
+            add "segmt#{ai.player}: #{world.tubes.getSegments(ai.player).length}"
+            
         add "pckts: #{world.tubes.getPackets(0).length}"
+        for ai in world.ai
+            add "pckts#{ai.player}: #{world.tubes.getPackets(ai.player).length}"
+            
         add "store: #{world.storage[0].stones}"
         # add "temps: #{world.storage[0].temp}"
         for ai in world.ai
-            add "strg#{ai.player}: #{world.storage[ai.player].stones}"
+            add "store#{ai.player}: #{world.storage[ai.player].stones}"
             # add "temp#{ai.player}: #{world.storage[ai.player].temp}"
         for ai in world.ai
             add "base#{ai.player}: #{ai.base.state} #{world.botOfType(Bot.base, ai.player)?.hitPoints}"

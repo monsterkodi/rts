@@ -6,11 +6,6 @@
  0000000   00000000   0000000   000   000  00000000     000     000   000     000   
 ###
 
-{ deg2rad, log, _ } = require 'kxk'
-
-{ Bot } = require './constants'
-
-THREE     = require 'three'
 ThreeBSP  = require('three-js-csg')(THREE)
 
 class Geometry

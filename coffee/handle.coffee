@@ -6,15 +6,8 @@
 000   000  000   000  000   000  0000000    0000000  00000000
 ###
 
-{ post, empty, valid, first, log, str, _ } = require 'kxk'
-
-{ Face, Bot, Stone } = require './constants'
-
-Science   = require './science'
-Materials = require './materials'
 Spark     = require './spark'
 Bullet    = require './bullet'
-Vector    = require './lib/vector'
 
 class Handle
 
@@ -130,10 +123,10 @@ class Handle
                         Bullet.spawn @world, berta, enemy
                     # else 
                         # log "enemy too far #{Bot.string enemy.type}"
-                else 
-                    log 'no enemy'
-            else
-                log 'no stones'
+                # else 
+                    # log 'no enemy'
+            # else
+                # log 'no stones'
             true
 
     enemyDamage: (enemy, damage) ->
@@ -218,7 +211,7 @@ class Handle
     buyBot: (type, player=0) ->
 
         storage = @world.storage[player]
-        cost = state.cost[Bot.string type]
+        cost = config.cost[Bot.string type]
         if not storage.canAfford cost
             if player == 0
                 log "WARNING handle.buyBot player:#{player} -- not enough stones for bot!"

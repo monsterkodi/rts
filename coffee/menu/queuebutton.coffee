@@ -6,9 +6,6 @@
  00000 00   0000000   00000000   0000000   00000000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ log } = require 'kxk'
-
-Science     = require '../science'
 BrainButton = require './brainbutton'
 
 class QueueButton extends BrainButton
@@ -19,6 +16,8 @@ class QueueButton extends BrainButton
         
         @canvas.classList.add 'queueButton'
 
+    transMat: (mat) -> mat
+        
     stars: -> @info.stars
   
     click: => Science.dequeue @info

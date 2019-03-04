@@ -6,13 +6,6 @@
 000   000  000
 ###
 
-{ post, first, last, valid, empty, str, log, _ } = require 'kxk'
-
-{ Bot, Stone } = require './constants'
-
-Science = require './science'
-Vector = require './lib/vector'
-
 class AI
 
     constructor: (@world, @base) ->
@@ -110,7 +103,7 @@ class AI
         @tick = 0
         @task = ''
         @player = @base.player
-        @actionDelay = state.ai.delay
+        @actionDelay = config.ai.delay
         @actionQueue = []
         
         post.on 'botRemoved', @onBotRemoved
@@ -134,7 +127,7 @@ class AI
     
         @actionDelay -= scaledDelta
         return if @actionDelay > 0
-        @actionDelay += state.ai.delay
+        @actionDelay += config.ai.delay
         @tick++
         return if @dequeueAction()
         return if @moveToTarget()
@@ -184,7 +177,7 @@ class AI
     
     switchBase: ->
         
-        sparkStones = @amountOf state.spark.stone
+        sparkStones = @amountOf config.spark.stone
         
         if sparkStones > 40
             if @base.state == 'off'
@@ -201,7 +194,7 @@ class AI
         
         if valid bertas
         
-            bulletStones = @amountOf state.bullet.stone
+            bulletStones = @amountOf config.bullet.stone
             
             if bulletStones > 40
                 if bertas[0].state == 'off'

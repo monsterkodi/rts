@@ -6,10 +6,6 @@
 0000000      000      0000000   000   000  000   000   0000000   00000000
 ###
 
-{ post, clamp, menu, log, _ } = require 'kxk'
-
-{ Stone } = require './constants'
-
 class Storage 
 
     constructor: (@world, @player) ->
@@ -22,7 +18,7 @@ class Storage
         # log "new Storage #{@player}"
         
         for stone in Stone.resources
-            @add stone, state.storage.stones[stone], 'init'
+            @add stone, config.storage.stones[stone], 'init'
         
         post.on 'scienceFinished', @onScienceFinished
                     

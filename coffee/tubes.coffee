@@ -6,12 +6,7 @@
    000      0000000   0000000    00000000  0000000 
 ###
 
-{ post, valid, empty, first, last, log, _ } = require 'kxk'
-
-{ Stone, Bend, Bot } = require './constants'
-
 AStar    = require './lib/astar'
-Vector   = require './lib/vector'
 Packet   = require './packet'
 
 class Tubes
@@ -33,6 +28,16 @@ class Tubes
     insertPacket: (bot, stone) ->
         
         if seg = @segmentBelowBot bot
+            
+            if seg.player != bot.player
+                log 'DAFUK? tubes.insertPacket #{bot.player} != #{seg.player}!'
+                return
+            
+            # if not @isInputBlocked seg
+                # log "tubes.insertPacket #{Bot.string bot.type} #{bot.player} #{Stone.string stone} blocked? #{@isInputBlocked seg}"
+            # else
+                # log "blocked #{Bot.string bot.type} #{bot.player} #{Stone.string stone}"
+            
             stone ?= @world.stoneBelowBot bot
             # log 'insertPacket blocked', Stone.string(stone), @isInputBlocked seg
             if not @isInputBlocked seg
@@ -43,9 +48,11 @@ class Tubes
         # log 'insertPacketFAIL', Stone.string stone
         false
         
-    insertPacketIntoSegment: (pck, seg) -> seg.packets.unshift pck
+    insertPacketIntoSegment: (pck, seg) -> 
+    
+        seg.packets.unshift pck
         
-    isInputBlocked: (seg) -> first(seg.packets)?.moved < @gap(seg.player)
+    isInputBlocked: (seg) -> first(seg.packets)?.moved <= @gap(seg.player)
                 
     isCrossingBlocked: (seg, pck) -> 
         
@@ -58,8 +65,8 @@ class Tubes
                 waiting += 1
                 
         if waiting > 0
-            seg.queue = [] if not seg.queue
-            seg.queue.push pck if pck not in seg.queue
+            seg.queue ?= []
+            seg.queue.push(pck) if pck not in seg.queue
             if pck == first seg.queue
                 return false
                 
@@ -89,10 +96,10 @@ class Tubes
         for player in @world.players
             segs = @getSegments player
             segs.sort (a,b) -> a.dist - b.dist
-            
             for seg in segs
                 
                 continue if empty seg.packets
+                outSeg = null
                 
                 if seg.out
                     outSeg = @segments[player][seg.out]
@@ -106,14 +113,14 @@ class Tubes
                         if pckIndex == seg.packets.length-1
                             nextDist = @distToNext pck, seg, outSeg
                         else
-                            nextDist = (seg.packets[pckIndex+1].moved - @gap(seg.player)) - pck.moved
+                            nextDist = (seg.packets[pckIndex+1].moved - @gap(player)) - pck.moved
                             
-                        moveDist = Math.min delta * @speed(seg.player), nextDist
+                        moveDist = Math.min delta * @speed(player), nextDist
                         pck.move moveDist 
                         
                         if pck.moved >= seg.moves
                             if pck == first outSeg.queue
-                                outSeg.queue.shift()
+                                outSeg.queue.shift()                            
                             @insertPacketIntoSegment pck, outSeg
                             seg.packets.pop()
                             pck.move -seg.moves
@@ -122,10 +129,10 @@ class Tubes
                             pck.moveOnSegment seg
                     else
                         
-                        pck.move delta * @speed(seg.player)
+                        pck.move delta * @speed(player)
                         if pck.moved >= seg.moves
                             pck = seg.packets.pop()
-                            @world.storage[pck.player].add pck.stone
+                            @world.storage[player].add pck.stone
                             pck.del()
                         else
                             pck.moveOnSegment seg
@@ -154,7 +161,7 @@ class Tubes
         oldSegments = @segments[player]
         @segments[player] = {}
         
-        for bot in @world.getBots player
+        for bot in @world.botsOfPlayer player
             continue if bot.type == Bot.base
             
             hadPath = bot.path?
@@ -168,7 +175,7 @@ class Tubes
                 
                 fi = @world.faceIndex bot.path.points[0].face, bot.path.points[0].index
                 si = @segIndex fi, fi
-                fakePoints = [_.cloneDeep(bot.path.points[0]), _.clone(bot.path.points[0])]
+                fakePoints = [_.cloneDeep(bot.path.points[0]), _.cloneDeep(bot.path.points[0])]
                 fakePoints[0].pos.add Vector.normals[bot.face].mul 0.7
                 @segments[player][si] = 
                     index:  si
@@ -209,7 +216,7 @@ class Tubes
                 nextIndex += 1
         
         @world.construct.tubes player          
-        # log 'build', segs.map (s) -> dist:s.dist, in:s.in, out:s.out, index:s.index, from:s.from, to:s.to#, points:s.points
+        # log 'build', segs.map (s) -> player:s.player, dist:s.dist, in:s.in, out:s.out, index:s.index, from:s.from, to:s.to#, points:s.points
                     
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  
@@ -301,6 +308,7 @@ class Tubes
         packets = []
         for seg in @getSegments player
             packets = packets.concat seg.packets
+        # log packets
         packets
         
 module.exports = Tubes

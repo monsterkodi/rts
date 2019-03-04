@@ -6,24 +6,47 @@
 000   000     000     0000000 
 ###
 
-{ prefs, post, elem, empty, valid, deg2rad, log, _ } = require 'kxk'
+{ prefs, post, randInt, clamp, elem, empty, valid, first, last, deg2rad, rad2deg, str, log, $, _ } = require 'kxk'
 
-{ Bot } = require './constants'
+{ Bot, Stone, Geom, Face, Edge, Bend } = require './constants'
 
-THREE   = require 'three'
+window.$         = $
+window._         = _
+window.post      = post
+window.prefs     = prefs
+window.randInt   = randInt
+window.deg2rad   = deg2rad
+window.rad2deg   = rad2deg
+window.clamp     = clamp
+window.empty     = empty
+window.valid     = valid
+window.first     = first
+window.last      = last
+window.elem      = elem
+window.str       = str
+window.log       = log
+
+window.Bot       = Bot
+window.Edge      = Edge
+window.Bend      = Bend
+window.Geom      = Geom
+window.Face      = Face
+window.Stone     = Stone
+window.THREE     = require 'three'
+window.Vector    = require './lib/vector'
+window.Color     = require './color'
+window.Science   = require './science'
+window.Geometry  = require './geometry'
+window.Materials = require './materials'
+
 FPS     = require './lib/fps'
 Info    = require './lib/info'
 Debug   = require './lib/debug'
 Menu    = require './menu/menu'
 World   = require './world'
 Map     = require './map'
-Color   = require './color'
 Camera  = require './camera'
 Handle  = require './handle'
-Science = require './science'
-Vector  = require './lib/vector'
-
-window.THREE = THREE
 
 class RTS
 
@@ -294,6 +317,8 @@ class RTS
         @renderer.render @world.scene, @camera
         
         @fps.draw()
+        
+        return if @paused
 
         if prefs.get 'info'
             @info = new Info if not @info

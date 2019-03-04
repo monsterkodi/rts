@@ -6,10 +6,6 @@
 000   000  000   000     000     00000000  000   000  000  000   000  0000000  0000000 
 ###
 
-THREE = require 'three'
-
-Color = require './color'
-
 Materials = 
     transparent: new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.1
     cage:   

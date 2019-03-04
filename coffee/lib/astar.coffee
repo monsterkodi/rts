@@ -6,10 +6,6 @@
 000   000  0000000      000     000   000  000   000
 ###
 
-{ valid, log, _ } = require 'kxk'
-
-Vector = require './vector'
-
 class AStar
 
     constructor: (@world) ->

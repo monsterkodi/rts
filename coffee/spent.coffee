@@ -6,15 +6,6 @@
 0000000   000        00000000  000   000     000
 ###
 
-{ deg2rad, valid, pos, log } = require 'kxk'
-
-
-{ Stone, Face, Bot } = require './constants'
-
-Vector    = require './lib/vector'
-Color     = require './color'
-Materials = require './materials'
-
 rotCount = 0
 
 class Spent
@@ -74,7 +65,8 @@ class Spent
             when Bot.trade then 0.22
             when Bot.mine  then 0.13
             when Bot.brain then 0.18
-            else 0.8
+            when Bot.berta then 0.10
+            else 0.2
         
         @costAtPosFace cost, bot.pos, bot.face, radius
                 
@@ -115,9 +107,8 @@ class Spent
         
         box = @world.boxes.add pos:startPos, size:0.05, stone:stone, rot:rot
         box.dir = dir
-        # box.rot = quat().setFromAxisAngle Vector.normals[face], deg2rad -1
         box.rot = Vector.normals[face]
-        box.life = box.maxLife = 6
+        box.life = box.maxLife = config.spent.time.cost
         @spent.push box
 
     spawnGain: (stone, stoneIndex, numStones, pos, face) ->
@@ -132,7 +123,7 @@ class Spent
         box = @world.boxes.add pos:startPos, size:0.001, stone:stone, dir:pos.to startPos
         box.startPos = startPos
         box.bot = rts.world.botAtPos pos
-        box.life = box.maxLife = 4
+        box.life = box.maxLife = config.spent.time.gain
         @gains.push box
 
 module.exports = Spent

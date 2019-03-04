@@ -6,11 +6,9 @@
  0000000  000   000  000   000  00000000  000   000  000   000
 ###
 
-{ deg2rad, rad2deg, clamp, valid, reduce, log } = require 'kxk'
+{ reduce } = require 'kxk'
 
-Vector      = require './lib/vector'
 Quaternion  = require './lib/quaternion'
-THREE       = require 'three'
 
 class Camera extends THREE.PerspectiveCamera
 

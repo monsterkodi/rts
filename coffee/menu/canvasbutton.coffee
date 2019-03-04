@@ -6,12 +6,6 @@
  0000000  000   000  000   000      0      000   000  0000000   0000000     0000000      000        000      0000000   000   000
 ###
 
-{ elem, empty, log, _ } = require 'kxk'
-
-{ Stone } = require '../constants'
-
-Color = require '../color'
-
 class CanvasButton
     
     @renderer = null

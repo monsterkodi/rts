@@ -6,14 +6,13 @@
  0000000   0000000   000   000  000       000   0000000 
 ###
 
-{ Stone } = require './constants'
-
 module.exports = 
     
     default:
             
         world:
             speed: [1/4, 1/2, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48]
+            opacity: [0, 0.04, 0.06, 0.08, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1]
         
         ai: delay: 20
         
@@ -49,6 +48,10 @@ module.exports =
         berta: health: 64
         mine:  health: 32
         
+        spent:
+            time:
+                cost: 12
+                gain: 8
         spark:  
             speed: 0.5
             stone: Stone.blue

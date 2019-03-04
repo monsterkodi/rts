@@ -6,12 +6,6 @@
 0000000     0000000   0000000  0000000  00000000     000     
 ###
 
-{ empty, str, log, _ } = require 'kxk'
-
-{ Stone } = require './constants'
-
-Materials = require './materials'
-
 class Bullet
 
     @spawn: (world, berta, enemy) ->
@@ -19,17 +13,17 @@ class Bullet
         storage = world.storage[berta.player]
         
         func = -> 
-            if storage.has(state.bullet.stone) and enemy.health > 0
+            if storage.has(config.bullet.stone) and enemy.health > 0
                 new Bullet world, berta, enemy
-        for i in [0...state.bullet.count]
-            setTimeout func, 1000*state.bullet.delay*i/world.speed
+        for i in [0...config.bullet.count]
+            setTimeout func, 1000*config.bullet.delay*i/world.speed
     
     constructor: (@world, berta, @enemy) ->
         
         @enemy.health -= 1
         # log "enemy.health #{@enemy.health}"
         storage = @world.storage[berta.player]
-        storage.sub state.bullet.stone
+        storage.sub config.bullet.stone
         @pos = vec berta.pos
         @updatePath()
         if not @path
@@ -38,7 +32,7 @@ class Bullet
         @dir = vec()
         @updateDir()
                 
-        @box = @world.boxes.add pos:@pos, size:0.05, stone:state.bullet.stone
+        @box = @world.boxes.add pos:@pos, size:0.05, stone:config.bullet.stone
         @life = 0
         @animate 0
         
@@ -56,7 +50,7 @@ class Bullet
         
     animate: (delta) =>
         
-        @life += state.bullet.speed * delta
+        @life += config.bullet.speed * delta
         
         if @life > 1
             @life -= 1 

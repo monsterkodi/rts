@@ -6,10 +6,6 @@
 0000000    0000000  000  00000000  000   000   0000000  00000000
 ###
 
-{ post, last, first, empty, log, _ } = require 'kxk'
-
-{ Bot } = require './constants'
-
 class Science
 
     @tree = 
@@ -73,7 +69,7 @@ class Science
         
         switch bot.type
             when Bot.mine then @science(bot.player).mine.speed
-            else state.nonMineSpeed
+            else config.nonMineSpeed
         
     @split: (scienceKey) -> scienceKey.split '.'
         
@@ -100,8 +96,8 @@ class Science
         stars = @nextStars scienceKey, player
         [science, key] = @split scienceKey
         if stars <= @maxStars(scienceKey,player) and @queue[player].length < @maxQueue
-            c     = window.debug?.cheapScience and 1 or state.scienceCost[stars]
-            times = window.debug?.fastScience and 1 or state.scienceSteps[stars]-@players[player].progress[science][key][stars]
+            c     = window.debug?.cheapScience and 1 or config.scienceCost[stars]
+            times = window.debug?.fastScience and 1 or config.scienceSteps[stars]-@players[player].progress[science][key][stars]
             cost  = [c,c,c,c]
             @queue[player].push scienceKey:scienceKey, stars:stars, cost:cost, times:times, player:player
             if player == 0
@@ -142,7 +138,7 @@ class Science
     @progress: (scienceKey, stars, player=0) ->
         
         [science, key] = @split scienceKey
-        100*@players[player].progress[science][key][stars]/(state.scienceSteps[stars]-1)
+        100*@players[player].progress[science][key][stars]/(config.scienceSteps[stars]-1)
             
     @finished: (info) =>
         log "Science.finished #{info.player} #{info.scienceKey} #{info.stars}"

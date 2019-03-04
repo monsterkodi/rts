@@ -6,12 +6,6 @@
 000        000   000   0000000  000   000  00000000     000   
 ###
 
-{ deg2rad, empty, clamp, log, _ } = require 'kxk'
-
-THREE     = require 'three'
-Vector    = require './lib/vector'
-Materials = require './materials'
-
 class Packet
 
     constructor: (@stone, @player, world) ->
@@ -19,9 +13,8 @@ class Packet
         @moved = 0
         
         size = 0.001
-        # size = 0.1
         
-        @box = world.boxes.add stone:@stone, size:size, pos:vec(0,0,0)
+        @box = world.boxes.add stone:@stone, size:size, pos:vec()
         
         @lifeTime = 0
         rts.animate @initialScale
@@ -75,8 +68,14 @@ class Packet
         else
             frc = factor
             
-        dir = ths.pos.to nxt.pos
-        tgt = ths.pos.plus dir.mul frc
+        # dir = ths.pos.to nxt.pos
+        # tgt = ths.pos.plus dir.mul frc
+        tgt = vec nxt.pos
+        tgt.sub ths.pos
+        tgt.scale frc
+        tgt.add ths.pos
+        
+        # log "#{@player} #{Stone.string @stone} #{tgt.x} #{tgt.y} #{tgt.z}"
         
         rts.world.boxes.setPos @box, tgt
         

@@ -6,15 +6,13 @@
 000   000  00000000  000   000   0000000 
 ###
 
-{ post, stopEvent, elem, log, $, _ } = require 'kxk'
+{ stopEvent } = require 'kxk'
 
-{ Bot }   = require '../constants'
-
-Color         = require '../color'
 StorageButton = require './storagebutton'
 BotButton     = require './botbutton'
 BuyButton     = require './buybutton'
 SpeedButton   = require './speedbutton'
+OpacityButton = require './opacitybutton'
 SubMenu       = require './submenu'
 
 class Menu
@@ -39,7 +37,8 @@ class Menu
         for bot in bots
             @buttons[Bot.string bot] = new BotButton bot, @div
             
-        @speed = new SpeedButton main
+        new SpeedButton main
+        new OpacityButton main
             
         @div.addEventListener 'mouseenter', @onMouseEnter
         @div.addEventListener 'mouseleave', @onMouseLeave

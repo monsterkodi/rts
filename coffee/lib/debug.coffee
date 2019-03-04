@@ -6,8 +6,6 @@
 0000000    00000000  0000000     0000000    0000000 
 ###
 
-{ post, elem, clamp, def, log, _ } = require 'kxk'
-
 class Debug
 
     constructor: () ->

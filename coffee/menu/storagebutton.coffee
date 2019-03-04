@@ -6,14 +6,8 @@
 0000000      000      0000000   000   000  000   000   0000000   00000000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ post, clamp, menu, log, _ } = require 'kxk'
-
-{ Stone } = require '../constants'
-
 CanvasButton = require './canvasbutton'
-Materials    = require '../materials'
 Graph        = require '../graph'
-Color        = require '../color'
 Boxes        = require '../boxes'
 
 class StorageButton extends CanvasButton

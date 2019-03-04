@@ -6,11 +6,6 @@
  00000 00   0000000   000   000     000     00000000  000   000  000   000  000   0000000   000   000
 ###
 
-{ deg2rad, rad2deg, log } = require 'kxk'
-
-Vector  = require './vector'
-THREE   = require 'three'
-
 class Quaternion extends THREE.Quaternion
 
     constructor: (x=0, y=0, z=0, w=1) ->

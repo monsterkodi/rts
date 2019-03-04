@@ -6,8 +6,6 @@
   000       000        0000000 
 ###
 
-{ elem, clamp, first, last, log, $}  = require 'kxk'
-
 class FPS
 
     constructor: () ->

@@ -6,14 +6,9 @@
    000     000   000  000   000  0000000    00000000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ post, first, log, _ } = require 'kxk'
-
-{ Stone, Bot } = require '../constants'
-
 SubMenu     = require './submenu'
 StoneMenu   = require './stonemenu'
 StoneButton = require './stonebutton'
-Materials   = require '../materials'
 
 class TradeButton extends StoneButton
 

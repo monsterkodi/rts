@@ -6,9 +6,7 @@
     0      00000000   0000000     000      0000000   000   000
 ###
 
-{ randRange, deg2rad, rad2deg, last, log } = require 'kxk'
-
-THREE = require 'three'
+{ randRange } = require 'kxk'
 
 class Vector extends THREE.Vector3
 

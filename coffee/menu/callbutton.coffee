@@ -6,12 +6,6 @@
  0000000  000   000  0000000  0000000  0000000     0000000      000        000      0000000   000   000
 ###
 
-{ deg2rad, log, str } = require 'kxk'
-
-{ Stone, Bot, Face } = require '../constants'
-
-Materials    = require '../materials'
-Geometry     = require '../geometry'
 CanvasButton = require './canvasbutton'
 
 class CallButton extends CanvasButton

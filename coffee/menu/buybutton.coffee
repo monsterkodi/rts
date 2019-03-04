@@ -6,12 +6,7 @@
 0000000     0000000      000    
 ###
 
-{ post, elem, log, _ } = require 'kxk'
-
-{ Stone, Bot } = require '../constants'
-
 CanvasButton = require './canvasbutton'
-Materials    = require '../materials'
 Boxes        = require '../boxes'
 
 class BuyButton extends CanvasButton
@@ -29,7 +24,7 @@ class BuyButton extends CanvasButton
         y = @botButton.canvas.offsetTop - rts.menuBorderWidth
         @canvas.style = "left:100px; top:#{y}px"
         
-        @boxes = new Boxes @scene, 16*4*80, new THREE.BoxBufferGeometry
+        @boxes = new Boxes @scene, 4*(8+9), new THREE.BoxBufferGeometry
         @box   = [[],[],[],[]]
         
         @init()
@@ -109,7 +104,7 @@ class BuyButton extends CanvasButton
     click: -> rts.handle.buyButtonClick @
                     
     canAfford: -> rts.world.storage[0].canAfford @cost()
-    cost: -> state.cost[Bot.string @bot]
+    cost: -> config.cost[Bot.string @bot]
         
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  

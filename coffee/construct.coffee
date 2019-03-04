@@ -6,21 +6,15 @@
  0000000   0000000   000   000  0000000      000     000   000   0000000    0000000     000   
 ###
 
-{ deg2rad, valid, empty, first, last, log, _ } = require 'kxk'
-
-THREE     = require 'three'
-Vector    = require './lib/vector'
-Geometry  = require './geometry'
-Materials = require './materials'
-
-{ Stone, Bot, Geom, Face } = require './constants'
-
 class Construct
 
     constructor: (@world) ->
         
         @segmentMesh = [null,null,null,null]
-        @stoneMeshes = {}        
+        @stoneMeshes = {}     
+        @stoneMaterials = {}
+        for stone in Stone.all
+            @stoneMaterials[stone] = Materials.stone[stone].clone()
                 
     # 000000000  000   000  0000000    00000000  
     #    000     000   000  000   000  000       
@@ -165,6 +159,9 @@ class Construct
         for bot in [Geom.cube..Geom.tubecross]
             @botGeoms[bot].computeFaceNormals()
             @botGeoms[bot].computeFlatVertexNormals()
+            
+        # for geom in @botGeoms
+            # geom.scale 0.1, 0.1, 0.1
     
     # 0000000     0000000   000000000   0000000  
     # 000   000  000   000     000     000       
@@ -341,7 +338,7 @@ class Construct
             bufgeo = new THREE.BufferGeometry()
             bufgeo.fromGeometry stonesides[stone]
             
-            mesh = new THREE.Mesh bufgeo, Materials.stone[stone]
+            mesh = new THREE.Mesh bufgeo, @stoneMaterials[stone]
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.stone = stone
