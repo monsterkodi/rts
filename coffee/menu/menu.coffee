@@ -29,15 +29,15 @@ class Menu
             Bot.base
             Bot.brain
             Bot.trade
+            Bot.build
             Bot.berta
             Bot.mine
-            Bot.build
         ]
         
         for bot in bots
             @buttons[Bot.string bot] = new BotButton bot, @div
             
-        new SpeedButton main
+        new SpeedButton   main
         new OpacityButton main
             
         @div.addEventListener 'mouseenter', @onMouseEnter
@@ -45,6 +45,7 @@ class Menu
         @div.addEventListener 'mouseover',  @onMouseOver
         @div.addEventListener 'mouseout',   @onMouseOut
         @div.addEventListener 'mousemove',  @onMouseMove
+        @div.addEventListener 'mousedown',  @onMouseDown
         @div.addEventListener 'click',      @onClick
                 
         post.on 'botCreated', @onBotCreated
@@ -62,6 +63,9 @@ class Menu
         if BotButton.currentlyShown?.botButton == @buttons[Bot.string bot.type]
             @buttons[Bot.string bot.type].highlight()
         
+    onMouseDown:  (event) => 
+        event.target.button?.middleClick?(event) if event.button == 1
+        event.target.button?.rightClick?(event) if event.button == 2
     onClick:      (event) => event.target.button?.click? event
     onMouseOver:  (event) => event.target.button?.highlight? event
     onMouseOut:   (event) => event.target.button?.unhighlight? event

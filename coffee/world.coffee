@@ -63,8 +63,9 @@ class World
             
         post.on 'storageChanged', @onStorageChanged
         
-        @setSpeed   prefs.get 'speed', 6
-        @setOpacity prefs.get 'opacity', 6
+        @setSpeed       prefs.get 'speed', 6
+        @setOpacity     prefs.get 'opacity', 6
+        @setCageOpacity prefs.get 'cageOpacity', 6
                 
     drawBrokenPath: (info) ->
         
@@ -74,7 +75,7 @@ class World
             p = @posAtIndex open
             g.merge Geometry.box 0.1, p.x, p.y, p.z
             
-        @scene.add new THREE.Mesh g, Materials.segs
+        @scene.add new THREE.Mesh g, Materials.cancer
         
         p = @posAtIndex info.start
         g = Geometry.coordinateCross 0.05, p.x, p.y, p.z
@@ -109,6 +110,30 @@ class World
     incrOpacity:  -> @setOpacity @opacityIndex + 1
     decrOpacity:  -> @setOpacity @opacityIndex - 1
         
+    setCageOpacity: (cageOpacityIndex) ->
+        
+        @cageOpacityIndex = clamp 0, config.world.cageOpacity.length-1, cageOpacityIndex
+        @cageOpacity = config.world.cageOpacity[@cageOpacityIndex]
+
+        prefs.set 'cageOpacity', @cageOpacityIndex
+        
+        for key in ['player', 'enemy']
+            for type in ['base', 'berta']
+                Materials.cage[key][type].transparent = true
+                Materials.cage[key][type].opacity = @cageOpacity
+                
+        post.emit 'cageOpacity', @cageOpacity, @cageOpacityIndex
+        
+    resetCageOpacity: -> @setCageOpacity 6
+    incrCageOpacity:  -> @setCageOpacity @cageOpacityIndex + 1
+    decrCageOpacity:  -> @setCageOpacity @cageOpacityIndex - 1
+    
+    #  0000000  00000000   00000000  00000000  0000000    
+    # 000       000   000  000       000       000   000  
+    # 0000000   00000000   0000000   0000000   000   000  
+    #      000  000        000       000       000   000  
+    # 0000000   000        00000000  00000000  0000000    
+    
     setSpeed: (speedIndex) -> 
         
         @speedIndex = clamp 0, config.world.speed.length-1, speedIndex

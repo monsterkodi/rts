@@ -34,6 +34,14 @@ class DialButton extends CanvasButton
         height = 11
         @camera = new THREE.OrthographicCamera width / - 2, width / 2, height / 2, height / - 2, 1, 10
         
+        @light.position.set -4,4,6
+        @camera.position.copy vec(0,0,1).normal().mul 10
+        @camera.lookAt vec 0,0,0
+        
+        @initDots()
+        
+    initDots: ->
+        
         merg = new THREE.Geometry
         
         for i in [-6..6]
@@ -52,10 +60,6 @@ class DialButton extends CanvasButton
         bufg = new THREE.BufferGeometry().fromGeometry geom
         @dot = new THREE.Mesh bufg, Materials.menu.active
         @scene.add @dot
-        
-        @light.position.set -4,4,6
-        @camera.position.copy vec(0,0,1).normal().mul 10
-        @camera.lookAt vec 0,0,0
         
     onDrag: (drag, event) => 
         

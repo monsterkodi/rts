@@ -14,6 +14,7 @@ Color =
         background:      color 0x181818
         backgroundHover: color 0x202020
         progress:        color 0x8888ff
+        health:          color 0xff0000
         disconnected:    color 0x000000
         active:          color 0xcccccc
         inactive:        color 0x333333
@@ -51,10 +52,10 @@ Color =
     path:                color 0xbbbbbb
     cage:                
         player:
-            base:            color 0x000044
-            berta:           color 0x666666
+            base:            color 0x000033
+            berta:           color 0xaaaa00
         enemy:
-            base:            color 0x000011
+            base:            color 0x000033
             berta:           color 0xff0000
 
 Color.bot.red    = Color.stone.red

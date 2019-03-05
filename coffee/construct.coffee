@@ -39,7 +39,7 @@ class Construct
         tubeBuffer = new THREE.BufferGeometry
         tubeBuffer.fromGeometry tube
         mat = Materials.path
-        mat = Materials.segs if player
+        mat = Materials.ai[player-1] if player
         mesh = new THREE.Mesh tubeBuffer, mat
         mesh.castShadow = true
                         
@@ -228,7 +228,7 @@ class Construct
         sphere.computeFlatVertexNormals()
         
         mat = Materials.path
-        mat = Materials.segs if bot.player
+        mat = Materials.ai[bot.player-1] if bot.player
         bot.dot = new THREE.Mesh sphere, mat
         bot.dot.castShadow = true
         bot.dot.receiveShadow = true

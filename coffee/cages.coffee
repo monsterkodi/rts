@@ -77,7 +77,8 @@ class Cages
             x += 1
 
         index = @world.indexAtPos vec x,0,0
-        size = 0.05
+        # size = 0.05
+        size = 0.5
         visited = {}
         visited[index] = 1
         check = [index]
@@ -87,15 +88,15 @@ class Cages
             for neighbor in @world.neighborsOfIndex index
                 neighborPos = @world.posAtIndex neighbor
                 if not isInside neighborPos
-                    geom.merge Geometry.box size, checkPos.x, checkPos.y, checkPos.z
-                    # checkToNeighbor = checkPos.to neighborPos
-                    # n = Vector.perpNormals checkToNeighbor
-                    # geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[0].mul(size)).plus(n[1].mul(size))
-                    # geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[1].mul(size)).plus(n[2].mul(size))
-                    # geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[2].mul(size)).plus(n[3].mul(size))
-                    # geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[3].mul(size)).plus(n[0].mul(size))
-                    # geom.faces.push new THREE.Face3 geom.vertices.length-1, geom.vertices.length-4, geom.vertices.length-2
-                    # geom.faces.push new THREE.Face3 geom.vertices.length-4, geom.vertices.length-3, geom.vertices.length-2
+                    # geom.merge Geometry.box size, checkPos.x, checkPos.y, checkPos.z
+                    checkToNeighbor = checkPos.to neighborPos
+                    n = Vector.perpNormals checkToNeighbor
+                    geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[0].mul(size)).plus(n[1].mul(size))
+                    geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[1].mul(size)).plus(n[2].mul(size))
+                    geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[2].mul(size)).plus(n[3].mul(size))
+                    geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[3].mul(size)).plus(n[0].mul(size))
+                    geom.faces.push new THREE.Face3 geom.vertices.length-1, geom.vertices.length-4, geom.vertices.length-2
+                    geom.faces.push new THREE.Face3 geom.vertices.length-4, geom.vertices.length-3, geom.vertices.length-2
                 else 
                     if not visited[neighbor]
                         visited[neighbor] = 1

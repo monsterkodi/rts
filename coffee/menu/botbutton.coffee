@@ -99,6 +99,8 @@ class BotButton extends CanvasButton
             rts.camera.focusOnPos @focusBot.pos
         
     click: -> rts.handle.botButtonClick @
+    middleClick: -> @focusNextBot()
+    rightClick: -> 
     
     #  0000000  000   000   0000000   000   000  
     # 000       000   000  000   000  000 0 000  
@@ -230,5 +232,18 @@ class BotButton extends CanvasButton
                 
             for i in [0...Science.queue[0].length]
                 ctx.fillRect 100 + i*10 - ((Science.queue[0].length-1)*10/2), 192, 3, 3
+                
+        # 000   000  00000000   0000000   000      000000000  000   000  
+        # 000   000  000       000   000  000         000     000   000  
+        # 000000000  0000000   000000000  000         000     000000000  
+        # 000   000  000       000   000  000         000     000   000  
+        # 000   000  00000000  000   000  0000000     000     000   000  
+        
+        if @bot not in Bot.limited
+            if bot = rts.world.botOfType @bot
+                if bot.hitPoints < config[Bot.string @bot].health
+                    ctx.fillStyle = Color.menu.health.getStyle()
+                    health = 200 * bot.hitPoints / config[Bot.string @bot].health
+                    ctx.fillRect 0, 200-health, 1, health
                         
 module.exports = BotButton

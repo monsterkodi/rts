@@ -10,18 +10,17 @@ Materials =
     transparent: new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.1
     cage:   
         player:
-            base:   new THREE.MeshPhongMaterial    color:Color.cage.player.base,  emissive:Color.cage.player.base,  specular:Color.cage.player.base, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
-            berta:  new THREE.MeshPhongMaterial    color:Color.cage.player.berta, emissive:Color.cage.player.berta, specular:Color.cage.player.berta, transparent:true, opacity:0.05, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+            base:   new THREE.MeshPhongMaterial    color:Color.cage.player.base,  emissive:Color.cage.player.base,  specular:Color.cage.player.base, transparent:true, opacity:0.1, side:THREE.BackSide, depthWrite:false, shininess:100, dithering:true
+            berta:  new THREE.MeshPhongMaterial    color:Color.cage.player.berta, emissive:Color.cage.player.berta, specular:Color.cage.player.berta, transparent:true, opacity:0.05, side:THREE.BackSide, depthWrite:false, shininess:100, dithering:true
         enemy:
-            base:   new THREE.MeshPhongMaterial    color:Color.cage.enemy.base,  emissive:Color.cage.enemy.base,  specular:Color.cage.enemy.base, transparent:true, opacity:0.1, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
-            berta:  new THREE.MeshPhongMaterial    color:Color.cage.enemy.berta, emissive:Color.cage.enemy.berta, specular:Color.cage.enemy.berta, transparent:true, opacity:0.05, side:THREE.DoubleSide, depthWrite:false, shininess:100, dithering:true
+            base:   new THREE.MeshPhongMaterial    color:Color.cage.enemy.base,  emissive:Color.cage.enemy.base,  specular:Color.cage.enemy.base, transparent:true, opacity:0.1, side:THREE.BackSide, depthWrite:false, shininess:100, dithering:true
+            berta:  new THREE.MeshPhongMaterial    color:Color.cage.enemy.berta, emissive:Color.cage.enemy.berta, specular:Color.cage.enemy.berta, transparent:true, opacity:0.05, side:THREE.BackSide, depthWrite:false, shininess:100, dithering:true
             
     spark:      new THREE.LineBasicMaterial    color:Color.stone.red, linewidth: 8
     white:      new THREE.MeshStandardMaterial color:0xffffff
     highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2
     spent:      new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6, roughness: 0.7, side:THREE.DoubleSide
     path:       new THREE.MeshStandardMaterial color:Color.path, metalness: 0.9, roughness: 0.5
-    segs:       new THREE.MeshStandardMaterial color:Color.segs, metalness: 0.9, roughness: 0.5
     stone: [   
                 new THREE.MeshStandardMaterial color:Color.stone.red,     dithering:true # red
                 new THREE.MeshStandardMaterial color:Color.stone.gelb,    dithering:true # gelb
