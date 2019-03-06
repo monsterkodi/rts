@@ -214,7 +214,7 @@ class Handle
         cost = config.cost[Bot.string type]
         if not storage.canAfford cost
             if player == 0
-                log "WARNING handle.buyBot player:#{player} -- not enough stones for bot!"
+                log "WARNING handle.buyBot #{Bot.string type} player:#{player} -- not enough stones for bot!", cost
             return
 
         switch type 

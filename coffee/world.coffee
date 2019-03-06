@@ -116,12 +116,6 @@ class World
         @cageOpacity = config.world.cageOpacity[@cageOpacityIndex]
 
         prefs.set 'cageOpacity', @cageOpacityIndex
-        
-        for key in ['player', 'enemy']
-            for type in ['base', 'berta']
-                Materials.cage[key][type].transparent = true
-                Materials.cage[key][type].opacity = @cageOpacity
-                
         post.emit 'cageOpacity', @cageOpacity, @cageOpacityIndex
         
     resetCageOpacity: -> @setCageOpacity 6
@@ -161,6 +155,7 @@ class World
             # scaledDelta -= Math.min 0.1, scaledDelta
         @boxes.render()
         @resourceBoxes.render()
+        @cages.animate scaledDelta
         post.emit 'tick'
         
     simulate: (scaledDelta) ->
@@ -172,7 +167,7 @@ class World
         @spent.animate scaledDelta
         @tubes.animate scaledDelta
         
-        for bot in @getAllBots()
+        for bot in @allBots()
             rts.handle.tickBot scaledDelta, bot
          
         if valid @monsters
@@ -417,9 +412,9 @@ class World
         
     baseForBot: (bot) -> @bases[bot.player]
         
-    getAllBots: -> Object.values @bots
-    botsOfPlayer: (player=0) -> @getAllBots().filter (bot) -> bot.player == player
-    enemiesOfBot: (bot) -> @getAllBots().filter (e) -> e.player != bot.player #and e.type in [Bot.base, Bot.berta]
+    allBots: -> Object.values @bots
+    botsOfPlayer: (player=0) -> @allBots().filter (bot) -> bot.player == player
+    enemiesOfBot: (bot) -> @allBots().filter (e) -> e.player != bot.player #and e.type in [Bot.base, Bot.berta]
     
     botsOfType: (type, player=0) -> @botsOfPlayer(player).filter (b) -> b.type == type
     botOfType:  (type, player=0) -> first @botsOfType type, player
@@ -438,6 +433,7 @@ class World
             
     removeBot: (bot) ->
         
+        post.emit 'botWillBeRemoved', bot
         @cages.removeCage bot
         index = @indexAtBot bot
         bot.mesh?.parent.remove bot.mesh

@@ -53,10 +53,10 @@ Color =
     cage:                
         player:
             base:            color 0x000033
-            berta:           color 0xaaaa00
+            berta:           color 0xffaa00
         enemy:
             base:            color 0x000033
-            berta:           color 0xff0000
+            berta:           color 0x660000
 
 Color.bot.red    = Color.stone.red
 Color.bot.gelb   = Color.stone.gelb

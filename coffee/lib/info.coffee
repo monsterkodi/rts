@@ -36,6 +36,7 @@ class Info
         add "boxes: #{world.boxes.numBoxes()} / #{world.boxes.maxBoxes}"
         add "resbx: #{world.resourceBoxes.numBoxes()} / #{world.resourceBoxes.maxBoxes}"
         add "stgbx: #{rts.menu.buttons.storage.boxes.numBoxes()} / #{rts.menu.buttons.storage.boxes.maxBoxes}"
+        add "cgebx: #{world.cages.boxes.numBoxes()} / #{world.cages.boxes.maxBoxes}"
         
         add "segmt: #{world.tubes.getSegments(0).length}"
         for ai in world.ai

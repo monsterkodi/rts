@@ -6,12 +6,18 @@
  0000000  000   000   0000000   00000000  0000000 
 ###
 
+Boxes = require './boxes'
+
 class Cages
 
     constructor: (@world) ->
 
-        post.on 'scienceFinished', @onScienceFinished
-        post.on 'botState',        @onBotState
+        box = new THREE.BoxBufferGeometry
+        @boxes = new Boxes @world.scene, 3000, box, Materials.cage, false
+        
+        post.on 'scienceFinished',  @onScienceFinished
+        post.on 'botWillBeRemoved', @removeCage
+        post.on 'botState',         @onBotState
         
     onScienceFinished: (info) =>
         
@@ -25,7 +31,7 @@ class Cages
                     @updateCage bot
     
     onBotState: (type, state, player) =>
-        # log "onBotState #{Bot.string type} #{player} #{state}"
+
         if type in Bot.caged
             for bot in @world.botsOfType type, player
                 @updateCage bot
@@ -46,66 +52,64 @@ class Cages
         return if Science.needsTube(bot) and not bot.path
         
         if bot.state == 'on'
-            bot.cage = @cage bot, science(bot.player)[Bot.string bot.type].radius
-            bot.cage.position.copy bot.pos
+            @cage bot, science(bot.player)[Bot.string bot.type].radius
 
-    removeCage: (bot) -> 
+    removeCage: (bot) => 
         
-        bot?.cage?.parent.remove bot.cage
-        delete bot?.cage
+        if bot?.cageBoxes?
+            for box in bot.cageBoxes
+                @boxes.del box
+            delete bot.cageBoxes
+        
+    animate: (scaledDelta) ->
+        
+        for bot in @world.allBots()
+            if bot.cageBoxes
+                for box in bot.cageBoxes
+                    box.age += scaledDelta * config.cage.anim.speed
+                    if box.age % 7 < 3
+                        @boxes.setSize box, @world.cageOpacity*(1-(Math.cos(2*Math.PI*(box.age % 7)/3)+1)/2)
+                    else
+                        @boxes.setSize box, 0
+        
+        @boxes.render()
         
     cage: (bot, s) ->
         
-        # isInside = (s) -> (pos) -> Math.round(pos.paris(vec())) <= s
-        isInside = (s) -> (pos) -> Math.round(pos.manhattan(vec())) <= s
+        isInside = (pos) -> Math.round(pos.manhattan(vec())) <= s
                     
-        geom = @envelope bot.pos, isInside(s)
+        insidePos = bot.pos
+        
         if bot.player
-            mat = Materials.cage.enemy[Bot.string bot.type]
+            color = Color.cage.enemy[Bot.string bot.type]
         else
-            mat = Materials.cage.player[Bot.string bot.type]
-        mesh = new THREE.Mesh geom, mat
-        @world.scene.add mesh
-        mesh
-        
-    envelope: (insidePos, isInside) ->
-        
-        geom = new THREE.Geometry
+            color = Color.cage.player[Bot.string bot.type]
         
         x = 0
         while isInside insidePos.plus vec x+1,0,0
             x += 1
 
         index = @world.indexAtPos vec x,0,0
-        # size = 0.05
-        size = 0.5
+        size = 0.001
         visited = {}
-        visited[index] = 1
         check = [index]
+        
         while valid check
+            
             index = check.shift()
-            checkPos = @world.posAtIndex index
-            for neighbor in @world.neighborsOfIndex index
-                neighborPos = @world.posAtIndex neighbor
-                if not isInside neighborPos
-                    # geom.merge Geometry.box size, checkPos.x, checkPos.y, checkPos.z
-                    checkToNeighbor = checkPos.to neighborPos
-                    n = Vector.perpNormals checkToNeighbor
-                    geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[0].mul(size)).plus(n[1].mul(size))
-                    geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[1].mul(size)).plus(n[2].mul(size))
-                    geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[2].mul(size)).plus(n[3].mul(size))
-                    geom.vertices.push checkPos.plus checkToNeighbor.mul(size).plus(n[3].mul(size)).plus(n[0].mul(size))
-                    geom.faces.push new THREE.Face3 geom.vertices.length-1, geom.vertices.length-4, geom.vertices.length-2
-                    geom.faces.push new THREE.Face3 geom.vertices.length-4, geom.vertices.length-3, geom.vertices.length-2
-                else 
-                    if not visited[neighbor]
-                        visited[neighbor] = 1
+            
+            if not visited[index]
+                
+                visited[index] = 1
+                checkPos = @world.posAtIndex index
+                bot.cageBoxes ?= []
+                box = @boxes.add pos:checkPos.plus(insidePos), size:size, color:color
+                box.age = 7-checkPos.manhattan vec()
+                bot.cageBoxes.push box
+            
+                for neighbor in @world.neighborsOfIndex index
+                    neighborPos = @world.posAtIndex neighbor
+                    if not visited[neighbor] and isInside neighborPos
                         check.push neighbor
                     
-        # geom.mergeVertices()
-        geom.computeFaceNormals()
-        geom.computeFlatVertexNormals()
-        bufg = new THREE.BufferGeometry().fromGeometry geom
-        bufg
-
 module.exports = Cages

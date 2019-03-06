@@ -10,13 +10,15 @@ require('three-instanced-mesh')(THREE)
 
 class Boxes
 
-    constructor: (scene, @maxBoxes=1000, geom=Geometry.cornerBox()) ->
+    constructor: (scene, @maxBoxes=1000, geom=Geometry.cornerBox(), material=Materials.white, shadows=true) ->
 
         @boxes = []
-        @cluster = new THREE.InstancedMesh geom, Materials.white, @maxBoxes, true, true, true
+        @cluster = new THREE.InstancedMesh geom, material, @maxBoxes, true, true, true
         
-        @cluster.receiveShadow = true
-        @cluster.castShadow = true
+        if shadows
+            @cluster.receiveShadow = true
+            @cluster.castShadow    = true
+            
         scene.add @cluster 
         
     numBoxes: -> @boxes.length
@@ -42,7 +44,10 @@ class Boxes
         @boxes.push box
         
         @setPos   box, cfg.pos
-        @setStone box, cfg.stone ? Stone.gray
+        if cfg.color?
+            @setColor box, cfg.color
+        else
+            @setStone box, cfg.stone ? Stone.gray
         @setSize  box, cfg.size ? 0.1
         if cfg.dir?
             @setDir box, cfg.dir 

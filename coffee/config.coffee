@@ -10,10 +10,14 @@ module.exports =
     
     default:
             
+        cage:
+            boxes: size: 0.1
+            anim: speed: 0.2
+        
         world:
             speed: [1/4, 1/2, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48]
             opacity: [0, 0.1, 0.3, 0.6, 0.7, 0.9, 1]
-            cageOpacity: [0, 0.03, 0.06, 0.1, 0.2, 0.4, 0.6]
+            cageOpacity: [0, 0.03, 0.05, 0.1, 0.15, 0.22, 0.3]
         
         ai: delay: 20
         
