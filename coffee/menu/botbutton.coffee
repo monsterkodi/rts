@@ -203,12 +203,21 @@ class BotButton extends CanvasButton
                 geom.rotateZ deg2rad 45
                 @scene.add @meshes.buy  = new THREE.Mesh geom, Materials.stone[trade.buy]
                 
+        # 000      000  00     00  000  000000000  00000000  0000000    
+        # 000      000  000   000  000     000     000       000   000  
+        # 000      000  000000000  000     000     0000000   000   000  
+        # 000      000  000 0 000  000     000     000       000   000  
+        # 0000000  000  000   000  000     000     00000000  0000000    
+        
         if @bot in Bot.limited
             
             @meshes.limit?.parent.remove @meshes.limit
             delete @meshes.limit
             if @world.botsOfType(@bot).length >= science()[Bot.string @bot].limit
-                @scene.add @meshes.limit = new THREE.Mesh Geometry.botLimited(@world.botOfType @bot), Materials.menu.inactive
+                mat = Materials.state.paused
+                if @world.botsOfType(@bot).length >= Science.maxValue Bot.string(@bot) + '.limit'
+                    mat = Materials.menu.inactive
+                @scene.add @meshes.limit = new THREE.Mesh Geometry.botLimited(@world.botOfType @bot), mat
                     
         super()
         
@@ -239,11 +248,22 @@ class BotButton extends CanvasButton
         # 000   000  000       000   000  000         000     000   000  
         # 000   000  00000000  000   000  0000000     000     000   000  
         
+        ctx.fillStyle = Color.menu.health.getStyle()
+        
+        health = (bot, x) =>
+            if bot.hitPoints < config[Bot.string @bot].health
+                health = 200 * bot.hitPoints / config[Bot.string @bot].health
+                ctx.fillRect x, 200-health, 1, health
+                true
+        
         if @bot not in Bot.limited
             if bot = rts.world.botOfType @bot
-                if bot.hitPoints < config[Bot.string @bot].health
-                    ctx.fillStyle = Color.menu.health.getStyle()
-                    health = 200 * bot.hitPoints / config[Bot.string @bot].health
-                    ctx.fillRect 0, 200-health, 1, health
+                health bot, 0
+        else
+            bots = rts.world.botsOfType @bot
+            index = 0
+            for bot in bots
+                if health bot, index
+                    index++
                         
 module.exports = BotButton

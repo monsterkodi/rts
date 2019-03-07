@@ -24,7 +24,7 @@ class BuyButton extends CanvasButton
         y = @botButton.canvas.offsetTop - rts.menuBorderWidth
         @canvas.style = "left:100px; top:#{y}px"
         
-        @boxes = new Boxes @scene, 4*(8+9), new THREE.BoxBufferGeometry
+        @boxes = new Boxes @scene, 160, new THREE.BoxBufferGeometry
         @box   = [[],[],[],[]]
         
         @init()
@@ -64,6 +64,8 @@ class BuyButton extends CanvasButton
                 
     del: ->
         
+        @boxes?.del()
+        delete @boxes
         @canvas.removeEventListener 'mouseout', @del        
         post.removeListener 'storageChanged', @onStorageChanged
         super()
@@ -119,7 +121,7 @@ class BuyButton extends CanvasButton
     
     render: ->
 
-        @boxes.render()        
+        @boxes?.render()        
         super()
                             
 module.exports = BuyButton

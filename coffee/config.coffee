@@ -13,6 +13,15 @@ module.exports =
         cage:
             boxes: size: 0.1
             anim: speed: 0.2
+            
+        plosion: 
+            minRot:    0.01
+            maxRot:    0.03
+            maxAge:      12
+            minSize:    0.01
+            maxSize:    0.1
+            maxDist:    0.6
+            shrapnels:  100
         
         world:
             speed: [1/4, 1/2, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48]
@@ -62,7 +71,6 @@ module.exports =
             stone: Stone.blue
             
         bullet: 
-            stone: Stone.gelb
             speed: 0.1
             count: 8
             delay: 0.8

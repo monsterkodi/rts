@@ -16,6 +16,7 @@ Graph     = require './graph'
 Cancer    = require './cancer'
 Monster   = require './monster'
 Storage   = require './storage'
+Plosion   = require './plosion'
 Resource  = require './resource'
 Construct = require './construct'
 
@@ -39,9 +40,10 @@ class World
         @players   = []
         @ai        = []
         
-        @cages  = new Cages @ 
-        @tubes  = new Tubes @
-        @spent  = new Spent @
+        @cages   = new Cages @ 
+        @tubes   = new Tubes @
+        @spent   = new Spent @
+        @plosion = new Plosion @
         @boxes         = new Boxes @scene, 10000
         @resourceBoxes = new Boxes @scene, 10000
                 
@@ -150,12 +152,10 @@ class World
         
         scaledDelta = delta * @speed
         @simulate scaledDelta
-        # while scaledDelta > 0
-            # @simulate Math.min 0.1, scaledDelta
-            # scaledDelta -= Math.min 0.1, scaledDelta
         @boxes.render()
         @resourceBoxes.render()
         @cages.animate scaledDelta
+        @plosion.animate scaledDelta
         post.emit 'tick'
         
     simulate: (scaledDelta) ->
@@ -424,8 +424,6 @@ class World
         for bot in @botsOfPlayer player 
             @removeBot bot
             
-        @tubes.build()
-
         for ai in @ai
             if ai.player == player
                 @ai.splice @ai.indexOf(ai), 1
@@ -434,6 +432,7 @@ class World
     removeBot: (bot) ->
         
         post.emit 'botWillBeRemoved', bot
+        @plosion.atBot bot
         @cages.removeCage bot
         index = @indexAtBot bot
         bot.mesh?.parent.remove bot.mesh
@@ -441,6 +440,7 @@ class World
         delete bot.mesh
         delete bot.dot
         delete @bots[index]
+        @tubes.build()
         post.emit 'botRemoved', bot.type, bot.player
     
     # 00     00   0000000   000   000  00000000  

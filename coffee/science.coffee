@@ -90,6 +90,11 @@ class Science
         
         [science,key] = @split scienceKey
         @tree[science][key].v.length-1
+        
+    @maxValue: (scienceKey) ->
+        
+        [science,key] = @split scienceKey
+        last @tree[science][key].v
             
     @enqueue: (scienceKey, player=0) ->
         # log "enqueue #{player} #{scienceKey}"

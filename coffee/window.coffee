@@ -10,16 +10,38 @@
 
 { Bot } = require './constants'
 
-RTS    = require './rts'
-Vector = require './lib/vector'
-Quaternion =require './lib/quaternion'
-
-electron = require 'electron'
+RTS        = require './rts'
+Vector     = require './lib/vector'
+Quaternion = require './lib/quaternion'
+electron   = require 'electron'
          
 window.vec  = (x,y,z)   -> new Vector x, y, z
 window.quat = (x,y,z,w) -> new Quaternion x, y, z, w
 
-w = new win
+class Window extends win
+    
+    onMenuAction: (action, args) =>
+        
+        switch action
+            when 'Fullscreen' 
+                window.win.setSimpleFullScreen not window.win.isSimpleFullScreen()
+                if window.win.isSimpleFullScreen()
+                    $("#titlebar").style.display = 'none'
+                    $("#main").style.top = '0'
+                    $("#main").style.borderLeft = 'none'
+                    $("#main").style.borderRight = 'none'
+                    $("#main").style.borderBottom = 'none'
+                else
+                    window.win.setWindowButtonVisibility false
+                    $("#titlebar").style.display = 'flex'
+                    $("#main").style.top = '30px'
+                    $("#main").style.borderLeft = '6px solid #222'
+                    $("#main").style.borderRight = '6px solid #222'
+                    $("#main").style.borderBottom = '6px solid #222'
+                window.win.webContents.focus()
+        super
+
+w = new Window
     dir:    __dirname
     pkg:    require '../package.json'
     menu:   '../coffee/menu.noon'
@@ -127,6 +149,8 @@ window.onkeydown = (event) ->
         when '='     then rts.world.incrSpeed(); rts.world.incrSpeed()
         when '-'     then rts.world.decrSpeed(); rts.world.decrSpeed()
         when '0'     then rts.world.resetSpeed()
+        when 'p'     then rts.world.plosion.atBot rts.world.bases[0]
+        when 'o'     then rts.handle.enemyDeath rts.world.enemiesOfBot(rts.world.bases[0])[0]
     
 post.on 'menuAction', (action) ->
     

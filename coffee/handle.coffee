@@ -116,27 +116,29 @@ class Handle
         
         @delay delta, berta, 'speed', 'shoot', =>
             storage = @world.storage[berta.player]
-            if storage.stones[Stone.gelb]
+            stone = Stone.gelb
+            if berta.player then stone = Stone.red
+            if storage.stones[stone]
                 if enemy = @world.enemyClosestToBot berta
                     if Math.round(enemy.pos.manhattan(berta.pos)) <= science(berta.player).berta.radius
-                        # log "shoot at #{Bot.string enemy.type}"
-                        Bullet.spawn @world, berta, enemy
-                    # else 
-                        # log "enemy too far #{Bot.string enemy.type}"
+                        # log "shoot at #{berta.player} #{Bot.string enemy.type} #{enemy.player}"
+                        Bullet.spawn @world, berta, enemy, stone
+                    else 
+                        log "enemy too far #{berta.player} #{Bot.string enemy.type}"
                 # else 
-                    # log 'no enemy'
-            # else
-                # log 'no stones'
+                    # log "no enemy #{berta.player}"
+            else
+                log "no stones #{berta.player}"
             true
 
     enemyDamage: (enemy, damage) ->
         
         return if not enemy.mesh
         enemy.hitPoints -= damage
-        # log "damage #{Bot.string enemy.type} #{enemy.player} #{enemy.hitPoints}"
         enemy.mesh.material = Materials.stone[Stone.gelb]
         restoreMat = (enemy) -> -> rts.world.colorBot enemy
         setTimeout restoreMat(enemy), 1000*0.5/@world.speed
+        post.emit 'botDamage', enemy, enemy.hitPoints
         if enemy.hitPoints <= 0
             @enemyDeath enemy
 

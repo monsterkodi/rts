@@ -50,13 +50,19 @@ class Menu
                 
         post.on 'botCreated', @onBotCreated
         post.on 'botRemoved', @onBotRemoved
+        post.on 'botDamaged', @onBotDamaged
 
     onBotRemoved: (type, player) =>
         if player == 0
             @buttons[Bot.string type].update()
             if BotButton.currentlyShown?.botButton == @buttons[Bot.string type]
                 @buttons[Bot.string type].highlight()
+
+    onBotDamaged: (bot) =>
         
+        if bot.player == 0
+            @buttons[Bot.string bot.type].update()
+                
     onBotCreated: (bot) => 
         # log "onBotCreated #{Bot.string bot.type}", SubMenu.current?, BotButton.currentlyShown?.botButton == @buttons[Bot.string bot.type]
         @buttons[Bot.string bot.type].update()

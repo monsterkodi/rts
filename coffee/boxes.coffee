@@ -32,10 +32,10 @@ class Boxes
     setSize:  (box, size)  -> @cluster.setScaleAt      box.index, vec size, size, size
     setColor: (box, color) -> @cluster.setColorAt      box.index, color
     
-    pos:   (box) -> pos = vec();  @cluster.getPositionAt box.index, pos; pos
-    rot:   (box) -> rot = quat(); @cluster.getQuaternionAt box.index, rot; rot
-    size:  (box) -> szv = vec();  @cluster.getScaleAt box.index, szv; szv.x
-    color: (box) -> color = new THREE.Color(); @cluster.getColorAt box.index, color; color
+    pos:   (box,pos=vec())  -> @cluster.getPositionAt box.index, pos; pos
+    rot:   (box,rot=quat()) -> @cluster.getQuaternionAt box.index, rot; rot
+    size:  (box,szv=vec())  -> @cluster.getScaleAt box.index, szv; szv.x
+    color: (box,color=new THREE.Color()) -> @cluster.getColorAt box.index, color; color
     
     add: (cfg) ->
         
@@ -60,6 +60,12 @@ class Boxes
         
     del: (box) ->
         
+        if not box?
+            
+            @cluster?.parent.remove @cluster
+            delete @cluster
+            return
+        
         if box.index < @lastIndex()
             lastBox = @boxes.pop()
             pos     = @pos   lastBox
@@ -79,6 +85,8 @@ class Boxes
             @setSize lastBox, 0
         else
             log "Boxes.del dafuk? #{box.index} #{@lastIndex()}"
+            
+        @cluster.needsUpdate()
         
     render: ->
 

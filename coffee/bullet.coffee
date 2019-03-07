@@ -8,22 +8,22 @@
 
 class Bullet
 
-    @spawn: (world, berta, enemy) ->
+    @spawn: (world, berta, enemy, stone) ->
         
         storage = world.storage[berta.player]
         
         func = -> 
-            if storage.has(config.bullet.stone) and enemy.health > 0
-                new Bullet world, berta, enemy
+            if storage.has(stone) and enemy.health > 0
+                new Bullet world, berta, enemy, stone
         for i in [0...config.bullet.count]
             setTimeout func, 1000*config.bullet.delay*i/world.speed
     
-    constructor: (@world, berta, @enemy) ->
+    constructor: (@world, berta, @enemy, @stone) ->
         
         @enemy.health -= 1
         # log "enemy.health #{@enemy.health}"
         storage = @world.storage[berta.player]
-        storage.sub config.bullet.stone
+        storage.sub @stone
         @pos = vec berta.pos
         @updatePath()
         if not @path
@@ -32,7 +32,7 @@ class Bullet
         @dir = vec()
         @updateDir()
                 
-        @box = @world.boxes.add pos:@pos, size:0.05, stone:config.bullet.stone
+        @box = @world.boxes.add pos:@pos, size:0.05, stone:@stone
         @life = 0
         @animate 0
         

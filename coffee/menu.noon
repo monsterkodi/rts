@@ -18,6 +18,7 @@ rts
 
 Window
     Toggle Menu             alt+m
+    Fullscreen              alt+f
     --
     Minimize                alt+cmdctrl+shift+m
     Maximize                alt+cmdctrl+m

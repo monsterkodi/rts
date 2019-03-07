@@ -5,5 +5,4 @@ konrad --run
 
 IGNORE="/(.*\.dmg$|Icon$|watch$|icons$|.*md$|pug$|styl$|.*\.lock$|img/banner\.png)"
 
-# node_modules/electron-packager/cli.js . --overwrite --icon=img/app.icns --ignore=$IGNORE
-node_modules/electron-packager/cli.js . --overwrite --ignore=$IGNORE
+node_modules/electron-packager/cli.js . --overwrite --icon=img/app.icns --ignore=$IGNORE
