@@ -14,30 +14,39 @@ class DialButton extends CanvasButton
 
     constructor: (div, clss) ->
     
+        @lightPos = vec -4,4,6
+        @camPos   = vec(0,0,1).normal().mul 10
+        
         super div, clss
         
-        @name = 'DialButton'
         @scene.background = Color.menu.background
+        @name = 'DialButton'
         
         @drag = new drag
             target:  @canvas
             onStart: @onDrag
             onMove:  @onDrag
         
-    setDial: (index) ->
-            
-    initScene: ->
+    setDial: (index) -> @update()
 
-        super()
-        
+    # highlight: -> 
+        # # @scene.background = Color.menu.backgroundHover
+        # super
+#     
+    # unhighlight: ->
+#         
+        # # @scene.background = Color.menu.background
+        # super
+            
+    initCamera: ->
+
         width = 11
         height = 11
         @camera = new THREE.OrthographicCamera width / - 2, width / 2, height / 2, height / - 2, 1, 10
         
-        @light.position.set -4,4,6
-        @camera.position.copy vec(0,0,1).normal().mul 10
-        @camera.lookAt vec 0,0,0
+    initScene: ->
         
+        super
         @initDots()
         
     initDots: ->
@@ -71,5 +80,5 @@ class DialButton extends CanvasButton
         sectn = clamp -6, 6, Math.round angle/22.5
         
         @setDial sectn
-                
+        
 module.exports = DialButton

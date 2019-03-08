@@ -12,9 +12,7 @@ class Debug
 
         @elem = elem class:'debug', style:'position:absolute; z-index:1; bottom:10px; left:10px;'
 
-        window.debug = 
-            cheapScience: false
-            fastScience: false
+        window.debug = cheatScience: false
         
         # @worldSpeed = @value text:'world', value: rts.world.speed.toFixed(1),          reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         # @tubeSpeed  = @value text:'tube ', value: science().tube.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
@@ -24,8 +22,7 @@ class Debug
         @button text:'fill  storage', cb: -> rts.world.storage[0].fill()
         @button text:'clear storage', cb: -> rts.world.storage[0].clear()
         @button text:'stones',        cb: -> rts.world.toggleStones()
-        @toggle text:'cheap science', obj:window.debug, key:'cheapScience'
-        @toggle text:'fast  science', obj:window.debug, key:'fastScience'
+        @toggle text:'cheat science', obj:window.debug, key:'cheatScience'
 
         document.body.appendChild @elem
         

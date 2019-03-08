@@ -15,6 +15,13 @@ class BuyButton extends CanvasButton
         
         div ?= @botButton.canvas.parentElement
         
+        @lightPos = vec 0,10,6
+        @camPos   = vec(0,1,1).normal().mul 14
+        @lookPos  = vec 0,3,0
+        
+        @normFov = 40
+        @highFov = 33
+        
         super div, 'buyButton'
         
         @bot = @botButton.bot
@@ -46,9 +53,9 @@ class BuyButton extends CanvasButton
                     stoneOrNot = Stone.gray
                 @box[stone].push @boxes.add stone:stoneOrNot, size:@stoneSize, pos:@posForStone stone, @box[stone].length+1
                 
-        @render()
-                        
     update: -> 
+        
+        return if not @boxes
         
         have = rts.world.storage[0].stones
         
@@ -60,7 +67,7 @@ class BuyButton extends CanvasButton
                     stoneOrNot = Stone.gray
                 @boxes.setStone @box[stone][i], stoneOrNot
         
-        @render()
+        super
                 
     del: ->
         
@@ -68,41 +75,22 @@ class BuyButton extends CanvasButton
         delete @boxes
         @canvas.removeEventListener 'mouseout', @del        
         post.removeListener 'storageChanged', @onStorageChanged
-        super()
+        super
         
     #  0000000   0000000  00000000  000   000  00000000  
     # 000       000       000       0000  000  000       
     # 0000000   000       0000000   000 0 000  0000000   
     #      000  000       000       000  0000  000       
     # 0000000    0000000  00000000  000   000  00000000  
-    
-    initScene: ->
-                
-        @light = new THREE.DirectionalLight 0xffffff
-        @light.position.set 0,10,6
-        @scene.add @light
-        
-        @scene.add new THREE.AmbientLight 0xffffff
-        
-        @camera.fov = 40
-        @camera.position.copy vec(0,1,1).normal().mul 14
-        @camera.lookAt vec 0,3,0
-        @camera.updateProjectionMatrix()
-        
+            
     highlight: -> 
 
         return if not @canAfford()
-        
-        @camera.fov = 33
-        @camera.updateProjectionMatrix()
-        @render()
-    
-    unhighlight: ->
-        
-        @camera.fov = 40
-        @camera.updateProjectionMatrix()
-        @render()
-        
+
+        playSound 'menu', 'highlight', @bot+1
+
+        super
+            
     click: -> rts.handle.buyButtonClick @
                     
     canAfford: -> rts.world.storage[0].canAfford @cost()
@@ -122,6 +110,6 @@ class BuyButton extends CanvasButton
     render: ->
 
         @boxes?.render()        
-        super()
+        super
                             
 module.exports = BuyButton

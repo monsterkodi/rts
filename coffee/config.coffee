@@ -10,6 +10,8 @@ module.exports =
     
     default:
             
+        volume: [0, 0.02, 0.04, 0.08, 0.12, 0.16, 0.24, 0.32, 0.48, 0.64, 0.8, 1]
+        
         cage:
             boxes: size: 0.1
             anim: speed: 0.2

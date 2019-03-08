@@ -6,14 +6,13 @@
 000   000  000   000  000      
 ###
 
-Config = require './config'
 World  = require './world'
 
 class Map extends World
 
     constructor: (scene) ->
         
-        super scene, Config.default
+        super scene
         
     build: ->
         

@@ -12,11 +12,13 @@ class CanvasButton
 
     constructor: (div, clss='canvasButton') ->
         
+        @highlighted = false
+        
         @width     = 100
         @height    = 100
         @stoneSize = 0.5
         
-        @name = 'canvasbutton'
+        @name = 'CanvasButton'
         
         @meshes = {}
         
@@ -35,48 +37,79 @@ class CanvasButton
         @scene = new THREE.Scene()
         @scene.background = Color.menu.backgroundHover
         
-        @camera = new THREE.PerspectiveCamera 30, @width/@height, 0.01, 100
-                
+        @highFov  ?= 33
+        @normFov  ?= 40
+        @lightPos ?= vec 0,10,6
+        @lookPos  ?= vec 0,0,0
+        @camPos   ?= vec(0.3,0.6,1).normal().mul 12
+        
+        @initCamera()
+        
+        @camera.position.copy @camPos
+        @camera.lookAt @lookPos
+        @camera.updateProjectionMatrix() 
+        
+        @initLight()
         @initScene()
         
-        @camera.updateProjectionMatrix() 
+        @dirty = true
         
     del: => @canvas.remove()
     
     initLight: ->
 
         @light = new THREE.DirectionalLight 0xffffff
-        @light.position.set 0,10,6
+        @light.position.copy @lightPos
         @scene.add @light
         
         @scene.add new THREE.AmbientLight 0xffffff
 
-    initScene: ->
-
-        @initLight()
+    initCamera: ->
         
-        @camera.fov = 40
-        @camera.position.copy vec(0.3,0.6,1).normal().mul 12
-        @camera.lookAt vec 0,0,0
+        @camera = new THREE.PerspectiveCamera @normFov, @width/@height, 0.01, 100
+        
+    initScene: -> 
+    
+    # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
+    # 000   000  000  000        000   000  000      000  000        000   000     000     
+    # 000000000  000  000  0000  000000000  000      000  000  0000  000000000     000     
+    # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
+    # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
     highlight: -> 
-
-        @camera.fov = 33
+        
+        @highlighted = true
+        @camera.fov = @highFov
         @camera.updateProjectionMatrix()
-        @render()
+        @update()
     
     unhighlight: ->
-
-        @camera.fov = 40
+        
+        @highlighted = false
+        @camera.fov = @normFov
         @camera.updateProjectionMatrix()
-        @render()
+        @update()
         
+    update: => 
+        log "update #{@name}"
+        @dirty = true
+        
+    animate: (delta) ->
+        
+        if @dirty then @render()
+    
     render: =>
-
-        CanvasButton.renderer.render @scene, @camera
         
-        context = @canvas.getContext '2d'
-        context.drawImage CanvasButton.renderer.domElement, 0, 0
+        if @dirty
+        
+            @dirty = false
+            
+            log "render #{@name}"
+            
+            CanvasButton.renderer.render @scene, @camera
+            
+            context = @canvas.getContext '2d'
+            context.drawImage CanvasButton.renderer.domElement, 0, 0
         
     posForStone: (stone, i) ->
         

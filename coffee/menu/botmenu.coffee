@@ -11,7 +11,7 @@ class BotMenu
     constructor: (@botButton) ->
 
         y = @botButton.canvas.offsetTop - rts.menuBorderWidth
-        @div = elem class:'botMenu', style:"left:100px; top:#{y}px"
+        @div = elem class:'botMenu', style:"left:100px; top:#{y}px; width:100px;"
         
         @botButton.canvas.parentElement.appendChild @div
         
@@ -20,7 +20,17 @@ class BotMenu
     addButton: (key, button) ->
         
         @buttons[key] = button
-        @div.style.width = "#{Object.values(@buttons).length*100}px"
+        button
+        
+    animate: (delta) ->
+        
+        for key,button of @buttons
+            button.animate delta
+            
+    update: ->
+        
+        for key,button of @buttons
+            button.update()
         
     del: ->
         

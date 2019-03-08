@@ -10,7 +10,6 @@ CanvasButton = require './canvasbutton'
 BuyButton    = require './buybutton'
 BertaMenu    = require './bertamenu'
 BaseMenu     = require './basemenu'
-SubMenu      = require './submenu'
 TradeMenu    = require './trademenu'
 BuildMenu    = require './buildmenu'
 BrainMenu    = require './brainmenu'
@@ -19,10 +18,14 @@ class BotButton extends CanvasButton
 
     constructor: (@bot, div) ->
 
-        super div
-        
+        @highFov = 28
+        @normFov = 30
+        @lightPos = vec -2,-2,2
+                
         @world = rts.world
         
+        super div            
+                
         @name = "BotButton #{Bot.string @bot}"
         
         @canvas.id = @bot
@@ -38,20 +41,20 @@ class BotButton extends CanvasButton
             when Bot.mine
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.1
                 @camera.lookAt vec 0,0,0          
-                post.on 'scienceFinished', @render
+                post.on 'scienceFinished', @update
             when Bot.trade
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,-0.05
             when Bot.brain
                 @camera.position.copy vec(0,-1,0.9).normal().mul 1.3
                 @camera.lookAt vec 0,0,-0.05               
-                post.on 'scienceUpdated',  @render
-                post.on 'scienceQueued',   @render
-                post.on 'scienceDequeued', @render
+                post.on 'scienceUpdated',  @update
+                post.on 'scienceQueued',   @update
+                post.on 'scienceDequeued', @update
             when Bot.berta
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,0
-                post.on 'scienceFinished', @render
+                post.on 'scienceFinished', @update
             when Bot.build
                 @camera.position.copy vec(0,-1,0.6).normal().mul 1.3
                 @camera.lookAt vec 0,0,0
@@ -63,26 +66,9 @@ class BotButton extends CanvasButton
             post.on 'botState', (type,state,player) => @render() if player == 0
 
         if @bot in [Bot.brain, Bot.trade]
-            post.on 'botDisconnected', @render
-            post.on 'botConnected',    @render
-            
-        @camera.updateProjectionMatrix()                
-        @render()
-        
-    initScene: ->
-        
-        @scene.background = Color.menu.background
-        
-        @light = new THREE.DirectionalLight 0xffffff
-        @light.position.set -2,-2,2
-        @scene.add @light
-        
-        @scene.add new THREE.AmbientLight 0xffffff
-                
-        @camera.near = 0.01
-        @camera.far = 10
-        @camera.fov = 30
-        
+            post.on 'botDisconnected', @update
+            post.on 'botConnected',    @update
+                                    
     # 00000000   0000000    0000000  000   000   0000000  000   000  00000000  000   000  000000000  
     # 000       000   000  000       000   000  000       0000  000  000        000 000      000     
     # 000000    000   000  000       000   000  0000000   000 0 000  0000000     00000       000     
@@ -98,7 +84,11 @@ class BotButton extends CanvasButton
             @world.highlightBot @focusBot
             rts.camera.focusOnPos @focusBot.pos
         
-    click: -> rts.handle.botButtonClick @
+    click: -> 
+        
+        rts.handle.botButtonClick @
+        @update()
+    
     middleClick: -> @focusNextBot()
     rightClick: -> 
     
@@ -110,8 +100,8 @@ class BotButton extends CanvasButton
     
     show: (clss) ->
         
-        BotButton.currentlyShown?.del()
-        BotButton.currentlyShown = new clss @ 
+        rts.menu.buttons.bot?.del()
+        rts.menu.buttons.bot = new clss @
     
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
@@ -121,7 +111,7 @@ class BotButton extends CanvasButton
     
     highlight: ->
         
-        SubMenu.close()
+        playSound 'menu', 'highlight', @bot
         
         if @bot in [Bot.mine, Bot.berta] or not @world.botOfType @bot
             @show BuyButton
@@ -131,30 +121,15 @@ class BotButton extends CanvasButton
                 when Bot.trade then @show TradeMenu
                 when Bot.build then @show BuildMenu
                 when Bot.brain then @show BrainMenu
-            
-        @camera.fov = 28
-        @camera.updateProjectionMatrix()
-        @mesh.material = @botMat true
-        @render()
-        
-    unhighlight: ->
-        
-        @camera.fov = 30
-        @camera.updateProjectionMatrix()
-        @mesh.material = @botMat false
-        @render()
-        
-    update: ->
-        
-        @mesh.material = @botMat false
-        @render()
-        
-    botMat: (highlight=false) ->
+  
+        super
+                
+    botMat: () ->
         
         if empty @world.botsOfType @bot
-            if highlight then Materials.menu.inactiveHigh else Materials.menu.inactive
+            if @highlighted then Materials.menu.inactiveHigh else Materials.menu.inactive
         else
-            if highlight then Materials.menu.activeHigh else Materials.menu.active
+            if @highlighted then Materials.menu.activeHigh else Materials.menu.active
             
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
@@ -218,7 +193,9 @@ class BotButton extends CanvasButton
                 if @world.botsOfType(@bot).length >= Science.maxValue Bot.string(@bot) + '.limit'
                     mat = Materials.menu.inactive
                 @scene.add @meshes.limit = new THREE.Mesh Geometry.botLimited(@world.botOfType @bot), mat
-                    
+
+        @mesh.material = @botMat()
+        
         super()
         
         # 00000000   00000000    0000000    0000000   00000000   00000000   0000000   0000000  

@@ -12,25 +12,29 @@ class BrainButton extends CanvasButton
 
     constructor: (div, scienceKey) ->
 
+        @camPos   = vec(0,0,1).normal().mul 1.5
+        @lightPos = vec -10,10,10
+        @normFov  = 40
+        
         super div, 'brainButton canvasButton'
         
         @name = "BrainButton #{scienceKey}"
         @scienceKey = scienceKey
-            
-        @render()
         
     click: => 
         
         if Science.enqueue @scienceKey
-            @render()
+            playSound 'science', 'enqueue', (@stars()+1)*4
+            @update()
+        else
+            playSound 'fail', 'science'
     
     highlight: =>
-        @high = true
-        super()
-
-    unhighlight: =>
-        @high = false
-        super()
+        
+        if @stars() <= @maxStars()
+            playSound 'science', 'highlight', @stars()*4
+        
+        super
         
     #  0000000   0000000  00000000  000   000  00000000  
     # 000       000       000       0000  000  000       
@@ -38,24 +42,12 @@ class BrainButton extends CanvasButton
     #      000  000       000       000  0000  000       
     # 0000000    0000000  00000000  000   000  00000000  
     
-    initScene: ->
-                
-        @light = new THREE.DirectionalLight 0xffffff
-        @light.position.set -10,10,10
-        @scene.add @light
-        
-        @scene.add new THREE.AmbientLight 0xffffff
-        
-        @camera.fov = 40
-        @camera.position.copy vec(0,0,1).normal().mul 1.5
-        @camera.lookAt vec 0,0,0
-        @camera.updateProjectionMatrix()
-    
-    stars: -> Science.nextStars @scienceKey, 0
+    stars:    -> Science.nextStars @scienceKey, 0
+    maxStars: -> Science.maxStars @scienceKey
       
     transMat: (mat) ->
         
-        if not @high
+        if not @highlighted
             mat = mat.clone()
             mat.transparent = true
             mat.opacity     = 0.5
@@ -78,7 +70,7 @@ class BrainButton extends CanvasButton
         [science, key] = @scienceKey.split '.'
         
         stars = @stars()
-        if stars > Science.maxStars @scienceKey
+        if stars > @maxStars()
             return super()
         
         construct = rts.world.construct
@@ -174,7 +166,7 @@ class BrainButton extends CanvasButton
                 g.merge Geometry.box 0.05,  0.03, -0.055
                 g
                
-        if @high
+        if @highlighted
             geom.translate 0.14, 0.15, 0.55
         else
             geom.translate 0.17, 0.17, 0.55
@@ -196,7 +188,7 @@ class BrainButton extends CanvasButton
         g.merge Geometry.star 0.1,  0.2 if stars > 2
         g.merge Geometry.star 0.1,  0.3 if stars > 3
         g.merge Geometry.star 0.1,  0.4 if stars > 4
-        if @high
+        if @highlighted
             g.translate -0.1*stars/2+0.05, -0.295, 0.3
         else
             g.translate -0.1*stars/2+0.05, -0.3, 0.5

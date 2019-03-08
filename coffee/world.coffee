@@ -22,11 +22,10 @@ Construct = require './construct'
 
 class World
     
-    constructor: (@scene, config) ->
+    constructor: (@scene) ->
         
-        rts.world  = @
+        rts.world = @
         
-        window.config  = config
         window.science = Science.science
         
         @stones    = {}
@@ -58,7 +57,7 @@ class World
         @construct.stones()
         @construct.bots()
         
-        @updateTubes()
+        @tubesDirty = true
         
         if prefs.get 'graph', false
             Graph.toggle()
@@ -149,6 +148,10 @@ class World
     # 000   000  000   000  000  000   000  000   000     000     00000000  
     
     animate: (delta) ->
+        
+        if @tubes.dirty
+            @tubes.build()
+            delete @tubes.dirty
         
         scaledDelta = delta * @speed
         @simulate scaledDelta
@@ -341,6 +344,8 @@ class World
     
     addBot: (x,y,z, type=Bot.mine, player=0, face=null) -> 
         
+        @tubesDirty = true
+        
         p = @roundPos vec x,y,z
         
         if not face?
@@ -440,7 +445,7 @@ class World
         delete bot.mesh
         delete bot.dot
         delete @bots[index]
-        @tubes.build()
+        @updateTubes()
         post.emit 'botRemoved', bot.type, bot.player
     
     # 00     00   0000000   000   000  00000000  
@@ -466,7 +471,7 @@ class World
         @construct.updateBot bot
         @cages.moveBot bot
         
-    updateTubes: -> @tubes.build()
+    updateTubes: -> @tubes.dirty = true
             
     canBotMoveTo: (bot, face, index) -> 
         

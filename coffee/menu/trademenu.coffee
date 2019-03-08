@@ -11,12 +11,83 @@ BotMenu      = require './botmenu'
 
 class TradeMenu extends BotMenu
 
-    constructor: (botButton) ->
+    constructor: (@botButton) ->
 
-        super botButton
+        super @botButton
 
-        trade = rts.world.botOfType Bot.trade
-        @addButton 'sell',  new TradeButton  @div, 'sell'
-        @addButton 'buy',   new TradeButton  @div, 'buy'
+        @name = 'TradeMenu'
         
+        @div.style.width  = "200px"
+        @div.style.height = "400px"
+
+        btn = @addButton 'sell', new TradeButton  @, 'sell'
+        btn = @addButton 'buy',  new TradeButton  @, 'buy'
+        btn.canvas.style.left = "100px"
+        
+    buttonClicked: (button) ->
+        
+        log "TradeMenu.buttonClicked #{button.inOut} #{Stone.string button.stone}"
+        
+        trade = rts.world.botOfType Bot.trade
+        trade[button.inOut] = button.stone
+        
+        @buttons[button.inOut].stone = button.stone
+        for i in [0...3]
+            key = "#{button.inOut}#{i}"
+        
+        other = if button.inOut == 'sell' then 'buy' else 'sell'
+        
+        if trade[other] == button.stone
+            otherStone = first Stone.resources.filter (s) -> s != button.stone
+            log 'otherStone', other, Stone.string otherStone
+            trade[other] = otherStone
+            @buttons[other].stone = otherStone
+            @updateStones @buttons[other]
+            
+        @updateStones button
+        @update()
+        
+    highlight: (button) ->
+        
+        return if button != @buttons[button.inOut]
+        return if @buttons["#{button.inOut}0"]?
+        # log "highlight #{button.inOut}"
+               
+        other = if button.inOut == 'sell' then 'buy' else 'sell'
+        
+        for i in [0...3]
+
+            @buttons["#{other}#{i}"]?.del()
+            delete @buttons["#{other}#{i}"]
+            
+            btn = @addButton "#{button.inOut}#{i}", new TradeButton @, button.inOut, Stone.gray
+            
+            left = if button.inOut == 'sell' then 0 else 100
+            top  = (i+1)*100
+            
+            btn.canvas.style.left = "#{left}px"
+            btn.canvas.style.top  = "#{top}px"
+            
+        @updateStones button
+            
+    unhighlight: (button) ->
+        
+        log "unhighlight #{button.inOut} #{Stone.string button.stone}", rts.menu.mousePos.x
+        
+        if button.inOut == 'buy' and rts.menu.mousePos.x < 200
+            @highlight @buttons.sell
+        else if button.inOut == 'sell' and rts.menu.mousePos.x >= 200
+            @highlight @buttons.buy
+        # return if button != @buttons[button.inOut]
+        # log "unhighlight #{button.inOut}"
+        # for i in [0..3]
+            # @buttons["#{button.inOut}#{i}"]?.del()
+        
+    updateStones: (button) ->
+        log "TradeMenu.updateStones #{button.inOut}"
+        
+        stones = Stone.resources.filter (s) -> s != button.stone
+        for i in [0...3]
+            @buttons["#{button.inOut}#{i}"]?.stone = stones[i]
+            
 module.exports = TradeMenu

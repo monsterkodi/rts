@@ -6,14 +6,12 @@
 000   000  00000000  000   000   0000000 
 ###
 
-{ stopEvent } = require 'kxk'
-
 StorageButton = require './storagebutton'
 BotButton     = require './botbutton'
 BuyButton     = require './buybutton'
 SpeedButton   = require './speedbutton'
 OpacityButton = require './opacitybutton'
-SubMenu       = require './submenu'
+VolumeButton  = require './volumebutton'
 
 class Menu
 
@@ -23,7 +21,13 @@ class Menu
         @div = elem class:'buttons', style:"left:0px; top:0px"
         main.appendChild @div
         
-        @buttons = storage:new StorageButton @
+        @mousePos = vec()
+        @botButtons = {}
+        @buttons = 
+            storage: new StorageButton @
+            speed:   new SpeedButton   main
+            opacity: new OpacityButton main
+            volume:  new VolumeButton  main
          
         bots = [
             Bot.base
@@ -35,18 +39,18 @@ class Menu
         ]
         
         for bot in bots
-            @buttons[Bot.string bot] = new BotButton bot, @div
-            
-        new SpeedButton   main
-        new OpacityButton main
-            
+            botButton = new BotButton bot, @div
+            @buttons[Bot.string bot] = botButton
+            @botButtons[Bot.string bot] = botButton
+            botButton.scene.background = Color.menu.background
+                        
         @div.addEventListener 'mouseenter', @onMouseEnter
         @div.addEventListener 'mouseleave', @onMouseLeave
-        @div.addEventListener 'mouseover',  @onMouseOver
-        @div.addEventListener 'mouseout',   @onMouseOut
         @div.addEventListener 'mousemove',  @onMouseMove
-        @div.addEventListener 'mousedown',  @onMouseDown
-        @div.addEventListener 'click',      @onClick
+        main.addEventListener 'mouseover',  @onMouseOver
+        main.addEventListener 'mouseout',   @onMouseOut
+        main.addEventListener 'mousedown',  @onMouseDown
+        main.addEventListener 'click',      @onClick
                 
         post.on 'botCreated', @onBotCreated
         post.on 'botRemoved', @onBotRemoved
@@ -55,7 +59,7 @@ class Menu
     onBotRemoved: (type, player) =>
         if player == 0
             @buttons[Bot.string type].update()
-            if BotButton.currentlyShown?.botButton == @buttons[Bot.string type]
+            if @buttons.bot.botButton == @buttons[Bot.string type]
                 @buttons[Bot.string type].highlight()
 
     onBotDamaged: (bot) =>
@@ -64,37 +68,51 @@ class Menu
             @buttons[Bot.string bot.type].update()
                 
     onBotCreated: (bot) => 
-        # log "onBotCreated #{Bot.string bot.type}", SubMenu.current?, BotButton.currentlyShown?.botButton == @buttons[Bot.string bot.type]
+
         @buttons[Bot.string bot.type].update()
-        if BotButton.currentlyShown?.botButton == @buttons[Bot.string bot.type]
+        if @buttons.bot.botButton == @buttons[Bot.string bot.type]
             @buttons[Bot.string bot.type].highlight()
         
+    onClick:      (event) => @calcMouse event ; event.target.button?.click? event
+    onMouseOver:  (event) => @calcMouse event ; event.target.button?.highlight? event
+    onMouseOut:   (event) => @calcMouse event ; event.target.button?.unhighlight? event
     onMouseDown:  (event) => 
+        
+        @calcMouse event
         event.target.button?.middleClick?(event) if event.button == 1
         event.target.button?.rightClick?(event) if event.button == 2
-    onClick:      (event) => event.target.button?.click? event
-    onMouseOver:  (event) => event.target.button?.highlight? event
-    onMouseOut:   (event) => event.target.button?.unhighlight? event
-    onMouseMove:  (event) => stopEvent event
+        
     onMouseEnter: (event) =>
 
-        for key,button of @buttons
+        for key,button of @botButtons
             button.scene.background = Color.menu.backgroundHover
-            button.render()
+            button.update()
+            
+    onMouseMove:  (event) => 
+        
+        @calcMouse event        
+        stopEvent event
         
     onMouseLeave: (event) => 
         
-        BotButton.currentlyShown?.del()
-        delete BotButton.currentlyShown
-           
-        SubMenu.close()
+        @calcMouse event
+        @buttons.bot?.del()
+        delete @buttons.bot
          
-        for key,button of @buttons
+        for key,button of @botButtons
             button.scene.background = Color.menu.background
-            button.render()                
+            button.update()                
+
+    calcMouse: (event) ->
         
+        br = @div.getBoundingClientRect()
+        @mousePos.x = event.clientX-br.left
+        @mousePos.y = event.clientY-br.top
+            
     animate: (delta) ->
         
-        @buttons.storage.animate delta
+        for key,button of @buttons
+            # log key, button.name
+            button.animate delta
             
 module.exports = Menu

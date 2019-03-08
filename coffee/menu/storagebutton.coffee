@@ -14,28 +14,27 @@ class StorageButton extends CanvasButton
 
     constructor: (menu) ->
         
-        @dirty   = false
         @storage = rts.world.storage[0]
         @box     = [[],[],[],[]]
 
+        @normFov  = 40
+        @highFov  = 36
+        @lightPos = vec 0,10,6
+        @lookPos  = vec 0, 7.6, 0
+        @camPos   = vec(0,2,1).normal().mul 22
+        
         super menu.div
         
         @boxes = new Boxes @scene, 4*320, new THREE.BoxBufferGeometry
-        @name  = 'Storage'
-        
+        @name  = 'StorageButton'
+                
         post.on 'storageChanged', @onStorageChanged 
                                 
         for stone in Stone.resources
             @onStorageChanged @storage, stone, @storage.stones[stone]
                                 
     click: -> Graph.toggle()
-    
-    animate: (delta) ->
-        
-        if @dirty
-            @render()
-            @dirty = false
-                   
+                       
     posForStone: (stone, i) ->
         
         cap = @storage.capacity()
@@ -58,37 +57,8 @@ class StorageButton extends CanvasButton
         while @box[stone].length > amount
             @boxes.del @box[stone].pop()
                 
-        @dirty = true
+        @update()
     
-    #  0000000   0000000  00000000  000   000  00000000  
-    # 000       000       000       0000  000  000       
-    # 0000000   000       0000000   000 0 000  0000000   
-    #      000  000       000       000  0000  000       
-    # 0000000    0000000  00000000  000   000  00000000  
-    
-    initScene: ->
-                
-        @scene.background = Color.menu.background
-        
-        @light = new THREE.DirectionalLight 0xffffff
-        @light.position.set 0,10,6
-        @scene.add @light
-        
-        @scene.add new THREE.AmbientLight 0xffffff
-        
-        @camera.fov = 40
-        @camera.position.copy vec(0,2,1).normal().mul 22
-            
-    highlight: -> 
-
-        @camera.fov = 36
-        @render()
-    
-    unhighlight: ->
-
-        @camera.fov = 40
-        @render()
-        
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
     # 0000000    0000000   000 0 000  000   000  0000000   0000000    
@@ -97,6 +67,7 @@ class StorageButton extends CanvasButton
     
     render: ->
 
+        return if not @dirty
         # log 'render', @storage.capacity(), @box[Stone.red].length, @box[Stone.gelb].length, @box[Stone.blue].length, @box[Stone.white].length
         switch @storage.capacity()
             when 320 then @camera.lookAt vec 0, 5.6, 0
@@ -109,6 +80,7 @@ class StorageButton extends CanvasButton
         @camera.updateProjectionMatrix()
         
         @boxes.render()
-        super()
+        
+        super
             
 module.exports = StorageButton

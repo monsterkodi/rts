@@ -81,6 +81,8 @@ class OpacityButton extends DialButton
             sectn = clamp 1, 7, Math.round angle/22.5
             rts.world.setCageOpacity 6-sectn+1
             
+        @update()
+            
     # 000   000   0000000   00000000   000      0000000    
     # 000 0 000  000   000  000   000  000      000   000  
     # 000000000  000   000  0000000    000      000   000  
@@ -91,7 +93,7 @@ class OpacityButton extends DialButton
         
         p = vec(0,4,0).rotate vec(0,0,1), 180-22.5-rts.world.opacityIndex*22.5
         @dot1.position.copy p
-        @render()
+        @update()
         
     #  0000000   0000000    0000000   00000000  
     # 000       000   000  000        000       
@@ -103,6 +105,6 @@ class OpacityButton extends DialButton
         
         p = vec(0,4,0).rotate vec(0,0,1), 180+22.5+rts.world.cageOpacityIndex*22.5
         @dot2.position.copy p
-        @render()
+        @update()
 
 module.exports = OpacityButton

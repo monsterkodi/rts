@@ -12,9 +12,9 @@ BotMenu      = require './botmenu'
 
 class BrainMenu extends BotMenu
 
-    constructor: (botButton) -> 
+    constructor: (@botButton) -> 
     
-        super botButton
+        super @botButton
         
         @div.style.borderBottom = 'unset'
         
@@ -54,6 +54,13 @@ class BrainMenu extends BotMenu
         post.removeListener 'scienceUpdated',  @onScienceUpdated
         super()
         
+    animate: (delta) ->
+        
+        for button in @queue
+            button.animate delta
+        
+        super delta
+        
     onScienceQueued:   (info) => @addToQueue   info
     onScienceDequeued: (info) => @delFromQueue info
     onScienceUpdated:  (info) => @queue[info.index]?.render()
@@ -64,7 +71,7 @@ class BrainMenu extends BotMenu
         btn.canvas.style.left = "#{@queue.length*100}px"
         btn.canvas.style.top  = "0"
         @queue.push btn
-    
+            
     delFromQueue: (info) ->
         
         btn = @queue[info.index]
@@ -75,7 +82,5 @@ class BrainMenu extends BotMenu
         
         for i in [0...@queue.length]
             @queue[i].canvas.style.left = "#{i*100}px"
-        
-    addButton: (key, button) -> @buttons[key] = button
         
 module.exports = BrainMenu

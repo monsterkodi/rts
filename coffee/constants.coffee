@@ -27,20 +27,19 @@ class Enum
         for key in @keys
             return key if @[key] == v
 
-module.exports = 
-
-    Bot: new Enum
+Bot = new Enum
         base:       1
-        mine:       2
+        brain:      2
         trade:      3
         build:      4
-        brain:      5
-        berta:      6
-        switchable: [1,3,5,6]
-        caged:      [1,6]
-        limited:    [2,6]
+        berta:      5
+        mine:       6
     
-    Stone: new Enum
+Bot.switchable  = [Bot.base,  Bot.brain, Bot.trade, Bot.berta]
+Bot.caged       = [Bot.base,  Bot.berta]
+Bot.limited     = [Bot.berta, Bot.mine]
+        
+Stone = new Enum
         red:        0
         gelb:       1
         blue:       2
@@ -49,15 +48,16 @@ module.exports =
         monster:    5
         cancer:     6
         silver:     7
-        resources:  [0,1,2,3]
-        all:        [0..5] # world.construct stones
         
-    Bend: new Enum
+Stone.resources = [Stone.red, Stone.gelb, Stone.blue, Stone.white]
+Stone.all       = [0..Stone.monster] # world.construct stones
+        
+Bend = new Enum
         flat:       0
         concave:    1
         convex:     2
     
-    Face: new Enum
+Face = new Enum
         PX:         0
         PY:         1
         PZ:         2
@@ -65,7 +65,7 @@ module.exports =
         NY:         4
         NZ:         5
                                 
-    Geom: new Enum
+Geom = new Enum
         cube:       1
         cone:       2
         sphere:     3
@@ -81,4 +81,10 @@ module.exports =
         toruscone:  13
         tubecross:  14
         cubecross:  15
-
+        
+module.exports = 
+    Bot:   Bot
+    Bend:  Bend
+    Face:  Face
+    Geom:  Geom
+    Stone: Stone

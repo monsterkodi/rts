@@ -27,18 +27,19 @@ class Handle
             # log 'double', Bot.string(bot.type), @world.stringForFaceIndex @world.faceIndexForBot bot
             @toggleBotState @world.highBot       
         else
-            log 'placeBase'
             @placeBase()
 
     toggleBotState: (bot) ->
         
         if bot.type in Bot.switchable
+            
             oldState = bot.state
             newState = oldState == 'on' and 'off' or 'on'
             for bot in @world. botsOfType bot.type, bot.player
                 bot.state = newState
             # log "toggleBotState #{Bot.string(bot.type)} #{bot.player} #{newState}"
             post.emit 'botState', bot.type, newState, bot.player
+            playSound 'state', newState, bot.type if bot.player == 0
             newState
             
     botClicked: (bot) ->
@@ -217,28 +218,31 @@ class Handle
         if not storage.canAfford cost
             if player == 0
                 log "WARNING handle.buyBot #{Bot.string type} player:#{player} -- not enough stones for bot!", cost
+                playSound 'fail', 'buyBot'
             return
 
         switch type 
             when Bot.mine, Bot.berta
                 if @world.botsOfType(type, player).length >= science(player)[Bot.string type].limit
                     # log "WARNING handle.buyBot player:#{player} -- #{Bot.string type} limit reached!"
+                    playSound 'fail', 'buyBot' if player == 0
                     return
             else
                 if @world.botOfType(type, player)
                     log "WARNING handle.buyBot player:#{player} -- already has a #{Bot.string type}!"
+                    playSound 'fail', 'buyBot' if player == 0
                     return
                     
         [p, face] = @world.emptyPosFaceNearBot @world.bases[player]
         if not p?
             log "WARNING handle.buyBot player:#{player} -- no space for new bot!"
+            playSound 'fail', 'buyBot' if player == 0
             return
 
         storage.deduct cost, 'buy'
         bot = @world.addBot p.x,p.y,p.z, type, player, face
         @world.spent.costAtBot cost, bot
         @world.construct.botAtPos bot, p
-        @world.updateTubes()
         @world.cages.updateCage bot
         
         switch type 

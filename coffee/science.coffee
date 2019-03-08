@@ -101,8 +101,8 @@ class Science
         stars = @nextStars scienceKey, player
         [science, key] = @split scienceKey
         if stars <= @maxStars(scienceKey,player) and @queue[player].length < @maxQueue
-            c     = window.debug?.cheapScience and 1 or config.scienceCost[stars]
-            times = window.debug?.fastScience and 1 or config.scienceSteps[stars]-@players[player].progress[science][key][stars]
+            c     = window.debug?.cheatScience and 1 or config.scienceCost[stars]
+            times = window.debug?.cheatScience and 1 or config.scienceSteps[stars]-@players[player].progress[science][key][stars]
             cost  = [c,c,c,c]
             @queue[player].push scienceKey:scienceKey, stars:stars, cost:cost, times:times, player:player
             if player == 0

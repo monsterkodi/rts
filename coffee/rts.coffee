@@ -6,7 +6,7 @@
 000   000     000     0000000 
 ###
 
-{ prefs, post, randInt, clamp, elem, empty, valid, first, last, deg2rad, rad2deg, str, log, $, _ } = require 'kxk'
+{ prefs, post, randInt, clamp, elem, empty, valid, first, last, stopEvent, deg2rad, rad2deg, str, log, $, _ } = require 'kxk'
 
 { Bot, Stone, Geom, Face, Edge, Bend } = require './constants'
 
@@ -17,6 +17,7 @@ window.prefs     = prefs
 window.randInt   = randInt
 window.deg2rad   = deg2rad
 window.rad2deg   = rad2deg
+window.stopEvent = stopEvent
 window.clamp     = clamp
 window.empty     = empty
 window.valid     = valid
@@ -38,10 +39,13 @@ window.Color     = require './color'
 window.Science   = require './science'
 window.Geometry  = require './geometry'
 window.Materials = require './materials'
+window.playSound = (o,n,c) -> rts.sound.play o,n,c
 
 FPS     = require './lib/fps'
 Info    = require './lib/info'
 Debug   = require './lib/debug'
+Sound   = require './lib/sound'
+Config  = require './config'
 Menu    = require './menu/menu'
 World   = require './world'
 Map     = require './map'
@@ -53,6 +57,9 @@ class RTS
     constructor: (@view) ->
         
         window.rts = @
+        window.config  = Config.default
+        
+        @sound = new Sound
         
         @menuBorderWidth = 50
         
@@ -119,6 +126,7 @@ class RTS
         @handle = new Handle @world
                 
         @mouse = vec()
+        
         @raycaster = new THREE.Raycaster()
         
         document.addEventListener 'mousemove', @onMouseMove
@@ -243,11 +251,15 @@ class RTS
             if hit?.face?
                 @handle.moveBot @dragBot, hit.pos, hit.face
 
-    onDblClick: (event) => @handle.doubleClick()
+    onDblClick: (event) => 
+        # log 'doubleClick', event.target.button?
+        if not event.target.button
+            @handle.doubleClick()
                             
     calcMouse: (event) ->
         
         br = @view.getBoundingClientRect()
+        
         @mouse.x = ((event.clientX-br.left) / br.width) * 2 - 1
         @mouse.y = -((event.clientY-br.top) / br.height ) * 2 + 1
         @mouse
