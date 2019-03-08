@@ -14,13 +14,22 @@ class BrainMenu extends BotMenu
 
     constructor: (@botButton) -> 
     
-        super @botButton
-        
-        @div.style.borderBottom = 'unset'
-        
         @queue = []
         
-        border = "#{rts.menuBorderWidth}px transparent"
+        super @botButton
+        
+        post.on 'scienceQueued',   @onScienceQueued
+        post.on 'scienceDequeued', @onScienceDequeued
+        post.on 'scienceUpdated',  @onScienceUpdated
+           
+    del: ->
+        
+        post.removeListener 'scienceQueued',   @onScienceQueued
+        post.removeListener 'scienceDequeued', @onScienceDequeued
+        post.removeListener 'scienceUpdated',  @onScienceUpdated
+        super()
+
+    initButtons: ->
         
         brain = rts.world.botOfType Bot.brain
                 
@@ -28,31 +37,16 @@ class BrainMenu extends BotMenu
             for key,values of cfg
                 
                 scienceKey = science + '.' + key
-                btn = @addButton scienceKey, new BrainButton @div, scienceKey
+                btn = @addButton scienceKey, new BrainButton @, scienceKey
                 
                 btn.canvas.style.left = "#{values.x*100+100}px"
                 btn.canvas.style.top  = "#{values.y*100+100}px"
                 
-                if values.x == 0
-                    btn.canvas.style.borderLeft = border
-                if values.y == 2
-                    btn.canvas.style.borderBottom = border
-                    
         for info in Science.queue[0]
             @addToQueue info
                 
-        @div.style.width  = "500px"
+        @div.style.width  = "600px"
         @div.style.height = "500px"
-        
-        post.on 'scienceQueued',   @onScienceQueued
-        post.on 'scienceDequeued', @onScienceDequeued
-        post.on 'scienceUpdated',  @onScienceUpdated
-           
-    del: ->
-        post.removeListener 'scienceQueued',   @onScienceQueued
-        post.removeListener 'scienceDequeued', @onScienceDequeued
-        post.removeListener 'scienceUpdated',  @onScienceUpdated
-        super()
         
     animate: (delta) ->
         
@@ -63,11 +57,11 @@ class BrainMenu extends BotMenu
         
     onScienceQueued:   (info) => @addToQueue   info
     onScienceDequeued: (info) => @delFromQueue info
-    onScienceUpdated:  (info) => @queue[info.index]?.render()
+    onScienceUpdated:  (info) => @queue[info.index]?.update()
         
     addToQueue: (info) -> 
     
-        btn = new QueueButton @div, info
+        btn = new QueueButton @, info
         btn.canvas.style.left = "#{@queue.length*100}px"
         btn.canvas.style.top  = "0"
         @queue.push btn
@@ -78,7 +72,7 @@ class BrainMenu extends BotMenu
         @queue.splice info.index, 1
         btn.del()
         
-        @buttons[info.scienceKey]?.render()
+        @buttons[info.scienceKey]?.update()
         
         for i in [0...@queue.length]
             @queue[i].canvas.style.left = "#{i*100}px"

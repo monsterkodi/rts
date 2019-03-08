@@ -43,6 +43,8 @@ class Menu
             @buttons[Bot.string bot] = botButton
             @botButtons[Bot.string bot] = botButton
             botButton.scene.background = Color.menu.background
+            
+        @buttons.storage.scene.background = Color.menu.background
                         
         @div.addEventListener 'mouseenter', @onMouseEnter
         @div.addEventListener 'mouseleave', @onMouseLeave
@@ -59,7 +61,7 @@ class Menu
     onBotRemoved: (type, player) =>
         if player == 0
             @buttons[Bot.string type].update()
-            if @buttons.bot.botButton == @buttons[Bot.string type]
+            if @buttons.bot?.botButton == @buttons[Bot.string type]
                 @buttons[Bot.string type].highlight()
 
     onBotDamaged: (bot) =>
@@ -70,7 +72,9 @@ class Menu
     onBotCreated: (bot) => 
 
         @buttons[Bot.string bot.type].update()
-        if @buttons.bot.botButton == @buttons[Bot.string bot.type]
+        if @buttons.bot?.botButton == @buttons[Bot.string bot.type]
+            @buttons.bot.del()
+            delete @buttons.bot
             @buttons[Bot.string bot.type].highlight()
         
     onClick:      (event) => @calcMouse event ; event.target.button?.click? event
@@ -87,6 +91,9 @@ class Menu
         for key,button of @botButtons
             button.scene.background = Color.menu.backgroundHover
             button.update()
+
+        @buttons.storage.scene.background = Color.menu.backgroundHover
+        @buttons.storage.update()
             
     onMouseMove:  (event) => 
         
@@ -94,14 +101,17 @@ class Menu
         stopEvent event
         
     onMouseLeave: (event) => 
-        
+
         @calcMouse event
         @buttons.bot?.del()
         delete @buttons.bot
          
         for key,button of @botButtons
             button.scene.background = Color.menu.background
-            button.update()                
+            button.update()     
+            
+        @buttons.storage.scene.background = Color.menu.background
+        @buttons.storage.update()
 
     calcMouse: (event) ->
         

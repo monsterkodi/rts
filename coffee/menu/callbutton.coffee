@@ -12,22 +12,15 @@ class CallButton extends CanvasButton
 
     constructor: (div) ->
         
-        super div, 'canvasButtonInline'
+        @normFov = 40
+        @camPos = vec(0,0,1).normal().mul 2
         
-        @render()
+        super div, 'canvasButtonInline'
         
     click: -> rts.handle.call()
 
     initScene: ->
         
-        @initLight()
-        
-        @camera.fov = 40
-        @camera.position.copy vec(0,0,1).normal().mul 2
-        @camera.lookAt vec 0,0,0
-        
-        mat = Materials.menu.active
-        mesh = new THREE.Mesh Geometry.call(), mat
-        @scene.add @meshes.icon = mesh
+        @scene.add @meshes.icon = new THREE.Mesh Geometry.call(), Materials.menu.active
         
 module.exports = CallButton

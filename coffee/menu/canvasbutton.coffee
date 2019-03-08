@@ -16,21 +16,19 @@ class CanvasButton
         
         @width     = 100
         @height    = 100
+        @size      = vec @width*window.devicePixelRatio, @height*window.devicePixelRatio
         @stoneSize = 0.5
         
         @name = 'CanvasButton'
         
         @meshes = {}
         
-        fullWidth  = 2 * @width 
-        fullHeight = 2 * @height
-        
         if empty CanvasButton.renderer
             CanvasButton.renderer = new THREE.WebGLRenderer antialias:true
             CanvasButton.renderer.setPixelRatio window.devicePixelRatio
             CanvasButton.renderer.setSize @width, @height
 
-        @canvas = elem 'canvas', class:clss, width:@width*window.devicePixelRatio, height:@height*window.devicePixelRatio
+        @canvas = elem 'canvas', class:clss, width:@size.x, height:@size.y
         div.appendChild @canvas
         
         @canvas.button = @        
@@ -91,7 +89,7 @@ class CanvasButton
         @update()
         
     update: => 
-        log "update #{@name}"
+        # log "update #{@name}"
         @dirty = true
         
     animate: (delta) ->
@@ -104,7 +102,7 @@ class CanvasButton
         
             @dirty = false
             
-            log "render #{@name}"
+            # log "render #{@name}"
             
             CanvasButton.renderer.render @scene, @camera
             

@@ -10,9 +10,9 @@ BrainButton = require './brainbutton'
 
 class QueueButton extends BrainButton
 
-    constructor: (div, @info) ->
+    constructor: (@menu, @info) ->
 
-        super div, @info.scienceKey
+        super @menu, @info.scienceKey
         
         @canvas.classList.add 'queueButton'
 

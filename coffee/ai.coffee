@@ -140,7 +140,10 @@ class AI
         return if @idleCall()
         @did 'relax'
     
-    did: (@task) -> log "#{@player} #{@tick} #{@task}"; true
+    did: (@task) -> 
+        # log "#{@player} #{@tick} #{@task}"
+        true
+        
     queue: (action) -> @actionQueue.push action
         
     #  0000000   0000000  000  00000000  000   000   0000000  00000000  
@@ -152,7 +155,7 @@ class AI
     doScience: ->
         
         if empty @scienceOrder
-            log 'no science left?'
+            # log 'no science left?'
             return false
             
         if @brain
@@ -194,9 +197,9 @@ class AI
         
         if valid bertas
         
-            bulletStones = @amountOf config.bullet.stone
+            bulletStones = @amountOf Stone.red
             
-            if bulletStones > 40
+            if bulletStones > 16
                 if bertas[0].state == 'off'
                     rts.handle.toggleBotState bertas[0]
                     return @did 'berta:on'
@@ -267,8 +270,8 @@ class AI
                     rts.handle.toggleBotState @brain
                     @did 'brain:off'
                 return @did 'hunt'
-        else
-            log "no monster close to #{str @base.pos}?"
+        # else
+            # log "no monster close to #{str @base.pos}?"
         false
     
     # 00     00   0000000   000   000  00000000  
@@ -285,8 +288,8 @@ class AI
         
         if closestFaceIndex
             return rts.handle.moveBotToFaceIndex bot, closestFaceIndex
-        else 
-            log 'no closestFace'
+        # else 
+            # log 'no closestFace'
     
     moveBotToFaceClosestToTarget: (bot) ->
         
@@ -299,7 +302,7 @@ class AI
             shorterPathFound = false
             
             if not closestFaceIndex
-                log 'moveBotToFaceClosestToTarget -- dafuk, no closestFaceIndex!'
+                # log 'moveBotToFaceClosestToTarget -- dafuk, no closestFaceIndex!'
                 return
             
             targetNeighbors  = @world.neighborsOfFaceIndex @target
@@ -310,14 +313,14 @@ class AI
             
             targetPath = @world.pathFromPosToPos @world.posAtIndex(closestFaceIndex), @world.posAtIndex(@target)
             if not targetPath
-                log 'really? no targetPath?'
+                # log 'really? no targetPath?'
                 return
             
             for targetNeighbor in targetNeighbors
                 for closestNeighbor in closestNeighbors
                     closestPath = @world.pathFromPosToPos @world.posAtIndex(closestNeighbor), @world.posAtIndex(targetNeighbor)
                     if not closestPath
-                        log "really? not closestPath? closestNeighbor:#{@world.stringForIndex closestNeighbor} targetNeighbor:#{@world.stringForIndex targetNeighbor}"
+                        # log "really? not closestPath? closestNeighbor:#{@world.stringForIndex closestNeighbor} targetNeighbor:#{@world.stringForIndex targetNeighbor}"
                         break
                     if closestPath.length < targetPath.length
                         shorterPathFound = true
@@ -325,7 +328,7 @@ class AI
                         closestFaceIndex = closestNeighbor
         
         if closestFaceIndex
-            log "closestFaceIndex #{@world.stringForFaceIndex closestFaceIndex}"
+            # log "closestFaceIndex #{@world.stringForFaceIndex closestFaceIndex}"
             return rts.handle.moveBotToFaceIndex bot, closestFaceIndex
         
     # 000000000   0000000   00000000    0000000   00000000  000000000  
@@ -342,12 +345,12 @@ class AI
         targetPos = @world.posAtIndex @target
         if targetPos.equals @build.pos
             choices = Vector.perpNormals(Vector.normals[@build.face]).filter (n) => @world.noItemAtPos @build.pos.plus n
-            log "target reached. #{choices.length} choices"
+            # log "target reached. #{choices.length} choices"
             delete @target
             if valid choices
                 if rts.handle.build @build, first choices
                     return @did "build #{@world.stringForFaceIndex @world.faceIndexForBot @build}"
-            log "couldn't build last stone!"
+            # log "couldn't build last stone!"
             return
         
         if not @world.storage[@player].canAfford science(@player).build.cost
@@ -358,7 +361,7 @@ class AI
         path = @world.pathFromPosToPos @build.pos, targetPos
         
         if not path
-            log 'moveToTarget dafuk? no path?', @build.pos, @world.posAtIndex @target
+            # log 'moveToTarget dafuk? no path?', @build.pos, @world.posAtIndex @target
             delete @target
             return false
         
@@ -371,14 +374,14 @@ class AI
                     break
             
         if not nextPos
-            log 'dafuk -- no nextPos?'
+            # log 'dafuk -- no nextPos?'
             return false
                     
         n = Vector.normalIndex @build.pos.to nextPos
         if rts.handle.build @build, Vector.normals[n]
             # log 'built to', nextPos
             if path.length < 2
-                log 'target reached!'
+                # log 'target reached!'
                 delete @target
             return @did "build #{@world.stringForFaceIndex @world.faceIndexForBot @build}"
             

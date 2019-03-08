@@ -10,13 +10,13 @@ CanvasButton = require './canvasbutton'
 
 class BrainButton extends CanvasButton
 
-    constructor: (div, scienceKey) ->
+    constructor: (@menu, scienceKey) ->
 
         @camPos   = vec(0,0,1).normal().mul 1.5
         @lightPos = vec -10,10,10
         @normFov  = 40
         
-        super div, 'brainButton canvasButton'
+        super @menu.div, 'brainButton canvasButton'
         
         @name = "BrainButton #{scienceKey}"
         @scienceKey = scienceKey
@@ -63,6 +63,8 @@ class BrainButton extends CanvasButton
     
     render: ->
 
+        return if not @dirty
+            
         for key,mesh of @meshes
             mesh.parent?.remove mesh
         @meshes = {}
@@ -207,8 +209,8 @@ class BrainButton extends CanvasButton
         # 000        000   000   0000000    0000000   000   000  00000000  0000000   0000000   
         
         ctx = @canvas.getContext '2d'
-        progress = Science.progress @scienceKey, stars
-        ctx.fillStyle = Color.menu.progress.getStyle()
-        ctx.fillRect 100-progress, 199, 2*progress, 1
+        if progress = Science.progress @scienceKey, stars
+            ctx.fillStyle = Color.menu.progress.getStyle()
+            ctx.fillRect @size.x/2-progress*@size.x/200, @size.y-1, 2*progress*@size.x/200+2, 1
         
 module.exports = BrainButton

@@ -17,6 +17,8 @@ class TradeMenu extends BotMenu
 
         @name = 'TradeMenu'
         
+    initButtons: ->
+        
         @div.style.width  = "200px"
         @div.style.height = "400px"
 
@@ -25,8 +27,6 @@ class TradeMenu extends BotMenu
         btn.canvas.style.left = "100px"
         
     buttonClicked: (button) ->
-        
-        log "TradeMenu.buttonClicked #{button.inOut} #{Stone.string button.stone}"
         
         trade = rts.world.botOfType Bot.trade
         trade[button.inOut] = button.stone
@@ -39,19 +39,18 @@ class TradeMenu extends BotMenu
         
         if trade[other] == button.stone
             otherStone = first Stone.resources.filter (s) -> s != button.stone
-            log 'otherStone', other, Stone.string otherStone
             trade[other] = otherStone
             @buttons[other].stone = otherStone
             @updateStones @buttons[other]
             
         @updateStones button
+        @botButton.update()
         @update()
         
     highlight: (button) ->
         
         return if button != @buttons[button.inOut]
         return if @buttons["#{button.inOut}0"]?
-        # log "highlight #{button.inOut}"
                
         other = if button.inOut == 'sell' then 'buy' else 'sell'
         
@@ -72,19 +71,12 @@ class TradeMenu extends BotMenu
             
     unhighlight: (button) ->
         
-        log "unhighlight #{button.inOut} #{Stone.string button.stone}", rts.menu.mousePos.x
-        
         if button.inOut == 'buy' and rts.menu.mousePos.x < 200
             @highlight @buttons.sell
         else if button.inOut == 'sell' and rts.menu.mousePos.x >= 200
             @highlight @buttons.buy
-        # return if button != @buttons[button.inOut]
-        # log "unhighlight #{button.inOut}"
-        # for i in [0..3]
-            # @buttons["#{button.inOut}#{i}"]?.del()
         
     updateStones: (button) ->
-        log "TradeMenu.updateStones #{button.inOut}"
         
         stones = Stone.resources.filter (s) -> s != button.stone
         for i in [0...3]

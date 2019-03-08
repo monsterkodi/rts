@@ -50,6 +50,8 @@ class AStar
         
     findWithNeighborFunc: (start, goal, neighborFunc) ->
         
+        # log "findWithNeighborFunc #{start} #{goal}"
+        
         closedSet = new Map # set of nodes already evaluated
     
         openSet = new Map # set of currently discovered nodes that are not evaluated yet
@@ -79,8 +81,8 @@ class AStar
             
             steps += 1
             if steps > 2000
-                log "dafuk? too many steps. bailing out. openSet:#{openSet.size} closedSet:#{closedSet.size} cameFrom:#{@cameFrom.size}"
-                log "start: #{@world.stringForFaceIndex start} goal:#{@world.stringForFaceIndex goal}"
+                # log "dafuk? too many steps. bailing out. openSet:#{openSet.size} closedSet:#{closedSet.size} cameFrom:#{@cameFrom.size}"
+                # log "start: #{@world.stringForFaceIndex start} goal:#{@world.stringForFaceIndex goal}"
                 # for open in Array.from openSet.keys()
                     # log open, @world.stringForFaceIndex open
                 # @world.drawBrokenPath

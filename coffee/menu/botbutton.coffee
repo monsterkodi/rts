@@ -7,8 +7,7 @@
 ###
 
 CanvasButton = require './canvasbutton'
-BuyButton    = require './buybutton'
-BertaMenu    = require './bertamenu'
+BotMenu      = require './botmenu'
 BaseMenu     = require './basemenu'
 TradeMenu    = require './trademenu'
 BuildMenu    = require './buildmenu'
@@ -63,7 +62,7 @@ class BotButton extends CanvasButton
                 @camera.lookAt vec 0,0,0
 
         if @bot in Bot.switchable
-            post.on 'botState', (type,state,player) => @render() if player == 0
+            post.on 'botState', (type,state,player) => @update() if player == 0
 
         if @bot in [Bot.brain, Bot.trade]
             post.on 'botDisconnected', @update
@@ -100,8 +99,9 @@ class BotButton extends CanvasButton
     
     show: (clss) ->
         
-        rts.menu.buttons.bot?.del()
-        rts.menu.buttons.bot = new clss @
+        if rts.menu.buttons.bot?.botButton != @
+            rts.menu.buttons.bot?.del()
+            rts.menu.buttons.bot = new clss @
     
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
@@ -112,15 +112,14 @@ class BotButton extends CanvasButton
     highlight: ->
         
         playSound 'menu', 'highlight', @bot
-        
-        if @bot in [Bot.mine, Bot.berta] or not @world.botOfType @bot
-            @show BuyButton
-        else 
-            switch @bot
-                when Bot.base  then @show BaseMenu  
-                when Bot.trade then @show TradeMenu
-                when Bot.build then @show BuildMenu
-                when Bot.brain then @show BrainMenu
+                
+        switch @bot
+            when Bot.base  then @show BaseMenu  
+            when Bot.trade then @show TradeMenu
+            when Bot.build then @show BuildMenu
+            when Bot.brain then @show BrainMenu
+            when Bot.mine  then @show BotMenu
+            when Bot.berta then @show BotMenu
   
         super
                 
@@ -196,7 +195,7 @@ class BotButton extends CanvasButton
 
         @mesh.material = @botMat()
         
-        super()
+        super
         
         # 00000000   00000000    0000000    0000000   00000000   00000000   0000000   0000000  
         # 000   000  000   000  000   000  000        000   000  000       000       000       
@@ -214,10 +213,10 @@ class BotButton extends CanvasButton
                 ctx.fillStyle = Color.menu.disconnected.getStyle()
 
             if progress = Science.currentProgress()
-                ctx.fillRect 100-progress, 199, 2*progress+2, 1
+                ctx.fillRect @size.x/2-progress*@size.x/200, @size.y-1, 2*progress*@size.x/200+2, 1
                 
             for i in [0...Science.queue[0].length]
-                ctx.fillRect 100 + i*10 - ((Science.queue[0].length-1)*10/2), 192, 3, 3
+                ctx.fillRect @size.x/2 + i*10 - ((Science.queue[0].length-1)*10/2), @size.y-8, 3, 3
                 
         # 000   000  00000000   0000000   000      000000000  000   000  
         # 000   000  000       000   000  000         000     000   000  
@@ -229,8 +228,8 @@ class BotButton extends CanvasButton
         
         health = (bot, x) =>
             if bot.hitPoints < config[Bot.string @bot].health
-                health = 200 * bot.hitPoints / config[Bot.string @bot].health
-                ctx.fillRect x, 200-health, 1, health
+                h = @size.y * bot.hitPoints / config[Bot.string @bot].health
+                ctx.fillRect x, @size.y-h, 1, h
                 true
         
         if @bot not in Bot.limited

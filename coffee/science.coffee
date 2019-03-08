@@ -146,7 +146,7 @@ class Science
         100*@players[player].progress[science][key][stars]/(config.scienceSteps[stars]-1)
             
     @finished: (info) =>
-        log "Science.finished #{info.player} #{info.scienceKey} #{info.stars}"
+        # log "Science.finished #{info.player} #{info.scienceKey} #{info.stars}"
         
         player = info.player
         

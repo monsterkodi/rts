@@ -61,8 +61,6 @@ class RTS
         
         @sound = new Sound
         
-        @menuBorderWidth = 50
-        
         @fps = new FPS
         @paused = false
         @animations = []

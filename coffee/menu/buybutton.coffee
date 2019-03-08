@@ -11,9 +11,7 @@ Boxes        = require '../boxes'
 
 class BuyButton extends CanvasButton
 
-    constructor: (@botButton, div) ->
-        
-        div ?= @botButton.canvas.parentElement
+    constructor: (@menu) ->
         
         @lightPos = vec 0,10,6
         @camPos   = vec(0,1,1).normal().mul 14
@@ -22,14 +20,11 @@ class BuyButton extends CanvasButton
         @normFov = 40
         @highFov = 33
         
-        super div, 'buyButton'
+        super @menu.div, 'buyButton'
         
-        @bot = @botButton.bot
+        @bot = @menu.botButton.bot
         
         @name = "BuyButton #{Bot.string @bot}"
-        
-        y = @botButton.canvas.offsetTop - rts.menuBorderWidth
-        @canvas.style = "left:100px; top:#{y}px"
         
         @boxes = new Boxes @scene, 160, new THREE.BoxBufferGeometry
         @box   = [[],[],[],[]]
@@ -37,8 +32,6 @@ class BuyButton extends CanvasButton
         @init()
         
         post.on 'storageChanged', @onStorageChanged
-        
-        @canvas.addEventListener 'mouseout', @del
         
     init: ->
         

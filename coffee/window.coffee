@@ -14,7 +14,9 @@ RTS        = require './rts'
 Vector     = require './lib/vector'
 Quaternion = require './lib/quaternion'
 electron   = require 'electron'
-         
+    
+post.setMaxListeners 20
+
 window.vec  = (x,y,z)   -> new Vector x, y, z
 window.quat = (x,y,z,w) -> new Quaternion x, y, z, w
 

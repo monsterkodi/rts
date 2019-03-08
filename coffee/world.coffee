@@ -53,7 +53,7 @@ class World
         @build()
         
         @construct = new Construct @
-        @construct.initBotGeoms()
+        @construct.init()
         @construct.stones()
         @construct.bots()
         
@@ -484,8 +484,8 @@ class World
     
         if @noItemAtPos(to) 
             return @tubes.astar.posPath from, to
-        else
-            log "pathFromPosToPos item! stone:#{Stone.string @stoneAtPos to} bot:#{Bot.string @botAtPos(to)?.type}", to
+        # else
+            # log "pathFromPosToPos item! stone:#{Stone.string @stoneAtPos to} bot:#{Bot.string @botAtPos(to)?.type}", to
         null
     
     bulletPath: (fromBot, toBot) -> @tubes.astar.bulletPath fromBot, toBot

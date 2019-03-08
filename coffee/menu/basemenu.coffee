@@ -11,9 +11,11 @@ CallButton   = require './callbutton'
 
 class BaseMenu extends BotMenu
 
-    constructor: (botButton) -> 
+    constructor: (@botButton) -> 
     
-        super botButton
+        super @botButton
+        
+    initButtons: ->
         
         @addButton 'call', new CallButton @div
                 

@@ -6,17 +6,26 @@
 0000000     0000000      000     000   000  00000000  000   000   0000000 
 ###
 
+BuyButton = require './buybutton'
+
 class BotMenu
 
     constructor: (@botButton) ->
 
-        y = @botButton.canvas.offsetTop - rts.menuBorderWidth
+        y = @botButton.canvas.offsetTop
         @div = elem class:'botMenu', style:"left:100px; top:#{y}px; width:100px;"
         
         @botButton.canvas.parentElement.appendChild @div
         
         @buttons = {}
-                
+        
+        if @botButton.bot in [Bot.mine, Bot.berta] or not rts.world.botOfType @botButton.bot
+            @addButton 'buy', new BuyButton @ 
+        else 
+            @initButtons()
+       
+    initButtons: ->
+            
     addButton: (key, button) ->
         
         @buttons[key] = button
@@ -33,7 +42,7 @@ class BotMenu
             button.update()
         
     del: ->
-        
+
         for key,button of @buttons
             button.del()
             

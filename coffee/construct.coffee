@@ -112,6 +112,11 @@ class Construct
 # 000   000  000   000     000     000   000  000       000   000  000 0 000       000  
 # 0000000     0000000      000      0000000   00000000   0000000   000   000  0000000   
 
+    init: -> 
+        
+        @initBotGeoms()
+        @initStoneSides()
+
     initBotGeoms: ->
                 
         @botGeoms = [
@@ -259,63 +264,64 @@ class Construct
     #      000     000     000   000  000  0000  000            000    
     # 0000000      000      0000000   000   000  00000000  0000000     
     
-    stones: ->
-              
-        # return
+    initStoneSides: ->
+
         s = 0.5
         o = 0.55
         i = 0.45
         
-        topside = new THREE.Geometry()
+        @topside = new THREE.Geometry()
         
-        topside.vertices.push vec  s,  s, s
-        topside.vertices.push vec -s,  s, s
-        topside.vertices.push vec -s, -s, s
-        topside.vertices.push vec  s, -s, s
+        @topside.vertices.push vec  s,  s, s
+        @topside.vertices.push vec -s,  s, s
+        @topside.vertices.push vec -s, -s, s
+        @topside.vertices.push vec  s, -s, s
 
-        topside.vertices.push vec  i,  i, o
-        topside.vertices.push vec -i,  i, o
-        topside.vertices.push vec -i, -i, o
-        topside.vertices.push vec  i, -i, o
+        @topside.vertices.push vec  i,  i, o
+        @topside.vertices.push vec -i,  i, o
+        @topside.vertices.push vec -i, -i, o
+        @topside.vertices.push vec  i, -i, o
         
-        topside.faces.push new THREE.Face3 4, 5, 6
-        topside.faces.push new THREE.Face3 4, 6, 7
+        @topside.faces.push new THREE.Face3 4, 5, 6
+        @topside.faces.push new THREE.Face3 4, 6, 7
 
-        topside.faces.push new THREE.Face3 0, 1, 5
-        topside.faces.push new THREE.Face3 0, 5, 4
+        @topside.faces.push new THREE.Face3 0, 1, 5
+        @topside.faces.push new THREE.Face3 0, 5, 4
         
-        topside.faces.push new THREE.Face3 1, 2, 6
-        topside.faces.push new THREE.Face3 1, 6, 5
+        @topside.faces.push new THREE.Face3 1, 2, 6
+        @topside.faces.push new THREE.Face3 1, 6, 5
 
-        topside.faces.push new THREE.Face3 2, 3, 7
-        topside.faces.push new THREE.Face3 2, 7, 6
+        @topside.faces.push new THREE.Face3 2, 3, 7
+        @topside.faces.push new THREE.Face3 2, 7, 6
         
-        topside.faces.push new THREE.Face3 0, 4, 7
-        topside.faces.push new THREE.Face3 0, 7, 3
+        @topside.faces.push new THREE.Face3 0, 4, 7
+        @topside.faces.push new THREE.Face3 0, 7, 3
         
-        topside.computeFaceNormals()
-        topside.computeFlatVertexNormals()
+        @topside.computeFaceNormals()
+        @topside.computeFlatVertexNormals()
         
-        rightside = new THREE.Geometry()
-        rightside.copy topside
-        rightside.rotateY deg2rad 90
+        @rightside = new THREE.Geometry()
+        @rightside.copy @topside
+        @rightside.rotateY deg2rad 90
         
-        leftside = new THREE.Geometry()
-        leftside.copy topside
-        leftside.rotateY deg2rad -90
+        @leftside = new THREE.Geometry()
+        @leftside.copy @topside
+        @leftside.rotateY deg2rad -90
 
-        backside = new THREE.Geometry()
-        backside.copy topside
-        backside.rotateX deg2rad -90
+        @backside = new THREE.Geometry()
+        @backside.copy @topside
+        @backside.rotateX deg2rad -90
 
-        frontside = new THREE.Geometry()
-        frontside.copy topside
-        frontside.rotateX deg2rad 90
+        @frontside = new THREE.Geometry()
+        @frontside.copy @topside
+        @frontside.rotateX deg2rad 90
 
-        bottomside = new THREE.Geometry()
-        bottomside.copy topside
-        bottomside.rotateX deg2rad -180
+        @bottomside = new THREE.Geometry()
+        @bottomside.copy @topside
+        @bottomside.rotateX deg2rad -180
         
+    stones: ->
+                      
         stonesides = []
         for stone in Stone.all
             stonesides.push new THREE.Geometry
@@ -323,12 +329,12 @@ class Construct
         for index,stone of @world.stones
             p = @world.posAtIndex index
             cube = new THREE.Geometry()
-            if not @world.isStoneAt p.x, p.y, p.z+1 then cube.merge topside
-            if not @world.isStoneAt p.x+1, p.y, p.z then cube.merge rightside
-            if not @world.isStoneAt p.x, p.y+1, p.z then cube.merge backside
-            if not @world.isStoneAt p.x, p.y, p.z-1 then cube.merge bottomside
-            if not @world.isStoneAt p.x-1, p.y, p.z then cube.merge leftside
-            if not @world.isStoneAt p.x, p.y-1, p.z then cube.merge frontside
+            if not @world.isStoneAt p.x, p.y, p.z+1 then cube.merge @topside
+            if not @world.isStoneAt p.x+1, p.y, p.z then cube.merge @rightside
+            if not @world.isStoneAt p.x, p.y+1, p.z then cube.merge @backside
+            if not @world.isStoneAt p.x, p.y, p.z-1 then cube.merge @bottomside
+            if not @world.isStoneAt p.x-1, p.y, p.z then cube.merge @leftside
+            if not @world.isStoneAt p.x, p.y-1, p.z then cube.merge @frontside
             cube.translate p.x, p.y, p.z
             stonesides[stone].merge cube
             

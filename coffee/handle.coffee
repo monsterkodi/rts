@@ -124,12 +124,12 @@ class Handle
                     if Math.round(enemy.pos.manhattan(berta.pos)) <= science(berta.player).berta.radius
                         # log "shoot at #{berta.player} #{Bot.string enemy.type} #{enemy.player}"
                         Bullet.spawn @world, berta, enemy, stone
-                    else 
-                        log "enemy too far #{berta.player} #{Bot.string enemy.type}"
+                    # else 
+                        # log "enemy too far #{berta.player} #{Bot.string enemy.type}"
                 # else 
                     # log "no enemy #{berta.player}"
-            else
-                log "no stones #{berta.player}"
+            # else
+                # log "no stones #{berta.player}"
             true
 
     enemyDamage: (enemy, damage) ->
@@ -235,7 +235,7 @@ class Handle
                     
         [p, face] = @world.emptyPosFaceNearBot @world.bases[player]
         if not p?
-            log "WARNING handle.buyBot player:#{player} -- no space for new bot!"
+            # log "WARNING handle.buyBot player:#{player} -- no space for new bot!"
             playSound 'fail', 'buyBot' if player == 0
             return
 
@@ -479,7 +479,7 @@ class Handle
                     # else
                         # log "stay:#{Bot.string bot.type} #{@world.distanceFromFaceToFace(faceIndex,baseIndex)} >= #{@world.distanceFromFaceToFace(botIndex,baseIndex)}"
                 else
-                    log 'no resource and no empty'
+                    # log 'no resource and no empty'
                     return botMoved
         botMoved
             

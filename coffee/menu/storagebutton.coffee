@@ -12,7 +12,7 @@ Boxes        = require '../boxes'
 
 class StorageButton extends CanvasButton
 
-    constructor: (menu) ->
+    constructor: (@menu) ->
         
         @storage = rts.world.storage[0]
         @box     = [[],[],[],[]]
@@ -23,7 +23,7 @@ class StorageButton extends CanvasButton
         @lookPos  = vec 0, 7.6, 0
         @camPos   = vec(0,2,1).normal().mul 22
         
-        super menu.div
+        super @menu.div
         
         @boxes = new Boxes @scene, 4*320, new THREE.BoxBufferGeometry
         @name  = 'StorageButton'
