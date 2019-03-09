@@ -29,6 +29,7 @@ class Monster
         @stone     = [Stone.red,Stone.red, Stone.gelb,Stone.gelb, Stone.white,Stone.white, Stone.blue][randInt 7]
         
         @vec = vec()
+        @rot = quat()
         
         for i in [0...@length]
             size = (1-(i/@length))*@radius
@@ -45,7 +46,7 @@ class Monster
             
     del: -> 
         
-        return if empty @boxes
+        return if @boxes.length <= 0
         
         for box in @boxes
             @world.boxes.del box
@@ -133,8 +134,8 @@ class Monster
             @world.boxes.setRot  box, box.death.rot.slerp quat(), f
     
     animate: (scaledDelta) ->
-
-        return if empty @boxes
+        
+        return if @boxes.length <= 0
                 
         if @dyingTime
             @animateDying scaledDelta
@@ -146,7 +147,6 @@ class Monster
         @moved += scaledDelta * @speed
         
         nextInc = Math.floor @moved * @length
-                
                 
         if nextInc > lastInc
             for i in [lastInc...nextInc]
@@ -163,7 +163,6 @@ class Monster
         
         d = @moved * @length - nextInc
         
-        rot = quat()
         for i in [0...@length]
             if i < @length/2
                 fact = (i+d)/@length
@@ -175,7 +174,7 @@ class Monster
             size = fact*@radius * Math.min 1, @age/@ageTime
             box = @boxes[i]
             @world.boxes.setSize box, size
-            @world.boxes.setRot  box, rot.setFromAxisAngle @axes[i], deg2rad 360 * asgn
+            @world.boxes.setRot  box, Quaternion.axisAngle @axes[i], 360 * asgn
                 
         if @trail.length >= @health
             for i in [0...Math.min(@trail.length, 10)]
@@ -184,7 +183,7 @@ class Monster
         if @moved > 1 
             @moved -= 1
             @findNextDirection()
-        
+                    
     # 000   000  00000000  000   000  000000000  
     # 0000  000  000        000 000      000     
     # 000 0 000  0000000     00000       000     

@@ -27,7 +27,7 @@ class Boxes
     lastIndex: -> @numBoxes()-1
         
     setStone: (box, stone) -> @setColor box, Color.stones[stone]
-    setDir:   (box, dir)   -> @setRot box, quat().setFromUnitVectors Vector.unitZ, dir
+    setDir:   (box, dir)   -> @setRot box, Quaternion.unitVectors Vector.unitZ, dir
     setPos:   (box, pos)   -> @cluster.setPositionAt   box.index, pos
     setRot:   (box, rot)   -> @cluster.setQuaternionAt box.index, rot
     setColor: (box, color) -> @cluster.setColorAt      box.index, color

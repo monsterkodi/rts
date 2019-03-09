@@ -9,8 +9,6 @@
 class Graph
 
     @graph      = null
-    @stones     = []
-    @stonesNum  = 200
     @balance    = []
     @avgs       = [[],[],[],[]]
     @avgsNum    = 100
@@ -28,7 +26,7 @@ class Graph
 
         y = parseInt -@height/2
         x = parseInt -@width/2
-        @canvas.style.transform = "translate3d(#{x}px, #{y}px, 0px) scale3d(0.5, -0.5, 1)"
+        # @canvas.style.transform = "translate3d(#{x}px, #{y}px, 0px) scale3d(0.5, -0.5, 1)"
             
         $("#main").appendChild @canvas
         
@@ -54,19 +52,6 @@ class Graph
         stoneStyles = Stone.resources.map (s) -> Color.stone[Stone.string s].getStyle()
         spentStyles = Stone.resources.map (s) -> Color.spent[Stone.string s].getStyle()
 
-        xoff = 0
-        if false
-            xoff = Graph.stonesNum*4
-            for i in [0...Graph.stones.length]
-                si = 0
-                stones = Graph.stones[i].map (s) -> amount:s, stone:si++
-                for s in [0...i]
-                    stones.push stones.shift()
-                for stone in stones
-                    ctx.fillStyle = stoneStyles[stone.stone]
-                    h = 196*stone.amount/rts.world.storage[0].capacity()
-                    ctx.fillRect i*4, h, 4, 4
-
         for stone in Stone.resources     
             avgs = Graph.avgs[stone]
 
@@ -74,10 +59,10 @@ class Graph
                 [gain, spent] = avgs[i]
                 h = gain*2
                 ctx.fillStyle = stoneStyles[stone]
-                ctx.fillRect xoff+i*4+Graph.avgsNum*stone*4, 98, 2, h
+                ctx.fillRect i*4+Graph.avgsNum*stone*4, 98, 2, h
                 h = -spent*2
                 ctx.fillStyle = spentStyles[stone]
-                ctx.fillRect xoff+i*4+Graph.avgsNum*stone*4, 98, 2, h
+                ctx.fillRect i*4+Graph.avgsNum*stone*4, 98, 2, h
                 
     @toggle: -> 
         
@@ -90,9 +75,6 @@ class Graph
             @graph = new Graph
             
     @sampleStorage: (storage) ->
-        
-        @stones.push _.clone storage.stones
-        @stones.shift() while @stones.length > @stonesNum
         
         @balance.push _.clone storage.balance
         @balance.shift() while @balance.length > @avgsSecs

@@ -49,7 +49,7 @@ class Vector extends THREE.Vector3
         
     rotated: (axis, angle) -> @clone().rotate axis,angle
     rotate: (axis, angle) ->
-        @applyQuaternion quat().setFromAxisAngle axis, deg2rad angle
+        @applyQuaternion Quaternion.axisAngle axis, angle
         @
 
     crossed: (v) -> @clone().cross(v)

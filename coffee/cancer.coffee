@@ -14,6 +14,7 @@ class Cancer
     
     constructor: (@world, @pos, @maxDist=10) ->
         
+        @rot       = quat()
         @boxes     = []
         @growBoxes = {}
         @growCells = []
@@ -59,7 +60,7 @@ class Cancer
             box.axis = Vector.random()
             box.age = 0
             
-            @world.resourceBoxes.setRot box, quat().setFromUnitVectors vec(0,0,1), box.axis
+            @world.resourceBoxes.setRot box, Quaternion.unitVectors Vector.unitZ, box.axis
             
             @boxes.push box
             @growBoxes[index].push box
@@ -73,11 +74,11 @@ class Cancer
             
         for index,boxes of @growBoxes
             for box in boxes
-                rot = @world.resourceBoxes.rot box
+                @world.resourceBoxes.rot box, @rot
                 box.age += scaledDelta
                 @world.resourceBoxes.setSize box, Math.min 1, box.age / @ageTime
-                @world.resourceBoxes.setRot  box, rot.multiply quat().setFromAxisAngle box.axis, deg2rad config.cancer.rotSpeed*scaledDelta
+                @world.resourceBoxes.setRot  box, @rot.rotateAxisAngle box.axis, config.cancer.rotSpeed*scaledDelta
                 if box.age >= @ageTime
                     delete @growBoxes[index]
-            
+
 module.exports = Cancer

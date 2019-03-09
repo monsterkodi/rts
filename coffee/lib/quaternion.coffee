@@ -8,7 +8,13 @@
 
 class Quaternion extends THREE.Quaternion
 
+    @tmp = new Quaternion
+    @counter = 0
+    
     constructor: (x=0, y=0, z=0, w=1) ->
+        
+        Quaternion.counter++
+        
         if x instanceof Vector
             super x.x, x.y, x.z, 0
         else if x instanceof Quaternion or x instanceof THREE.Quaternion
@@ -19,6 +25,21 @@ class Quaternion extends THREE.Quaternion
             super x, y, z, w
         if Number.isNaN @x
             throw new Error
+        
+    @unitVectors: (n1, n2) -> 
+        
+        Quaternion.tmp.setFromUnitVectors n1, n2
+        Quaternion.tmp
+            
+    @axisAngle: (axis, angle) -> 
+        
+        Quaternion.tmp.setFromAxisAngle axis, deg2rad angle
+        Quaternion.tmp
+            
+    rotateAxisAngle: (axis, angle) ->
+        
+        @multiply Quaternion.axisAngle axis, angle
+        @
             
     clone: -> new Quaternion @
     copy: (q) ->

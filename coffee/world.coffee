@@ -868,7 +868,7 @@ class World
             
         @buildGuide.bot = Bot.build
         @buildGuide.position.copy bot.pos.plus hitInfo.norm.mul 0.3
-        @buildGuide.quaternion.copy quat().setFromUnitVectors vec(0,0,1), hitInfo.norm
+        @buildGuide.quaternion.copy Quaternion.unitVectors Vector.unitZ, hitInfo.norm
                                 
     #  0000000  000000000  00000000   000  000   000   0000000   
     # 000          000     000   000  000  0000  000  000        

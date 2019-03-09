@@ -22,7 +22,17 @@ class FPS
         x = parseInt  @width/2
         @canvas.style.transform = "translate3d(#{x}px, #{y}px, 0px) scale3d(0.5, 0.5, 1)"
         
+        @colors = []
+        for i in [0..32]
+            red   = parseInt 32 + (255-32)*clamp 0,1, (i-16)/16
+            green = parseInt 32 + (255-32)*clamp 0,1, (i-32)/32
+            @colors.push "rgb(#{red}, #{green}, 32)"
+        
         @history = []
+        for i in [0...2*@width]
+            @history[i] = 0
+        @index = 0
+        
         @last = window.performance.now()
             
         $("#main").appendChild @canvas
@@ -36,17 +46,17 @@ class FPS
     draw: =>
         
         time = window.performance.now()
-        @history.push time-@last
-        @history.shift() while @history.length > 2*@width
+        @index += 1
+        if @index > 2*@width
+            @index = 0
+        @history[@index] = time-@last
         @canvas.height = @canvas.height
         ctx = @canvas.getContext '2d'        
         for i in [0...@history.length]  
             ms = Math.max 0, @history[i]-17
-            red = parseInt 32 + (255-32)*clamp 0,1, (ms-16)/16
-            green = parseInt 32 + (255-32)*clamp 0,1, (ms-32)/32
-            ctx.fillStyle = "rgb(#{red}, #{green}, 32)"
+            ctx.fillStyle = @colors[clamp 0, 32, parseInt ms]
             h = Math.min ms, 60
-            ctx.fillRect 2*@width-@history.length+i, 0, 2, h
+            ctx.fillRect (2*@width-@index+i)%(2*@width), 0, 2, h
         @last = time
 
 module.exports = FPS

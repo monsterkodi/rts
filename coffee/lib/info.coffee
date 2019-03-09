@@ -28,7 +28,8 @@ class Info
         @elem.innerHTML = ''
         world = rts.world
         add = (text) => elem class:'infoText', parent:@elem, text:text
-        add "vector: #{Vector.counter}"
+        add "vects: #{Vector.counter}"
+        add "quats: #{Quaternion.counter}"
         # add "cycls: #{world.cycles}"
         # add "calls: #{info.calls}"
         # add "trias: #{info.triangles}"

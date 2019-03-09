@@ -91,7 +91,7 @@ class Handle
     # 0000000    000   000  0000000   00000000
 
     tickBase: (delta, base) ->
-
+        
         @delay delta, base, 'speed', 'prod', =>
             gained = [0,0,0,0]
             storage = @world.storage[base.player]

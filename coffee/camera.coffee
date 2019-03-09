@@ -8,8 +8,6 @@
 
 { reduce } = require 'kxk'
 
-Quaternion  = require './lib/quaternion'
-
 class Camera extends THREE.PerspectiveCamera
 
     constructor: (opt) ->
@@ -29,6 +27,7 @@ class Camera extends THREE.PerspectiveCamera
         @degree  = 60
         @rotate  = 0
         @wheelInert = 0
+        @quat = quat()
 
         @elem.addEventListener 'mousewheel', @onMouseWheel
         @elem.addEventListener 'mousedown',  @onMouseDown
@@ -216,18 +215,15 @@ class Camera extends THREE.PerspectiveCamera
     # 000   000  000        000   000  000   000     000     000       
     #  0000000   000        0000000    000   000     000     00000000  
     
-    rotQuat: ->
-
-        q = quat()
-        q.multiply quat().setFromAxisAngle vec(0, 0, 1), deg2rad @rotate
-        q.multiply quat().setFromAxisAngle vec(1, 0, 0), deg2rad @degree
-        q
-    
     update: -> 
         
         @degree = clamp 0, 180, @degree
-        q = @rotQuat()
-        @position.copy @center.plus vec(0,0,@dist).applyQuaternion q
-        @quaternion.copy q
+        
+        @quat.reset()
+        @quat.rotateAxisAngle Vector.unitZ, @rotate
+        @quat.rotateAxisAngle Vector.unitX, @degree
+        
+        @position.copy @center.plus vec(0,0,@dist).applyQuaternion @quat
+        @quaternion.copy @quat
 
 module.exports = Camera

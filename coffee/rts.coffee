@@ -10,38 +10,39 @@
 
 { Bot, Stone, Geom, Face, Edge, Bend } = require './constants'
 
-window.$         = $
-window._         = _
-window.post      = post
-window.prefs     = prefs
-window.randInt   = randInt
+window.$            = $
+window._            = _
+window.post         = post
+window.prefs        = prefs
+window.randInt      = randInt
 window.randIntRange = randIntRange
-window.deg2rad   = deg2rad
-window.rad2deg   = rad2deg
-window.stopEvent = stopEvent
-window.clamp     = clamp
-window.empty     = empty
-window.valid     = valid
-window.first     = first
-window.last      = last
-window.elem      = elem
-window.str       = str
-window.log       = log
+window.deg2rad      = deg2rad
+window.rad2deg      = rad2deg
+window.stopEvent    = stopEvent
+window.clamp        = clamp
+window.empty        = empty
+window.valid        = valid
+window.first        = first
+window.last         = last
+window.elem         = elem
+window.str          = str
+window.log          = log
 
-window.Bot       = Bot
-window.Edge      = Edge
-window.Bend      = Bend
-window.Geom      = Geom
-window.Face      = Face
-window.Stone     = Stone
-window.THREE     = require 'three'
-window.Vector    = require './lib/vector'
-window.Color     = require './color'
-window.Science   = require './science'
-window.Geometry  = require './geometry'
-window.Materials = require './materials'
-window.playSound = (o,n,c) -> rts.sound.play o,n,c
-
+window.Bot          = Bot
+window.Edge         = Edge
+window.Bend         = Bend
+window.Geom         = Geom
+window.Face         = Face
+window.Stone        = Stone
+window.THREE        = require 'three'
+window.Vector       = require './lib/vector'
+window.Quaternion   = require './lib/quaternion'
+window.Color        = require './color'
+window.Science      = require './science'
+window.Geometry     = require './geometry'
+window.Materials    = require './materials'
+window.playSound    = (o,n,c) -> rts.sound.play o,n,c
+   
 FPS     = require './lib/fps'
 Info    = require './lib/info'
 Debug   = require './lib/debug'
@@ -58,7 +59,7 @@ class RTS
     constructor: (@view) ->
         
         window.rts = @
-        window.config  = Config.default
+        window.config = Config.default
         
         @sound = new Sound
         
@@ -172,7 +173,7 @@ class RTS
         if not @paused
              
             angle = -delta*0.01*@world.speed
-            @light2.position.applyQuaternion quat().setFromAxisAngle Vector.unitZ, angle
+            @light2.position.applyQuaternion Quaternion.axisAngle Vector.unitZ, angle
             @light2Helper?.update()   
             @world.animate delta
             @menu.animate delta

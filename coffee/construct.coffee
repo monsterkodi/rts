@@ -211,7 +211,7 @@ class Construct
         @orientBot bot
         @world.colorBot bot
         
-    orientFace: (obj, face) -> obj.quaternion.copy quat().setFromUnitVectors vec(0,0,1), Vector.normals[face]
+    orientFace: (obj, face) -> obj.quaternion.copy Quaternion.unitVectors Vector.unitZ, Vector.normals[face]
     
     orientBot: (bot) -> 
         
