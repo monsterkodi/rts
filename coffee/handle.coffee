@@ -265,7 +265,6 @@ class Handle
     sendPacket: (bot) =>
 
         stone = @world.stoneBelowBot bot
-        # log 'send', Stone.string stone
         storage = @world.storage[bot.player]
         if storage.canTake stone
             if bot.path?
@@ -296,8 +295,8 @@ class Handle
         newPos = bot.pos.plus n
         
         if @world.isStoneAtPos newPos
-            n.negate()
             newFace = (newFace+3) % 6
+            n = Vector.normals[newFace]
             newPos = bot.pos.plus n
 
         if @world.isItemAtPos newPos

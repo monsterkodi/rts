@@ -16,11 +16,54 @@ class Map extends World
         
     build: ->
         
-        @ais()
-        # @pest()
+        # @simple()
+        # @star()
+        # @ais()
+        @pest()
         # @grid()
         # @plenty()
         # @sparse()
+      
+    simple: ->
+        
+        @addStone 0,0,0
+        @addStone 1,0,0
+        @addStone -1,0,0
+        @addStone 0,-1,0
+        @addStone 0,1,0
+        @addBot 0,0,1, Bot.base
+        
+    star: ->
+        
+        s = 1024
+        @wall -s, 0, 0, s, 0, 0
+        @wall 0, -s, 0, 0, s, 0
+        @wall 0, 0, -s, 0, 0, s
+        
+        # n = 50
+        # for i in [0...n]
+            # x1 = randIntRange -s, 0
+            # x2 = randIntRange 0, s
+            # y = randIntRange -s, s
+            # z = randIntRange -s, s
+            # @wall x1, y, z, x2, y, z
+
+        # for i in [0...n]
+            # x = randIntRange -s, s
+            # y1 = randIntRange -s, 0
+            # y2 = randIntRange 0, s
+            # z = randIntRange -s, s
+            # @wall x, y1, z, x, y2, z
+
+        # for i in [0...n]
+            # x = randIntRange -s, s
+            # y = randIntRange -s, s
+            # z1 = randIntRange -s, 0
+            # z2 = randIntRange 0, s
+            # @wall x, y, z1, x, y, z2
+            
+        @addBot  5, 0, 1, Bot.base
+        # @addBot -5, 0, 1, Bot.base
         
     ais: ->
         
@@ -167,6 +210,6 @@ class Map extends World
         @wall -1,-1,-2, 1,1,-2
         
         @addBot  0, 0, 1, Bot.base
-        @addBot  1, 1, -2, Bot.base
+        # @addBot  1, 1, -2, Bot.base
         
 module.exports = Map

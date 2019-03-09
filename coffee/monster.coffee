@@ -28,6 +28,8 @@ class Monster
         @start     = vec @pos
         @stone     = [Stone.red,Stone.red, Stone.gelb,Stone.gelb, Stone.white,Stone.white, Stone.blue][randInt 7]
         
+        @vec = vec()
+        
         for i in [0...@length]
             size = (1-(i/@length))*@radius
             box  = @world.boxes.add stone:Stone.monster, size:size
@@ -133,7 +135,7 @@ class Monster
     animate: (scaledDelta) ->
 
         return if empty @boxes
-        
+                
         if @dyingTime
             @animateDying scaledDelta
             return
@@ -144,22 +146,21 @@ class Monster
         @moved += scaledDelta * @speed
         
         nextInc = Math.floor @moved * @length
-        
-        pos = vec()
+                
+                
         if nextInc > lastInc
-            newPos = vec()
             for i in [lastInc...nextInc]
                 @boxes.unshift @boxes.pop()
                 @axes.unshift @axes.pop()
                 box = @boxes[0]
-                @addTrail @world.boxes.pos @boxes[@boxes.length-3]
-                pos.copy @nxt
-                pos.scale (i+1) * @dist
-                pos.add @pos
-                @world.boxes.setPos box, pos
+                @addTrail @world.boxes.pos @boxes[@boxes.length-3], @vec
+                @vec.copy @nxt
+                @vec.scale (i+1) * @dist
+                @vec.add @pos
+                @world.boxes.setPos box, @vec
                 @world.boxes.setStone box, Stone.monster
                 @axes[0].copy @nxt
-
+        
         d = @moved * @length - nextInc
         
         rot = quat()
@@ -193,15 +194,15 @@ class Monster
     findNextDirection: ->
         
         @pos.add @nxt
-        dir = @nxt.clone().negate()
-        pos = vec()
+        @vec.copy @nxt
+        @vec.negate()
         rts.handle.monsterMoved @
-        choices = _.shuffle Vector.normals.filter (v) => not v.equals dir
+        choices = _.shuffle Vector.normals.filter (v) => not v.equals @vec
         for choice in choices
-            pos.copy @pos
-            pos.add choice
-            if @isInDist pos
-                if @world.noItemAtPos(pos) and @world.noStoneAroundPosInDirection(pos, @nxt)                   
+            @vec.copy @pos
+            @vec.add choice
+            if @isInDist @vec
+                if @world.noItemAtPos(@vec) and @world.noStoneAroundPosInDirection(@vec, @nxt)                   
                     @nxt.copy choice
                     return
         @nxt.negate()

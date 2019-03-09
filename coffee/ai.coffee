@@ -129,6 +129,7 @@ class AI
         return if @actionDelay > 0
         @actionDelay += config.ai.delay
         @tick++
+        
         return if @dequeueAction()
         return if @moveToTarget()
         return if @moveToResource()

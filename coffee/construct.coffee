@@ -68,7 +68,7 @@ class Construct
         else
             n1 = n2 = n3 = n4 = Vector.normals[p1.face].mul 0.025
             
-        n5 = n6 = n7 = n8 = Vector.normals[p1.face].cross(p1.pos.to(p2.pos)).normal().mul 0.025
+        n5 = n6 = n7 = n8 = Vector.normals[p1.face].crossed(p1.pos.to(p2.pos)).normal().mul 0.025
         
         if p1.i == 0
             d = p2.pos.to p1.pos

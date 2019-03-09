@@ -13,6 +13,7 @@ class Boxes
     constructor: (scene, @maxBoxes=1000, geom=Geometry.cornerBox(), material=Materials.white, shadows=true) ->
 
         @boxes = []
+        @sz = vec()
         @cluster = new THREE.InstancedMesh geom, material, @maxBoxes, true, true, true
         
         if shadows
@@ -26,11 +27,15 @@ class Boxes
     lastIndex: -> @numBoxes()-1
         
     setStone: (box, stone) -> @setColor box, Color.stones[stone]
-    setDir:   (box, dir)   -> @setRot box, quat().setFromUnitVectors vec(0,0,1), vec(dir).normal()
-    setPos:   (box, pos)   -> @cluster.setPositionAt   box.index, vec pos
+    setDir:   (box, dir)   -> @setRot box, quat().setFromUnitVectors Vector.unitZ, dir
+    setPos:   (box, pos)   -> @cluster.setPositionAt   box.index, pos
     setRot:   (box, rot)   -> @cluster.setQuaternionAt box.index, rot
-    setSize:  (box, size)  -> @cluster.setScaleAt      box.index, vec size, size, size
     setColor: (box, color) -> @cluster.setColorAt      box.index, color
+    setSize:  (box, size)  -> 
+        @sz.x = size 
+        @sz.y = size 
+        @sz.z = size 
+        @cluster.setScaleAt box.index, @sz
     
     pos:   (box,pos=vec())  -> @cluster.getPositionAt box.index, pos; pos
     rot:   (box,rot=quat()) -> @cluster.getQuaternionAt box.index, rot; rot
@@ -43,7 +48,11 @@ class Boxes
         
         @boxes.push box
         
-        @setPos   box, cfg.pos
+        if cfg.pos
+            @setPos box, cfg.pos
+        else
+            @sz.set 0,0,0
+            @setPos box, @sz
         if cfg.color?
             @setColor box, cfg.color
         else

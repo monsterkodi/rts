@@ -10,7 +10,13 @@
 
 class Vector extends THREE.Vector3
 
+    @counter = 0
+    @tmp = new Vector
+    
     constructor: (x=0,y=0,z=0) ->
+        
+        Vector.counter += 1
+        
         if x.x? and x.y?
             super x.x, x.y, x.z ? 0
         else if Array.isArray x
@@ -27,7 +33,6 @@ class Vector extends THREE.Vector3
         @z = v.z ? 0
         @
 
-    normal: -> @clone().normalize()
     
     parallel: (n) ->
         dot = @x*n.x + @y*n.y + @z*n.z
@@ -42,13 +47,15 @@ class Vector extends THREE.Vector3
         dot = 2*(@x*n.x + @y*n.y + @z*n.z)
         new Vector @x-dot*n.x, @y-dot*n.y, @z-dot*n.z
         
+    rotated: (axis, angle) -> @clone().rotate axis,angle
     rotate: (axis, angle) ->
         @applyQuaternion quat().setFromAxisAngle axis, deg2rad angle
         @
 
-    rotated: (axis, angle) -> @clone().rotate axis,angle
-        
-    cross: (v) -> @clone().crossVectors(@,v)
+    crossed: (v) -> @clone().cross(v)
+    cross: (v) -> @crossVectors @, v
+    
+    normal: -> @clone().normalize()
     normalize: ->
         l = @length()
         if l
@@ -59,18 +66,24 @@ class Vector extends THREE.Vector3
         @    
 
     xyperp: -> new Vector -@y, @x
-    round:  -> new Vector Math.round(@x), Math.round(@y), Math.round(@z)
+    
+    rounded: -> @clone().round()
+    round: -> 
+        @x = Math.round @x 
+        @y = Math.round @y 
+        @z = Math.round @z
+        @
+
     equals: (o) -> @manhattan(o) < 0.001
     same:   (o) -> @x==o.x and @y==o.y and z=o.z
 
+    faded: (o, val) -> @clone().fade o, val
     fade: (o, val) -> # linear interpolation from this (val==0) to other (val==1)
         
         @x = @x * (1-val) + o.x * val
         @y = @y * (1-val) + o.y * val
         @z = @z * (1-val) + o.z * val
         @
-        
-    faded: (o, val) -> @clone().fade o, val
     
     xyangle: (v) ->
         
@@ -88,7 +101,6 @@ class Vector extends THREE.Vector3
     manhattan: (o) -> Math.abs(o.x-@x)+Math.abs(o.y-@y)+Math.abs(o.z-@z)
     dist:   (o) -> @minus(o).length()
     length:    -> Math.sqrt @x*@x + @y*@y + @z*@z
-    angle: (v) -> rad2deg Math.acos @normal().dot v.normal()
     dot:   (v) -> @x*v.x + @y*v.y + @z*v.z
     
     mul:   (f) -> new Vector @x*f, @y*f, @z*f
@@ -98,6 +110,19 @@ class Vector extends THREE.Vector3
     neg:       -> new Vector -@x, -@y, -@z
     to:    (v) -> new Vector(v).sub @
         
+    angle: (v) -> 
+        
+        if l = @length()
+            if o = v.length()
+                x = @x / l
+                y = @y / l
+                z = @z / l
+                p = v.x / o
+                q = v.y / o
+                r = v.z / o
+                return rad2deg Math.acos x*p + y*q + z*r
+        0    
+    
     negate:  -> @scale -1
     scale: (f) ->
         @x *= f
@@ -170,14 +195,15 @@ class Vector extends THREE.Vector3
     
     @closestNormal: (v) ->
         
-        vn = v.normal()
+        Vector.tmp.copy v
+        Vector.tmp.normalize()
         angles = []
         for n in Vector.normals
-            if n.equals vn
-                return new Vector n
-            angles.push [n.angle(vn), n]
+            if n.equals Vector.tmp
+                return n
+            angles.push [n.angle(Vector.tmp), n]
                 
         angles.sort (a,b) -> a[0]-b[0]
-        new Vector angles[0][1]
+        angles[0][1]
     
 module.exports = Vector

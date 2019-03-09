@@ -6,7 +6,7 @@
 000   000     000     0000000 
 ###
 
-{ prefs, post, randInt, clamp, elem, empty, valid, first, last, stopEvent, deg2rad, rad2deg, str, log, $, _ } = require 'kxk'
+{ prefs, post, randInt, randIntRange, clamp, elem, empty, valid, first, last, stopEvent, deg2rad, rad2deg, str, log, $, _ } = require 'kxk'
 
 { Bot, Stone, Geom, Face, Edge, Bend } = require './constants'
 
@@ -15,6 +15,7 @@ window._         = _
 window.post      = post
 window.prefs     = prefs
 window.randInt   = randInt
+window.randIntRange = randIntRange
 window.deg2rad   = deg2rad
 window.rad2deg   = rad2deg
 window.stopEvent = stopEvent
@@ -169,13 +170,13 @@ class RTS
             animation delta
         
         if not @paused
-            
+             
             angle = -delta*0.01*@world.speed
-            @light2.position.applyQuaternion quat().setFromAxisAngle vec(0, 0, 1), angle
+            @light2.position.applyQuaternion quat().setFromAxisAngle Vector.unitZ, angle
             @light2Helper?.update()   
             @world.animate delta
             @menu.animate delta
-            
+             
             oldWorldAnimations = @worldAnimations.clone()
             @worldAnimations = []
             for animation in oldWorldAnimations
@@ -285,24 +286,24 @@ class RTS
         intersects[0]
     
     castRay: (ignoreHighlight) ->
-        
+
         @raycaster.setFromCamera @mouse, @camera
         intersects = @raycaster.intersectObjects @scene.children, false
 
-        # log intersects.length
         intersect = @filterHit intersects, ignoreHighlight
         
         return if empty intersect
         
         point = vec intersect.point
+        pos = @world.roundPos point
         
         info = 
-            pos:    @world.roundPos point
-            index:  @world.indexAtPos @world.roundPos point
+            pos:    pos
+            index:  @world.indexAtPos pos
             norm:   vec intersect.face.normal
             point:  point
             dist:   intersect.distance
-            
+        
         @scene.remove @cursor if @cursor
         delete @cursor
             

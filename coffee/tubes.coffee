@@ -26,26 +26,19 @@ class Tubes
     # 000  000   000  0000000   00000000  000   000     000     
     
     insertPacket: (bot, stone) ->
-        
+                        
         if seg = @segmentBelowBot bot
             
             if seg.player != bot.player
-                log 'DAFUK? tubes.insertPacket #{bot.player} != #{seg.player}!'
+                log 'insertPacket -- DAFUK? tubes.insertPacket #{bot.player} != #{seg.player}!'
                 return
             
-            # if not @isInputBlocked seg
-                # log "tubes.insertPacket #{Bot.string bot.type} #{bot.player} #{Stone.string stone} blocked? #{@isInputBlocked seg}"
-            # else
-                # log "blocked #{Bot.string bot.type} #{bot.player} #{Stone.string stone}"
-            
             stone ?= @world.stoneBelowBot bot
-            # log 'insertPacket blocked', Stone.string(stone), @isInputBlocked seg
             if not @isInputBlocked seg
                 pck = new Packet stone, bot.player, @world
                 @insertPacketIntoSegment pck, seg
                 pck.moveOnSegment seg
                 return true
-        # log 'insertPacketFAIL', Stone.string stone
         false
         
     insertPacketIntoSegment: (pck, seg) -> 
@@ -94,7 +87,9 @@ class Tubes
     animate: (delta) ->
 
         for player in @world.players
+            
             segs = @getSegments player
+            
             segs.sort (a,b) -> a.dist - b.dist
             for seg in segs
                 
@@ -299,8 +294,14 @@ class Tubes
             lastPos = nextPos
         points
 
-    segIndex: (fromFaceIndex,toFaceIndex) -> "#{@faceString fromFaceIndex} #{@faceString toFaceIndex}"
-    faceString: (faceIndex) -> @world.stringForFaceIndex faceIndex
+    segIndex: (fromFaceIndex,toFaceIndex) -> 
+
+        neighbor = 15
+        if fromFaceIndex != toFaceIndex
+            [fromFace, fromIndex] = @world.splitFaceIndex fromFaceIndex
+            [toFace, toIndex]     = @world.splitFaceIndex toFaceIndex
+            neighbor = fromFace - toFace + 5
+        fromFaceIndex | (neighbor<<28)
         
     getSegments: (player) -> Object.values @segments[player]
     getPackets:  (player) -> 
@@ -308,7 +309,6 @@ class Tubes
         packets = []
         for seg in @getSegments player
             packets = packets.concat seg.packets
-        # log packets
         packets
         
 module.exports = Tubes

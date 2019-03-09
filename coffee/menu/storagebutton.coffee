@@ -17,6 +17,8 @@ class StorageButton extends CanvasButton
         @storage = rts.world.storage[0]
         @box     = [[],[],[],[]]
 
+        @vec = vec()
+        
         @normFov  = 40
         @highFov  = 36
         @lightPos = vec 0,10,6
@@ -38,14 +40,14 @@ class StorageButton extends CanvasButton
     posForStone: (stone, i) ->
         
         cap = @storage.capacity()
-        pos = vec stone*1.6-2.7, 0, 0
+        @vec.set stone*1.6-2.7, 0, 0
         l = cap/10
         h = l/2
-        pos.y = 1.2*Math.floor (i-1)/l
-        pos.y += @stoneSize if (i-1)%l > h-1
-        pos.x += @stoneSize if (i-1)%2 == 1
-        pos.z += @stoneSize * Math.floor ((i-1)%h)/2 
-        pos
+        @vec.y = 1.2*Math.floor (i-1)/l
+        @vec.y += @stoneSize if (i-1)%l > h-1
+        @vec.x += @stoneSize if (i-1)%2 == 1
+        @vec.z += @stoneSize * Math.floor ((i-1)%h)/2 
+        @vec
             
     onStorageChanged: (storage, stone, amount) =>
                 

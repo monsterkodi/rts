@@ -14,18 +14,22 @@ class Spent
 
         @spent = []
         @gains = []
+        @vec = vec()
+        @pos = vec()
         
     animate: (delta) ->
-        
+
         if valid @spent
             for i in [@spent.length-1..0]
                 box = @spent[i]
-                pos = @world.boxes.pos box
                 rot = @world.boxes.rot box
-                pos.add box.dir.mul 0.4*delta/box.maxLife
+                @vec.copy box.dir
+                @vec.scale 0.4*delta/box.maxLife
+                @world.boxes.pos box, @pos
+                @pos.add @vec
                 box.life -= delta
                 s = Math.min 1.0, box.life
-                @world.boxes.setPos box, pos
+                @world.boxes.setPos box, @pos
                 @world.boxes.setSize box, s*0.05
                 @world.boxes.setRot box, rot.multiply quat().setFromAxisAngle box.rot, deg2rad -60*delta
                 if box.life <= 0
@@ -40,10 +44,10 @@ class Spent
                     log 'no bot? splice!'
                     @gains.splice i, 1
                     continue
-                newPos = box.bot.pos.faded box.startPos, box.life/box.maxLife
-                @world.boxes.setPos box, newPos
-                s = Math.min 0.1, 0.1*(box.maxLife-box.life)
-                @world.boxes.setSize box, s
+                @vec.copy box.bot.pos
+                @vec.fade box.startPos, box.life/box.maxLife
+                @world.boxes.setPos  box, @vec
+                @world.boxes.setSize box, Math.min 0.1, 0.1*(box.maxLife-box.life)
                 if box.life <= 0
                     @world.boxes.del box
                     @gains.splice i, 1
@@ -57,7 +61,7 @@ class Spent
             for i in [0...cost[stone]]
                 @spawnGain stone, stoneIndex, numStones, pos, face
                 stoneIndex += 1
-
+                
     costAtBot: (cost, bot) ->
         
         radius = switch bot.type
@@ -98,14 +102,17 @@ class Spent
         dir = Vector.normals[@world.dirsForFace(face)[0]].clone()
         angle = rotCount+360*stoneIndex/numStones
         dir.rotate Vector.normals[face], angle
-        
-        startPos = pos.plus dir.mul radius
-         
+                 
         rot = quat().setFromAxisAngle Vector.normals[face], deg2rad angle+45
-        axis = Vector.normals[(face+1)%6].clone().applyQuaternion rot
-        rot.premultiply quat().setFromAxisAngle axis, deg2rad 45
+        @vec.copy Vector.normals[(face+1)%6]
+        @vec.applyQuaternion rot
+        rot.premultiply quat().setFromAxisAngle @vec, deg2rad 45
         
-        box = @world.boxes.add pos:startPos, size:0.05, stone:stone, rot:rot
+        @vec.copy dir
+        @vec.scale radius
+        @vec.add pos
+        
+        box = @world.boxes.add pos:@vec, size:0.05, stone:stone, rot:rot
         box.dir = dir
         box.rot = Vector.normals[face]
         box.life = box.maxLife = config.spent.time.cost
@@ -113,17 +120,30 @@ class Spent
 
     spawnGain: (stone, stoneIndex, numStones, pos, face) ->
 
-        if numStones > 1
-            dir = Vector.normals[@world.dirsForFace(face)[0]].clone()
-            dir.rotate Vector.normals[face], 360*stoneIndex/numStones
-            startPos = pos.plus dir.plus(Vector.normals[face].mul 0.5).normal().mul 0.6
-        else
-            startPos = pos.plus Vector.normals[face].mul 0.5
+        startPos = vec()
         
-        box = @world.boxes.add pos:startPos, size:0.001, stone:stone, dir:pos.to startPos
+        if numStones > 1
+            @vec.copy Vector.normals[@world.dirsForFace(face)[0]]
+            @vec.rotate Vector.normals[face], 360*stoneIndex/numStones
+            startPos.copy Vector.normals[face]
+            startPos.scale 0.5
+            startPos.add @vec
+            startPos.normalize()
+            startPos.scale 0.6
+        else
+            startPos.copy Vector.normals[face]
+            startPos.scale 0.5
+        
+        startPos.add pos    
+            
+        @vec.copy pos
+        @vec.sub startPos
+        @vec.normalize()
+        box = @world.boxes.add pos:startPos, size:0.001, stone:stone, dir:@vec
+        
         box.startPos = startPos
         box.bot = rts.world.botAtPos pos
         box.life = box.maxLife = config.spent.time.gain
         @gains.push box
-
+        
 module.exports = Spent

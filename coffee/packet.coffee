@@ -8,13 +8,15 @@
 
 class Packet
 
+    @vec = new Vector()
+    
     constructor: (@stone, @player, world) ->
         
         @moved = 0
         
         size = 0.001
         
-        @box = world.boxes.add stone:@stone, size:size, pos:vec()
+        @box = world.boxes.add stone:@stone, size:size
         
         @lifeTime = 0
         rts.animate @initialScale
@@ -46,7 +48,7 @@ class Packet
     move: (delta) -> @moved += delta
             
     moveOnSegment: (seg) ->
-        
+
         points = seg.points
         return if empty points
         ind = 0
@@ -68,16 +70,14 @@ class Packet
         else
             frc = factor
             
-        # dir = ths.pos.to nxt.pos
-        # tgt = ths.pos.plus dir.mul frc
-        tgt = vec nxt.pos
-        tgt.sub ths.pos
-        tgt.scale frc
-        tgt.add ths.pos
+        Packet.vec.copy nxt.pos
+        Packet.vec.sub ths.pos
+        Packet.vec.scale frc
+        Packet.vec.add ths.pos
         
         # log "#{@player} #{Stone.string @stone} #{tgt.x} #{tgt.y} #{tgt.z}"
         
-        rts.world.boxes.setPos @box, tgt
+        rts.world.boxes.setPos @box, Packet.vec
         
     # 0000000    00000000  000      
     # 000   000  000       000      

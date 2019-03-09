@@ -39,6 +39,9 @@ class World
         @players   = []
         @ai        = []
         
+        @vec  = vec()
+        @vec2 = vec()
+        
         @cages   = new Cages @ 
         @tubes   = new Tubes @
         @spent   = new Spent @
@@ -57,7 +60,7 @@ class World
         @construct.stones()
         @construct.bots()
         
-        @tubesDirty = true
+        @updateTubes()
         
         if prefs.get 'graph', false
             Graph.toggle()
@@ -344,10 +347,10 @@ class World
     
     addBot: (x,y,z, type=Bot.mine, player=0, face=null) -> 
         
-        @tubesDirty = true
+        @updateTubes()
         
         p = @roundPos vec x,y,z
-        
+        log p
         if not face?
             [p,face] = @emptyPosFaceNearPos p
             if not p?
@@ -365,6 +368,7 @@ class World
             index:  index
             player: player
             
+        bot.posBelow = p.minus Vector.normals[face]
         bot.mine = 1/Science.mineSpeed bot
         bot.hitPoints = bot.health = config[Bot.string type].health
                 
@@ -464,7 +468,10 @@ class World
         bot.face  = toFace
         bot.index = toIndex
         bot.delay = 1/bot.speed
-        bot.pos = @roundPos toPos
+        bot.pos.copy toPos
+        bot.pos.round()
+        bot.posBelow.copy bot.pos
+        bot.posBelow.sub Vector.normals[bot.face]
         
         @removeBuildGuide()
         @updateTubes()
@@ -514,13 +521,15 @@ class World
     delStone: (x,y,z) -> delete @stones[@indexAt x,y,z]
     addStone: (x,y,z, stone=Stone.gray) -> 
     
+        return if x <= -128
+        return if y <= -128
+        return if z <= -128
+        return if x >=  128
+        return if y >=  128
+        return if z >=  128
+        
         index = @indexAt x,y,z
         @stones[index] = stone
-        
-        # if @box[index]
-            # @boxes.del @box[index]
-
-        # @box[index] = @boxes.add pos:vec(x,y,z), stone:stone, size:1.1
         
     botAt:    (x,y,z) -> @botAtIndex @indexAt x,y,z
     botAtPos:     (v) -> @botAtIndex @indexAtPos v
@@ -546,12 +555,19 @@ class World
     noBotAtIndex:  (i) -> not @isBotAtIndex i
                 
     noStoneAroundPosInDirection: (pos, dir) ->
-        
-        return false if @isStoneAtPos pos.plus dir
+        @vec.copy pos
+        @vec.add dir
+        return false if @isStoneAtPos @vec
         for n in Vector.perpNormals dir
-            return false if @isStoneAtPos pos.plus n
-            return false if @isStoneAtPos pos.plus(dir).plus n
-            return false if @isStoneAtPos pos.plus(dir).plus(n).plus dir.cross(n)
+            @vec.copy pos
+            @vec.add n
+            return false if @isStoneAtPos @vec
+            @vec.add dir
+            return false if @isStoneAtPos @vec
+            @vec2.copy dir
+            @vec2.cross n
+            @vec.add @vec2
+            return false if @isStoneAtPos @vec
         true
     
     # 00000000   0000000    0000000  00000000  
@@ -584,23 +600,23 @@ class World
                 
     faceAtPosNorm: (v,n) -> 
         
-        norm = new Vector n
-        if n.equals Vector.unitX  then return 0
-        if n.equals Vector.unitY  then return 1
-        if n.equals Vector.unitZ  then return 2
-        if n.equals Vector.minusX then return 3
-        if n.equals Vector.minusY then return 4
-        if n.equals Vector.minusZ then return 5
+        if Vector.unitX.equals n  then return 0
+        if Vector.unitY.equals n  then return 1
+        if Vector.unitZ.equals n  then return 2
+        if Vector.minusX.equals n then return 3
+        if Vector.minusY.equals n then return 4
+        if Vector.minusZ.equals n then return 5
         
-        v = new Vector v 
+        v = vec v 
         dir = v.to @roundPos(v)
-        angles = [0..5].map (i) -> index:i, norm:Vector.normals[i], angle:Vector.normals[i].angle(norm) + Vector.normals[i].angle(dir)
+        angles = [0..5].map (i) -> index:i, norm:Vector.normals[i], angle:Vector.normals[i].angle(n) + Vector.normals[i].angle(dir)
         angles.sort (a,b) -> a.angle - b.angle
         return angles[0].index
             
-    faceIndex: (face,index) -> (face<<28) | index
+    faceIndex: (face,index) -> (face<<25) | index
     faceIndexForBot: (bot) -> @faceIndex bot.face, bot.index
-    splitFaceIndex: (faceIndex) -> [faceIndex >> 28, faceIndex & ((Math.pow 2, 27)-1)]
+    # splitFaceIndex: (faceIndex) -> [faceIndex >> 25, faceIndex & 134217727] # 2^27-1
+    splitFaceIndex: (faceIndex) -> [faceIndex >> 25, faceIndex & 16777215] # 2^24-1
         
     # 00000000  00     00  00000000   000000000  000   000  00000000    0000000    0000000  
     # 000       000   000  000   000     000      000 000   000   000  000   000  000       
@@ -763,7 +779,7 @@ class World
     # 000  000  0000  000   000  000        000 000   
     # 000  000   000  0000000    00000000  000   000  
     
-    indexAt: (x,y,z) -> (Math.round(x)+256)+((Math.round(y)+256)<<9)+((Math.round(z)+256)<<18)
+    indexAt: (x,y,z) -> (Math.round(x)+128)+((Math.round(y)+128)<<8)+((Math.round(z)+128)<<16)
     indexAtPos: (v) -> @indexAt v.x, v.y, v.z
     indexAtBot: (bot) -> @indexAtPos bot.pos
     
@@ -774,9 +790,9 @@ class World
     # 000         0000000   0000000   
         
     indexToPos: (index,pos) -> 
-        pos.x = ( index      & 0b111111111)-256
-        pos.y = ((index>>9 ) & 0b111111111)-256
-        pos.z = ((index>>18) & 0b111111111)-256
+        pos.x = ( index      & 0b11111111)-128
+        pos.y = ((index>>8 ) & 0b11111111)-128
+        pos.z = ((index>>16) & 0b11111111)-128
         pos
         
     posAtIndex: (index) -> @indexToPos index, vec()
@@ -785,8 +801,8 @@ class World
         [face,index] = @splitFaceIndex faceIndex
         @posAtIndex index
     
-    roundPos: (v) -> vec(v).round()
-    posBelowBot: (bot) -> bot.pos.minus Vector.normals[bot.face]            
+    roundPos: (v) -> v.rounded()
+    posBelowBot: (bot) -> bot.posBelow #bot.pos.minus Vector.normals[bot.face]            
                 
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
@@ -864,9 +880,9 @@ class World
             
     stringForIndex: (index) -> pos = @posAtIndex index; "#{pos.x} #{pos.y} #{pos.z}"
     stringForFaceIndex: (faceIndex) ->
-        
         [face,index] = @splitFaceIndex faceIndex
         pos = @posAtIndex index
+        # log "stringForFaceIndex #{faceIndex}", "#{pos.x} #{pos.y} #{pos.z} #{Face.string(face)}"
         "#{pos.x} #{pos.y} #{pos.z} #{Face.string(face)}"
         
 module.exports = World

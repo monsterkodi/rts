@@ -103,37 +103,7 @@ class Camera extends THREE.PerspectiveCamera
     # 000        000      0       0000000      000     
     
     pivot: (x,y) ->
-        
-        # br = rts.elem.getBoundingClientRect()
-        # relMouse = new THREE.Vector2 ((@mouseX-br.left)/br.width)*2-1, -((@mouseY-br.top)/br.height)*2+1 # [-1..1] [-1..1] left to right, bottom to top
-        # rayDirection = vec relMouse.x, relMouse.y, 1 # point on far frustum
-        # rayDirection.unproject @ # point on far plane
-        # rayDirection.normalize()
-#         
-        # planeNormal = vec(0,0,1).applyQuaternion @rotQuat()
-#         
-        # plane = new THREE.Plane 
-        # plane.setFromNormalAndCoplanarPoint planeNormal, @center
-        # ray = new THREE.Ray @position, rayDirection
-        # planeHit = vec()
-        # ray.intersectPlane plane, planeHit
-
-        # rayDirection = vec ((@mouseX-br.left-x)/br.width)*2-1, -((@mouseY-br.top-y)/br.height)*2+1, 1
-        # rayDirection.unproject @
-        # rayDirection.normalize()
-#         
-        # deltaHit = vec()
-        # ray = new THREE.Ray @position, rayDirection
-        # ray.intersectPlane plane, deltaHit 
-        # centerToOld = vec().subVectors deltaHit, @center
-        # centerToNew = vec().subVectors planeHit, @center
-        # angle = rad2deg centerToNew.angleTo centerToOld
-        # centerToOldNorm = centerToOld.clone().normalize()
-        # centerToNewNorm = centerToNew.clone().normalize()
-        # cross = centerToOld.clone().cross(planeNormal)
-        # dotp = cross.dot(centerToNewNorm)
-        # asign = dotp > 0 and 1 or -1
-        
+                
         @rotate += -0.1*x
         @degree += -0.1*y
         

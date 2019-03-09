@@ -10,13 +10,19 @@ class AStar
 
     constructor: (@world) ->
         
+        @startPos = vec()
+        @goalPos  = vec()
+        
     dist: (start, goal) ->
         
-        s = @world.posAtIndex start
-        g = @world.posAtIndex goal
-        d = s.manhattan g
-        if d == 1
-            d += 1 if @world.splitFaceIndex(start)[0] != @world.splitFaceIndex(goal)[0]
+        if start == goal
+            return 0
+            
+        @world.indexToPos start, @startPos
+        @world.indexToPos goal, @goalPos
+        d = @startPos.manhattan @goalPos
+        if d == 0 or d == 1 and @world.splitFaceIndex(start)[0] != @world.splitFaceIndex(goal)[0]
+            d += 1
         d
         
     neighborCost: (start, neighbor) -> 1
@@ -60,7 +66,7 @@ class AStar
         # For each node, which node it can most efficiently be reached from.
         # If a node can be reached from many nodes, cameFrom will eventually contain the
         # most efficient previous step.
-        @cameFrom = new Map
+        cameFrom = new Map
     
         # For each node, the cost of getting from the start node to that node.
         gScore = new Map # map with default value of Infinity
@@ -81,7 +87,7 @@ class AStar
             
             steps += 1
             if steps > 2000
-                # log "dafuk? too many steps. bailing out. openSet:#{openSet.size} closedSet:#{closedSet.size} cameFrom:#{@cameFrom.size}"
+                log "AStar -- too many steps. bailing out. openSet:#{openSet.size} closedSet:#{closedSet.size} cameFrom:#{cameFrom.size}"
                 # log "start: #{@world.stringForFaceIndex start} goal:#{@world.stringForFaceIndex goal}"
                 # for open in Array.from openSet.keys()
                     # log open, @world.stringForFaceIndex open
@@ -96,7 +102,7 @@ class AStar
                 
             current = @lowestScore openSet, fScore # the node in openSet having the lowest fScore value
             if current == goal
-                return @collectPath current
+                return @collectPath current, cameFrom
     
             openSet.delete current
             closedSet.set current, current
@@ -115,17 +121,16 @@ class AStar
                     continue
     
                 # path is the best until now
-                @cameFrom.set neighbor, current
+                cameFrom.set neighbor, current
                 gScore.set neighbor, tScore
                 fScore.set neighbor, @getScore(gScore, neighbor)+@dist(neighbor, goal)
                 
-    collectPath: (current) ->
+    collectPath: (current, cameFrom) ->
         
         path = [current]
-        while @cameFrom.get(current)?
-            current = @cameFrom.get(current)
-            # path.push current
+        while cameFrom.get(current)?
+            current = cameFrom.get(current)
             path.unshift current
-        return path
+        path
         
 module.exports = AStar
