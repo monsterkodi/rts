@@ -30,6 +30,7 @@ class Bullet
             # log "ok? no path for bullet? #{str berta.pos} #{str @enemy.pos}"
             return
         @dir = vec()
+        @vec = vec()
         @updateDir()
                 
         @box = @world.boxes.add pos:@pos, size:0.05, stone:@stone
@@ -66,7 +67,10 @@ class Bullet
                     return
             @updateDir()
 
-        @world.boxes.setPos @box, @pos.plus @dir.mul @life
+        @vec.copy  @dir
+        @vec.scale @life
+        @vec.add   @pos
+        @world.boxes.setPos @box, @vec
 
         rts.animateWorld @animate
                 

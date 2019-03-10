@@ -16,17 +16,18 @@ class Graph
     
     constructor: ->
         
-        @width  = (Graph.stonesNum+Graph.avgsNum*4)*2
-        @height = 100
+        @width     = 4*Graph.avgsNum*2
+        @height    = 100
+        @size      = vec @width*window.devicePixelRatio, @height*window.devicePixelRatio
         
         @canvas = elem 'canvas', 
             class:  "graph"
-            height: 2*@height
-            width:  2*@width
+            width:  @size.x
+            height: @size.y
 
         y = parseInt -@height/2
         x = parseInt -@width/2
-        # @canvas.style.transform = "translate3d(#{x}px, #{y}px, 0px) scale3d(0.5, -0.5, 1)"
+        @canvas.style.transform = "translate3d(#{x}px, #{y}px, 0px) scale3d(#{1/window.devicePixelRatio}, -#{1/window.devicePixelRatio}, 1)"
             
         $("#main").appendChild @canvas
         
