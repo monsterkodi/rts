@@ -15,7 +15,7 @@ class Storage
 
         @resetBalance()
         
-        # log "new Storage #{@player}"
+        # log "new Storage #{@player}", config.storage.stones
         
         for stone in Stone.resources
             @add stone, config.storage.stones[stone], 'init'
@@ -38,6 +38,7 @@ class Storage
             
     canTake: (stone, amount=1) -> 
         
+        return amount if @world.isMeta
         return 0 if stone == Stone.gray
         clamp 0, amount, @capacity() - @stones[stone] - @temp[stone]
 

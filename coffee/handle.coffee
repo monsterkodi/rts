@@ -42,12 +42,30 @@ class Handle
             playSound 'state', newState, bot.type if bot.player == 0
             newState
             
+    #  0000000  000      000   0000000  000   000  
+    # 000       000      000  000       000  000   
+    # 000       000      000  000       0000000    
+    # 000       000      000  000       000  000   
+    #  0000000  0000000  000   0000000  000   000  
+    
     botClicked: (bot) ->
 
         hit = rts.castRay()
 
         switch hit?.bot?.type
             when Bot.build then @buildBotHit bot, hit
+            when Bot.icon  
+                if @world[bot.func]?
+                    @world.clear()
+                    @world[bot.func].apply @world
+                    @world.isMeta = false
+                    @world.create()
+                    
+    loadMeta: ->
+        
+        @world.clear()
+        @world.meta()
+        @world.create()
 
     # 0000000    00000000  000       0000000   000   000
     # 000   000  000       000      000   000   000 000
@@ -266,15 +284,15 @@ class Handle
 
         stone = @world.stoneBelowBot bot
         storage = @world.storage[bot.player]
-        if storage.canTake stone
+        if not storage or storage.canTake stone
             if bot.path?
                 if @world.tubes.insertPacket bot, stone
-                    storage.willSend stone
+                    storage?.willSend stone
                     if resource = @world.resourceAtPos @world.posBelowBot bot
                         resource.deduct()
                     return true
             else if bot.type == Bot.base
-                storage.add stone
+                storage?.add stone
                 gained = [0,0,0,0]
                 gained[stone] = 1
                 @world.spent.gainAtPosFace gained, bot.pos, bot.face
@@ -420,6 +438,8 @@ class Handle
         
     moveBot: (bot, pos, face) ->
 
+        return if bot.type == Bot.icon
+        
         if not @world.isItemAtPos(pos) or @world.botAtPos(pos) == bot
             index = @world.indexAtPos pos
             if bot.face != face or bot.index != index

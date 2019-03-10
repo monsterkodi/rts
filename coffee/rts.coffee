@@ -184,6 +184,7 @@ class RTS
                 animation delta * @world.speed
                     
         @render()
+        # window.requestAnimationFrame @animationStep
         setTimeout @animationStep, 1000/60
             
     # 00     00   0000000   000   000   0000000  00000000  

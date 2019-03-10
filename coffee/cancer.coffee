@@ -22,6 +22,12 @@ class Cancer
         @ageTime   = config.cancer.ageTime
         @cellsSinceLastMonster = 0
         @spawnAtPos @pos
+        
+    del: ->
+        
+        for box in @boxes
+            @world.resourceBoxes.del box
+        @boxes = []
                     
     grow: ->
         

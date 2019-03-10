@@ -14,15 +14,34 @@ class Map extends World
         
         super scene
         
-    build: ->
+    build: -> @meta()
         
-        # @simple()
-        # @star()
-        # @ais()
-        @pest()
-        # @grid()
-        # @plenty()
-        # @sparse()
+    meta: ->
+
+        @isMeta = true
+        
+        s = 6
+        @wall -s, 0, 0, s, 0, 0
+        @wall 0, -s, 0, 0, s, 0
+        
+        @addBot   0, 0, 1, Bot.base
+        @addIcon  6, 0, 1, 'simple'
+        @addIcon  3, 0, 1, 'star'
+        @addIcon -3, 0, 1, 'ais'
+        @addIcon  0,-3, 1, 'pest'
+        @addIcon  0, 3, 1, 'grid'
+        @addIcon  0, 6, 1, 'plenty'
+        @addIcon  0,-6, 1, 'sparse'
+        
+        @addResource  6, 0, 0, Stone.red
+        @addResource  3, 0, 0, Stone.gelb
+        @addResource -3, 0, 0, Stone.blue
+        @addResource  0,-3, 0, Stone.blue
+        @addResource  0, 3, 0, Stone.red
+        @addResource  0, 6, 0, Stone.white
+        @addResource  0,-6, 0, Stone.white
+        
+        science(0).path.length = 16
       
     simple: ->
         
@@ -35,32 +54,18 @@ class Map extends World
         
     star: ->
         
-        s = 1024
-        @wall -s, 0, 0, s, 0, 0
-        @wall 0, -s, 0, 0, s, 0
-        @wall 0, 0, -s, 0, 0, s
-        
-        # n = 50
-        # for i in [0...n]
-            # x1 = randIntRange -s, 0
-            # x2 = randIntRange 0, s
-            # y = randIntRange -s, s
-            # z = randIntRange -s, s
-            # @wall x1, y, z, x2, y, z
-
-        # for i in [0...n]
-            # x = randIntRange -s, s
-            # y1 = randIntRange -s, 0
-            # y2 = randIntRange 0, s
-            # z = randIntRange -s, s
-            # @wall x, y1, z, x, y2, z
-
-        # for i in [0...n]
-            # x = randIntRange -s, s
-            # y = randIntRange -s, s
-            # z1 = randIntRange -s, 0
-            # z2 = randIntRange 0, s
-            # @wall x, y, z1, x, y, z2
+        for n in Vector.normals
+            c = vec()
+            o = n.mul 64
+            @wall c.x, c.y, c.z, c.x+o.x, c.y+o.y, c.z+o.z
+            c = o.mul 0.5
+            for n in Vector.normals
+                o = n.mul 32
+                @wall c.x, c.y, c.z, c.x+o.x, c.y+o.y, c.z+o.z
+                d = c.plus o.mul 0.5
+                for n in Vector.normals
+                    o = n.mul 16
+                    @wall d.x, d.y, d.z, d.x+o.x, d.y+o.y, d.z+o.z 
             
         @addBot  5, 0, 1, Bot.base
         # @addBot -5, 0, 1, Bot.base
@@ -152,7 +157,7 @@ class Map extends World
         @addStone -3, 0, 0
         @addStone  2, 0, 0
                 
-        for z in [0, -255]
+        for z in [0, -127]
             for y in [-5..5]
                 @wall -20,y*4,z, 20,y*4,z
                 @wall y*4,-20,z, y*4,20,z
@@ -169,7 +174,7 @@ class Map extends World
              
         for x in [-20..20] by 8
             for y in [-20..20] by 8
-                @wall x, y, 0, x, y, -256
+                @wall x, y, 0, x, y, -127
                 
         @addBot  0, 0, 1, Bot.base
           

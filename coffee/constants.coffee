@@ -34,6 +34,7 @@ Bot = new Enum
         build:      4
         berta:      5
         mine:       6
+        icon:       7
     
 Bot.switchable  = [Bot.base,  Bot.brain, Bot.trade, Bot.berta]
 Bot.caged       = [Bot.base,  Bot.berta]

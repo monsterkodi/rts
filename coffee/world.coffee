@@ -29,7 +29,6 @@ class World
         window.science = Science.science
         
         @stones    = {}
-        @box       = {}
         @bots      = {}
         @resources = {}
         @monsters  = []
@@ -42,10 +41,10 @@ class World
         @vec  = vec()
         @vec2 = vec()
         
-        @cages   = new Cages @ 
-        @tubes   = new Tubes @
-        @spent   = new Spent @
-        @plosion = new Plosion @
+        @cages         = new Cages @ 
+        @tubes         = new Tubes @
+        @spent         = new Spent @
+        @plosion       = new Plosion @
         @boxes         = new Boxes @scene, 10000
         @resourceBoxes = new Boxes @scene, 10000
                 
@@ -57,10 +56,8 @@ class World
         
         @construct = new Construct @
         @construct.init()
-        @construct.stones()
-        @construct.bots()
         
-        @updateTubes()
+        @create()
         
         if prefs.get 'graph', false
             Graph.toggle()
@@ -70,7 +67,55 @@ class World
         @setSpeed       prefs.get 'speed', 6
         @setOpacity     prefs.get 'opacity', 6
         @setCageOpacity prefs.get 'cageOpacity', 6
-                
+          
+    #  0000000  00000000   00000000   0000000   000000000  00000000  
+    # 000       000   000  000       000   000     000     000       
+    # 000       0000000    0000000   000000000     000     0000000   
+    # 000       000   000  000       000   000     000     000       
+    #  0000000  000   000  00000000  000   000     000     00000000  
+    
+    create: ->
+        
+        @construct.stones()
+        @construct.bots()
+        @updateTubes()
+        
+        post.emit 'world', @
+        
+    #  0000000  000      00000000   0000000   00000000   
+    # 000       000      000       000   000  000   000  
+    # 000       000      0000000   000000000  0000000    
+    # 000       000      000       000   000  000   000  
+    #  0000000  0000000  00000000  000   000  000   000  
+    
+    clear: ->
+        
+        @tubes.clear()
+        @spent.clear()
+        
+        @players = []
+        @bases   = []
+        @storage = []
+        @ai      = []
+        
+        for index,stone of @stones
+            delete @stones[index]
+        @construct.stones()            
+        
+        for index,bot of @bots
+            @delBot bot
+        
+        for index,resource of @resources
+            resource.del()
+        @resources = {}
+        
+        while @monsters.length
+            @monsters[0].del()
+
+        for cancer in @cancers
+            cancer.del()
+        @cancers = []
+        
     drawBrokenPath: (info) ->
         
         # log info
@@ -153,6 +198,7 @@ class World
     animate: (delta) ->
         
         if @tubes.dirty
+            # log '@tubes.dirty', @tubes.dirty
             @tubes.build()
             delete @tubes.dirty
         
@@ -190,7 +236,7 @@ class World
                     
         @sample -= scaledDelta
         if @sample <= 0
-            Graph.sampleStorage @storage[0]
+            Graph.sampleStorage @storage[0] if @storage.length
             @sample = 1.0
                     
     # 00000000   00000000   0000000   0000000   000   000  00000000    0000000  00000000  
@@ -350,7 +396,7 @@ class World
         @updateTubes()
         
         p = @roundPos vec x,y,z
-        log p
+
         if not face?
             [p,face] = @emptyPosFaceNearPos p
             if not p?
@@ -370,7 +416,9 @@ class World
             
         bot.posBelow = p.minus Vector.normals[face]
         bot.mine = 1/Science.mineSpeed bot
-        bot.hitPoints = bot.health = config[Bot.string type].health
+        
+        if type != Bot.icon
+            bot.hitPoints = bot.health = config[Bot.string type].health
                 
         if type in Bot.switchable
             bot.state = 'off'
@@ -380,9 +428,7 @@ class World
                 Science.addPlayer()
                 @storage.push new Storage @, player
                 @players.push player
-                if player == 0
-                    @base = bot
-                else 
+                if player
                     @addAI bot
                 @bases[player] = bot
                 bot.prod = 1/science(player).base.speed
@@ -401,6 +447,22 @@ class World
         @bots[index] = bot
         bot
 
+    # 000   0000000   0000000   000   000  
+    # 000  000       000   000  0000  000  
+    # 000  000       000   000  000 0 000  
+    # 000  000       000   000  000  0000  
+    # 000   0000000   0000000   000   000  
+    
+    addIcon: (x,y,z, func) ->
+        
+        iconBot = @addBot x,y,z, Bot.icon
+        if not func
+            Science.addPlayer()
+            @bases[0] = iconBot
+        else
+            iconBot.func = func
+        iconBot
+        
     #  0000000   0000000   000       0000000   00000000   
     # 000       000   000  000      000   000  000   000  
     # 000       000   000  000      000   000  0000000    
@@ -442,15 +504,21 @@ class World
         
         post.emit 'botWillBeRemoved', bot
         @plosion.atBot bot
+        delBot bot
+        @updateTubes()
+        post.emit 'botRemoved', bot.type, bot.player
+        
+    delBot: (bot) ->
+        
         @cages.removeCage bot
         index = @indexAtBot bot
+        bot.highlight?.parent.remove bot.highlight
         bot.mesh?.parent.remove bot.mesh
         bot.dot?.parent.remove bot.dot
+        delete bot.highlight
         delete bot.mesh
         delete bot.dot
         delete @bots[index]
-        @updateTubes()
-        post.emit 'botRemoved', bot.type, bot.player
     
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       

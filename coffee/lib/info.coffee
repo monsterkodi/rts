@@ -48,7 +48,8 @@ class Info
         for ai in world.ai
             add "pckts#{ai.player}: #{world.tubes.getPackets(ai.player).length}"
             
-        add "store: #{world.storage[0].stones}"
+        if world.storage[0]
+            add "store: #{world.storage[0].stones}"
         # add "temps: #{world.storage[0].temp}"
         for ai in world.ai
             add "store#{ai.player}: #{world.storage[ai.player].stones}"

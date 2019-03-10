@@ -138,6 +138,8 @@ class BotButton extends CanvasButton
     
     render: =>
         
+        return if @world.isMeta
+        
         if @bot in Bot.switchable
             
             if bot = @world.botOfType @bot

@@ -6,8 +6,8 @@
    000      0000000   0000000    00000000  0000000 
 ###
 
-AStar    = require './lib/astar'
-Packet   = require './packet'
+AStar  = require './lib/astar'
+Packet = require './packet'
 
 class Tubes
 
@@ -19,6 +19,18 @@ class Tubes
     speed: (player=0) -> science(player).tube.speed
     gap:   (player=0) -> science(player).tube.gap + 0.1
         
+    clear: ->
+        
+        for player in @world.players
+            for index,segment of @segments[player]
+                for pck in segment.packets
+                    pck.del()
+                    
+        @segments = [{},{},{},{}]
+        
+        for player in @world.players
+            @world.construct.tubes player
+    
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
     # 000  000 0 000  0000000   0000000   0000000       000     
@@ -147,12 +159,12 @@ class Tubes
     # 0000000     0000000   000  0000000  0000000    
     
     build: ->
-        
+        # log '@world.players', @world.players.length
         for player in @world.players
             @tubesForPlayer player
             
     tubesForPlayer: (player) ->
-        
+
         oldSegments = @segments[player]
         @segments[player] = {}
         

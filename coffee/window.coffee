@@ -49,10 +49,11 @@ w = new Window
     menu:   '../coffee/menu.noon'
     icon:   '../img/menu@2x.png'
     context: (items) -> 
-    onLoad: -> window.rts = new RTS $ '#main'
-    
+    onLoad: -> 
+        window.rts = new RTS $ '#main'
+        
 window.win = electron.remote.getCurrentWindow()
-    
+
 # 00000000   00000000   00000000  00000000   0000000
 # 000   000  000   000  000       000       000
 # 00000000   0000000    0000000   000000    0000000
@@ -134,6 +135,7 @@ window.onkeydown = (event) ->
     
     # log 'keydown', keyinfo.forEvent event
     switch keyinfo.forEvent(event).key
+        when 'esc'   then rts.handle.loadMeta()
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
         when 'x'     then rts.handle.placeBase()
         when 'z'     then rts.handle.placeBuild()

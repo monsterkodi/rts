@@ -11,7 +11,7 @@ Materials =
     cage:       new THREE.MeshPhongMaterial    color:0xffffff, dithering:true
     spark:      new THREE.LineBasicMaterial    color:Color.stone.red, linewidth: 8
     white:      new THREE.MeshStandardMaterial color:0xffffff    
-    highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:false, transparent:true, opacity:0.2
+    highlight:  new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:true, transparent:true, opacity:0.2
     spent:      new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6, roughness: 0.7, side:THREE.DoubleSide
     path:       new THREE.MeshStandardMaterial color:Color.path, metalness: 0.9, roughness: 0.5
     stone: [   

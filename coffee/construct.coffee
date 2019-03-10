@@ -13,6 +13,8 @@ class Construct
         @segmentMesh = [null,null,null,null]
         @stoneMeshes = {}     
         @stoneMaterials = {}
+        @iconGeometries = {}
+        
         for stone in Stone.all
             @stoneMaterials[stone] = Materials.stone[stone].clone()
                 
@@ -174,8 +176,17 @@ class Construct
     # 000   000  000   000     000          000  
     # 0000000     0000000      000     0000000   
     
+    geometryForBot: (bot) ->
+
+        if bot.type == Bot.icon 
+            @geometryForIcon bot
+        else        
+            @botGeoms[@geomForBot bot]
+    
     geomForBot: (bot) -> @geomForBotType bot.type
+        
     geomForBotType: (type) ->
+        # log "geomForBotType #{Bot.string type}"
         switch type
             when Bot.base  then Geom.dodicos
             when Bot.mine  then Geom.octacube
@@ -184,6 +195,76 @@ class Construct
             when Bot.brain then Geom.knot
             when Bot.berta then Geom.tubecross
     
+    # 000   0000000   0000000   000   000  
+    # 000  000       000   000  0000  000  
+    # 000  000       000   000  000 0 000  
+    # 000  000       000   000  000  0000  
+    # 000   0000000   0000000   000   000  
+    
+    geometryForIcon: (bot) ->
+        
+        if @iconGeometries[bot.func]
+            return @iconGeometries[bot.func]
+        
+        geom = new THREE.Geometry
+        
+        minx =  128
+        maxx = -128
+        miny =  128
+        maxy = -128
+        minz =  128
+        maxz = -128
+        
+        botGeoms = @botGeoms
+        geomForBotType = @geomForBotType
+
+        minxyz = (x,y,z) -> 
+            x = clamp -127, 127, x
+            y = clamp -127, 127, y
+            z = clamp -127, 127, z
+            minx = Math.min x, minx
+            miny = Math.min y, miny
+            minz = Math.min z, minz
+            maxx = Math.max x, maxx
+            maxy = Math.max y, maxy
+            maxz = Math.max z, maxz
+        
+        fakeWorld = 
+            addStone:  (x,y,z) -> 
+                minxyz x,y,z
+                geom.merge Geometry.box 1, x, y, z
+                # geom.merge Geometry.cornerBoxGeom 1, x, y, z
+            addBot:    (x,y,z,t) -> 
+                minxyz x,y,z
+                b = botGeoms[geomForBotType t].clone()
+                b.translate x,y,z
+                geom.merge b
+            addCancer: (x,y,z) -> 
+                minxyz x,y,z
+                geom.merge Geometry.box 1, x, y, z
+            addResource: -> 
+            
+        fakeWorld.wall = (xs, ys, zs, xe, ye, ze, stone=Stone.gray) ->
+        
+            for x in [xs..xe]
+                for y in [ys..ye]
+                    for z in [zs..ze]
+                        fakeWorld.addStone x, y, z, stone
+         
+        @world[bot.func]?.apply fakeWorld
+        
+        dimx = maxx-minx
+        dimy = maxy-miny
+        dimz = maxz-minz
+
+        s = 1 / Math.max dimx, dimy, dimz
+        geom.scale s, s, s
+        geom.translate 0, 0, 0.25 - (minz-1)*s
+        geom.merge Geometry.box 0.5
+        
+        @iconGeometries[bot.func] = new THREE.BufferGeometry().fromGeometry geom
+        geom
+            
     bots: ->
                         
         for index,bot of @world.bots
@@ -192,7 +273,7 @@ class Construct
             
     botAtPos: (bot, pos) ->
         
-        mesh = new THREE.Mesh @botGeoms[@geomForBot bot], Materials.bot[Stone.gray]
+        mesh = new THREE.Mesh @geometryForBot(bot), Materials.bot[Stone.gray]
         mesh.receiveShadow = true
         mesh.castShadow = true
         mesh.position.copy pos
@@ -248,7 +329,10 @@ class Construct
     highlight: (bot) ->
         # log 'highlight'
         geom = new THREE.BufferGeometry 
-        geom.fromGeometry @botGeoms[@geomForBot bot]
+        if bot.type != Bot.icon
+            geom.fromGeometry @geometryForBot bot
+        else
+            geom.fromGeometry Geometry.box 0.5
         s = 1.05
         geom.scale s,s,s
         

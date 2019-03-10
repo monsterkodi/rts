@@ -30,10 +30,12 @@ class StorageButton extends CanvasButton
         @boxes = new Boxes @scene, 4*320, new THREE.BoxBufferGeometry
         @name  = 'StorageButton'
                 
-        post.on 'storageChanged', @onStorageChanged 
-                                
-        for stone in Stone.resources
-            @onStorageChanged @storage, stone, @storage.stones[stone]
+        post.on 'storageChanged', @onStorageChanged
+        post.on 'world', @onWorld
+           
+        if @storage
+            for stone in Stone.resources
+                @onStorageChanged @storage, stone, @storage.stones[stone]
                                 
     click: -> Graph.toggle()
                        
@@ -52,6 +54,7 @@ class StorageButton extends CanvasButton
     onStorageChanged: (storage, stone, amount) =>
                 
         return if storage.player != 0
+        return if rts.world.isMeta
         
         while @box[stone].length < amount
             @box[stone].push @boxes.add stone:stone, size:@stoneSize, pos:@posForStone stone, @box[stone].length+1
@@ -61,6 +64,19 @@ class StorageButton extends CanvasButton
                 
         @update()
     
+    onWorld: (world) =>
+
+        for stone in Stone.resources
+            while @box[stone].length
+                @boxes.del @box[stone].pop()
+
+        if @storage and not world.isMeta
+            for stone in Stone.resources
+                while @box[stone].length < @storage.stones[stone]
+                    @box[stone].push @boxes.add stone:stone, size:@stoneSize, pos:@posForStone stone, @box[stone].length+1
+                
+        @update()
+        
     # 00000000   00000000  000   000  0000000    00000000  00000000   
     # 000   000  000       0000  000  000   000  000       000   000  
     # 0000000    0000000   000 0 000  000   000  0000000   0000000    
@@ -70,14 +86,15 @@ class StorageButton extends CanvasButton
     render: ->
 
         return if not @dirty
-        # log 'render', @storage.capacity(), @box[Stone.red].length, @box[Stone.gelb].length, @box[Stone.blue].length, @box[Stone.white].length
-        switch @storage.capacity()
-            when 320 then @camera.lookAt vec 0, 5.6, 0
-            when 240 then @camera.lookAt vec 0, 6.0, 0
-            when 200 then @camera.lookAt vec 0, 6.4, 0
-            when 160 then @camera.lookAt vec 0, 6.8, 0
-            when 120 then @camera.lookAt vec 0, 7.2, 0
-            when  80 then @camera.lookAt vec 0, 7.6, 0
+        
+        if @storage
+            switch @storage.capacity()
+                when 320 then @camera.lookAt vec 0, 5.6, 0
+                when 240 then @camera.lookAt vec 0, 6.0, 0
+                when 200 then @camera.lookAt vec 0, 6.4, 0
+                when 160 then @camera.lookAt vec 0, 6.8, 0
+                when 120 then @camera.lookAt vec 0, 7.2, 0
+                when  80 then @camera.lookAt vec 0, 7.6, 0
                 
         @camera.updateProjectionMatrix()
         

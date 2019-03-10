@@ -44,6 +44,12 @@ class Monster
         @age = 0
         @ageTime = 20
             
+    # 0000000    00000000  000      
+    # 000   000  000       000      
+    # 000   000  0000000   000      
+    # 000   000  000       000      
+    # 0000000    00000000  0000000  
+    
     del: -> 
         
         return if @boxes.length <= 0
@@ -52,14 +58,13 @@ class Monster
             @world.boxes.del box
         @boxes = []
         
+        for box in @trail
+            @world.boxes.del box
+        @trail = []
+        
         index = @world.monsters.indexOf @
         if index >= 0
             @world.monsters.splice index, 1
-            @world.addStone @pos.x, @pos.y, @pos.z, Stone.monster
-            @world.addResource @pos.x, @pos.y, @pos.z, @stone, config.monster.resource
-            @world.construct.stones()
-        else
-            log 'dafuk?'
             
     # 0000000     0000000   00     00   0000000    0000000   00000000  
     # 000   000  000   000  000   000  000   000  000        000       
@@ -124,6 +129,10 @@ class Monster
         @dyingTime -= scaledDelta
         
         if @dyingTime <= 0
+            
+            @world.addStone @pos.x, @pos.y, @pos.z, Stone.monster
+            @world.addResource @pos.x, @pos.y, @pos.z, @stone, config.monster.resource
+            @world.construct.stones()
             @del()
             return
             
