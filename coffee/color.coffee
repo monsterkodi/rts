@@ -64,5 +64,6 @@ Color.bot.blue   = Color.stone.blue
 Color.bot.white  = Color.stone.white
 
 Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.stone.monster, Color.stone.cancer, Color.stone.silver]
+Color.orbits = [Color.stone.gelb, Color.ai1, Color.ai2, Color.ai3, Color.ai4]
         
 module.exports = Color

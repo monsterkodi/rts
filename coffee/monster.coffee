@@ -26,7 +26,7 @@ class Monster
         @pos       = pos ? vec()
         @nxt       = vec dir ? Vector.unitX
         @start     = vec @pos
-        @stone     = [Stone.red,Stone.red, Stone.gelb,Stone.gelb, Stone.white,Stone.white, Stone.blue][randInt 7]
+        @stone     = randInt 4
         
         @vec = vec()
         @rot = quat()

@@ -21,9 +21,9 @@ module.exports =
             maxRot:    0.03
             maxAge:      12
             minSize:    0.01
-            maxSize:    0.1
+            maxSize:    0.05
             maxDist:    0.6
-            shrapnels:  100
+            shrapnels:  200
         
         world:
             speed: [1/4, 1/2, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48]

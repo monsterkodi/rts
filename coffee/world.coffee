@@ -59,8 +59,8 @@ class World
         
         @create()
         
-        if prefs.get 'graph', false
-            Graph.toggle()
+        # if prefs.get 'graph', false
+            # Graph.toggle()
             
         post.on 'storageChanged', @onStorageChanged
         
@@ -92,6 +92,7 @@ class World
         
         @tubes.clear()
         @spent.clear()
+        Science.clear()
         
         @players = []
         @bases   = []
@@ -454,7 +455,7 @@ class World
     # 000   0000000   0000000   000   000  
     
     addIcon: (x,y,z, func) ->
-        
+
         iconBot = @addBot x,y,z, Bot.icon
         if not func
             Science.addPlayer()
@@ -506,7 +507,7 @@ class World
         
         post.emit 'botWillBeRemoved', bot
         @plosion.atBot bot
-        delBot bot
+        @delBot bot
         @updateTubes()
         post.emit 'botRemoved', bot.type, bot.player
         

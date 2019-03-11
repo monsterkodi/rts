@@ -136,8 +136,13 @@ class Vector extends THREE.Vector3
     
     isZero: -> @x == @y == @z == 0
 
-    @random: -> vec(randRange(-1,1),randRange(-1,1),randRange(-1,1)).normalize()
-        
+    randomize: -> 
+        @set randRange(-1,1),randRange(-1,1),randRange(-1,1)
+        @normalize()
+        @
+    
+    @random: -> new Vector().randomize()
+            
     @rayPlaneIntersection: (rayPos, rayDirection, planePos, planeNormal) ->
         x = planePos.minus(rayPos).dot(planeNormal) / rayDirection.dot(planeNormal)
         return rayPos.plus rayDirection.mul x

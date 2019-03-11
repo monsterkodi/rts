@@ -14,6 +14,7 @@ class Plosion
 
     constructor: (@world) ->
 
+        @vec = vec()
         geom = new THREE.TetrahedronGeometry 1
         geom = new THREE.BufferGeometry().fromGeometry geom
         @boxes = new Boxes @world.scene, 3000, geom, Materials.cage, true
@@ -36,7 +37,8 @@ class Plosion
             box.dir = dir
             box.pos = pos
             box.age = 0
-            box.rot = quat().setFromAxisAngle Vector.random(), @world.speed * randRange(config.plosion.minRot, config.plosion.maxRot)
+            @vec.randomize()
+            box.rot = quat().setFromAxisAngle @vec, @world.speed * randRange(config.plosion.minRot, config.plosion.maxRot)
             @shrapnels.push box
         
     animate: (scaledDelta) ->
@@ -48,7 +50,10 @@ class Plosion
             box.age += scaledDelta        
             if box.age <= config.plosion.maxAge
                 ageFactor = box.age / config.plosion.maxAge
-                @boxes.setPos  box, box.pos.plus box.dir.mul ageFactor
+                @vec.copy box.dir
+                @vec.scale ageFactor
+                @vec.add box.pos
+                @boxes.setPos  box, @vec
                 @boxes.setSize box, fade config.plosion.minSize, config.plosion.maxSize, 1-(Math.cos(Math.PI*2*ageFactor)*0.5+0.5)
                 @boxes.setRot  box, @boxes.rot(box).multiply box.rot
             else

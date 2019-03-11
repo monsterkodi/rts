@@ -70,9 +70,9 @@ class Graph
         if @graph
             @graph.del()
             @graph = null
-            prefs.set 'graph', false
+            # prefs.set 'graph', false
         else
-            prefs.set 'graph', true
+            # prefs.set 'graph', true
             @graph = new Graph
             
     @sampleStorage: (storage) ->

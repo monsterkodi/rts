@@ -416,7 +416,7 @@ class Handle
         
         if hit = rts.castRay true
             if not hit.bot
-                @moveBot @world.base, hit.pos, hit.face
+                @moveBot @world.bases[0], hit.pos, hit.face
                 
     placeBuild: ->
         

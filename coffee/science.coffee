@@ -42,6 +42,11 @@ class Science
 
     @science: (player=0) -> Science.players[player].science
 
+    @clear: -> 
+    
+        @queue = []
+        @players  = []
+    
     @addPlayer: ->
         
         player =
@@ -56,9 +61,7 @@ class Science
                 player.progress[science][key] = [0,0,0,0,0,0]
                 
         @queue.push []
-        
-        log 'addPLaer', @players.length
-        
+                
         @players.push player
 
     @needsTube: (bot) -> 

@@ -22,7 +22,8 @@ class Bullet
         
         @enemy.health -= 1
         # log "enemy.health #{@enemy.health}"
-        storage = @world.storage[berta.player]
+        @player = berta.player
+        storage = @world.storage[@player]
         storage.sub @stone
         @pos = vec berta.pos
         @updatePath()
@@ -45,20 +46,49 @@ class Bullet
         if @path.length == 2
             @dir.scale 0.75
             
-    del: -> 
+    del: -> @world.boxes.del @box
+        
+    startOrbit: ->
+        
         rts.handle.enemyDamage @enemy, 1
-        @world.boxes.del @box
+        
+        @orbiting = true
+        
+        @world.boxes.setSize @box, 0.025
+        @world.boxes.setColor @box, Color.orbits[@player]
+        @world.boxes.pos @box, @vec
+        @vec.sub @enemy.pos
+        @pos.copy @vec
+        @pos.normalize()
+        @pos.scale 0.5
+        @vec.normalize()
+        @dir.randomize()
+        @dir.cross @vec
         
     animate: (delta) =>
         
         @life += config.bullet.speed * delta
+        
+        if @orbiting
+            
+            if @enemy.hitPoints <= 1
+                @del()
+                return
+            
+            @pos.applyQuaternion Quaternion.axisAngle @dir, delta*9
+            @vec.copy @pos
+            @vec.add @enemy.pos
+            @world.boxes.setPos @box, @vec
+            rts.animateWorld @animate
+            return
         
         if @life > 1
             @life -= 1 
             @path.shift()
             @world.indexToPos @path[0], @pos
             if @enemy.pos.equals @pos
-                @del()
+                @startOrbit()
+                rts.animateWorld @animate
                 return
             if @path.length < 2 
                 @updatePath()

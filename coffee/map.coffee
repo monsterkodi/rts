@@ -33,8 +33,8 @@ class Map extends World
         @addIcon -6, 0, 1, 'plenty'
         @addIcon  0,-6, 1, 'sparse'
         
-        @addResource  3, 0,0, Stone.blue 
-        @addResource -3, 0,0, Stone.blue 
+        # @addResource  3, 0,0, Stone.blue 
+        # @addResource -3, 0,0, Stone.blue 
         
         science(0).path.length = 16
       
@@ -177,10 +177,10 @@ class Map extends World
         
         @addStone  0, 0,  0
         
-        @addStone  1, 0, 0, Stone.red,   160
-        @addStone -1, 0, 0, Stone.gelb,  160
-        @addStone  0,-1, 0, Stone.white, 160
-        @addStone  0, 1, 0, Stone.blue,  160
+        @addStone  1, 0, 0, Stone.red,   240
+        @addStone -1, 0, 0, Stone.gelb,  240
+        @addStone  0,-1, 0, Stone.white, 240
+        @addStone  0, 1, 0, Stone.blue,  240
         
         @addStone  8, 8,  0, Stone.red
         @addStone  8, -8, 0, Stone.gelb

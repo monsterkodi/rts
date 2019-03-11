@@ -463,6 +463,7 @@ class AI
                         @[Bot.string bot] = newBot
                     @queue @call
                     return @did "buy #{Bot.string bot}"
+                return
                     
         if @world.botsOfType(Bot.mine, @player).length < science(@player).mine.limit
             if rts.handle.buyBot Bot.mine, @player
