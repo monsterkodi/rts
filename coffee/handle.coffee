@@ -284,12 +284,13 @@ class Handle
 
         stone = @world.stoneBelowBot bot
         storage = @world.storage[bot.player]
-        if not storage or storage.canTake stone
+        if storage.canTake stone
             if bot.path?
                 if @world.tubes.insertPacket bot, stone
-                    storage?.willSend stone
-                    if resource = @world.resourceAtPos @world.posBelowBot bot
-                        resource.deduct()
+                    if not @world.isMeta
+                        storage.willSend stone
+                        if resource = @world.resourceAtPos @world.posBelowBot bot
+                            resource.deduct()
                     return true
             else if bot.type == Bot.base
                 storage?.add stone

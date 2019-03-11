@@ -209,7 +209,7 @@ class Tubes
                  
         segs = @getSegments player
         segs.sort (a,b) -> a.dist - b.dist
-                    
+               
         for index in [0...segs.length]
             seg = segs[index]
             nextIndex = index+1
@@ -221,9 +221,9 @@ class Tubes
                     next.out = seg.index
                     seg.in.push next.index
                 nextIndex += 1
-        
+                        
         @world.construct.tubes player          
-        # log 'build', segs.map (s) -> player:s.player, dist:s.dist, in:s.in, out:s.out, index:s.index, from:s.from, to:s.to#, points:s.points
+        # log 'build', segs.map (s) => player:s.player, dist:s.dist, in:s.in, out:s.out, index:@world.stringForIndex(s.index), from:@world.stringForFaceIndex(s.from), to:@world.stringForFaceIndex(s.to)
                     
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  
@@ -241,10 +241,6 @@ class Tubes
             fromBot.path = 
                 points: @pathPoints path, fromBot.player
                 length: path.length
-            fromBot.path.pind = []
-            for pi in [0...fromBot.path.points.length]
-                if fromBot.path.points[pi].i == 0
-                    fromBot.path.pind.push pi
         else
             delete fromBot.path
                                                     
@@ -261,6 +257,7 @@ class Tubes
         lastPos = @world.posAtIndex lastIndex
         
         aboveFace = 0.35
+        skip = false
         
         lastPos.sub Vector.normals[lastFace].mul aboveFace
         points.push i:0, face:lastFace, index:lastIndex, pos:lastPos
@@ -285,7 +282,7 @@ class Tubes
             points.push i:0, face:nextFace, index:nextIndex, pos:nextPos
             
             si = @segIndex path[i-1], path[i]
-            if not @segments[player][si]
+            if not @segments[player][si] and not skip
                 p = 2
                 if lastFace != nextFace
                     p = 4
@@ -301,6 +298,8 @@ class Tubes
                     moves:  moves
                     in:     []
                     out:    null
+            else if not skip
+                skip = true
             
             [lastFace, lastIndex] = [nextFace, nextIndex]
             lastPos = nextPos
@@ -313,6 +312,7 @@ class Tubes
             [fromFace, fromIndex] = @world.splitFaceIndex fromFaceIndex
             [toFace, toIndex]     = @world.splitFaceIndex toFaceIndex
             neighbor = fromFace - toFace + 5
+            
         fromFaceIndex | (neighbor<<28)
         
     getSegments: (player) -> Object.values @segments[player]

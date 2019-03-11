@@ -59,6 +59,8 @@ class Menu
         post.on 'botDamaged', @onBotDamaged
         post.on 'world',      @onWorld
         
+        @onWorld rts.world
+        
     onWorld: (world) =>
         
         @div.style.display = if world.isMeta then 'none' else 'block'

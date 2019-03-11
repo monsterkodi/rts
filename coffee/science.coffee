@@ -57,6 +57,8 @@ class Science
                 
         @queue.push []
         
+        log 'addPLaer', @players.length
+        
         @players.push player
 
     @needsTube: (bot) -> 

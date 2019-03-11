@@ -25,21 +25,16 @@ class Map extends World
         @wall 0, -s, 0, 0, s, 0
         
         @addBot   0, 0, 1, Bot.base
+        @addIcon  0, 6, 1, 'grid'
+        @addIcon  0, 3, 1, 'star'
         @addIcon  6, 0, 1, 'simple'
-        @addIcon  3, 0, 1, 'star'
         @addIcon -3, 0, 1, 'ais'
-        @addIcon  0,-3, 1, 'pest'
-        @addIcon  0, 3, 1, 'grid'
-        @addIcon  0, 6, 1, 'plenty'
+        @addIcon  3, 0, 1, 'pest'
+        @addIcon -6, 0, 1, 'plenty'
         @addIcon  0,-6, 1, 'sparse'
         
-        @addResource  6, 0, 0, Stone.red
-        @addResource  3, 0, 0, Stone.gelb
-        @addResource -3, 0, 0, Stone.blue
-        @addResource  0,-3, 0, Stone.blue
-        @addResource  0, 3, 0, Stone.red
-        @addResource  0, 6, 0, Stone.white
-        @addResource  0,-6, 0, Stone.white
+        @addResource  3, 0,0, Stone.blue 
+        @addResource -3, 0,0, Stone.blue 
         
         science(0).path.length = 16
       
@@ -181,6 +176,12 @@ class Map extends World
     sparse: ->
         
         @addStone  0, 0,  0
+        
+        @addStone  1, 0, 0, Stone.red,   160
+        @addStone -1, 0, 0, Stone.gelb,  160
+        @addStone  0,-1, 0, Stone.white, 160
+        @addStone  0, 1, 0, Stone.blue,  160
+        
         @addStone  8, 8,  0, Stone.red
         @addStone  8, -8, 0, Stone.gelb
         @addStone -8,  8, 0, Stone.white

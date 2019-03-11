@@ -273,7 +273,7 @@ class World
         [face,index] = @splitFaceIndex faceIndex
         @stoneOrResourceAtPos @posAtIndex(index).minus Vector.normals[face]
     
-    addResource: (x, y, z, stone, amount) ->
+    addResource: (x, y, z, stone, amount=1) ->
         
         index = @indexAt x,y,z
         if not @resourceAt index
@@ -476,7 +476,9 @@ class World
             stone = @resourceBelowBot bot
             if stone?
                 bot.mesh.material = Materials.bot[stone]
-            else
+            else if @isMeta
+                bot.mesh.material = Materials.ai[0]
+            else 
                 bot.mesh.material = Materials.bot[Stone.gray]
         else
             bot.mesh.material = Materials.ai[bot.player-1]
@@ -587,7 +589,7 @@ class World
                     @addStone x, y, z, stone
                     
     delStone: (x,y,z) -> delete @stones[@indexAt x,y,z]
-    addStone: (x,y,z, stone=Stone.gray) -> 
+    addStone: (x,y,z, stone=Stone.gray, resource=0) -> 
     
         return if x <= -128
         return if y <= -128
@@ -598,6 +600,10 @@ class World
         
         index = @indexAt x,y,z
         @stones[index] = stone
+        
+        if resource and stone != Stone.gray
+            @addResource x, y, z, stone, resource
+            @stones[index] = Stone.gray
         
     botAt:    (x,y,z) -> @botAtIndex @indexAt x,y,z
     botAtPos:     (v) -> @botAtIndex @indexAtPos v

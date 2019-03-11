@@ -24,6 +24,13 @@ class Construct
     #    000     000   000  000   000  000       
     #    000      0000000   0000000    00000000  
          
+    tubeMaterial: (player=0) ->
+        
+        mat = Materials.path
+        mat = Materials.ai[player-1] if player
+        mat = Materials.ai[0] if @world.isMeta
+        mat
+    
     tubes: (player=0) ->
         
         @segmentMesh[player]?.parent?.remove @segmentMesh[player]
@@ -40,9 +47,7 @@ class Construct
         
         tubeBuffer = new THREE.BufferGeometry
         tubeBuffer.fromGeometry tube
-        mat = Materials.path
-        mat = Materials.ai[player-1] if player
-        mesh = new THREE.Mesh tubeBuffer, mat
+        mesh = new THREE.Mesh tubeBuffer, @tubeMaterial player
         mesh.castShadow = true
                         
         @world.scene.add mesh
@@ -313,9 +318,7 @@ class Construct
         sphere.rotateX deg2rad 90
         sphere.computeFlatVertexNormals()
         
-        mat = Materials.path
-        mat = Materials.ai[bot.player-1] if bot.player
-        bot.dot = new THREE.Mesh sphere, mat
+        bot.dot = new THREE.Mesh sphere, @tubeMaterial bot.player
         bot.dot.castShadow = true
         bot.dot.receiveShadow = true
         @world.scene.add bot.dot

@@ -38,8 +38,8 @@ class Storage
             
     canTake: (stone, amount=1) -> 
         
-        return amount if @world.isMeta
         return 0 if stone == Stone.gray
+        return amount if @world.isMeta
         clamp 0, amount, @capacity() - @stones[stone] - @temp[stone]
 
     willSend: (stone) -> @temp[stone] += 1
