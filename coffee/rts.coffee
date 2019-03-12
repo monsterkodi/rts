@@ -172,7 +172,7 @@ class RTS
         
         if not @paused
              
-            angle = -delta*0.01*@world.speed
+            angle = -delta*0.5*@world.speed
             @light2.position.applyQuaternion Quaternion.axisAngle Vector.unitZ, angle
             @light2Helper?.update()   
             @world.animate delta

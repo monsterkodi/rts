@@ -67,14 +67,15 @@ class Boxes
         
         box
         
+    clear: ->
+        
+        for box in @boxes
+            @setSize box, 0
+        @boxes = []
+        @cluster.needsUpdate()
+        
     del: (box) ->
-        
-        if not box?
-            
-            @cluster?.parent.remove @cluster
-            delete @cluster
-            return
-        
+                
         if box.index < @lastIndex()
             lastBox = @boxes.pop()
             pos     = @pos   lastBox

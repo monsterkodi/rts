@@ -13,7 +13,6 @@ class Construct
         @segmentMesh = [null,null,null,null]
         @stoneMeshes = {}     
         @stoneMaterials = {}
-        @iconGeometries = {}
         
         for stone in Stone.all
             @stoneMaterials[stone] = Materials.stone[stone].clone()
@@ -208,9 +207,6 @@ class Construct
     
     geometryForIcon: (bot) ->
         
-        if @iconGeometries[bot.func]
-            return @iconGeometries[bot.func]
-        
         geom = new THREE.Geometry
         
         minx =  128
@@ -219,11 +215,11 @@ class Construct
         maxy = -128
         minz =  128
         maxz = -128
+        pos  = vec()
+        dir  = vec()
         
-        botGeoms = @botGeoms
-        geomForBotType = @geomForBotType
-
         minxyz = (x,y,z) -> 
+            pos.set x,y,z
             x = clamp -127, 127, x
             y = clamp -127, 127, y
             z = clamp -127, 127, z
@@ -233,22 +229,50 @@ class Construct
             maxx = Math.max x, maxx
             maxy = Math.max y, maxy
             maxz = Math.max z, maxz
+            pos
         
+        boxes          = @world.boxes
+        botGeoms       = @botGeoms
+        geomForBotType = @geomForBotType
+        iconBoxes = []
+            
         fakeWorld = 
-            addStone:  (x,y,z) -> 
-                minxyz x,y,z
-                geom.merge Geometry.box 1, x, y, z
-                # geom.merge Geometry.cornerBoxGeom 1, x, y, z
-            addBot:    (x,y,z,t) -> 
+                            
+            addBot: (x,y,z,t) -> 
+                
                 minxyz x,y,z
                 b = botGeoms[geomForBotType t].clone()
                 b.translate x,y,z
                 geom.merge b
+                
             addCancer: (x,y,z) -> 
+                
                 minxyz x,y,z
-                geom.merge Geometry.box 1, x, y, z
-            addResource: -> 
+                for i in [0...4]
+                    dir.randomize()
+                    rot = Quaternion.unitVectors dir, Vector.unitZ
+                    iconBoxes.push boxes.add pos:pos, size:1.0, stone:Stone.cancer, rot:rot
+                
+            addResource: (x,y,z,stone,amount) -> 
+                
+                size = clamp 0.0, 0.5, 0.5 * Math.sqrt((amount-1)/512)
+                r = 0.6 - size/2
+                dir.set x,y,z
+                for i in [0...6]
+                    pos.copy Vector.normals[i]
+                    pos.scale r
+                    pos.add dir
+                    iconBoxes.push boxes.add stone:stone, pos:pos, size:size
             
+        fakeWorld.addStone = (x,y,z,stone,amount) -> 
+                
+            if amount?
+                fakeWorld.addResource x,y,z, stone, amount
+                stone = Stone.gray
+                
+            minxyz x,y,z
+            iconBoxes.push boxes.add pos:pos, size:1.0, stone:stone
+                    
         fakeWorld.wall = (xs, ys, zs, xe, ye, ze, stone=Stone.gray) ->
         
             for x in [xs..xe]
@@ -263,12 +287,20 @@ class Construct
         dimz = maxz-minz
 
         s = 1 / Math.max dimx, dimy, dimz
+        
+        for box in iconBoxes
+            boxes.pos box, pos
+            pos.scale s
+            pos.add bot.pos
+            pos.z += 0.25 - (minz-1)*s
+            boxes.setPos box, pos
+            boxes.setSize box, boxes.size(box)*s
+        
         geom.scale s, s, s
         geom.translate 0, 0, 0.25 - (minz-1)*s
         geom.merge Geometry.box 0.5
         
-        @iconGeometries[bot.func] = new THREE.BufferGeometry().fromGeometry geom
-        geom
+        bufg = new THREE.BufferGeometry().fromGeometry geom
             
     bots: ->
                         

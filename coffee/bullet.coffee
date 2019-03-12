@@ -60,7 +60,7 @@ class Bullet
         @vec.sub @enemy.pos
         @pos.copy @vec
         @pos.normalize()
-        @pos.scale 0.5
+        @pos.scale 0.4
         @vec.normalize()
         @dir.randomize()
         @dir.cross @vec

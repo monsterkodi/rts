@@ -36,7 +36,8 @@ class Map extends World
         # @addResource  3, 0,0, Stone.blue 
         # @addResource -3, 0,0, Stone.blue 
         
-        science(0).path.length = 16
+        science().path.length = 16
+        science().base.speed  = Number.EPSILON
       
     simple: ->
         

@@ -45,7 +45,7 @@ class World
         @tubes         = new Tubes @
         @spent         = new Spent @
         @plosion       = new Plosion @
-        @boxes         = new Boxes @scene, 10000
+        @boxes         = new Boxes @scene, 20000
         @resourceBoxes = new Boxes @scene, 10000
                 
         @sample  = 0
@@ -116,7 +116,9 @@ class World
         for cancer in @cancers
             cancer.del()
         @cancers = []
-        
+
+        @boxes.clear()
+                
     drawBrokenPath: (info) ->
         
         # log info
