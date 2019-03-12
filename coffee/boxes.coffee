@@ -67,6 +67,12 @@ class Boxes
         
         box
         
+    remove: -> 
+        
+        @boxes = []
+        @cluster?.parent.remove @cluster
+        delete @cluster
+        
     clear: ->
         
         for box in @boxes

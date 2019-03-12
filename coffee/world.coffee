@@ -872,6 +872,14 @@ class World
         pos.z = ((index>>16) & 0b11111111)-128
         pos
         
+    invalidPos: (pos) -> not @validPos pos
+    validPos: (pos) -> 
+
+        return false if pos.x > 127 or pos.x < -127
+        return false if pos.y > 127 or pos.y < -127
+        return false if pos.z > 127 or pos.z < -127
+        return true
+        
     posAtIndex: (index) -> @indexToPos index, vec()
             
     posAtFaceIndex: (faceIndex) -> 
@@ -879,7 +887,7 @@ class World
         @posAtIndex index
     
     roundPos: (v) -> v.rounded()
-    posBelowBot: (bot) -> bot.posBelow #bot.pos.minus Vector.normals[bot.face]            
+    posBelowBot: (bot) -> bot.posBelow
                 
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     

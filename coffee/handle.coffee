@@ -328,27 +328,25 @@ class Handle
     canBuild: (norm, player=0) ->
         
         buildBot = @world.botOfType Bot.build
-        
-        storage = @world.storage[player]
+        storage  = @world.storage[player]
         
         return false if not buildBot
         return false if not storage.canAfford science(player).build.cost
-        
-        if Science.needsTube(buildBot) and not buildBot.path
-            return false
-                
-        if norm and @world.isItemAtPos buildBot.pos.plus norm
-            return false
-            
-        true
+        return false if Science.needsTube(buildBot) and not buildBot.path
+        pos = buildBot.pos.plus norm
+        return false if @world.invalidPos pos
+        return false if @world.isItemAtPos pos
+        return true
         
     buildBotHit: (bot, hit) ->
 
-        return if not @canBuild()
         
         player = 0
         
         if hitInfo = @infoForBuildHit bot, hit
+            
+            return if not @canBuild hitInfo.norm
+            return if @world.invalidPos hitInfo.pos
 
             storage = @world.storage[player]
             if storage.deductBuild()
@@ -367,9 +365,9 @@ class Handle
                 
     build: (bot, norm) ->
         
-        pos = bot.pos.plus norm
+        pos  = bot.pos.plus norm
         face = Vector.normalIndex norm
-
+        
         storage = @world.storage[bot.player]
         if storage.deductBuild()
 

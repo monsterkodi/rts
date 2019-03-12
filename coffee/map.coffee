@@ -16,6 +16,12 @@ class Map extends World
         
     build: -> @meta()
         
+    # 00     00  00000000  000000000   0000000   
+    # 000   000  000          000     000   000  
+    # 000000000  0000000      000     000000000  
+    # 000 0 000  000          000     000   000  
+    # 000   000  00000000     000     000   000  
+    
     meta: ->
 
         @isMeta = true
@@ -39,6 +45,12 @@ class Map extends World
         science().path.length = 16
         science().base.speed  = Number.EPSILON
       
+    #  0000000  000  00     00  00000000   000      00000000  
+    # 000       000  000   000  000   000  000      000       
+    # 0000000   000  000000000  00000000   000      0000000   
+    #      000  000  000 0 000  000        000      000       
+    # 0000000   000  000   000  000        0000000  00000000  
+    
     simple: ->
         
         @addStone 0,0,0
@@ -48,6 +60,12 @@ class Map extends World
         @addStone 0,1,0
         @addBot 0,0,1, Bot.base
         
+    #  0000000  000000000   0000000   00000000   
+    # 000          000     000   000  000   000  
+    # 0000000      000     000000000  0000000    
+    #      000     000     000   000  000   000  
+    # 0000000      000     000   000  000   000  
+    
     star: ->
         
         for n in Vector.normals
@@ -66,6 +84,12 @@ class Map extends World
         @addBot  5, 0, 1, Bot.base
         # @addBot -5, 0, 1, Bot.base
         
+    #  0000000   000   0000000  
+    # 000   000  000  000       
+    # 000000000  000  0000000   
+    # 000   000  000       000  
+    # 000   000  000  0000000   
+    
     ais: ->
         
         @wall  0,-3,0, 0, 3,0
@@ -76,43 +100,44 @@ class Map extends World
         @wall  5,-3,0, 5, 3,0
         @wall -5,-3,0,-5, 3,0
 
-        @wall  0, 5,3, 0, 5,6
-        @wall  0,-5,5, 0,-5,8
-        @wall  5,-2,3, 5, 2,3
-        @wall -5,-2,3,-5, 2,3
+        @wall -2, 4,4, 2, 4,4
+        @wall -2,-4,4, 2,-4,4
+        @wall  4,-2,4, 4, 2,4
+        @wall -4,-2,4,-4, 2,4
         
         res = 80
                 
-        @addResource -3, -5, 0, Stone.white, res
-        @addResource -2, -5, 0, Stone.red,   res
-        @addResource -1, -5, 0, Stone.gelb,  res
-        @addResource  0, -5, 0, Stone.blue,  res
+        @addResource -2, -5, 0, Stone.white, res
+        @addResource -1, -5, 0, Stone.red,   res
+        @addResource  1, -5, 0, Stone.gelb,  res
+        @addResource  2, -5, 0, Stone.blue,  res
 
-        @addResource  3,  5, 0, Stone.white, res
-        @addResource  2,  5, 0, Stone.red,   res
+        @addResource -1, -4, 4, Stone.white, res
+        @addResource  1, -4, 4, Stone.white, res
+        
+        @addResource -2,  5, 0, Stone.white, res
+        @addResource -1,  5, 0, Stone.red,   res
         @addResource  1,  5, 0, Stone.gelb,  res
-        @addResource  0,  5, 0, Stone.blue,  res
+        @addResource  2,  5, 0, Stone.blue,  res
 
+        @addResource -1,  4, 4, Stone.white, res
+        @addResource  1,  4, 4, Stone.white, res
+        
         @addResource  5, -2, 0, Stone.white, res
         @addResource  5, -1, 0, Stone.red,   res
         @addResource  5,  1, 0, Stone.gelb,  res
         @addResource  5,  2, 0, Stone.blue,  res
-                          
-        @addResource -5, -3, 0, Stone.white, res
-        @addResource -5, -2, 0, Stone.red,   res
-        @addResource -5,  2, 0, Stone.gelb,  res
-        @addResource -5,  3, 0, Stone.blue,  res
 
-        @addResource -5, -2, 3, Stone.white, res
-        @addResource -5,  2, 3, Stone.white, res
+        @addResource  4, -1, 4, Stone.white, res
+        @addResource  4,  1, 4, Stone.white, res
         
-        @addResource  0,  5, 5, Stone.white, res
-        @addResource  0, -5, 5, Stone.white, res
+        @addResource -5, -2, 0, Stone.white, res
+        @addResource -5, -1, 0, Stone.red,   res
+        @addResource -5,  1, 0, Stone.gelb,  res
+        @addResource -5,  2, 0, Stone.blue,  res
 
-        @addResource  5, -1, 3, Stone.white, res
-        @addResource  5, -2, 3, Stone.white, res
-        @addResource  5,  2, 3, Stone.white, res
-        @addResource  5,  1, 3, Stone.white, res
+        @addResource -4, -1, 4, Stone.white, res
+        @addResource -4,  1, 4, Stone.white, res
 
         @addBot  0,-5, 1, Bot.base
         @addBot -5, 0, 1, Bot.base
@@ -125,6 +150,12 @@ class Map extends World
         @addCancer -3,  3,  0, 15
         @addCancer  3, -3,  0, 15
         
+    # 00000000   00000000   0000000  000000000  
+    # 000   000  000       000          000     
+    # 00000000   0000000   0000000      000     
+    # 000        000            000     000     
+    # 000        00000000  0000000      000     
+    
     pest: ->
 
         @addCancer 0,  0,  10, 15
@@ -145,6 +176,12 @@ class Map extends World
         
         @addBot  0, 0, 1, Bot.base
         
+    #  0000000   00000000   000  0000000    
+    # 000        000   000  000  000   000  
+    # 000  0000  0000000    000  000   000  
+    # 000   000  000   000  000  000   000  
+    #  0000000   000   000  000  0000000    
+    
     grid: ->
         
         @addStone  0, 0,-1
@@ -174,6 +211,12 @@ class Map extends World
                 
         @addBot  0, 0, 1, Bot.base
           
+    #  0000000  00000000    0000000   00000000    0000000  00000000  
+    # 000       000   000  000   000  000   000  000       000       
+    # 0000000   00000000   000000000  0000000    0000000   0000000   
+    #      000  000        000   000  000   000       000  000       
+    # 0000000   000        000   000  000   000  0000000   00000000  
+    
     sparse: ->
         
         @addStone  0, 0,  0
@@ -183,13 +226,23 @@ class Map extends World
         @addStone  0,-1, 0, Stone.white, 240
         @addStone  0, 1, 0, Stone.blue,  240
         
-        @addStone  8, 8,  0, Stone.red
-        @addStone  8, -8, 0, Stone.gelb
-        @addStone -8,  8, 0, Stone.white
-        @addStone -8, -8, 0, Stone.blue
+        s = 4
+        @addStone  s,  s, 0, Stone.red
+        @addStone  s, -s, 0, Stone.gelb
+        @addStone -s,  s, 0, Stone.gelb
+        @addStone -s, -s, 0, Stone.blue
+        s = 6
+        @addStone  0, 0, -s, Stone.white
+        @addStone  0, 0,  s, Stone.white
         
         @addBot  0, 0, 1, Bot.base
         
+    # 00000000   000      00000000  000   000  000000000  000   000  
+    # 000   000  000      000       0000  000     000      000 000   
+    # 00000000   000      0000000   000 0 000     000       00000    
+    # 000        000      000       000  0000     000        000     
+    # 000        0000000  00000000  000   000     000        000     
+    
     plenty: ->
                 
         @addStone  0, 0, 0

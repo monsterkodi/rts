@@ -64,7 +64,7 @@ class BuyButton extends CanvasButton
                 
     del: ->
         
-        @boxes?.del()
+        @boxes?.remove()
         delete @boxes
         @canvas.removeEventListener 'mouseout', @del        
         post.removeListener 'storageChanged', @onStorageChanged
