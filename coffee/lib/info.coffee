@@ -65,7 +65,7 @@ class Info
             add "brin#{ai.player}: #{ai.brain?.state ? ''} #{science?.scienceKey ? ''} #{science?.stars ? ''}"
         for ai in world.ai
             add "task#{ai.player}: #{ai.tick} #{ai.task}"
-        add '........................................'
+        add '....................................................'
 
 module.exports = Info
 

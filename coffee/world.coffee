@@ -31,6 +31,7 @@ class World
         @stones    = {}
         @bots      = {}
         @resources = {}
+        @targets   = {}
         @monsters  = []
         @cancers   = []
         @bases     = []
@@ -78,6 +79,7 @@ class World
         
         @construct.stones()
         @construct.bots()
+        @construct.targets()
         @updateTubes()
         
         @setCageOpacity 3
@@ -121,6 +123,10 @@ class World
             cancer.del()
         @cancers = []
 
+        for index,target of @targets
+            target.mesh.parent.remove target.mesh
+        @targets = {}
+        
         @boxes.clear()
                 
     drawBrokenPath: (info) ->
@@ -486,6 +492,16 @@ class World
         else
             iconBot.func = func
         iconBot
+        
+    # 000000000   0000000   00000000    0000000   00000000  000000000  
+    #    000     000   000  000   000  000        000          000     
+    #    000     000000000  0000000    000  0000  0000000      000     
+    #    000     000   000  000   000  000   000  000          000     
+    #    000     000   000  000   000   0000000   00000000     000     
+    
+    addTarget: (x,y,z) ->
+        
+        @targets[@indexAt x,y,z] = {}
         
     #  0000000   0000000   000       0000000   00000000   
     # 000       000   000  000      000   000  000   000  

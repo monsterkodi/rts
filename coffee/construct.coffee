@@ -171,15 +171,6 @@ class Construct
             @botGeoms[bot].computeFaceNormals()
             @botGeoms[bot].computeFlatVertexNormals()
             
-        # for geom in @botGeoms
-            # geom.scale 0.1, 0.1, 0.1
-    
-    # 0000000     0000000   000000000   0000000  
-    # 000   000  000   000     000     000       
-    # 0000000    000   000     000     0000000   
-    # 000   000  000   000     000          000  
-    # 0000000     0000000      000     0000000   
-    
     geometryForBot: (bot) ->
 
         if bot.type == Bot.icon 
@@ -239,6 +230,12 @@ class Construct
         fakeWorld = 
                  
             setCamera: ->
+            addTarget: (x,y,z) ->
+                
+                minxyz x,y,z
+                g = Geometry.target().clone()
+                g.translate x,y,z
+                geom.merge g
                 
             addBot: (x,y,z,t) -> 
                 
@@ -304,6 +301,35 @@ class Construct
         
         bufg = new THREE.BufferGeometry().fromGeometry geom
             
+    # 000000000   0000000   00000000    0000000   00000000  000000000   0000000  
+    #    000     000   000  000   000  000        000          000     000       
+    #    000     000000000  0000000    000  0000  0000000      000     0000000   
+    #    000     000   000  000   000  000   000  000          000          000  
+    #    000     000   000  000   000   0000000   00000000     000     0000000   
+    
+    targets: ->
+                        
+        return if empty @world.targets
+        
+        for index,target of @world.targets
+            
+            @targetAtPos target, @world.posAtIndex index
+            
+    targetAtPos: (target, pos) ->
+        
+        mesh = new THREE.Mesh Geometry.target(), Materials.stone[Stone.cancer] #Materials.bot[Stone.gray]
+        mesh.receiveShadow = true
+        mesh.castShadow = true
+        mesh.position.copy pos
+        @world.scene.add mesh
+        target.mesh = mesh
+        
+    # 0000000     0000000   000000000   0000000  
+    # 000   000  000   000     000     000       
+    # 0000000    000   000     000     0000000   
+    # 000   000  000   000     000          000  
+    # 0000000     0000000      000     0000000   
+    
     bots: ->
                         
         for index,bot of @world.bots

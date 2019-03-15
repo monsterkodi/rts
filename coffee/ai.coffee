@@ -456,7 +456,8 @@ class AI
     
     buyBot: ->
         
-        for bot in [Bot.mine, Bot.trade, Bot.brain, Bot.build]
+        # for bot in [Bot.mine, Bot.trade, Bot.brain, Bot.build]
+        for bot in [Bot.build, Bot.trade, Bot.brain, Bot.mine]
             if not @world.botOfType bot, @player
                 if newBot = rts.handle.buyBot bot, @player
                     if bot != Bot.mine

@@ -355,8 +355,10 @@ class Handle
 
                 @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
                 @world.spent.costAtBuild science(player).build.cost, bot
+                @checkTargets @world.indexAtPos hitInfo.pos
                 @world.moveBot bot, hitInfo.pos, hitInfo.face
                 @world.construct.stones()
+                
                 if @canBuild hitInfo.norm
                     @world.showBuildGuide bot, hitInfo
             else
@@ -372,7 +374,7 @@ class Handle
         if storage.deductBuild()
 
             @world.addStone bot.pos.x, bot.pos.y, bot.pos.z
-            @world.spent.costAtBuild science(bot.player).build.cost, bot
+            @world.spent.costAtBuild science(bot.player).build.cost, bot            
             @world.moveBot bot, pos, face
             @world.construct.stones()
             
@@ -443,9 +445,25 @@ class Handle
             index = @world.indexAtPos pos
             if bot.face != face or bot.index != index
                 if @world.canBotMoveTo bot, face, index
+                    @checkTargets index if bot.player == 0
                     @world.moveBot bot, pos, face
                     @world.highlightBot bot
                     return true
+                    
+    # 000000000   0000000   00000000    0000000   00000000  000000000   0000000  
+    #    000     000   000  000   000  000        000          000     000       
+    #    000     000000000  0000000    000  0000  0000000      000     0000000   
+    #    000     000   000  000   000  000   000  000          000          000  
+    #    000     000   000  000   000   0000000   00000000     000     0000000   
+    
+    checkTargets: (index) ->
+
+        if target = @world.targets[index]
+            @world.targets[index].mesh.parent.remove @world.targets[index].mesh
+            delete @world.targets[index]
+            @world.plosion.atPos @world.posAtIndex(index), 0.5, Color.bot.cancer, 0.03
+            if empty @world.targets
+                log 'all targets reached!'
 
     # 00     00   0000000   000   000   0000000  000000000  00000000  00000000   
     # 000   000  000   000  0000  000  000          000     000       000   000  

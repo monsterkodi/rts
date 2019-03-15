@@ -26,7 +26,7 @@ class Map extends World
 
         @isMeta = true
         
-        s = 4
+        s = 6
         @wall -s, 0, 0, s, 0, 0
         @wall 0, -s, 0, 0, s, 0
         
@@ -34,10 +34,12 @@ class Map extends World
         # @addIcon  0, 6, 1, 'grid'
         # @addIcon  0, 3, 1, 'star'
         # @addIcon  6, 0, 1, 'simple'
-        @addIcon  0, 4, 1, 'ais'
+        @addIcon  0, 2, 1, 'ai1'
+        @addIcon  0, 4, 1, 'ai2'
+        @addIcon  0, 6, 1, 'ai3'
         @addIcon  4, 0, 1, 'pest'
-        @addIcon -4, 0, 1, 'plenty'
         @addIcon  0,-4, 1, 'sparse'
+        @addIcon -4, 0, 1, 'plenty'
         
         # @addResource  3, 0,0, Stone.blue 
         # @addResource -3, 0,0, Stone.blue 
@@ -61,6 +63,7 @@ class Map extends World
         @addStone 0,-1,0
         @addStone 0,1,0
         @addBot 0,0,1, Bot.base
+        
         @setCamera()
         
     #  0000000  000000000   0000000   00000000   
@@ -87,14 +90,63 @@ class Map extends World
         @addBot  5, 0, 1, Bot.base
         # @addBot -5, 0, 1, Bot.base
         @setCamera()
-        
-    #  0000000   000   0000000  
-    # 000   000  000  000       
-    # 000000000  000  0000000   
-    # 000   000  000       000  
-    # 000   000  000  0000000   
+
+    #  0000000   000     000  
+    # 000   000  000   00000  
+    # 000000000  000  000000  
+    # 000   000  000     000  
+    # 000   000  000     000  
     
-    ais: ->
+    ai1: ->
+                
+        h = 4
+        r = 4
+        d = 3
+        
+        for x in [-r..r]
+            for y in [-r..r]
+                for z in [0...h]
+                    maxAbs = Math.max Math.abs(x), Math.abs(y)
+                    res = 16+(r-(maxAbs))*64
+                    @addStone x*d, y*d, -z-maxAbs*4+r*4, Stone.resources[z], res
+        
+        @addBot 0, r*d, 1, Bot.base
+        @addBot 0,-r*d, 1, Bot.base
+        
+        @setCamera dist:20, rotate:180, degree:70
+        
+    #  0000000   000  00000   
+    # 000   000  000     000  
+    # 000000000  000    000   
+    # 000   000  000   000    
+    # 000   000  000  000000  
+    
+    ai2: ->
+                
+        h = 4
+        r = 4
+        d = 3
+        
+        for x in [-r..r]
+            for y in [-r..r]
+                for z in [0...h]
+                    maxAbs = Math.max Math.abs(x), Math.abs(y)
+                    res = 16+(r-(maxAbs))*64
+                    @addStone x*d, y*d, -z-maxAbs*4+r*4, Stone.resources[z], res
+        
+        @addBot  0, r*d, 1, Bot.base
+        @addBot  r*d, 0, 1, Bot.base
+        @addBot -r*d, 0, 1, Bot.base
+        
+        @setCamera dist:20, rotate:180, degree:70
+        
+    #  0000000   000  000000   
+    # 000   000  000      000  
+    # 000000000  000    0000   
+    # 000   000  000      000  
+    # 000   000  000  000000   
+    
+    ai3: ->
         
         @wall  0,-3,0, 0, 3,0
         @wall -3, 0,0, 3, 0,0
@@ -168,21 +220,25 @@ class Map extends World
         @addCancer 0,  0, -10,  5
         @addCancer 0,  10,  0, 10
         @addCancer 0, -10,  0, 10
-        @addCancer 0,   0, -1,  3
+        @addCancer 0,   0,  0,  3
         
-        @wall 0,-3,0, 0,3,0
-        @wall -3,0,0, 3,0,0
-        @addResource -3, 0, 0, Stone.white, 256
-        @addResource -2, 0, 0, Stone.red,   128
-        @addResource -1, 0, 0, Stone.gelb,  64
-        @addResource  0, 0, 0, Stone.blue,  32
-        @addResource  1, 0, 0, Stone.gelb,  64
-        @addResource  2, 0, 0, Stone.red,   128
-        @addResource  3, 0, 0, Stone.white, 256
+        @wall 0,1,0, 0,3,0
+        @wall 0,-1,0, 0,-3,0
+
+        @addStone -3, 0, 0, Stone.blue,  256
+        @addStone -2, 0, 0, Stone.red,   128
+        @addStone -1, 0, 0, Stone.white, 32
+        @addStone  1, 0, 0, Stone.white, 32
+        @addStone  2, 0, 0, Stone.gelb,  128
+        @addStone  3, 0, 0, Stone.blue,  256
         
-        @addBot  0, 0, 1, Bot.base
+        @addStone 0, 0, 4, Stone.white, 80
+        @addBot  0, 0, 5, Bot.base
         
-        @setCamera()
+        @addTarget  10, 0, 0
+        @addTarget -10, 0, 0
+        
+        @setCamera rotate:0, degree:70, dist:20, pos:[0,0,0]
         
     #  0000000   00000000   000  0000000    
     # 000        000   000  000  000   000  
@@ -238,16 +294,23 @@ class Map extends World
         
         s = 4
         @addStone  s,  s, 0, Stone.red
-        @addStone  s, -s, 0, Stone.gelb
         @addStone -s,  s, 0, Stone.gelb
         @addStone -s, -s, 0, Stone.blue
-        s = 6
+
+        s = 10
         @addStone  0, 0, -s, Stone.white
-        @addStone  0, 0,  s, Stone.white
+        
+        s = 6
+        @addTarget s,s,s
+        @addTarget -s,s,s
+        @addTarget -s,-s,s
+
+        @addTarget s,s,-s
+        @addTarget -s,-s,-s
+        @addTarget s,-s,-s
         
         @addBot  0, 0, 1, Bot.base
-        
-        @setCamera dist:12
+        @setCamera dist:20
         
     # 00000000   000      00000000  000   000  000000000  000   000  
     # 000   000  000      000       0000  000     000      000 000   
@@ -256,33 +319,46 @@ class Map extends World
     # 000        0000000  00000000  000   000     000        000     
     
     plenty: ->
-                
+           
+        a = 32
         @addStone  0, 0, 0
-        @addStone  1, 0, 0, Stone.white
-        @addStone  0, 1, 0, Stone.gelb
-        @addStone -1, 0, 0, Stone.red
-        @addStone  0,-1, 0, Stone.blue
+        @addStone  1, 0, 0, Stone.white, a
+        @addStone  0, 1, 0, Stone.gelb, a
+        @addStone -1, 0, 0, Stone.red, a
+        @addStone  0,-1, 0, Stone.blue, a
 
-        @addStone  2, 0, -2, Stone.gelb
-        @addStone  0, 2, -2, Stone.red
-        @addStone -2, 0, -2, Stone.blue
-        @addStone  0,-2, -2, Stone.white
+        a = 64
+        @addStone  2, 0, -2, Stone.gelb, a
+        @addStone  0, 2, -2, Stone.red, a
+        @addStone -2, 0, -2, Stone.blue, a
+        @addStone  0,-2, -2, Stone.white, a
 
-        @addStone  3, 0, -4, Stone.red
-        @addStone  0, 3, -4, Stone.blue
-        @addStone -3, 0, -4, Stone.white
-        @addStone  0,-3, -4, Stone.gelb
+        a = 128
+        @addStone  3, 0, -4, Stone.red, a
+        @addStone  0, 3, -4, Stone.blue, a
+        @addStone -3, 0, -4, Stone.white, a
+        @addStone  0,-3, -4, Stone.gelb, a
 
-        @addStone  4, 0, -6, Stone.blue
-        @addStone  0, 4, -6, Stone.white
-        @addStone -4, 0, -6, Stone.gelb
-        @addStone  0,-4, -6, Stone.red
+        # @addStone  4, 0, -6, Stone.blue
+        # @addStone  0, 4, -6, Stone.white
+        # @addStone -4, 0, -6, Stone.gelb
+        # @addStone  0,-4, -6, Stone.red
          
-        @wall  0, 0,-1, 0,0,-3
+        @addStone  0,0,-8, Stone.red
+        
+        @wall  0, 0,-2, 0,0,-3
         @wall -1,-1,-2, 1,1,-2
         
         @addBot  0, 0, 1, Bot.base
         # @addBot  1, 1, -2, Bot.base
-        @setCamera pos:[0,0,-3]
+        
+        r = 4
+        h = 5
+        @addTarget  0, 0, 2
+        @addTarget  r, 0, h
+        @addTarget -r, 0, h
+        @addTarget  0, r, h
+        @addTarget  0,-r, h
+        @setCamera degree:88, dist:16
         
 module.exports = Map

@@ -21,7 +21,7 @@ Materials =
                 new THREE.MeshStandardMaterial color:Color.stone.white,   dithering:true # white
                 new THREE.MeshPhongMaterial    color:Color.stone.gray,    dithering:true # gray
                 new THREE.MeshStandardMaterial color:Color.stone.monster, dithering:true # monster
-                new THREE.MeshStandardMaterial color:Color.stone.cancer,  dithering:true, metalness: 1, roughness: 0 # cancer
+                new THREE.MeshStandardMaterial color:Color.stone.cancer,  dithering:true #, metalness: 1, roughness: 0 # cancer
     ]
     bot: [   
                 new THREE.MeshStandardMaterial color:Color.bot.red   # red

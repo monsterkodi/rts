@@ -164,8 +164,8 @@ window.onkeydown = (event) ->
         when '0'     then rts.world.resetSpeed()
         when 'p'     then rts.world.plosion.atBot rts.world.bases[0]
         when 'o'     then rts.handle.enemyDeath rts.world.enemiesOfBot(rts.world.bases[0])[0]
-        else 
-            log 'keydown', keyinfo.forEvent event
+        # else 
+            # log 'keydown', keyinfo.forEvent event
     
 window.onkeyup = (event) ->
     
