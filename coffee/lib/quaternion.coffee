@@ -114,10 +114,7 @@ class Quaternion extends THREE.Quaternion
 
     dot: (q) -> @x*q.x + @y*q.y + @z*q.z + @w*q.w
 
-    rotate: (v) ->
-        qv = new Quaternion v 
-        rq = @mul qv.mul @getConjugate()
-        new Vector rq.x, rq.y, rq.z 
+    rotate: (v) -> vec(v).applyQuaternion @
                 
     normalize: ->
         l = Math.sqrt @w*@w + @x*@x + @y*@y + @z*@z 

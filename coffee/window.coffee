@@ -133,8 +133,17 @@ window.onresize = (event) ->
 
 window.onkeydown = (event) ->
     
-    # log 'keydown', keyinfo.forEvent event
     switch keyinfo.forEvent(event).key
+        when 'w'     then rts.camera.startZoomIn()
+        when 's'     then rts.camera.startZoomOut()
+        when 'a'     then rts.camera.startPivotLeft()
+        when 'd'     then rts.camera.startPivotRight()
+        when 'q'     then rts.camera.startPivotUp()
+        when 'e'     then rts.camera.startPivotDown()
+        when 'left'  then rts.camera.startMoveLeft()
+        when 'right' then rts.camera.startMoveRight()
+        when 'up'    then rts.camera.startMoveUp()
+        when 'down'  then rts.camera.startMoveDown()
         when 'esc'   then rts.handle.loadMeta()
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
         when 'x'     then rts.handle.placeBase()
@@ -145,7 +154,7 @@ window.onkeydown = (event) ->
         when '4','m' then rts.handle.buyBot Bot.mine
         when '5'     then rts.handle.buyBot Bot.build
         when 'c', 'enter' then rts.handle.call()
-        when 'd'     then prefs.set 'debug', not prefs.get 'debug'
+        when '.'     then prefs.set 'debug', not prefs.get 'debug'
         when 'f'     then rts.world.storage[0].fill()
         when 'e'     then rts.world.storage[0].clear()
         when 'k'     then rts.world.monsters[0]?.die()
@@ -155,6 +164,15 @@ window.onkeydown = (event) ->
         when '0'     then rts.world.resetSpeed()
         when 'p'     then rts.world.plosion.atBot rts.world.bases[0]
         when 'o'     then rts.handle.enemyDeath rts.world.enemiesOfBot(rts.world.bases[0])[0]
+        else 
+            log 'keydown', keyinfo.forEvent event
+    
+window.onkeyup = (event) ->
+    
+    switch keyinfo.forEvent(event).key
+        when 's', 'w' then rts.camera.stopZoom()
+        when 'a', 'd', 'q', 'e' then rts.camera.stopPivot()
+        when 'left', 'right', 'up', 'down' then rts.camera.stopMoving()
     
 post.on 'menuAction', (action) ->
     

@@ -19,7 +19,6 @@ class Camera extends THREE.PerspectiveCamera
         
         @size    = vec width, height 
         @elem    = opt.view
-        # @dist    = @far/64
         @dist    = 10
         @maxDist = @far/4
         @minDist = 0.9
@@ -27,6 +26,10 @@ class Camera extends THREE.PerspectiveCamera
         @degree  = 60
         @rotate  = 0
         @wheelInert = 0
+        @pivotX = 0
+        @pivotY = 0
+        @moveX = 0
+        @moveY = 0
         @quat = quat()
 
         @elem.addEventListener 'mousewheel', @onMouseWheel
@@ -37,9 +40,10 @@ class Camera extends THREE.PerspectiveCamera
         
         @update()
 
-    getPosition:  -> vec @position
-    getDirection: -> quat(@quaternion).rotate Vector.minusZ
-    getUp:        -> quat(@quaternion).rotate Vector.unitY
+    getPosition: -> vec @position
+    getDir:      -> quat(@quaternion).rotate Vector.minusZ
+    getUp:       -> quat(@quaternion).rotate Vector.unitY
+    getRight:    -> quat(@quaternion).rotate Vector.unitX
 
     del: =>
         
@@ -107,7 +111,47 @@ class Camera extends THREE.PerspectiveCamera
         @degree += -0.1*y
         
         @update()
-               
+           
+    startPivotLeft: ->
+        
+        @pivotX = 20
+        @startPivot()
+        
+    startPivotRight: ->
+        
+        @pivotX = -20
+        @startPivot()
+
+    startPivotUp: ->
+        
+        @pivotY = -10
+        @startPivot()
+        
+    startPivotDown: ->
+        
+        @pivotY = 10
+        @startPivot()
+        
+    stopPivot: ->
+        
+        @pivoting = false
+        @pivotX = 0
+        @pivotY = 0
+       
+    startPivot: -> 
+        
+        if not @pivoting
+            rts.animate @pivotCenter
+            @pivoting = true
+            
+    pivotCenter: (deltaSeconds) =>
+        
+        return if not @pivoting
+
+        @pivot @pivotX, @pivotY
+        
+        rts.animate @pivotCenter
+        
     # 00000000    0000000   000   000  
     # 000   000  000   000  0000  000  
     # 00000000   000000000  000 0 000  
@@ -131,18 +175,18 @@ class Camera extends THREE.PerspectiveCamera
     # 000000    000   000  000       000   000  0000000   
     # 000       000   000  000       000   000       000  
     # 000        0000000    0000000   0000000   0000000   
-         
-    fadeToPos: (v) -> 
-        
-        @centerTarget = vec v
-        @startFadeCenter()
-            
+                     
     focusOnPos: (v) ->
         
         @centerTarget = vec v
         @center = vec v
         @update()
-            
+         
+    fadeToPos: (v) -> 
+        
+        @centerTarget = vec v
+        @startFadeCenter()
+
     startFadeCenter: -> 
         
         if not @fading
@@ -151,6 +195,8 @@ class Camera extends THREE.PerspectiveCamera
             
     fadeCenter: (deltaSeconds) =>
         
+        return if not @fading
+        
         @center.fade @centerTarget, deltaSeconds
         @update()
         
@@ -158,7 +204,63 @@ class Camera extends THREE.PerspectiveCamera
             rts.animate @fadeCenter
         else
             delete @fading
+
+    # 00     00   0000000   000   000  00000000  
+    # 000   000  000   000  000   000  000       
+    # 000000000  000   000   000 000   0000000   
+    # 000 0 000  000   000     000     000       
+    # 000   000   0000000       0      00000000  
+    
+    moveFactor: -> @dist/2
+    
+    startMoveLeft: ->
+        
+        @moveX = -@moveFactor()
+        @startMove()
+        
+    startMoveRight: ->
+        
+        @moveX = @moveFactor()
+        @startMove()
+
+    startMoveUp: ->
+        
+        @moveY = @moveFactor()
+        @startMove()
+        
+    startMoveDown: ->
+        
+        @moveY = -@moveFactor()
+        @startMove()
+        
+    stopMoving: ->
+        
+        @moving = false
+        @moveX = 0
+        @moveY = 0
+       
+    startMove: -> 
+        
+        @fading = false
+        if not @moving
+            rts.animate @moveCenter
+            @moving = true
             
+    moveCenter: (deltaSeconds) =>
+        
+        return if not @moving
+        
+        dir = vec()
+        dir.add Vector.unitX.mul @moveX
+        dir.add Vector.unitY.mul @moveY
+        dir.scale deltaSeconds
+        dir.applyQuaternion @quaternion
+        
+        @center.add dir
+        @update()
+        
+        rts.animate @moveCenter
+        
     # 000   000  000   000  00000000  00000000  000      
     # 000 0 000  000   000  000       000       000      
     # 000000000  000000000  0000000   0000000   000      
@@ -175,7 +277,7 @@ class Camera extends THREE.PerspectiveCamera
             @wheelInert = 0
             return
             
-        @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.000005
+        @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0001
         
         @startZoom()
 
@@ -185,16 +287,31 @@ class Camera extends THREE.PerspectiveCamera
     #  000     000   000  000   000  000 0 000  
     # 0000000   0000000    0000000   000   000  
 
+    startZoomIn: ->
+        
+        @wheelInert = (1+(@dist/@maxDist)*3)*10
+        @startZoom()
+        
+    startZoomOut: ->
+        
+        @wheelInert = -(1+(@dist/@maxDist)*3)*10
+        @startZoom()
+    
     startZoom: -> 
         
         if not @zooming
             rts.animate @inertZoom
-            @zoominging = true
+            @zooming = true
+            
+    stopZoom: -> 
+        
+        @wheelInert = 0
+        @zooming = false
     
     inertZoom: (deltaSeconds) =>
 
-        @setDist 1 - clamp -0.005, 0.005, @wheelInert
-        @wheelInert = reduce @wheelInert, deltaSeconds*0.003
+        @setDistFactor 1 - clamp -0.02, 0.02, @wheelInert
+        @wheelInert = reduce @wheelInert, deltaSeconds*0.3
         
         if Math.abs(@wheelInert) > 0.00000001
             rts.animate @inertZoom
@@ -202,7 +319,7 @@ class Camera extends THREE.PerspectiveCamera
             delete @zooming
             @wheelInert = 0
     
-    setDist: (factor) =>
+    setDistFactor: (factor) =>
         
         @dist = clamp @minDist, @maxDist, @dist*factor
         @update()
@@ -225,5 +342,7 @@ class Camera extends THREE.PerspectiveCamera
         
         @position.copy @center.plus vec(0,0,@dist).applyQuaternion @quat
         @quaternion.copy @quat
+        
+        # log "camera:", @dist, @rotate, @degree
 
 module.exports = Camera

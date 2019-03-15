@@ -26,21 +26,23 @@ class Map extends World
 
         @isMeta = true
         
-        s = 6
+        s = 4
         @wall -s, 0, 0, s, 0, 0
         @wall 0, -s, 0, 0, s, 0
         
         @addBot   0, 0, 1, Bot.base
-        @addIcon  0, 6, 1, 'grid'
-        @addIcon  0, 3, 1, 'star'
-        @addIcon  6, 0, 1, 'simple'
-        @addIcon -3, 0, 1, 'ais'
-        @addIcon  3, 0, 1, 'pest'
-        @addIcon -6, 0, 1, 'plenty'
-        @addIcon  0,-6, 1, 'sparse'
+        # @addIcon  0, 6, 1, 'grid'
+        # @addIcon  0, 3, 1, 'star'
+        # @addIcon  6, 0, 1, 'simple'
+        @addIcon  0, 4, 1, 'ais'
+        @addIcon  4, 0, 1, 'pest'
+        @addIcon -4, 0, 1, 'plenty'
+        @addIcon  0,-4, 1, 'sparse'
         
         # @addResource  3, 0,0, Stone.blue 
         # @addResource -3, 0,0, Stone.blue 
+        
+        @setCamera dist:10, rotate:45, degree:45
         
         science().path.length = 16
         science().base.speed  = Number.EPSILON
@@ -59,6 +61,7 @@ class Map extends World
         @addStone 0,-1,0
         @addStone 0,1,0
         @addBot 0,0,1, Bot.base
+        @setCamera()
         
     #  0000000  000000000   0000000   00000000   
     # 000          000     000   000  000   000  
@@ -83,6 +86,7 @@ class Map extends World
             
         @addBot  5, 0, 1, Bot.base
         # @addBot -5, 0, 1, Bot.base
+        @setCamera()
         
     #  0000000   000   0000000  
     # 000   000  000  000       
@@ -100,10 +104,10 @@ class Map extends World
         @wall  5,-3,0, 5, 3,0
         @wall -5,-3,0,-5, 3,0
 
-        @wall -2, 4,4, 2, 4,4
-        @wall -2,-4,4, 2,-4,4
-        @wall  4,-2,4, 4, 2,4
-        @wall -4,-2,4,-4, 2,4
+        @wall -1, 3,4, 1, 3,4
+        @wall -1,-3,4, 1,-3,4
+        @wall  3,-1,4, 3, 1,4
+        @wall -3,-1,4,-3, 1,4
         
         res = 80
                 
@@ -112,43 +116,45 @@ class Map extends World
         @addResource  1, -5, 0, Stone.gelb,  res
         @addResource  2, -5, 0, Stone.blue,  res
 
-        @addResource -1, -4, 4, Stone.white, res
-        @addResource  1, -4, 4, Stone.white, res
+        @addResource -1, -3, 4, Stone.white, res
+        @addResource  1, -3, 4, Stone.white, res
         
         @addResource -2,  5, 0, Stone.white, res
         @addResource -1,  5, 0, Stone.red,   res
         @addResource  1,  5, 0, Stone.gelb,  res
         @addResource  2,  5, 0, Stone.blue,  res
 
-        @addResource -1,  4, 4, Stone.white, res
-        @addResource  1,  4, 4, Stone.white, res
+        @addResource -1,  3, 4, Stone.white, res
+        @addResource  1,  3, 4, Stone.white, res
         
         @addResource  5, -2, 0, Stone.white, res
         @addResource  5, -1, 0, Stone.red,   res
         @addResource  5,  1, 0, Stone.gelb,  res
         @addResource  5,  2, 0, Stone.blue,  res
 
-        @addResource  4, -1, 4, Stone.white, res
-        @addResource  4,  1, 4, Stone.white, res
+        @addResource  3, -1, 4, Stone.white, res
+        @addResource  3,  1, 4, Stone.white, res
         
         @addResource -5, -2, 0, Stone.white, res
         @addResource -5, -1, 0, Stone.red,   res
         @addResource -5,  1, 0, Stone.gelb,  res
         @addResource -5,  2, 0, Stone.blue,  res
 
-        @addResource -4, -1, 4, Stone.white, res
-        @addResource -4,  1, 4, Stone.white, res
+        @addResource -3, -1, 4, Stone.white, res
+        @addResource -3,  1, 4, Stone.white, res
 
         @addBot  0,-5, 1, Bot.base
         @addBot -5, 0, 1, Bot.base
         @addBot  0, 5, 1, Bot.base
         @addBot  5, 0, 1, Bot.base
         
-        @addCancer  0,  0, 10, 25
-        @addCancer  3,  3,  0, 15
-        @addCancer -3, -3,  0, 15
-        @addCancer -3,  3,  0, 15
-        @addCancer  3, -3,  0, 15
+        @addCancer  0,  0, 8, 25
+        @addCancer  3,  3, 0, 15
+        @addCancer -3, -3, 0, 15
+        @addCancer -3,  3, 0, 15
+        @addCancer  3, -3, 0, 15
+        
+        @setCamera dist:12, rotate:45, degree:70, pos:[0,0,0]
         
     # 00000000   00000000   0000000  000000000  
     # 000   000  000       000          000     
@@ -175,6 +181,8 @@ class Map extends World
         @addResource  3, 0, 0, Stone.white, 256
         
         @addBot  0, 0, 1, Bot.base
+        
+        @setCamera()
         
     #  0000000   00000000   000  0000000    
     # 000        000   000  000  000   000  
@@ -210,6 +218,8 @@ class Map extends World
                 @wall x, y, 0, x, y, -127
                 
         @addBot  0, 0, 1, Bot.base
+        
+        @setCamera()
           
     #  0000000  00000000    0000000   00000000    0000000  00000000  
     # 000       000   000  000   000  000   000  000       000       
@@ -236,6 +246,8 @@ class Map extends World
         @addStone  0, 0,  s, Stone.white
         
         @addBot  0, 0, 1, Bot.base
+        
+        @setCamera dist:12
         
     # 00000000   000      00000000  000   000  000000000  000   000  
     # 000   000  000      000       0000  000     000      000 000   
@@ -271,5 +283,6 @@ class Map extends World
         
         @addBot  0, 0, 1, Bot.base
         # @addBot  1, 1, -2, Bot.base
+        @setCamera pos:[0,0,-3]
         
 module.exports = Map

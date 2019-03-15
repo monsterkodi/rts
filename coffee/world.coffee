@@ -80,6 +80,10 @@ class World
         @construct.bots()
         @updateTubes()
         
+        @setCageOpacity 3
+        @setOpacity 7
+        @setSpeed 6
+        
         post.emit 'world', @
         
     #  0000000  000      00000000   0000000   00000000   
@@ -136,6 +140,23 @@ class World
         p = @posAtIndex info.goal
         g = Geometry.coordinateCross 0.05, p.x, p.y, p.z
         @scene.add new THREE.Mesh g, Materials.stone[1]
+        
+    #  0000000   0000000   00     00  00000000  00000000    0000000   
+    # 000       000   000  000   000  000       000   000  000   000  
+    # 000       000000000  000000000  0000000   0000000    000000000  
+    # 000       000   000  000 0 000  000       000   000  000   000  
+    #  0000000  000   000  000   000  00000000  000   000  000   000  
+    
+    setCamera: (cfg={dist:10, rotate:45, degree:45}) ->
+        
+        rts.camera.dist   = cfg.dist   ? 10
+        rts.camera.rotate = cfg.rotate ? 45
+        rts.camera.degree = cfg.degree ? 45
+        if cfg.pos?
+            rts.camera.focusOnPos vec cfg.pos
+        else
+            rts.camera.focusOnPos @bases[0].pos
+        rts.camera.update()
         
     #  0000000   00000000    0000000    0000000  000  000000000  000   000  
     # 000   000  000   000  000   000  000       000     000      000 000   

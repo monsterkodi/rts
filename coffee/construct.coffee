@@ -237,7 +237,9 @@ class Construct
         iconBoxes = []
             
         fakeWorld = 
-                            
+                 
+            setCamera: ->
+                
             addBot: (x,y,z,t) -> 
                 
                 minxyz x,y,z
