@@ -22,7 +22,6 @@ class Spark
     constructor: (base, @monster) ->
         
         @monster.health -= 1
-        # log "monster.health #{@monster.health}"
         storage = world.storage[base.player]
         storage.sub config.spark.stone
         @path = world.pathFromPosToPos base.pos, @monster.pos

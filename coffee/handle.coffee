@@ -131,7 +131,7 @@ class Handle
     tickBerta: (delta, berta) ->
         
         return if berta.state != 'on'
-        return if Science.needsTube(berta) and not berta.path
+        return if Science.needsTube(berta.type, berta.player) and not berta.path
         
         @delay delta, berta, 'speed', 'shoot', =>
             storage = world.storage[berta.player]
@@ -332,7 +332,7 @@ class Handle
         
         return false if not buildBot
         return false if not storage.canAfford science(player).build.cost
-        return false if Science.needsTube(buildBot) and not buildBot.path
+        return false if Science.needsTube(buildBot.type, player) and not buildBot.path
         pos = buildBot.pos.plus norm
         return false if world.invalidPos pos
         return false if world.isItemAtPos pos
@@ -494,6 +494,9 @@ class Handle
             
             if type == Bot.build and not cfg.moveBuild
                 break
+                
+            if not Science.needsTube type, player
+                continue
             
             for bot in world.botsOfType type, player
                 

@@ -57,12 +57,12 @@ module.exports =
             
         nonMineSpeed: 0.2
            
-        base:  health: 4*80
+        base:  health: 256
         build: health: 128
         trade: health: 128
         brain: health: 64
         berta: health: 64
-        mine:  health: 32
+        mine:  health: 64
         
         spent:
             time:

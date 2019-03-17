@@ -14,8 +14,8 @@ class Science
             prod:   x:0, y:1, v:[[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4],[5,5,5,5],[6,6,6,6]]
             radius: x:0, y:2, v:[2, 3, 4, 5, 6, 7]
         berta:
-            radius: x:0, y:3, v:[1, 2, 3, 4, 5, 6]
-            speed:  x:1, y:3, v:[0.02, 0.04, 0.08, 0.16, 0.32, 0.64]
+            radius: x:0, y:3, v:[2, 3, 4, 5, 6, 7]
+            speed:  x:1, y:3, v:[0.02, 0.04, 0.06, 0.08, 0.12, 0.20]
             limit:  x:2, y:3, v:[1, 2, 3, 4, 5, 6]
         brain:
             speed:  x:1, y:0, v:[0.1, 0.2, 0.4, 0.6, 0.8, 1.0]
@@ -24,7 +24,7 @@ class Science
             sell:   x:2, y:1, v:[4, 3, 2, 1]
         mine:
             speed:  x:3, y:0, v:[0.8, 1.0, 1.2, 1.4, 1.6, 2.0]
-            limit:  x:3, y:1, v:[2, 3, 4, 6, 8, 12]
+            limit:  x:3, y:1, v:[1, 2, 3, 4, 6, 8]
         build:
             cost:   x:1, y:1, v:[[0,0,0,24],[0,0,0,16],[0,0,0,12],[0,0,0,10],[0,0,0,8],[0,0,0,4]]
         tube:
@@ -64,11 +64,14 @@ class Science
                 
         @players.push player
 
-    @needsTube: (bot) -> 
-        level = switch bot.type
-            when Bot.build then 1
-            when Bot.berta then 2
-        science(bot.player).tube.free < level
+    @needsTube: (botType, player=0) ->
+        
+        switch botType
+            when Bot.build then level = 1
+            when Bot.berta then level = 2
+            else return true
+            
+        science(player).tube.free < level
         
     @mineSpeed: (bot) ->
         

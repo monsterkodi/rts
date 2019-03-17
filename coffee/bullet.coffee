@@ -44,10 +44,18 @@ class Bullet
             return if enemy.health <= 0
             storage.sub stone
             enemy.health -= 1
-            life = -i*1/config.bullet.count
+            life = -i*0.5/config.bullet.count
             id = @bulletid++
             @botBullets[enemy.id][id] = new Bullet id, berta, enemy, stone, _.clone(path), life
     
+    @removeBot: (bot) ->
+        
+        if valid @botBullets
+            if bullets = @botBullets[bot.id]
+                for bulletid,bullet of bullets
+                    bullet.del()
+                delete @botBullets[bot.id]
+            
     constructor: (@id, berta, @enemy, @stone, @path, @life) ->
         
         @player = berta.player
@@ -60,8 +68,10 @@ class Bullet
         
     del: -> 
     
-        boxes.del @box
-        delete Bullet.botBullets[@enemy.id][@id]
+        if @box
+            boxes.del @box
+            delete @box
+            delete Bullet.botBullets[@enemy.id][@id]
         
     updatePath: -> @path = world.bulletPath @, @enemy
     updateDir: ->
@@ -74,7 +84,7 @@ class Bullet
     startOrbit: ->
         
         handle.enemyDamage @enemy, 1
-        Orbits.spawn @player, @enemy
+        Orbits.spawn @player, @enemy, @stone
         @del()
         
     animate: (scaledDelta) ->

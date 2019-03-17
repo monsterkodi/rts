@@ -178,6 +178,7 @@ class Tubes
             if bot.path?
                 
                 if not hadPath
+                    world.colorBot bot
                     post.emit 'botConnected', bot
                 
                 fi = world.faceIndex bot.path.points[0].face, bot.path.points[0].index
@@ -198,6 +199,7 @@ class Tubes
                     
             else
                 if hadPath
+                    world.colorBot bot
                     post.emit 'botDisconnected', bot
             
         for index,segment of oldSegments

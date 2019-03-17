@@ -96,7 +96,7 @@ class Map extends World
     ai1: ->
                 
         h = 4
-        r = 4
+        r = 3
         d = 3
         
         for x in [-r..r]
@@ -152,7 +152,7 @@ class Map extends World
                 p.x += t[i][0]
                 p.y += t[i][1]
                 p.z += t[i][2]
-                @addStone p.x, p.y, p.z, Stone.resources[r], 80
+                @addStone p.x, p.y, p.z, Stone.resources[r], 240
                 r = (r+1)%4
                     
         @addBot  d, -d,   d+o+1, Bot.base

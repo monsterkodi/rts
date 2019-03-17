@@ -49,7 +49,7 @@ class Cages
         
         @removeCage bot
         
-        return if Science.needsTube(bot) and not bot.path
+        return if Science.needsTube(bot.type, bot.player) and not bot.path
         
         if bot.state == 'on'
             @cage bot, science(bot.player)[Bot.string bot.type].radius

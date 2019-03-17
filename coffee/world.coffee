@@ -36,6 +36,7 @@ class World
         @storage   = []
         @players   = []
         @ai        = []
+        @idBot     = []
         
         @vec  = vec()
         @vec2 = vec()
@@ -457,7 +458,7 @@ class World
         bot.mine = 1/Science.mineSpeed bot
         
         if type != Bot.icon
-            bot.hitPoints = bot.health = config[Bot.string type].health
+            bot.hitPoints = bot.health = bot.maxHealth = config[Bot.string type].health
                 
         if type in Bot.switchable
             bot.state = 'off'
@@ -471,7 +472,6 @@ class World
                     @addAI bot
                 @bases[player] = bot
                 bot.prod = 1/science(player).base.speed
-                bot.hitPoints = bot.health = science(player).storage.capacity * 4
             when Bot.trade
                 bot.trade = 1/science(player).trade.speed
                 bot.sell  = Stone.red
@@ -484,6 +484,7 @@ class World
                     bot.state = 'on'
                     
         @bots[index] = bot
+        @idBot[bot.id] = bot
         bot
 
     # 000   0000000   0000000   000   000  
@@ -523,7 +524,7 @@ class World
         return if not bot.mesh
         if bot.player == 0
             stone = @resourceBelowBot bot
-            if stone?
+            if stone? and (bot.path? or bot.type == Bot.base)
                 bot.mesh.material = Materials.bot[stone]
             else if @isMeta
                 bot.mesh.material = Materials.ai[0]
@@ -554,6 +555,8 @@ class World
     removeBot: (bot) ->
         
         post.emit 'botWillBeRemoved', bot
+        Orbits.removeBot bot
+        Bullet.removeBot bot
         @plosion.atBot bot
         @delBot bot
         @dirtyTubes()
@@ -651,7 +654,8 @@ class World
         if resource and stone != Stone.gray
             @addResource x, y, z, stone, resource
             @stones[index] = Stone.gray
-        
+       
+    botWithId: (id) -> @idBot[id]
     botAt:    (x,y,z) -> @botAtIndex @indexAt x,y,z
     botAtPos:     (v) -> @botAtIndex @indexAtPos v
     botAtIndex:   (i) -> @bots[i]

@@ -26,7 +26,7 @@ class Info
         
         info = _.clone rts.renderer.info.render
         @elem.innerHTML = ''
-        world = world
+
         add = (text) => elem class:'infoText', parent:@elem, text:text
         add "vects: #{Vector.counter}"
         add "quats: #{Quaternion.counter}"
@@ -35,7 +35,7 @@ class Info
         # add "trias: #{info.triangles}"
         # add "lines: #{info.lines}"
         add "stone: #{_.size world.stones}"
-        add "boxes: #{world.boxes.numBoxes()} / #{world.boxes.maxBoxes}"
+        add "boxes: #{boxes.numBoxes()} / #{boxes.maxBoxes}"
         add "resbx: #{world.resourceBoxes.numBoxes()} / #{world.resourceBoxes.maxBoxes}"
         add "stgbx: #{rts.menu.buttons.storage.boxes.numBoxes()} / #{rts.menu.buttons.storage.boxes.maxBoxes}"
         add "cgebx: #{world.cages.boxes.numBoxes()} / #{world.cages.boxes.maxBoxes}"
