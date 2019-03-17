@@ -19,11 +19,11 @@ class CageButton extends DialButton
         post.on 'cageOpacity', @onCageOpacity        
         @onCageOpacity()
             
-    setDial: (index) -> rts.world.setCageOpacity index+6
+    setDial: (index) -> world.setCageOpacity index+6
                 
     onCageOpacity: =>
         
-        p = vec(0,4,0).rotate vec(0,0,1), 180-45-rts.world.cageOpacityIndex*22.5
+        p = vec(0,4,0).rotate vec(0,0,1), 180-45-world.cageOpacityIndex*22.5
         @dot.position.copy p
         @render()
 

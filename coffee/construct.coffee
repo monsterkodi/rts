@@ -8,7 +8,7 @@
 
 class Construct
 
-    constructor: (@world) ->
+    constructor: ->
         
         @segmentMesh = [null,null,null,null]
         @stoneMeshes = {}     
@@ -27,7 +27,7 @@ class Construct
         
         mat = Materials.path
         mat = Materials.ai[player-1] if player
-        mat = Materials.ai[0] if @world.isMeta
+        mat = Materials.ai[0] if world.isMeta
         mat
     
     tubes: (player=0) ->
@@ -36,7 +36,7 @@ class Construct
         
         tube = new THREE.Geometry
         
-        for seg in @world.tubes.getSegments player
+        for seg in world.tubes.getSegments player
             if seg.points.length >= 2
                 for i in [1...seg.points.length]
                     tube.merge @tubeFaces seg.points[i-1], seg.points[i]
@@ -49,7 +49,7 @@ class Construct
         mesh = new THREE.Mesh tubeBuffer, @tubeMaterial player
         mesh.castShadow = true
                         
-        @world.scene.add mesh
+        world.scene.add mesh
         
         @segmentMesh[player] = mesh
         
@@ -222,7 +222,6 @@ class Construct
             maxz = Math.max z, maxz
             pos
         
-        boxes          = @world.boxes
         botGeoms       = @botGeoms
         geomForBotType = @geomForBotType
         iconBoxes = []
@@ -279,7 +278,7 @@ class Construct
                     for z in [zs..ze]
                         fakeWorld.addStone x, y, z, stone
          
-        @world[bot.func]?.apply fakeWorld
+        world[bot.func]?.apply fakeWorld
         
         dimx = maxx-minx
         dimy = maxy-miny
@@ -309,11 +308,11 @@ class Construct
     
     targets: ->
                         
-        return if empty @world.targets
+        return if empty world.targets
         
-        for index,target of @world.targets
+        for index,target of world.targets
             
-            @targetAtPos target, @world.posAtIndex index
+            @targetAtPos target, world.posAtIndex index
             
     targetAtPos: (target, pos) ->
         
@@ -321,7 +320,7 @@ class Construct
         mesh.receiveShadow = true
         mesh.castShadow = true
         mesh.position.copy pos
-        @world.scene.add mesh
+        world.scene.add mesh
         target.mesh = mesh
         
     # 0000000     0000000   000000000   0000000  
@@ -332,9 +331,9 @@ class Construct
     
     bots: ->
                         
-        for index,bot of @world.bots
+        for index,bot of world.bots
             
-            @botAtPos bot, @world.posAtIndex index
+            @botAtPos bot, world.posAtIndex index
             
     botAtPos: (bot, pos) ->
         
@@ -343,7 +342,7 @@ class Construct
         mesh.castShadow = true
         mesh.position.copy pos
         mesh.bot = bot.type # needed for intersection test
-        @world.scene.add mesh
+        world.scene.add mesh
         bot.mesh = mesh
         
         @dot bot
@@ -355,7 +354,7 @@ class Construct
         bot.mesh.position.copy bot.pos
         bot.highlight?.position.copy bot.pos
         @orientBot bot
-        @world.colorBot bot
+        world.colorBot bot
         
     orientFace: (obj, face) -> obj.quaternion.copy Quaternion.unitVectors Vector.unitZ, Vector.normals[face]
     
@@ -381,7 +380,7 @@ class Construct
         bot.dot = new THREE.Mesh sphere, @tubeMaterial bot.player
         bot.dot.castShadow = true
         bot.dot.receiveShadow = true
-        @world.scene.add bot.dot
+        world.scene.add bot.dot
         
     # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
     # 000   000  000  000        000   000  000      000  000        000   000     000     
@@ -402,7 +401,7 @@ class Construct
         mesh = new THREE.Mesh geom, Materials.highlight
         mesh.position.copy bot.pos
         @orientFace mesh, bot.face
-        @world.scene.add mesh
+        world.scene.add mesh
         mesh
                     
     #  0000000  000000000   0000000   000   000  00000000   0000000    
@@ -473,15 +472,15 @@ class Construct
         for stone in Stone.all
             stonesides.push new THREE.Geometry
         
-        for index,stone of @world.stones
-            p = @world.posAtIndex index
+        for index,stone of world.stones
+            p = world.posAtIndex index
             cube = new THREE.Geometry()
-            if not @world.isStoneAt p.x, p.y, p.z+1 then cube.merge @topside
-            if not @world.isStoneAt p.x+1, p.y, p.z then cube.merge @rightside
-            if not @world.isStoneAt p.x, p.y+1, p.z then cube.merge @backside
-            if not @world.isStoneAt p.x, p.y, p.z-1 then cube.merge @bottomside
-            if not @world.isStoneAt p.x-1, p.y, p.z then cube.merge @leftside
-            if not @world.isStoneAt p.x, p.y-1, p.z then cube.merge @frontside
+            if not world.isStoneAt p.x, p.y, p.z+1 then cube.merge @topside
+            if not world.isStoneAt p.x+1, p.y, p.z then cube.merge @rightside
+            if not world.isStoneAt p.x, p.y+1, p.z then cube.merge @backside
+            if not world.isStoneAt p.x, p.y, p.z-1 then cube.merge @bottomside
+            if not world.isStoneAt p.x-1, p.y, p.z then cube.merge @leftside
+            if not world.isStoneAt p.x, p.y-1, p.z then cube.merge @frontside
             cube.translate p.x, p.y, p.z
             stonesides[stone].merge cube
             
@@ -495,7 +494,7 @@ class Construct
             mesh.receiveShadow = true
             mesh.castShadow = true
             mesh.stone = stone
-            @world.scene.add mesh            
+            world.scene.add mesh            
             @stoneMeshes[stone] = mesh
 
 module.exports = Construct

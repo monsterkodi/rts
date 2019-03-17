@@ -410,7 +410,7 @@ class Geometry
         
     @call: ->
         
-        construct = rts.world.construct
+        construct = world.construct
 
         geom = new THREE.Geometry
         b = construct.botGeoms[construct.geomForBotType Bot.base].clone()

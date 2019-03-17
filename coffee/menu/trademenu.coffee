@@ -28,7 +28,7 @@ class TradeMenu extends BotMenu
         
     buttonClicked: (button) ->
         
-        trade = rts.world.botOfType Bot.trade
+        trade = world.botOfType Bot.trade
         trade[button.inOut] = button.stone
         
         @buttons[button.inOut].stone = button.stone

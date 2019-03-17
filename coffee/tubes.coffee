@@ -11,9 +11,9 @@ Packet = require './packet'
 
 class Tubes
 
-    constructor: (@world) ->
+    constructor: ->
         
-        @astar    = new AStar @world
+        @astar    = new AStar
         @segments = [{},{},{},{}]
 
     speed: (player=0) -> science(player).tube.speed
@@ -21,15 +21,15 @@ class Tubes
         
     clear: ->
         
-        for player in @world.players
+        for player in world.players
             for index,segment of @segments[player]
                 for pck in segment.packets
                     pck.del()
                     
         @segments = [{},{},{},{}]
         
-        for player in @world.players
-            @world.construct.tubes player
+        for player in world.players
+            world.construct.tubes player
     
     # 000  000   000   0000000  00000000  00000000   000000000  
     # 000  0000  000  000       000       000   000     000     
@@ -45,9 +45,9 @@ class Tubes
                 log 'insertPacket -- DAFUK? tubes.insertPacket #{bot.player} != #{seg.player}!'
                 return
             
-            stone ?= @world.stoneBelowBot bot
+            stone ?= world.stoneBelowBot bot
             if not @isInputBlocked seg
-                pck = new Packet stone, bot.player, @world
+                pck = new Packet stone, bot.player, world
                 @insertPacketIntoSegment pck, seg
                 pck.moveOnSegment seg
                 return true
@@ -98,7 +98,7 @@ class Tubes
         
     animate: (delta) ->
 
-        for player in @world.players
+        for player in world.players
             
             segs = @getSegments player
             
@@ -139,7 +139,7 @@ class Tubes
                         pck.move delta * @speed(player)
                         if pck.moved >= seg.moves
                             pck = seg.packets.pop()
-                            @world.storage[player].add pck.stone
+                            world.storage[player].add pck.stone
                             pck.del()
                         else
                             pck.moveOnSegment seg
@@ -148,7 +148,7 @@ class Tubes
         
         if bot.path?
             path = bot.path
-            fi = @world.faceIndex path.points[0].face, path.points[0].index
+            fi = world.faceIndex path.points[0].face, path.points[0].index
             si = @segIndex fi, fi
             @segments[bot.player][si]
         
@@ -159,8 +159,8 @@ class Tubes
     # 0000000     0000000   000  0000000  0000000    
     
     build: ->
-        # log '@world.players', @world.players.length
-        for player in @world.players
+
+        for player in world.players
             @tubesForPlayer player
             
     tubesForPlayer: (player) ->
@@ -168,7 +168,7 @@ class Tubes
         oldSegments = @segments[player]
         @segments[player] = {}
         
-        for bot in @world.botsOfPlayer player
+        for bot in world.botsOfPlayer player
             continue if bot.type == Bot.base
             
             hadPath = bot.path?
@@ -180,7 +180,7 @@ class Tubes
                 if not hadPath
                     post.emit 'botConnected', bot
                 
-                fi = @world.faceIndex bot.path.points[0].face, bot.path.points[0].index
+                fi = world.faceIndex bot.path.points[0].face, bot.path.points[0].index
                 si = @segIndex fi, fi
                 fakePoints = [_.cloneDeep(bot.path.points[0]), _.cloneDeep(bot.path.points[0])]
                 fakePoints[0].pos.add Vector.normals[bot.face].mul 0.7
@@ -222,8 +222,8 @@ class Tubes
                     seg.in.push next.index
                 nextIndex += 1
                         
-        @world.construct.tubes player          
-        # log 'build', segs.map (s) => player:s.player, dist:s.dist, in:s.in, out:s.out, index:@world.stringForIndex(s.index), from:@world.stringForFaceIndex(s.from), to:@world.stringForFaceIndex(s.to)
+        world.construct.tubes player          
+        # log 'build', segs.map (s) => player:s.player, dist:s.dist, in:s.in, out:s.out, index:world.stringForIndex(s.index), from:world.stringForFaceIndex(s.from), to:world.stringForFaceIndex(s.to)
                     
     # 00000000    0000000   000000000  000   000  
     # 000   000  000   000     000     000   000  
@@ -233,9 +233,9 @@ class Tubes
             
     pathFromBot: (fromBot) -> 
         
-        toBot = @world.baseForBot fromBot
+        toBot = world.baseForBot fromBot
     
-        path = @astar.findPath @world.faceIndexForBot(fromBot), @world.faceIndexForBot(toBot)
+        path = @astar.findPath world.faceIndexForBot(fromBot), world.faceIndexForBot(toBot)
         
         if path and path.length <= science(fromBot.player).path.length+1
             fromBot.path = 
@@ -253,8 +253,8 @@ class Tubes
     pathPoints: (path, player) ->
         
         points = []
-        [lastFace, lastIndex] = @world.splitFaceIndex path[0]
-        lastPos = @world.posAtIndex lastIndex
+        [lastFace, lastIndex] = world.splitFaceIndex path[0]
+        lastPos = world.posAtIndex lastIndex
         
         aboveFace = 0.35
         skip = false
@@ -264,18 +264,18 @@ class Tubes
         
         for i in [1...path.length]
             moves = 1
-            [nextFace, nextIndex] = @world.splitFaceIndex path[i]
-            nextPos = @world.posAtIndex nextIndex
+            [nextFace, nextIndex] = world.splitFaceIndex path[i]
+            nextPos = world.posAtIndex nextIndex
             nextPos.sub Vector.normals[nextFace].mul aboveFace
             if lastFace != nextFace
-                pos1 = lastPos.plus @world.directionFaceToFace path[i-1], path[i]
-                pos2 = nextPos.plus @world.directionFaceToFace path[i], path[i-1]
+                pos1 = lastPos.plus world.directionFaceToFace path[i-1], path[i]
+                pos2 = nextPos.plus world.directionFaceToFace path[i], path[i-1]
                 lm = pos1.to(pos2).length()
                 l1 = (1-lm)/2
                 l2 = 1-l1
                 points.push i:l1, face:lastFace, index:lastIndex, pos:pos1
                 points.push i:l2, face:nextFace, index:nextIndex, pos:pos2
-                if Bend.convex == @world.bendType path[i-1], path[i]
+                if Bend.convex == world.bendType path[i-1], path[i]
                     moves = 1.275
                 else
                     moves = 0.66
@@ -309,8 +309,8 @@ class Tubes
 
         neighbor = 15
         if fromFaceIndex != toFaceIndex
-            [fromFace, fromIndex] = @world.splitFaceIndex fromFaceIndex
-            [toFace, toIndex]     = @world.splitFaceIndex toFaceIndex
+            [fromFace, fromIndex] = world.splitFaceIndex fromFaceIndex
+            [toFace, toIndex]     = world.splitFaceIndex toFaceIndex
             neighbor = fromFace - toFace + 5
             
         fromFaceIndex | (neighbor<<28)

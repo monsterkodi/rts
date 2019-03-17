@@ -21,11 +21,11 @@ class SpeedButton extends DialButton
             
     setDial: (index) -> 
     
-        rts.world.setSpeed index+6
+        world.setSpeed index+6
                 
     onWorldSpeed: =>
         
-        p = vec(0,4,0).rotate vec(0,0,1), 180-45-rts.world.speedIndex*22.5
+        p = vec(0,4,0).rotate vec(0,0,1), 180-45-world.speedIndex*22.5
         @dot.position.copy p
         @update()
 

@@ -10,10 +10,10 @@ Boxes = require './boxes'
 
 class Cages
 
-    constructor: (@world) ->
+    constructor: () ->
 
         box = new THREE.BoxBufferGeometry
-        @boxes = new Boxes @world.scene, 3000, box, Materials.cage, false
+        @boxes = new Boxes world.scene, 3000, box, Materials.cage, false
         
         post.on 'scienceFinished',  @onScienceFinished
         post.on 'botWillBeRemoved', @removeCage
@@ -23,24 +23,24 @@ class Cages
         
         [science, key] = Science.split info.scienceKey
         if key == 'radius'
-            for bot in @world.botsOfType Bot[science], info.player
+            for bot in world.botsOfType Bot[science], info.player
                 @updateCage bot
         if info.scienceKey in ['path.length', 'tube.free']
             for type in Bot.caged
-                for bot in @world.botsOfType type, info.player
+                for bot in world.botsOfType type, info.player
                     @updateCage bot
     
     onBotState: (type, state, player) =>
 
         if type in Bot.caged
-            for bot in @world.botsOfType type, player
+            for bot in world.botsOfType type, player
                 @updateCage bot
             
     moveBot: (bot) ->
         
         @updateCage bot
         if bot.type == Bot.base
-            for berta in @world.botsOfType Bot.berta, bot.player
+            for berta in world.botsOfType Bot.berta, bot.player
                 @updateCage berta
                 
     updateCage: (bot) ->
@@ -63,12 +63,12 @@ class Cages
         
     animate: (scaledDelta) ->
         
-        for bot in @world.allBots()
+        for bot in world.allBots()
             if bot.cageBoxes
                 for box in bot.cageBoxes
                     box.age += scaledDelta * config.cage.anim.speed
                     if box.age % 7 < 3
-                        @boxes.setSize box, @world.cageOpacity*(1-(Math.cos(2*Math.PI*(box.age % 7)/3)+1)/2)
+                        @boxes.setSize box, world.cageOpacity*(1-(Math.cos(2*Math.PI*(box.age % 7)/3)+1)/2)
                     else
                         @boxes.setSize box, 0
         
@@ -89,7 +89,7 @@ class Cages
         while isInside insidePos.plus vec x+1,0,0
             x += 1
 
-        index = @world.indexAtPos vec x,0,0
+        index = world.indexAtPos vec x,0,0
         size = 0.001
         visited = {}
         check = [index]
@@ -101,14 +101,14 @@ class Cages
             if not visited[index]
                 
                 visited[index] = 1
-                checkPos = @world.posAtIndex index
+                checkPos = world.posAtIndex index
                 bot.cageBoxes ?= []
                 box = @boxes.add pos:checkPos.plus(insidePos), size:size, color:color
                 box.age = 7-checkPos.manhattan vec()
                 bot.cageBoxes.push box
             
-                for neighbor in @world.neighborsOfIndex index
-                    neighborPos = @world.posAtIndex neighbor
+                for neighbor in world.neighborsOfIndex index
+                    neighborPos = world.posAtIndex neighbor
                     if not visited[neighbor] and isInside neighborPos
                         check.push neighbor
                     

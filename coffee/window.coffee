@@ -144,26 +144,26 @@ window.onkeydown = (event) ->
         when 'right' then rts.camera.startMoveRight()
         when 'up'    then rts.camera.startMoveUp()
         when 'down'  then rts.camera.startMoveDown()
-        when 'esc'   then rts.handle.loadMeta()
+        when 'esc'   then handle.loadMeta()
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
-        when 'x'     then rts.handle.placeBase()
-        when 'z'     then rts.handle.placeBuild()
-        when '1'     then rts.handle.buyBot Bot.brain
-        when '2','t' then rts.handle.buyBot Bot.trade
-        when '3','b' then rts.handle.buyBot Bot.berta
-        when '4','m' then rts.handle.buyBot Bot.mine
-        when '5'     then rts.handle.buyBot Bot.build
-        when 'c', 'enter' then rts.handle.call()
+        when 'x'     then handle.placeBase()
+        when 'z'     then handle.placeBuild()
+        when '1'     then handle.buyBot Bot.brain
+        when '2','t' then handle.buyBot Bot.trade
+        when '3','b' then handle.buyBot Bot.berta
+        when '4','m' then handle.buyBot Bot.mine
+        when '5'     then handle.buyBot Bot.build
+        when 'c', 'enter' then handle.call()
         when '.'     then prefs.set 'debug', not prefs.get 'debug'
-        when 'f'     then rts.world.storage[0].fill()
-        when 'e'     then rts.world.storage[0].clear()
-        when 'k'     then rts.world.monsters[0]?.die()
+        when 'f'     then world.storage[0].fill()
+        when 'e'     then world.storage[0].clear()
+        when 'k'     then world.monsters[0]?.die()
         when 'space' then rts.togglePause()
-        when '='     then rts.world.incrSpeed(); rts.world.incrSpeed()
-        when '-'     then rts.world.decrSpeed(); rts.world.decrSpeed()
-        when '0'     then rts.world.resetSpeed()
-        when 'p'     then rts.world.plosion.atBot rts.world.bases[0]
-        when 'o'     then rts.handle.enemyDeath rts.world.enemiesOfBot(rts.world.bases[0])[0]
+        when '='     then world.incrSpeed(); world.incrSpeed()
+        when '-'     then world.decrSpeed(); world.decrSpeed()
+        when '0'     then world.resetSpeed()
+        when 'p'     then world.plosion.atBot world.bases[0]
+        when 'o'     then handle.enemyDeath world.enemiesOfBot(world.bases[0])[0]
         # else 
             # log 'keydown', keyinfo.forEvent event
     

@@ -17,7 +17,7 @@ class CallButton extends CanvasButton
         
         super div, 'canvasButtonInline'
         
-    click: -> rts.handle.call()
+    click: -> handle.call()
 
     initScene: ->
         

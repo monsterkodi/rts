@@ -59,7 +59,7 @@ class Menu
         post.on 'botDamaged', @onBotDamaged
         post.on 'world',      @onWorld
         
-        @onWorld rts.world
+        @onWorld world
         
     onWorld: (world) =>
         

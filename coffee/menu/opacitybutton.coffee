@@ -76,10 +76,10 @@ class OpacityButton extends DialButton
         angle = Math.sign(ctr2Pos.dot(vec 1,0,0)) * ctr2Pos.angle(vec 0,1,0)
         if ctr2Pos.x < 0
             sectn = clamp -7, -1, Math.round angle/22.5
-            rts.world.setOpacity sectn+7
+            world.setOpacity sectn+7
         else
             sectn = clamp 1, 7, Math.round angle/22.5
-            rts.world.setCageOpacity 6-sectn+1
+            world.setCageOpacity 6-sectn+1
             
         @update()
             
@@ -91,7 +91,7 @@ class OpacityButton extends DialButton
     
     onWorldOpacity: =>
         
-        p = vec(0,4,0).rotate vec(0,0,1), 180-22.5-rts.world.opacityIndex*22.5
+        p = vec(0,4,0).rotate vec(0,0,1), 180-22.5-world.opacityIndex*22.5
         @dot1.position.copy p
         @update()
         
@@ -103,7 +103,7 @@ class OpacityButton extends DialButton
     
     onCageOpacity: =>
         
-        p = vec(0,4,0).rotate vec(0,0,1), 180+22.5+rts.world.cageOpacityIndex*22.5
+        p = vec(0,4,0).rotate vec(0,0,1), 180+22.5+world.cageOpacityIndex*22.5
         @dot2.position.copy p
         @update()
 

@@ -10,7 +10,7 @@ rotCount = 0
 
 class Spent
 
-    constructor: (@world) ->
+    constructor: ->
 
         @spent = []
         @gains = []
@@ -27,10 +27,10 @@ class Spent
     clear: ->
         
         for box in @spent
-            @world.boxes.del box
+            boxes.del box
 
         for box in @gains
-            @world.boxes.del box
+            boxes.del box
 
         @spent = []
         @gains = []
@@ -46,18 +46,18 @@ class Spent
         if valid @spent
             for i in [@spent.length-1..0]
                 box = @spent[i]
-                @world.boxes.rot box, @rot
+                boxes.rot box, @rot
                 @vec.copy box.dir
                 @vec.scale 0.4*delta/box.maxLife
-                @world.boxes.pos box, @pos
+                boxes.pos box, @pos
                 @pos.add @vec
                 box.life -= delta
                 s = Math.min 1.0, box.life
-                @world.boxes.setPos box, @pos
-                @world.boxes.setSize box, s*0.05
-                @world.boxes.setRot box, @rot.rotateAxisAngle box.rot, -60*delta
+                boxes.setPos box, @pos
+                boxes.setSize box, s*0.05
+                boxes.setRot box, @rot.rotateAxisAngle box.rot, -60*delta
                 if box.life <= 0
-                    @world.boxes.del box
+                    boxes.del box
                     @spent.splice i, 1
 
         if valid @gains
@@ -70,10 +70,10 @@ class Spent
                     continue
                 @vec.copy box.bot.pos
                 @vec.fade box.startPos, box.life/box.maxLife
-                @world.boxes.setPos  box, @vec
-                @world.boxes.setSize box, Math.min 0.1, 0.1*(box.maxLife-box.life)
+                boxes.setPos  box, @vec
+                boxes.setSize box, Math.min 0.1, 0.1*(box.maxLife-box.life)
                 if box.life <= 0
-                    @world.boxes.del box
+                    boxes.del box
                     @gains.splice i, 1
                     
     #  0000000    0000000   000  000   000  
@@ -141,7 +141,7 @@ class Spent
     
     spawnCost: (stone, stoneIndex, numStones, pos, face, radius) ->
 
-        dir = Vector.normals[@world.dirsForFace(face)[0]].clone()
+        dir = Vector.normals[world.dirsForFace(face)[0]].clone()
         angle = rotCount+360*stoneIndex/numStones
         dir.rotate Vector.normals[face], angle
                  
@@ -154,7 +154,7 @@ class Spent
         @vec.scale radius
         @vec.add pos
         
-        box = @world.boxes.add pos:@vec, size:0.05, stone:stone, rot:@rot
+        box = boxes.add pos:@vec, size:0.05, stone:stone, rot:@rot
         box.dir = dir
         box.rot = Vector.normals[face]
         box.life = box.maxLife = config.spent.time.cost
@@ -165,7 +165,7 @@ class Spent
         startPos = vec()
 
         if numStones > 1
-            @vec.copy Vector.normals[@world.dirsForFace(face)[0]]
+            @vec.copy Vector.normals[world.dirsForFace(face)[0]]
             @vec.rotate Vector.normals[face], 360*stoneIndex/numStones
             startPos.copy Vector.normals[face]
             startPos.scale 0.5
@@ -181,10 +181,10 @@ class Spent
         @vec.copy pos
         @vec.sub startPos
         @vec.normalize()
-        box = @world.boxes.add pos:startPos, size:0.001, stone:stone, dir:@vec
+        box = boxes.add pos:startPos, size:0.001, stone:stone, dir:@vec
         
         box.startPos = startPos
-        box.bot = rts.world.botAtPos pos
+        box.bot = world.botAtPos pos
         box.life = box.maxLife = config.spent.time.gain
         @gains.push box
         

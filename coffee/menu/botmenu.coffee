@@ -19,7 +19,7 @@ class BotMenu
         
         @buttons = {}
         
-        if @botButton.bot in [Bot.mine, Bot.berta] or not rts.world.botOfType @botButton.bot
+        if @botButton.bot in [Bot.mine, Bot.berta] or not world.botOfType @botButton.bot
             @addButton 'buy', new BuyButton @ 
         else 
             @initButtons()

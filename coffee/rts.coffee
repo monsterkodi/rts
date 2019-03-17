@@ -60,7 +60,8 @@ class RTS
         
         window.rts = @
         window.config = Config.default
-        
+        window.science = Science.science
+                
         @sound = new Sound
         
         @fps = new FPS
@@ -122,8 +123,8 @@ class RTS
         # @light2Helper = new THREE.DirectionalLightHelper @light2, 5, new THREE.Color 0xffff00
         # @scene.add @light2Helper
         
-        new Map @scene
-        @handle = new Handle @world
+        new Map @scene # sets window.world
+        window.handle = new Handle
                 
         @mouse = vec()
         
@@ -170,21 +171,24 @@ class RTS
         for animation in oldAnimations
             animation delta
         
+        @menu.animate delta
+        world.updateTubes()
+         
         if not @paused
-             
-            angle = -delta*0.5*@world.speed
+            
+            angle = -delta*0.5*world.speed
             @light2.position.applyQuaternion Quaternion.axisAngle Vector.unitZ, angle
             @light2Helper?.update()   
-            @world.animate delta
-            @menu.animate delta
+            
+            world.animate delta
              
             oldWorldAnimations = @worldAnimations.clone()
             @worldAnimations = []
             for animation in oldWorldAnimations
-                animation delta * @world.speed
+                animation delta * world.speed
                     
         @render()
-        # window.requestAnimationFrame @animationStep
+
         setTimeout @animationStep, 1000/60
             
     # 00     00   0000000   000   000   0000000  00000000  
@@ -200,8 +204,8 @@ class RTS
         
         if event.buttons == 1
                         
-            if @world.highBot?
-                @dragBot = @world.highBot
+            if world.highBot?
+                @dragBot = world.highBot
             else
                 delete @dragBot
         else
@@ -209,7 +213,7 @@ class RTS
             
         if event.button == 2
             if @rightUp and window.performance.now() - @rightUp < 500
-                @handle.doubleRightClick()
+                handle.doubleRightClick()
             delete @rightUp
                 
     onMouseUp: (event) =>
@@ -226,8 +230,8 @@ class RTS
             if event.button == 1
                 @focusOnHit()
             else
-                if bot = @world.highBot
-                    @handle.botClicked bot
+                if bot = world.highBot
+                    handle.botClicked bot
                     
             if event.button == 2
                 @rightUp = window.performance.now()
@@ -242,7 +246,7 @@ class RTS
         
         if not @dragBot
                             
-            @handle.mouseMoveHit hit
+            handle.mouseMoveHit hit
                 
         else 
             moved = @downPos?.dist @mouse
@@ -250,12 +254,12 @@ class RTS
                 return
             
             if hit?.face?
-                @handle.moveBot @dragBot, hit.pos, hit.face
+                handle.moveBot @dragBot, hit.pos, hit.face
 
     onDblClick: (event) => 
         # log 'doubleClick', event.target.button?
         if not event.target.button
-            @handle.doubleClick()
+            handle.doubleClick()
                             
     calcMouse: (event) ->
         
@@ -271,7 +275,7 @@ class RTS
             if hit.bot
                 @camera.fadeToPos hit.bot.pos
             else    
-                @camera.fadeToPos @world.roundPos hit.point.minus hit.norm.mul 0.5
+                @camera.fadeToPos world.roundPos hit.point.minus hit.norm.mul 0.5
 
     #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
     # 000       000   000  000          000     000   000  000   000   000 000   
@@ -283,7 +287,7 @@ class RTS
         
         intersects = intersects.filter (i) => i.object.stone? or i.object.bot
         if ignoreHighlight
-            intersects = intersects.filter (i) => i.object != @world.highBot?.mesh
+            intersects = intersects.filter (i) => i.object != world.highBot?.mesh
             
         intersects[0]
     
@@ -297,11 +301,11 @@ class RTS
         return if empty intersect
         
         point = vec intersect.point
-        pos = @world.roundPos point
+        pos = world.roundPos point
         
         info = 
             pos:    pos
-            index:  @world.indexAtPos pos
+            index:  world.indexAtPos pos
             norm:   vec intersect.face.normal
             point:  point
             dist:   intersect.distance
@@ -310,11 +314,11 @@ class RTS
         delete @cursor
             
         if intersect.object.bot
-            info.bot = @world.botAtPos point
+            info.bot = world.botAtPos point
         
         stones = intersects.filter (i) => i.object.stone?
         if valid stones
-            info.face = @world.faceAtPosNorm stones[0].point, stones[0].face.normal
+            info.face = world.faceAtPosNorm stones[0].point, stones[0].face.normal
         
         info
         
@@ -327,7 +331,7 @@ class RTS
     render: ->
 
         @sun.position.copy @camera.position
-        @renderer.render @world.scene, @camera
+        @renderer.render world.scene, @camera
         
         @fps.draw()
         

@@ -8,7 +8,7 @@
 
 class AStar
 
-    constructor: (@world) ->
+    constructor: ->
         
         @startPos = vec()
         @goalPos  = vec()
@@ -18,10 +18,10 @@ class AStar
         if start == goal
             return 0
             
-        @world.indexToPos start, @startPos
-        @world.indexToPos goal, @goalPos
+        world.indexToPos start, @startPos
+        world.indexToPos goal, @goalPos
         d = @startPos.manhattan @goalPos
-        if d == 0 or d == 1 and @world.splitFaceIndex(start)[0] != @world.splitFaceIndex(goal)[0]
+        if d == 0 or d == 1 and world.splitFaceIndex(start)[0] != world.splitFaceIndex(goal)[0]
             d += 1
         d
         
@@ -35,24 +35,24 @@ class AStar
         keys.sort (a,b) => @getScore(fScore, a) - @getScore(fScore, b)
         keys[0]
         
-    findPath: (start, goal) -> @findWithNeighborFunc start, goal, @world.neighborsOfFaceIndex
+    findPath: (start, goal) -> @findWithNeighborFunc start, goal, world.neighborsOfFaceIndex
     posPath: (fromPos, toPos) -> 
     
-        start = @world.indexAtPos fromPos
-        goal  = @world.indexAtPos toPos
-        # log "posPath #{@world.stringForIndex start} posPath"
-        @findWithNeighborFunc start, goal, @world.emptyNeighborsOfIndex
+        start = world.indexAtPos fromPos
+        goal  = world.indexAtPos toPos
+        # log "posPath #{world.stringForIndex start} posPath"
+        @findWithNeighborFunc start, goal, world.emptyNeighborsOfIndex
         
     bulletPath: (fromBot, toBot) ->
 
-        start = @world.indexAtBot fromBot
-        goal  = @world.indexAtBot toBot
+        start = world.indexAtBot fromBot
+        goal  = world.indexAtBot toBot
         
         filterFunc = (world, acceptBot) -> (index) -> 
             world.emptyOrBotNeighborsOfIndex(index).filter (ni) -> 
                 world.botAtIndex(ni) == acceptBot or world.noBotAtIndex(ni)
         
-        @findWithNeighborFunc start, goal, filterFunc(@world,toBot)
+        @findWithNeighborFunc start, goal, filterFunc(world,toBot)
         
     findWithNeighborFunc: (start, goal, neighborFunc) ->
         
@@ -88,10 +88,10 @@ class AStar
             steps += 1
             if steps > 2000
                 log "AStar -- too many steps. bailing out. openSet:#{openSet.size} closedSet:#{closedSet.size} cameFrom:#{cameFrom.size}"
-                # log "start: #{@world.stringForFaceIndex start} goal:#{@world.stringForFaceIndex goal}"
+                # log "start: #{world.stringForFaceIndex start} goal:#{world.stringForFaceIndex goal}"
                 # for open in Array.from openSet.keys()
-                    # log open, @world.stringForFaceIndex open
-                # @world.drawBrokenPath
+                    # log open, world.stringForFaceIndex open
+                # world.drawBrokenPath
                     # start:    start
                     # goal:     goal
                     # open:     Array.from openSet.keys()

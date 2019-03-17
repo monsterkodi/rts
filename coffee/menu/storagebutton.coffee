@@ -14,7 +14,7 @@ class StorageButton extends CanvasButton
 
     constructor: (@menu) ->
         
-        @storage = rts.world.storage[0]
+        @storage = world.storage[0]
         @box     = [[],[],[],[]]
 
         @vec = vec()
@@ -54,7 +54,7 @@ class StorageButton extends CanvasButton
     onStorageChanged: (storage, stone, amount) =>
                 
         return if storage.player != 0
-        return if rts.world.isMeta
+        return if world.isMeta
         
         while @box[stone].length < amount
             @box[stone].push @boxes.add stone:stone, size:@stoneSize, pos:@posForStone stone, @box[stone].length+1

@@ -14,14 +14,14 @@ class Debug
 
         window.debug = cheatScience: false
         
-        # @worldSpeed = @value text:'world', value: rts.world.speed.toFixed(1),          reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
+        # @worldSpeed = @value text:'world', value: world.speed.toFixed(1),          reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         # @tubeSpeed  = @value text:'tube ', value: science().tube.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
         # @tubesGap   = @value text:'gap  ', value: science().tube.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
         @cageSize   = @value text:'cage ', value: science().base.radius,           reset:@resetCage,       incr:@incrCage,       decr:@decrCage
         @pathLength = @value text:'path ', value: science().path.length,           reset:@resetPath,       incr:@incrPath,       decr:@decrPath
-        @button text:'fill  storage', cb: -> rts.world.storage[0].fill()
-        @button text:'clear storage', cb: -> rts.world.storage[0].clear()
-        @button text:'stones',        cb: -> rts.world.toggleStones()
+        @button text:'fill  storage', cb: -> world.storage[0].fill()
+        @button text:'clear storage', cb: -> world.storage[0].clear()
+        @button text:'stones',        cb: -> world.toggleStones()
         @toggle text:'cheat science', obj:window.debug, key:'cheatScience'
 
         document.body.appendChild @elem
@@ -39,7 +39,7 @@ class Debug
     # 000   000  000            000  000          000     
     # 000   000  00000000  0000000   00000000     000     
     
-    resetWorldSpeed: => rts.world.resetSpeed()
+    resetWorldSpeed: => world.resetSpeed()
     resetTubeSpeed:  => @modTubeSpeed 0.5-science().tube.speed
     resetPath:       => @modPath 10-science().path.length
     resetCage:       => @modCage 4-science().base.radius
@@ -63,9 +63,9 @@ class Debug
     # 000   000  000   000  000   000  000      000   000  
     # 00     00   0000000   000   000  0000000  0000000    
     
-    incrWorldSpeed: => rts.world.incrSpeed()
-    decrWorldSpeed: => rts.world.decrSpeed()
-    updateWorldSpeed: =>  @worldSpeed?.children[2].innerHTML = rts.world.speed.toFixed 1
+    incrWorldSpeed: => world.incrSpeed()
+    decrWorldSpeed: => world.decrSpeed()
+    updateWorldSpeed: =>  @worldSpeed?.children[2].innerHTML = world.speed.toFixed 1
 
     #  0000000    0000000   00000000   
     # 000        000   000  000   000  
@@ -92,7 +92,7 @@ class Debug
         science().path.length += d
         science().path.length = clamp 1, 40, science().path.length
         @pathLength?.children[2].innerHTML = science().path.length
-        rts.world.updateTubes()
+        world.dirtyTubes()
 
     incrCage: => @modCage  1 
     decrCage: => @modCage -1

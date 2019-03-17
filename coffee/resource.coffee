@@ -8,11 +8,11 @@
 
 class Resource
 
-    constructor: (@world, @index, @stone, @amount) ->
+    constructor: (@index, @stone, @amount) ->
         
-        @boxes = []
+        @bxs = []
         for i in [0...6]
-            @boxes.push @world.resourceBoxes.add stone:@stone
+            @bxs.push world.resourceBoxes.add stone:@stone
         
         @deduct 0
             
@@ -27,22 +27,22 @@ class Resource
             @del()
             return
             
-        pos = @world.posAtIndex @index
+        pos = world.posAtIndex @index
         size = @sizeForAmount @amount
         r = 0.6 - size/2
         for i in [0...6]            
-            box = @boxes[i]
-            @world.resourceBoxes.setSize box, size
-            @world.resourceBoxes.setPos  box, pos.plus Vector.normals[i].mul r
+            box = @bxs[i]
+            world.resourceBoxes.setSize box, size
+            world.resourceBoxes.setPos  box, pos.plus Vector.normals[i].mul r
             
     del: ->
         
-        for box in @boxes
-            @world.resourceBoxes.del box
-        @boxes = []
-        delete @world.resources[@index]
-        for neighbor in @world.neighborsOfIndex @index
-            if bot = @world.bots[neighbor]
-                @world.construct.updateBot bot
+        for box in @bxs
+            world.resourceBoxes.del box
+        @bxs = []
+        delete world.resources[@index]
+        for neighbor in world.neighborsOfIndex @index
+            if bot = world.bots[neighbor]
+                world.construct.updateBot bot
 
 module.exports = Resource

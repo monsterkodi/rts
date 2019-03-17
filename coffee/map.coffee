@@ -41,9 +41,6 @@ class Map extends World
         @addIcon  0,-4, 1, 'sparse'
         @addIcon -4, 0, 1, 'plenty'
         
-        # @addResource  3, 0,0, Stone.blue 
-        # @addResource -3, 0,0, Stone.blue 
-        
         @setCamera dist:10, rotate:45, degree:45
         
         science().path.length = 16
@@ -57,12 +54,12 @@ class Map extends World
     
     simple: ->
         
-        @addStone 0,0,0
-        @addStone 1,0,0
-        @addStone -1,0,0
-        @addStone 0,-1,0
-        @addStone 0,1,0
-        @addBot 0,0,1, Bot.base
+        @addStone  0, 0, 0
+        @addStone  1, 0, 0
+        @addStone -1, 0, 0
+        @addStone  0,-1, 0
+        @addStone  0, 1, 0
+        @addBot    0, 0, 1, Bot.base
         
         @setCamera()
         
@@ -87,8 +84,7 @@ class Map extends World
                     o = n.mul 16
                     @wall d.x, d.y, d.z, d.x+o.x, d.y+o.y, d.z+o.z 
             
-        @addBot  5, 0, 1, Bot.base
-        # @addBot -5, 0, 1, Bot.base
+        @addBot 5, 0, 1, Bot.base
         @setCamera()
 
     #  0000000   000     000  
@@ -123,22 +119,47 @@ class Map extends World
     
     ai2: ->
                 
-        h = 4
-        r = 4
         d = 3
+        o = 2
+        r = 0
+        y = -(d+o)
         
-        for x in [-r..r]
-            for y in [-r..r]
-                for z in [0...h]
-                    maxAbs = Math.max Math.abs(x), Math.abs(y)
-                    res = 16+(r-(maxAbs))*64
-                    @addStone x*d, y*d, -z-maxAbs*4+r*4, Stone.resources[z], res
+        p = vec(d, -d-o,  d)
+            
+        t = [
+            [  0,  0, -1, 2*d+o ],
+            [ -1,  0,  0, 2*d   ],
+            [  0,  1,  0, 2*d+o ],
+            [  1,  0,  0, 2*d+o ],
+            [  0, -1,  0, 2*d   ],
+            [  0,  0,  1, 2*d+o ],            
+            [  0,  1,  0, 2*d+o ],            
+            [  0,  0, -1, 2*d   ],            
+            [ -1,  0,  0, 2*d+o ],
+            [  0,  0,  1, 2*d+o ],            
+            [  1,  0,  0, 2*d   ],            
+            [  0, -1,  0, 2*d+o ],
+            [ -1,  0,  0, 2*d+o ],
+            [  0,  1,  0, 2*d   ],                        
+            [  0,  0, -1, 2*d+o ],            
+            [  0, -1,  0, 2*d+o ],
+            [  0,  0,  1, 2*d   ],            
+            [  1,  0,  0, 2*d+o ],            
+            ]
         
-        @addBot  0, r*d, 1, Bot.base
-        @addBot  r*d, 0, 1, Bot.base
-        @addBot -r*d, 0, 1, Bot.base
+        for i in [0...t.length]
+            for n in [0...t[i][3]]
+                p.x += t[i][0]
+                p.y += t[i][1]
+                p.z += t[i][2]
+                @addStone p.x, p.y, p.z, Stone.resources[r], 80
+                r = (r+1)%4
+                    
+        @addBot  d, -d,   d+o+1, Bot.base
+        @addBot  d, -d-o, d+1, Bot.base
+        @addBot  d+o, -d, d+1, Bot.base
         
-        @setCamera dist:20, rotate:180, degree:70
+        @setCamera dist:18, rotate:45, degree:55, pos:[0,0,0] #pos:[d, -d, d+o-1]
         
     #  0000000   000  000000   
     # 000   000  000      000  
@@ -222,8 +243,8 @@ class Map extends World
         @addCancer 0, -10,  0, 10
         @addCancer 0,   0,  0,  3
         
-        @wall 0,1,0, 0,3,0
-        @wall 0,-1,0, 0,-3,0
+        @wall 0, 1, 0, 0, 3,0
+        @wall 0,-1, 0, 0,-3,0
 
         @addStone -3, 0, 0, Stone.blue,  256
         @addStone -2, 0, 0, Stone.red,   128
@@ -233,7 +254,7 @@ class Map extends World
         @addStone  3, 0, 0, Stone.blue,  256
         
         @addStone 0, 0, 4, Stone.white, 80
-        @addBot  0, 0, 5, Bot.base
+        @addBot   0, 0, 5, Bot.base
         
         @addTarget  10, 0, 0
         @addTarget -10, 0, 0
@@ -256,6 +277,7 @@ class Map extends World
                 
         for z in [0, -127]
             for y in [-5..5]
+                
                 @wall -20,y*4,z, 20,y*4,z
                 @wall y*4,-20,z, y*4,20,z
 
@@ -271,6 +293,7 @@ class Map extends World
              
         for x in [-20..20] by 8
             for y in [-20..20] by 8
+                
                 @wall x, y, 0, x, y, -127
                 
         @addBot  0, 0, 1, Bot.base
@@ -301,13 +324,12 @@ class Map extends World
         @addStone  0, 0, -s, Stone.white
         
         s = 6
-        @addTarget s,s,s
-        @addTarget -s,s,s
-        @addTarget -s,-s,s
-
-        @addTarget s,s,-s
+        @addTarget  s, s, s
+        @addTarget -s, s, s
+        @addTarget -s,-s, s
         @addTarget -s,-s,-s
-        @addTarget s,-s,-s
+        @addTarget  s,-s,-s
+        @addTarget  s, s,-s
         
         @addBot  0, 0, 1, Bot.base
         @setCamera dist:20
@@ -339,18 +361,12 @@ class Map extends World
         @addStone -3, 0, -4, Stone.white, a
         @addStone  0,-3, -4, Stone.gelb, a
 
-        # @addStone  4, 0, -6, Stone.blue
-        # @addStone  0, 4, -6, Stone.white
-        # @addStone -4, 0, -6, Stone.gelb
-        # @addStone  0,-4, -6, Stone.red
-         
         @addStone  0,0,-8, Stone.red
         
         @wall  0, 0,-2, 0,0,-3
         @wall -1,-1,-2, 1,1,-2
         
         @addBot  0, 0, 1, Bot.base
-        # @addBot  1, 1, -2, Bot.base
         
         r = 4
         h = 5

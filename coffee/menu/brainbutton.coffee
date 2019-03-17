@@ -75,7 +75,7 @@ class BrainButton extends CanvasButton
         if stars > @maxStars()
             return super()
         
-        construct = rts.world.construct
+        construct = world.construct
         
         # 0000000     0000000   000000000  
         # 000   000  000   000     000     

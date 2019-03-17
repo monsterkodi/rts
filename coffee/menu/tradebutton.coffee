@@ -20,7 +20,7 @@ class TradeButton extends CanvasButton
         @lightPos = vec 0,10,6
         @camPos   = vec(0.3,0.6,1).normal().mul 12
         
-        @stone ?= rts.world.botOfType(Bot.trade)[@inOut]
+        @stone ?= world.botOfType(Bot.trade)[@inOut]
         
         super @menu.div, 'tradeButton canvasButtonInline'
         

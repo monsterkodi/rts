@@ -36,7 +36,7 @@ class BuyButton extends CanvasButton
     init: ->
         
         cost = @cost()
-        have = rts.world.storage[0].stones
+        have = world.storage[0].stones
         
         for stone in Stone.resources
             
@@ -50,7 +50,7 @@ class BuyButton extends CanvasButton
         
         return if not @boxes
         
-        have = rts.world.storage[0].stones
+        have = world.storage[0].stones
         
         for stone in Stone.resources
             
@@ -84,9 +84,9 @@ class BuyButton extends CanvasButton
 
         super
             
-    click: -> rts.handle.buyButtonClick @
+    click: -> handle.buyButtonClick @
                     
-    canAfford: -> rts.world.storage[0].canAfford @cost()
+    canAfford: -> world.storage[0].canAfford @cost()
     cost: -> config.cost[Bot.string @bot]
         
     # 00000000   00000000  000   000  0000000    00000000  00000000   

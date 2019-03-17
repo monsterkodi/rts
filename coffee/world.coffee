@@ -13,6 +13,8 @@ Cages     = require './cages'
 Boxes     = require './boxes'
 Spent     = require './spent'
 Graph     = require './graph'
+Bullet    = require './bullet'
+Orbits    = require './orbits'
 Cancer    = require './cancer'
 Monster   = require './monster'
 Storage   = require './storage'
@@ -23,11 +25,7 @@ Construct = require './construct'
 class World
     
     constructor: (@scene) ->
-        
-        rts.world = @
-        
-        window.science = Science.science
-        
+                
         @stones    = {}
         @bots      = {}
         @resources = {}
@@ -42,27 +40,27 @@ class World
         @vec  = vec()
         @vec2 = vec()
         
+        window.world   = @
+        
         @cages         = new Cages @ 
         @tubes         = new Tubes @
         @spent         = new Spent @
         @plosion       = new Plosion @
-        @boxes         = new Boxes @scene, 20000
+        window.boxes   = new Boxes @scene, 20000
         @resourceBoxes = new Boxes @scene, 10000
-                
+        
+        @boid    = 0
         @sample  = 0
         @timeSum = 0
         @cycles  = 0
-        
+                
         @build()
         
-        @construct = new Construct @
+        @construct = new Construct
         @construct.init()
         
         @create()
         
-        # if prefs.get 'graph', false
-            # Graph.toggle()
-            
         post.on 'storageChanged', @onStorageChanged
         
         @setSpeed       prefs.get 'speed', 6
@@ -80,7 +78,7 @@ class World
         @construct.stones()
         @construct.bots()
         @construct.targets()
-        @updateTubes()
+        @dirtyTubes()
         
         @setCageOpacity 3
         @setOpacity 7
@@ -99,6 +97,8 @@ class World
         @tubes.clear()
         @spent.clear()
         Science.clear()
+        Bullet.clear()
+        Orbits.clear()
         
         @players = []
         @bases   = []
@@ -127,7 +127,8 @@ class World
             target.mesh.parent.remove target.mesh
         @targets = {}
         
-        @boxes.clear()
+        boxes.clear()
+        @botid = 0
                 
     drawBrokenPath: (info) ->
         
@@ -227,18 +228,22 @@ class World
     
     animate: (delta) ->
         
-        if @tubes.dirty
-            # log '@tubes.dirty', @tubes.dirty
-            @tubes.build()
-            delete @tubes.dirty
-        
         scaledDelta = delta * @speed
         @simulate scaledDelta
-        @boxes.render()
+        boxes.render()
         @resourceBoxes.render()
         @cages.animate scaledDelta
         @plosion.animate scaledDelta
+        Bullet.animate scaledDelta
+        Orbits.animate scaledDelta
         post.emit 'tick'
+        
+    dirtyTubes: -> @tubes.dirty = true        
+    updateTubes: ->
+        
+        if @tubes.dirty
+            @tubes.build()
+            @tubes.dirty = false
         
     simulate: (scaledDelta) ->
         
@@ -250,7 +255,7 @@ class World
         @tubes.animate scaledDelta
         
         for bot in @allBots()
-            rts.handle.tickBot scaledDelta, bot
+            handle.tickBot scaledDelta, bot
          
         if valid @monsters
             for i in [@monsters.length-1..0]
@@ -290,6 +295,7 @@ class World
         
     stoneBelowBot: (bot) -> @stoneOrResourceAtPos @posBelowBot bot
     resourceBelowBot: (bot) -> 
+        
         stone = @stoneBelowBot bot
         if stone in Stone.resources
             return stone
@@ -307,7 +313,7 @@ class World
         
         index = @indexAt x,y,z
         if not @resourceAt index
-            @resources[index] = new Resource @, index, stone, amount
+            @resources[index] = new Resource index, stone, amount
         
     emptyResources: (cfg) ->
         
@@ -384,7 +390,7 @@ class World
     
     addMonster: (x,y,z) ->
         
-        monster = new Monster @, vec(x,y,z), Vector.normals[randInt 6]
+        monster = new Monster vec(x,y,z), Vector.normals[randInt 6]
         @monsters.push monster
         monster
         
@@ -408,12 +414,12 @@ class World
         
     addCancer: (x,y,z) ->
         
-        @cancers.push new Cancer @, vec(x,y,z)
+        @cancers.push new Cancer vec(x,y,z)
         last @cancers
         
     addAI: (bot) ->
         
-        @ai.push new AI @, bot
+        @ai.push new AI bot
                 
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
@@ -423,7 +429,7 @@ class World
     
     addBot: (x,y,z, type=Bot.mine, player=0, face=null) -> 
         
-        @updateTubes()
+        @dirtyTubes()
         
         p = @roundPos vec x,y,z
 
@@ -443,6 +449,9 @@ class World
             face:   face
             index:  index
             player: player
+            id:     @botid
+            
+        @botid += 1
             
         bot.posBelow = p.minus Vector.normals[face]
         bot.mine = 1/Science.mineSpeed bot
@@ -456,7 +465,7 @@ class World
         switch type 
             when Bot.base
                 Science.addPlayer()
-                @storage.push new Storage @, player
+                @storage.push new Storage player
                 @players.push player
                 if player
                     @addAI bot
@@ -547,7 +556,7 @@ class World
         post.emit 'botWillBeRemoved', bot
         @plosion.atBot bot
         @delBot bot
-        @updateTubes()
+        @dirtyTubes()
         post.emit 'botRemoved', bot.type, bot.player
         
     delBot: (bot) ->
@@ -584,12 +593,10 @@ class World
         bot.posBelow.sub Vector.normals[bot.face]
         
         @removeBuildGuide()
-        @updateTubes()
+        @dirtyTubes()
         @construct.updateBot bot
         @cages.moveBot bot
-        
-    updateTubes: -> @tubes.dirty = true
-            
+                    
     canBotMoveTo: (bot, face, index) -> 
         
         return false if @isItemAtIndex(index) and @botAtIndex(index) != bot
@@ -729,7 +736,6 @@ class World
             
     faceIndex: (face,index) -> (face<<25) | index
     faceIndexForBot: (bot) -> @faceIndex bot.face, bot.index
-    # splitFaceIndex: (faceIndex) -> [faceIndex >> 25, faceIndex & 134217727] # 2^27-1
     splitFaceIndex: (faceIndex) -> [faceIndex >> 25, faceIndex & 16777215] # 2^24-1
         
     # 00000000  00     00  00000000   000000000  000   000  00000000    0000000    0000000  
@@ -967,8 +973,8 @@ class World
         if @highBot?.type == Bot.build and not @buildGuide
             hit = rts.castRay false
             if hit?.bot?
-                if hitInfo = rts.handle.infoForBuildHit @highBot, hit
-                    if rts.handle.canBuild hitInfo.norm
+                if hitInfo = handle.infoForBuildHit @highBot, hit
+                    if handle.canBuild hitInfo.norm
                         @showBuildGuide @highBot, hitInfo
             
     removeBuildGuide: ->

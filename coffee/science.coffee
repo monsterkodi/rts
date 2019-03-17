@@ -163,7 +163,7 @@ class Science
         
         @science(player)[science][key] = @tree[science][key].v[info.stars]
         switch scienceKey
-            when 'path.length' then rts.world.updateTubes()
+            when 'path.length' then world.dirtyTubes()
             
         if player == 0
             post.emit 'scienceUpdated',  info

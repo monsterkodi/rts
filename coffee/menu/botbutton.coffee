@@ -21,15 +21,13 @@ class BotButton extends CanvasButton
         @normFov = 30
         @lightPos = vec -2,-2,2
                 
-        @world = rts.world
-        
         super div            
                 
         @name = "BotButton #{Bot.string @bot}"
         
         @canvas.id = @bot
         
-        construct = @world.construct
+        construct = world.construct
         @mesh = new THREE.Mesh construct.botGeoms[construct.geomForBotType @bot], @botMat()
         @mesh.receiveShadow = true
         @mesh.castShadow = true
@@ -76,16 +74,16 @@ class BotButton extends CanvasButton
     
     focusNextBot: ->
         
-        bots = @world.botsOfType @bot
+        bots = world.botsOfType @bot
         index = (bots.indexOf(@focusBot)+1) % bots.length
         @focusBot = bots[index]
         if @focusBot
-            @world.highlightBot @focusBot
+            world.highlightBot @focusBot
             rts.camera.focusOnPos @focusBot.pos
         
     click: -> 
         
-        rts.handle.botButtonClick @
+        handle.botButtonClick @
         @update()
     
     middleClick: -> @focusNextBot()
@@ -125,7 +123,7 @@ class BotButton extends CanvasButton
                 
     botMat: () ->
         
-        if empty @world.botsOfType @bot
+        if empty world.botsOfType @bot
             if @highlighted then Materials.menu.inactiveHigh else Materials.menu.inactive
         else
             if @highlighted then Materials.menu.activeHigh else Materials.menu.active
@@ -138,11 +136,11 @@ class BotButton extends CanvasButton
     
     render: =>
         
-        return if @world.isMeta
+        return if world.isMeta
         
         if @bot in Bot.switchable
             
-            if bot = @world.botOfType @bot
+            if bot = world.botOfType @bot
             
                 @meshes.state?.parent.remove @meshes.state
                 delete @meshes.state
@@ -164,7 +162,7 @@ class BotButton extends CanvasButton
             @meshes.buy?.parent.remove @meshes.buy
             delete @meshes.buy
             
-            trade = rts.world.botOfType @bot
+            trade = world.botOfType @bot
             if trade?.path
 
                 s = 0.07
@@ -189,11 +187,11 @@ class BotButton extends CanvasButton
             
             @meshes.limit?.parent.remove @meshes.limit
             delete @meshes.limit
-            if @world.botsOfType(@bot).length >= science()[Bot.string @bot].limit
+            if world.botsOfType(@bot).length >= science()[Bot.string @bot].limit
                 mat = Materials.state.paused
-                if @world.botsOfType(@bot).length >= Science.maxValue Bot.string(@bot) + '.limit'
+                if world.botsOfType(@bot).length >= Science.maxValue Bot.string(@bot) + '.limit'
                     mat = Materials.menu.inactive
-                @scene.add @meshes.limit = new THREE.Mesh Geometry.botLimited(@world.botOfType @bot), mat
+                @scene.add @meshes.limit = new THREE.Mesh Geometry.botLimited(world.botOfType @bot), mat
 
         @mesh.material = @botMat()
         
@@ -211,7 +209,7 @@ class BotButton extends CanvasButton
 
             ctx.fillStyle = Color.menu.progress.getStyle()
             
-            if not rts.world.botOfType(@bot)?.path
+            if not world.botOfType(@bot)?.path
                 ctx.fillStyle = Color.menu.disconnected.getStyle()
 
             if progress = Science.currentProgress()
@@ -235,10 +233,10 @@ class BotButton extends CanvasButton
                 true
         
         if @bot not in Bot.limited
-            if bot = rts.world.botOfType @bot
+            if bot = world.botOfType @bot
                 health bot, 0
         else
-            bots = rts.world.botsOfType @bot
+            bots = world.botsOfType @bot
             index = 0
             for bot in bots
                 if health bot, index

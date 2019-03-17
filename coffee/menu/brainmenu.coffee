@@ -31,7 +31,7 @@ class BrainMenu extends BotMenu
 
     initButtons: ->
         
-        brain = rts.world.botOfType Bot.brain
+        brain = world.botOfType Bot.brain
                 
         for science,cfg of Science.tree
             for key,values of cfg

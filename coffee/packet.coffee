@@ -16,7 +16,7 @@ class Packet
         
         size = 0.001
         
-        @box = world.boxes.add stone:@stone, size:size
+        @box = boxes.add stone:@stone, size:size
         
         @lifeTime = 0
         rts.animate @initialScale
@@ -30,11 +30,11 @@ class Packet
     initialScale: (deltaSeconds) =>
 
         return if not @box
-        @lifeTime += deltaSeconds * rts.world.speed
+        @lifeTime += deltaSeconds * world.speed
         timeOrTravel = clamp 0, 1, Math.max @lifeTime, @moved*5
         size = Math.min timeOrTravel*0.1, 0.1
         
-        rts.world.boxes.setSize @box, size
+        boxes.setSize @box, size
         
         if size < 0.1
             rts.animate @initialScale            
@@ -77,7 +77,7 @@ class Packet
         
         # log "#{@player} #{Stone.string @stone} #{tgt.x} #{tgt.y} #{tgt.z}"
         
-        rts.world.boxes.setPos @box, Packet.vec
+        boxes.setPos @box, Packet.vec
         
     # 0000000    00000000  000      
     # 000   000  000       000      
@@ -87,8 +87,8 @@ class Packet
     
     del: -> 
     
-        rts.world.boxes.del @box
-        rts.world.storage[@player].temp[@stone] -= 1
+        boxes.del @box
+        world.storage[@player].temp[@stone] -= 1
         delete @box
             
 module.exports = Packet

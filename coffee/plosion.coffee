@@ -12,12 +12,12 @@ Boxes = require './boxes'
 
 class Plosion
 
-    constructor: (@world) ->
+    constructor: ->
 
         @vec = vec()
         geom = new THREE.TetrahedronGeometry 1
         geom = new THREE.BufferGeometry().fromGeometry geom
-        @boxes = new Boxes @world.scene, 3000, geom, Materials.cage, true
+        @boxes = new Boxes world.scene, 3000, geom, Materials.cage, true
         @plosions = []
         
     atBot: (bot) ->
@@ -44,7 +44,7 @@ class Plosion
             box.dir = dir
             box.pos = @vec.clone()
             @vec.randomize()
-            box.rot = quat().setFromAxisAngle @vec, @world.speed * randRange(config.plosion.minRot, config.plosion.maxRot)
+            box.rot = quat().setFromAxisAngle @vec, world.speed * randRange(config.plosion.minRot, config.plosion.maxRot)
             plosion.shrapnels.push box
             
         @plosions.push plosion
