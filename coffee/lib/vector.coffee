@@ -6,7 +6,7 @@
     0      00000000   0000000     000      0000000   000   000
 ###
 
-{ randRange } = require 'kxk'
+{ rad2deg, randRange } = require 'kxk'
 
 class Vector extends THREE.Vector3
 
@@ -49,6 +49,7 @@ class Vector extends THREE.Vector3
         
     rotated: (axis, angle) -> @clone().rotate axis,angle
     rotate: (axis, angle) ->
+        Quaternion = require './quaternion'
         @applyQuaternion Quaternion.axisAngle axis, angle
         @
 
