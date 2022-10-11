@@ -10,8 +10,8 @@
 
 class Vector extends THREE.Vector3
 
-    @counter = 0
-    @tmp = new Vector
+    @counter: 0
+    @tmp: new Vector
     
     constructor: (x=0,y=0,z=0) ->
         
@@ -38,7 +38,6 @@ class Vector extends THREE.Vector3
         @y = v.y 
         @z = v.z ? 0
         @
-
     
     parallel: (n) ->
         dot = @x*n.x + @y*n.y + @z*n.z
@@ -171,21 +170,21 @@ class Vector extends THREE.Vector3
             throw new Error
         r
 
-    @PX = 0
-    @PY = 1
-    @PZ = 2
-    @NX = 3
-    @NY = 4
-    @NZ = 5
+    @PX: 0
+    @PY: 1
+    @PZ: 2
+    @NX: 3
+    @NY: 4
+    @NZ: 5
         
-    @unitX  = new Vector 1,0,0
-    @unitY  = new Vector 0,1,0
-    @unitZ  = new Vector 0,0,1
-    @minusX = new Vector -1,0,0
-    @minusY = new Vector 0,-1,0
-    @minusZ = new Vector 0,0,-1
+    @unitX:   new Vector 1,0,0
+    @unitY:   new Vector 0,1,0
+    @unitZ:   new Vector 0,0,1
+    @minusX:  new Vector -1,0,0
+    @minusY:  new Vector 0,-1,0
+    @minusZ:  new Vector 0,0,-1
     
-    @normals = [Vector.unitX, Vector.unitY, Vector.unitZ, Vector.minusX, Vector.minusY, Vector.minusZ]
+    @normals: [Vector.unitX, Vector.unitY, Vector.unitZ, Vector.minusX, Vector.minusY, Vector.minusZ]
     
     @perpNormals: (v) -> 
         i = @normalIndex(v)

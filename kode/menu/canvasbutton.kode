@@ -8,8 +8,6 @@
 
 class CanvasButton
     
-    @renderer = null
-
     constructor: (div, clss='canvasButton') ->
         
         @highlighted = false

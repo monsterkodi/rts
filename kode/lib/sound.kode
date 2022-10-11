@@ -6,7 +6,7 @@
 0000000    0000000    0000000   000   000  0000000    
 ###
 
-{ randRange } = require 'kxk'
+{ clamp, post, prefs, randRange } = require 'kxk'
 
 Synt = require './synt'
 
@@ -41,8 +41,8 @@ class Sound
 
     play: (o,n,c=0) ->
         @synt[o].playNote switch n
-            when 'won'  then 5*12+c+parseInt randRange 0,4
-            when 'lost' then 6*12+c+parseInt randRange 0,2
+            when 'won'       then 5*12+c+parseInt randRange 0,4
+            when 'lost'      then 6*12+c+parseInt randRange 0,2
             when 'highlight' then 40+c 
             when 'enqueue'   then 55+c 
             when 'off'       then 50+c 
