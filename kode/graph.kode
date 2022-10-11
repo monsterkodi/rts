@@ -8,11 +8,11 @@
 
 class Graph
 
-    @graph      = null
-    @balance    = []
-    @avgs       = [[],[],[],[]]
-    @avgsNum    = 100
-    @avgsSecs   = 10 
+    @graph:       null
+    @balance:     []
+    @avgs:        [[],[],[],[]]
+    @avgsNum:     100
+    @avgsSecs:    10 
     
     constructor: ->
         

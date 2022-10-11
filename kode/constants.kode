@@ -42,12 +42,10 @@ Stone = new Enum
         blue:       2
         white:      3
         gray:       4
-        monster:    5
-        cancer:     6
-        silver:     7
+        silver:     5
         
 Stone.resources = [Stone.red, Stone.gelb, Stone.blue, Stone.white]
-Stone.all       = [0..Stone.monster] 
+Stone.all       = [0..Stone.silver]
         
 Bend = new Enum
         flat:       0

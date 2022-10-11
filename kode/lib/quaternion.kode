@@ -6,7 +6,9 @@
  00000 00   0000000   000   000     000     00000000  000   000  000   000  000   0000000   000   000
 ###
 
-class Quaternion extends THREE.Quaternion
+ThreeQuaternion = THREE.Quaternion
+
+class Quaternion extends ThreeQuaternion
 
     @tmp: new Quaternion
     @counter: 0
@@ -16,25 +18,13 @@ class Quaternion extends THREE.Quaternion
         Quaternion.counter++
         
         if x instanceof Vector
-            @x = x.x 
-            @y = x.y
-            @z = x.z
-            @w = 0
+            super x.x, x.y, x.z, 0
         else if x instanceof Quaternion or x instanceof THREE.Quaternion
-            @x = x.x
-            @y = x.y
-            @z = x.z
-            @w = x.w
+            super x.x, x.y, x.z, x.w
         else if Array.isArray w
-            @x = w[0]
-            @y = w[1]
-            @z = w[2]
-            @w = w[3]
+            super w[0], w[1], w[2], w[3]
         else
-            @x = x
-            @y = y
-            @z = z
-            @w = w
+            super x, y, z, w
         if Number.isNaN @x
             throw new Error
         
@@ -66,31 +56,32 @@ class Quaternion extends THREE.Quaternion
         minQuat = null
         up   = @rotate Vector.unitY
         back = @rotate Vector.unitZ
-        for q in [  Quaternion.XupY
-                    Quaternion.XupZ
-                    Quaternion.XdownY
-                    Quaternion.XdownZ
-                    Quaternion.YupX
-                    Quaternion.YupZ
-                    Quaternion.YdownX
-                    Quaternion.YdownZ
-                    Quaternion.ZupX
-                    Quaternion.ZupY
-                    Quaternion.ZdownX
-                    Quaternion.ZdownY
-                    Quaternion.minusXupY
-                    Quaternion.minusXupZ
-                    Quaternion.minusXdownY
-                    Quaternion.minusXdownZ
-                    Quaternion.minusYupX
-                    Quaternion.minusYupZ
-                    Quaternion.minusYdownX
-                    Quaternion.minusYdownZ
-                    Quaternion.minusZupX
-                    Quaternion.minusZupY
-                    Quaternion.minusZdownX
-                    Quaternion.minusZdownY
-                    ]
+        quats = [ Quaternion.XupY
+                  Quaternion.XupZ
+                  Quaternion.XdownY
+                  Quaternion.XdownZ
+                  Quaternion.YupX
+                  Quaternion.YupZ
+                  Quaternion.YdownX
+                  Quaternion.YdownZ
+                  Quaternion.ZupX
+                  Quaternion.ZupY
+                  Quaternion.ZdownX
+                  Quaternion.ZdownY
+                  Quaternion.minusXupY
+                  Quaternion.minusXupZ
+                  Quaternion.minusXdownY
+                  Quaternion.minusXdownZ
+                  Quaternion.minusYupX
+                  Quaternion.minusYupZ
+                  Quaternion.minusYdownX
+                  Quaternion.minusYdownZ
+                  Quaternion.minusZupX
+                  Quaternion.minusZupY
+                  Quaternion.minusZdownX
+                  Quaternion.minusZdownY ]
+
+        for q in quats
             upDiff   = 1 - up.dot q.rotate Vector.unitY
             backDiff = 1 - back.dot q.rotate Vector.unitZ
             l = upDiff + backDiff
@@ -100,7 +91,7 @@ class Quaternion extends THREE.Quaternion
                 if l < 0.0001
                     break
         minQuat
-        
+
     round: -> @clone @normalize().rounded()
 
     euler: -> [
@@ -191,7 +182,7 @@ class Quaternion extends THREE.Quaternion
         cosom = @x * quat.x + @y * quat.y + @z * quat.z + @w * quat.w # calc cosine
         
         if cosom < 0 # adjust signs (if necessary)
-            cosom = -cosom 
+            cosom = -cosom
             to1[0] = -quat.x
             to1[1] = -quat.y
             to1[2] = -quat.z

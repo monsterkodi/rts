@@ -17,7 +17,7 @@ class Sound
         @volumeIndex = 3
         @volume = 0
         
-        @ctx = new (window.AudioContext || window.webkitAudioContext)()
+        @ctx = new (window.AudioContext or window.webkitAudioContext)()
         
         @gain = @ctx.createGain()
         @gain.connect @ctx.destination

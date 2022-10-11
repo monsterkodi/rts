@@ -8,7 +8,7 @@
 
 class CanvasButton
     
-    constructor: (div, clss='canvasButton') ->
+    constructor: (div, clss='canvasButton', @lightPos, @camPos) ->
         
         @highlighted = false
         
@@ -72,14 +72,14 @@ class CanvasButton
     # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
     # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
-    highlight: -> 
+    highlight: => 
         
         @highlighted = true
         @camera.fov = @highFov
         @camera.updateProjectionMatrix()
         @update()
     
-    unhighlight: ->
+    unhighlight: =>
         
         @highlighted = false
         @camera.fov = @normFov

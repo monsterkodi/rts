@@ -12,12 +12,9 @@ CanvasButton = require './canvasbutton'
 
 class DialButton extends CanvasButton
 
-    constructor: (div, clss) ->
+    @: (div, clss) ->
     
-        @lightPos = vec -4,4,6
-        @camPos   = vec(0,0,1).normal().mul 10
-        
-        super div, clss
+        super div, clss, vec(-4,4,6), vec(0,0,1).normal().mul 10
         
         @scene.background = Color.menu.background
         @name = 'DialButton'
@@ -29,24 +26,14 @@ class DialButton extends CanvasButton
         
     setDial: (index) -> @update()
 
-    # highlight: -> 
-        # # @scene.background = Color.menu.backgroundHover
-        # super
-#     
-    # unhighlight: ->
-#         
-        # # @scene.background = Color.menu.background
-        # super
-            
     initCamera: ->
 
-        width = 11
-        height = 11
-        @camera = new THREE.OrthographicCamera width / - 2, width / 2, height / 2, height / - 2, 1, 10
+        s = 5.5
+        @camera = new THREE.OrthographicCamera -s, s, s, -s, 1, 10
         
     initScene: ->
         
-        super
+        super()
         @initDots()
         
     initDots: ->

@@ -14,15 +14,7 @@ class Debug
 
         window.debug = cheatScience: false
         
-        # @worldSpeed = @value text:'world', value: world.speed.toFixed(1),          reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
-        # @tubeSpeed  = @value text:'tube ', value: science().tube.speed.toFixed(1), reset:@resetTubeSpeed,  incr:@incrTubeSpeed,  decr:@decrTubeSpeed
-        # @tubesGap   = @value text:'gap  ', value: science().tube.gap.toFixed(2),   reset:@resetGap,        incr:@incrGap,        decr:@decrGap
-        @cageSize   = @value text:'cage ', value: science().base.radius,           reset:@resetCage,       incr:@incrCage,       decr:@decrCage
-        @pathLength = @value text:'path ', value: science().path.length,           reset:@resetPath,       incr:@incrPath,       decr:@decrPath
-        @button text:'fill  storage', cb: -> world.storage[0].fill()
-        @button text:'clear storage', cb: -> world.storage[0].clear()
         @button text:'stones',        cb: -> world.toggleStones()
-        @toggle text:'cheat science', obj:window.debug, key:'cheatScience'
 
         document.body.appendChild @elem
         
@@ -40,23 +32,7 @@ class Debug
     # 000   000  00000000  0000000   00000000     000     
     
     resetWorldSpeed: => world.resetSpeed()
-    resetTubeSpeed:  => @modTubeSpeed 0.5-science().tube.speed
-    resetPath:       => @modPath 10-science().path.length
-    resetCage:       => @modCage 4-science().base.radius
-    resetGap:        => @modGap 0.12-science().tube.gap
     
-    # 000000000  000   000  0000000    00000000  
-    #    000     000   000  000   000  000       
-    #    000     000   000  0000000    0000000   
-    #    000     000   000  000   000  000       
-    #    000      0000000   0000000    00000000  
-    
-    incrTubeSpeed: => @modTubeSpeed  0.1 
-    decrTubeSpeed: => @modTubeSpeed -0.1
-    modTubeSpeed: (d) -> 
-        science().tube.speed = @clampZero science().tube.speed, d, 1
-        @tubeSpeed?.children[2].innerHTML = science().tube.speed.toFixed 1
-
     # 000   000   0000000   00000000   000      0000000    
     # 000 0 000  000   000  000   000  000      000   000  
     # 000000000  000   000  0000000    000      000   000  
@@ -65,42 +41,10 @@ class Debug
     
     incrWorldSpeed: => world.incrSpeed()
     decrWorldSpeed: => world.decrSpeed()
-    updateWorldSpeed: =>  @worldSpeed?.children[2].innerHTML = world.speed.toFixed 1
+    updateWorldSpeed: =>  
+        @worldSpeed?.children[2].innerHTML = world.speed.toFixed 1
+        0
 
-    #  0000000    0000000   00000000   
-    # 000        000   000  000   000  
-    # 000  0000  000000000  00000000   
-    # 000   000  000   000  000        
-    #  0000000   000   000  000        
-    
-    incrGap: => @modGap  0.01 
-    decrGap: => @modGap -0.01
-    modGap: (d) -> 
-        science().tube.gap += d
-        science().tube.gap = clamp 0.1, 0.5, science().tube.gap
-        @tubesGap?.children[2].innerHTML = science().tube.gap.toFixed(2)
-
-    # 00000000    0000000   000000000  000   000  
-    # 000   000  000   000     000     000   000  
-    # 00000000   000000000     000     000000000  
-    # 000        000   000     000     000   000  
-    # 000        000   000     000     000   000  
-    
-    incrPath: => @modPath  1 
-    decrPath: => @modPath -1
-    modPath: (d) -> 
-        science().path.length += d
-        science().path.length = clamp 1, 40, science().path.length
-        @pathLength?.children[2].innerHTML = science().path.length
-        world.dirtyTubes()
-
-    incrCage: => @modCage  1 
-    decrCage: => @modCage -1
-    modCage: (d) -> 
-        science().base.radius += d
-        science().base.radius = clamp 1, 32, science().base.radius
-        @cageSize?.children[2].innerHTML = science().base.radius
-        
     value: (cfg) ->
         
         lbl = elem class:'label', text:cfg.text

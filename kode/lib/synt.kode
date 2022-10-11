@@ -135,27 +135,27 @@ class Synt
         
     piano2: (t, w, x) =>
 
-        t    = t + .00015*@noise(12*t)
+        t    = t + 0.00015*@noise(12*t)
         rt   = t
-        r    = t*w*.2
+        r    = t*w*0.2
         r    = @fmod(r,1)
         a    = 0.15 + 0.6*(rt)
         b    = 0.65 - 0.5*(rt)
-        y    = 50*r*(r-1)*(r-.2)*(r-a)*(r-b)
-        r    = t*w*.401
+        y    = 50*r*(r-1)*(r-0.2)*(r-a)*(r-b)
+        r    = t*w*0.401
         r    = @fmod(r,1)
         a    = 0.12 + 0.65*(rt)
         b    = 0.67 - 0.55*(rt)
-        y2   = 50*r*(r-1)*(r-.4)*(r-a)*(r-b)
-        r    = t*w*.399
+        y2   = 50*r*(r-1)*(r-0.4)*(r-a)*(r-b)
+        r    = t*w*0.399
         r    = @fmod(r,1)
         a    = 0.14 + 0.55*(rt)
         b    = 0.66 - 0.65*(rt)
-        y3   = 50*r*(r-1)*(r-.8)*(r-a)*(r-b)
-        y   += .02*@noise(1000*t)
-        y   /= (t*w*.0015+.1)
-        y2  /= (t*w*.0020+.1)
-        y3  /= (t*w*.0025+.1)
+        y3   = 50*r*(r-1)*(r-0.8)*(r-a)*(r-b)
+        y   += 0.02*@noise(1000*t)
+        y   /= (t*w*0.0015+0.1)
+        y2  /= (t*w*0.0020+0.1)
+        y3  /= (t*w*0.0025+0.1)
         y    = (y+y2+y3)/3
         d = 0.8; if x > d then y *= Math.pow(1-(x-d)/(1-d), 2) # decay
         y
@@ -163,8 +163,8 @@ class Synt
     piano3: (t, w, x) ->
         
         tt = 1-t
-        a  = Math.sin(t*w*.5)*Math.log(t+0.3)*tt
-        b  = Math.sin(t*w)*t*.4
+        a  = Math.sin(t*w*0.5)*Math.log(t+0.3)*tt
+        b  = Math.sin(t*w)*t*0.4
         y  = (a+b)*tt
         d = 0.8; if x > d then y *= Math.pow(1-(x-d)/(1-d), 2) # decay
         y
@@ -195,20 +195,20 @@ class Synt
     
     organ1: (t, w, x) ->
 
-        y  = .6 * Math.cos(w*t)   * Math.exp(-4*t)
-        y += .4 * Math.cos(2*w*t) * Math.exp(-3*t)
-        y += .01* Math.cos(4*w*t) * Math.exp(-1*t)
+        y  = 0.6 * Math.cos(w*t)   * Math.exp(-4*t)
+        y += 0.4 * Math.cos(2*w*t) * Math.exp(-3*t)
+        y += 0.01* Math.cos(4*w*t) * Math.exp(-1*t)
         y = y*y*y + y*y*y*y*y + y*y
-        a = .5+.5*Math.cos(3.14*x)
+        a = 0.5+0.5*Math.cos(3.14*x)
         y = Math.sin(y*a*3.14)
-        y *= 20*t*Math.exp(-.1*x)
+        y *= 20*t*Math.exp(-0.1*x)
 
     organ2: (t, w, x) =>
 
         wt = w*t
-        a1 = .5+.5*Math.cos(0+t*12)
-        a2 = .5+.5*Math.cos(1+t*8)
-        a3 = .5+.5*Math.cos(2+t*4)
+        a1 = 0.5+0.5*Math.cos(0+t*12)
+        a2 = 0.5+0.5*Math.cos(1+t*8)
+        a3 = 0.5+0.5*Math.cos(2+t*4)
         y  = @saw(0.2500*wt,a1)*Math.exp(-2*x)
         y += @saw(0.1250*wt,a2)*Math.exp(-3*x)
         y += @saw(0.0625*wt,a3)*Math.exp(-4*x)

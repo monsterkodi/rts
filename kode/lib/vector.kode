@@ -8,7 +8,9 @@
 
 { rad2deg, randRange } = require 'kxk'
 
-class Vector extends THREE.Vector3
+ThreeVector = THREE.Vector3
+
+class Vector extends ThreeVector
 
     @counter: 0
     @tmp: new Vector
@@ -18,17 +20,20 @@ class Vector extends THREE.Vector3
         Vector.counter += 1
         
         if x.x? and x.y?
-            @x = x.x 
-            @y = x.y
-            @z = x.z ? 0
+            super x.x, x.y, x.z ? 0
+            # @x = x.x 
+            # @y = x.y
+            # @z = x.z ? 0
         else if Array.isArray x
-            @x = x[0] 
-            @y = x[1] 
-            @z = x[2] ? 0
+            # @x = x[0] 
+            # @y = x[1] 
+            # @z = x[2] ? 0
+            super x[0], x[1], x[2] ? 0 
         else
-            @x = x 
-            @y = y
-            @z = z ? 0
+            # @x = x 
+            # @y = y
+            # @z = z ? 0
+            super x, y, z ? 0
         if Number.isNaN @x
             throw new Error
             

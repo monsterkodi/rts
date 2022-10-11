@@ -8,7 +8,7 @@
 
 class Construct
 
-    constructor: ->
+    @: ->
         
         @segmentMesh = [null,null,null,null]
         @stoneMeshes = {}     
