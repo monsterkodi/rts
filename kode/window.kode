@@ -6,7 +6,7 @@
 00     00  000  000   000  0000000     0000000   00     00  
 ###
 
-{ keyinfo, post, prefs, win } = require 'kxk'
+{ args, keyinfo, post, prefs, win } = require 'kxk'
 
 { Bot } = require './constants'
 
@@ -20,7 +20,7 @@ post.setMaxListeners 20
 window.vec  = (x,y,z)   -> new Vector x, y, z
 window.quat = (x,y,z,w) -> new Quaternion x, y, z, w
 
-class Window extends win
+function Window extends win
     
     onMenuAction: (action, args) =>
         
@@ -41,7 +41,7 @@ class Window extends win
                     $("#main").style.borderRight = '6px solid #222'
                     $("#main").style.borderBottom = '6px solid #222'
                 window.win.webContents.focus()
-        super
+        super action, args
 
 w = new Window
     dir:    __dirname
@@ -50,23 +50,8 @@ w = new Window
     icon:   '../img/menu@2x.png'
     context: (items) -> 
     onLoad: -> 
-        log 'RTS!'
         window.rts = new RTS $ '#main'
         
-# window.win = electron.remote.getCurrentWindow()
-
-# 00000000   00000000   00000000  00000000   0000000
-# 000   000  000   000  000       000       000
-# 00000000   0000000    0000000   000000    0000000
-# 000        000   000  000       000            000
-# 000        000   000  00000000  000       0000000
-
-# if bounds = prefs.get 'bounds'
-    # window.win.setBounds bounds
-
-# if prefs.get 'devTools'
-    # window.win.webContents.openDevTools()
-
 #  0000000   000   000   0000000  000       0000000    0000000  00000000
 # 000   000  0000  000  000       000      000   000  000       000
 # 000   000  000 0 000  000       000      000   000  0000000   0000000

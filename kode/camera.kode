@@ -95,11 +95,8 @@ class Camera extends PerspectiveCamera
         if @downPos.dist(vec @mouseX, @mouseY) > 60
             @mouseMoved = true
         
-        # dbg event.buttons
-            
         if event.buttons == 4
             s = @dist
-            log 'pan' s
             @pan x*2*s/@size.x, y*s/@size.y
             
         if event.buttons == 2
@@ -201,7 +198,7 @@ class Camera extends PerspectiveCamera
         @update()
          
     fadeToPos: (v) -> 
-        log 'v' v
+
         @centerTarget = vec v
         @startFadeCenter()
 
@@ -302,7 +299,6 @@ class Camera extends PerspectiveCamera
             @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0001
         else
             @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0003
-            log 'startZoom' @wheelInert, event.wheelDelta
             @startZoom()
 
     # 0000000   0000000    0000000   00     00  

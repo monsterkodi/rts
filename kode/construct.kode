@@ -71,7 +71,6 @@ class Construct
         @botGeoms[Geom.icosa].rotateZ deg2rad 18
 
     geometryForBot: (bot) ->
-        log bot
         @botGeoms[@geomForBot bot]
     
     geomForBot: (bot) -> @geomForBotType bot.type
