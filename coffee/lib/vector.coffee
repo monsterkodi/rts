@@ -18,11 +18,17 @@ class Vector extends THREE.Vector3
         Vector.counter += 1
         
         if x.x? and x.y?
-            super x.x, x.y, x.z ? 0
+            @x = x.x 
+            @y = x.y
+            @z = x.z ? 0
         else if Array.isArray x
-            super x[0], x[1], x[2] ? 0
+            @x = x[0] 
+            @y = x[1] 
+            @z = x[2] ? 0
         else
-            super x, y, z ? 0
+            @x = x 
+            @y = y
+            @z = z ? 0
         if Number.isNaN @x
             throw new Error
             

@@ -16,13 +16,25 @@ class Quaternion extends THREE.Quaternion
         Quaternion.counter++
         
         if x instanceof Vector
-            super x.x, x.y, x.z, 0
+            @x = x.x 
+            @y = x.y
+            @z = x.z
+            @w = 0
         else if x instanceof Quaternion or x instanceof THREE.Quaternion
-            super x.x, x.y, x.z, x.w
+            @x = x.x
+            @y = x.y
+            @z = x.z
+            @w = x.w
         else if Array.isArray w
-            super w[0], w[1], w[2], w[3]
+            @x = w[0]
+            @y = w[1]
+            @z = w[2]
+            @w = w[3]
         else
-            super x, y, z, w
+            @x = x
+            @y = y
+            @z = z
+            @w = w
         if Number.isNaN @x
             throw new Error
         

@@ -50,21 +50,6 @@ class Graph
         @canvas.height = @canvas.height
         ctx = @canvas.getContext '2d'       
         
-        stoneStyles = Stone.resources.map (s) -> Color.stone[Stone.string s].getStyle()
-        spentStyles = Stone.resources.map (s) -> Color.spent[Stone.string s].getStyle()
-
-        for stone in Stone.resources     
-            avgs = Graph.avgs[stone]
-
-            for i in [0...avgs.length]
-                [gain, spent] = avgs[i]
-                h = gain*2
-                ctx.fillStyle = stoneStyles[stone]
-                ctx.fillRect i*4+Graph.avgsNum*stone*4, 98, 2, h
-                h = -spent*2
-                ctx.fillStyle = spentStyles[stone]
-                ctx.fillRect i*4+Graph.avgsNum*stone*4, 98, 2, h
-                
     @toggle: -> 
         
         if @graph
@@ -74,25 +59,5 @@ class Graph
         else
             # prefs.set 'graph', true
             @graph = new Graph
-            
-    @sampleStorage: (storage) ->
-        
-        @balance.push _.clone storage.balance
-        @balance.shift() while @balance.length > @avgsSecs
-
-        storage.resetBalance()
-        
-        for stone in Stone.resources
-            avg = [0,0]
-            if lst = last @avgs[stone]
-                avg[0] = lst[0]
-                avg[1] = lst[1]
-            avg[0] += last(@balance).gains[stone] 
-            avg[1] += last(@balance).spent[stone]
-            if @balance.length >= @avgsSecs
-                avg[0] -= @balance[0].gains[stone] 
-                avg[1] -= @balance[0].spent[stone]
-            @avgs[stone].push avg
-            @avgs[stone].shift() while @avgs[stone].length > @avgsNum
-                
+                            
 module.exports = Graph

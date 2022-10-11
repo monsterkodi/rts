@@ -1,0 +1,74 @@
+###
+00     00   0000000   00000000 
+000   000  000   000  000   000
+000000000  000000000  00000000 
+000 0 000  000   000  000      
+000   000  000   000  000      
+###
+
+World = require './world'
+
+class Map extends World
+
+    constructor: (scene) ->
+        
+        super scene
+        
+    build: -> @ai2()
+
+    #  0000000   000  00000   
+    # 000   000  000     000  
+    # 000000000  000    000   
+    # 000   000  000   000    
+    # 000   000  000  000000  
+    
+    ai2: ->
+                
+        d = 3
+        o = 2
+        r = 0
+        y = -(d+o)
+        
+        p = vec(d, -d-o,  d)
+            
+        t = [
+            [  0,  0, -1, 2*d+o ],
+            [ -1,  0,  0, 2*d   ],
+            [  0,  1,  0, 2*d+o ],
+            [  1,  0,  0, 2*d+o ],
+            [  0, -1,  0, 2*d   ],
+            [  0,  0,  1, 2*d+o ],            
+            [  0,  1,  0, 2*d+o ],            
+            [  0,  0, -1, 2*d   ],            
+            [ -1,  0,  0, 2*d+o ],
+            [  0,  0,  1, 2*d+o ],            
+            [  1,  0,  0, 2*d   ],            
+            [  0, -1,  0, 2*d+o ],
+            [ -1,  0,  0, 2*d+o ],
+            [  0,  1,  0, 2*d   ],                        
+            [  0,  0, -1, 2*d+o ],            
+            [  0, -1,  0, 2*d+o ],
+            [  0,  0,  1, 2*d   ],            
+            [  1,  0,  0, 2*d+o ],            
+            ]
+        
+        k = 1
+        for i in [0...t.length]
+            for n in [0...t[i][3]]
+                p.x += t[i][0]
+                p.y += t[i][1]
+                p.z += t[i][2]
+                # @addStone p.x, p.y, p.z, Stone.resources[r], k
+                @addStone p.x, p.y, p.z, r, k
+                r = (r+1)%4
+                k++
+                    
+        @addStone 0,0,0, Stone.gelb
+                
+        @addBot  d, -d,   d+o+1, Bot.base
+        @addBot  d, -d-o, d+1,   Bot.base
+        @addBot  d+o, -d, d+1,   Bot.base
+                                 
+        @setCamera dist:18, rotate:45, degree:55, pos:[0,0,0]
+        
+module.exports = Map

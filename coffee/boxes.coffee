@@ -6,15 +6,16 @@
 0000000     0000000   000   000  00000000  0000000 
 ###
 
-require('three-instanced-mesh')(THREE)
+# require('three-instanced-mesh')(THREE)
 
 class Boxes
 
-    constructor: (scene, @maxBoxes=1000, geom=Geometry.cornerBox(), material=Materials.white, shadows=true) ->
+    constructor: (scene, @maxBoxes=1000, geom=Geometry.cornerBox(), material, shadows=true) ->
 
         @boxes = []
         @sz = vec()
-        @cluster = new THREE.InstancedMesh geom, material, @maxBoxes, true, true, true
+        material = new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.3, roughness: 0.3
+        @cluster = new THREE.InstancedMesh geom, material, @maxBoxes
         
         if shadows
             @cluster.receiveShadow = true
@@ -28,36 +29,69 @@ class Boxes
         
     setStone: (box, stone) -> @setColor box, Color.stones[stone]
     setDir:   (box, dir)   -> @setRot box, Quaternion.unitVectors Vector.unitZ, dir
-    setPos:   (box, pos)   -> @cluster.setPositionAt   box.index, pos
-    setRot:   (box, rot)   -> @cluster.setQuaternionAt box.index, rot
-    setColor: (box, color) -> @cluster.setColorAt      box.index, color
+    setPos:   (box, pos)   -> 
+        mat = new THREE.Matrix4
+        @cluster.getMatrixAt box.index, mat
+        mat.setPosition pos
+        @cluster.setMatrixAt box.index, mat
+        @cluster.instanceMatrix.needsUpdate = true
+    setRot:   (box, rot)   -> mat = new THREE.Matrix4; @cluster.getMatrixAt box.index, mat; mat.makeRotationFromQuaternion rot; @cluster.setMatrixAt box.index, mat
+    setColor: (box, color) -> 
+        @cluster.setColorAt box.index, color
+        @cluster.instanceColor.needsUpdate = true
     setSize:  (box, size)  -> 
         @sz.x = size 
         @sz.y = size 
         @sz.z = size 
-        @cluster.setScaleAt box.index, @sz
+        mat = new THREE.Matrix4
+        @cluster.getMatrixAt box.index, mat
+        pos   = new THREE.Vector3
+        rot   = new THREE.Quaternion
+        scale = new THREE.Vector3
+        mat.decompose pos, rot, scale
+        mat.compose pos, rot, @sz
+        @cluster.setMatrixAt box.index, mat
+        @cluster.instanceMatrix.needsUpdate = true
     
-    pos:   (box,pos=vec())  -> @cluster.getPositionAt box.index, pos; pos
-    rot:   (box,rot=quat()) -> @cluster.getQuaternionAt box.index, rot; rot
-    size:  (box,szv=vec())  -> @cluster.getScaleAt box.index, szv; szv.x
+    pos:   (box,pos=vec())  -> 
+        mat = new THREE.Matrix4
+        @cluster.getMatrixAt box.index, mat
+        pos = new THREE.Vector3
+        pos.setFromMatrixPosition mat
+        pos
+    rot:   (box,rot=quat()) -> 
+        mat = new THREE.Matrix4
+        @cluster.getMatrixAt box.index, mat
+        pos = new THREE.Vector3
+        scale = new THREE.Vector3
+        mat.decompose pos, rot, scale
+        rot
+    size:  (box,szv=vec())  -> 
+        mat = new THREE.Matrix4
+        @cluster.getMatrixAt box.index, mat
+        pos = new THREE.Vector3
+        rot = new THREE.Quaternion
+        mat.decompose pos, rot, szv
+        szv
     color: (box,color=new THREE.Color()) -> @cluster.getColorAt box.index, color; color
     
     add: (cfg) ->
         
         box = index:@numBoxes()
-        
         @boxes.push box
+        @cluster.count = @numBoxes()
         
         if cfg.pos
             @setPos box, cfg.pos
         else
             @sz.set 0,0,0
             @setPos box, @sz
+            
         if cfg.color?
             @setColor box, cfg.color
         else
-            @setStone box, cfg.stone ? Stone.gray
-        @setSize  box, cfg.size ? 0.1
+            @setStone box, cfg.stone #? Stone.gray
+        
         if cfg.dir?
             @setDir box, cfg.dir 
         else if cfg.rot?
@@ -70,15 +104,14 @@ class Boxes
     remove: -> 
         
         @boxes = []
+        @cluster.dispose()
         @cluster?.parent.remove @cluster
         delete @cluster
-        
+                
     clear: ->
         
-        for box in @boxes
-            @setSize box, 0
         @boxes = []
-        @cluster.needsUpdate()
+        @cluster.count = @boxes.length
         
     del: (box) ->
                 
@@ -88,7 +121,6 @@ class Boxes
             rot     = @rot   lastBox
             size    = @size  lastBox
             color   = @color lastBox
-            @setSize lastBox, 0
             @boxes[box.index] = lastBox
             lastBox.index = box.index
             @setPos   lastBox, pos
@@ -98,14 +130,11 @@ class Boxes
             
         else if box.index == @lastIndex()
             lastBox = @boxes.pop()
-            @setSize lastBox, 0
         else
             log "Boxes.del dafuk? #{box.index} #{@lastIndex()}"
             
-        @cluster.needsUpdate()
-        
+        @cluster.count = @boxes.length
+            
     render: ->
-
-        @cluster.needsUpdate() if @numBoxes()
-
+        
 module.exports = Boxes

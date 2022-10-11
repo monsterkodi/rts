@@ -6,11 +6,14 @@
  0000000  000   000  000   000  00000000  000   000  000   000
 ###
 
-{ reduce } = require 'kxk'
+{ clamp, reduce } = require 'kxk'
 
-class Camera extends THREE.PerspectiveCamera
+THREE = require 'three'
+PerspectiveCamera = THREE.PerspectiveCamera
 
-    constructor: (opt) ->
+class Camera extends PerspectiveCamera
+
+    @: (opt) ->
         
         width  = opt.view.clientWidth
         height = opt.view.clientHeight
@@ -92,11 +95,14 @@ class Camera extends THREE.PerspectiveCamera
         if @downPos.dist(vec @mouseX, @mouseY) > 60
             @mouseMoved = true
         
-        if event.buttons & 4
+        # dbg event.buttons
+            
+        if event.buttons == 4
             s = @dist
+            log 'pan' s
             @pan x*2*s/@size.x, y*s/@size.y
             
-        if event.buttons & 2
+        if event.buttons == 2
             @pivot 4000*x/@size.x, 2000*y/@size.y
             
     # 00000000   000  000   000   0000000   000000000  
@@ -168,8 +174,20 @@ class Camera extends THREE.PerspectiveCamera
         
         @center.add right.add up
         @centerTarget?.copy @center
+        @stopZoom()
         @update()
+        if not @panBlocksWheel
+            @panBlocksWheel = 1.0
+            rts.animate @panBlocks
             
+    panBlocks: (deltaSeconds) =>
+        
+        @panBlocksWheel -= deltaSeconds
+        if @panBlocksWheel < 0
+            delete @panBlocksWheel
+        else
+            rts.animate @panBlocks
+        
     # 00000000   0000000    0000000  000   000   0000000  
     # 000       000   000  000       000   000  000       
     # 000000    000   000  000       000   000  0000000   
@@ -183,7 +201,7 @@ class Camera extends THREE.PerspectiveCamera
         @update()
          
     fadeToPos: (v) -> 
-        
+        log 'v' v
         @centerTarget = vec v
         @startFadeCenter()
 
@@ -276,10 +294,16 @@ class Camera extends THREE.PerspectiveCamera
         if @wheelInert < 0 and event.wheelDelta > 0
             @wheelInert = 0
             return
-            
-        @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0001
         
-        @startZoom()
+        if @panBlocksWheel
+            return
+            
+        if @wheelInert == 0
+            @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0001
+        else
+            @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0003
+            log 'startZoom' @wheelInert, event.wheelDelta
+            @startZoom()
 
     # 0000000   0000000    0000000   00     00  
     #    000   000   000  000   000  000   000  

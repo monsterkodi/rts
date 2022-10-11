@@ -6,7 +6,7 @@
 00     00  000  000   000  0000000     0000000   00     00  
 ###
 
-{ win, prefs, post, keyinfo, stopEvent, log, $ } = require 'kxk'
+{ keyinfo, post, prefs, win } = require 'kxk'
 
 { Bot } = require './constants'
 
@@ -50,9 +50,10 @@ w = new Window
     icon:   '../img/menu@2x.png'
     context: (items) -> 
     onLoad: -> 
+        log 'RTS!'
         window.rts = new RTS $ '#main'
         
-window.win = electron.remote.getCurrentWindow()
+# window.win = electron.remote.getCurrentWindow()
 
 # 00000000   00000000   00000000  00000000   0000000
 # 000   000  000   000  000       000       000
@@ -60,11 +61,11 @@ window.win = electron.remote.getCurrentWindow()
 # 000        000   000  000       000            000
 # 000        000   000  00000000  000       0000000
 
-if bounds = prefs.get 'bounds'
-    window.win.setBounds bounds
+# if bounds = prefs.get 'bounds'
+    # window.win.setBounds bounds
 
-if prefs.get 'devTools'
-    window.win.webContents.openDevTools()
+# if prefs.get 'devTools'
+    # window.win.webContents.openDevTools()
 
 #  0000000   000   000   0000000  000       0000000    0000000  00000000
 # 000   000  0000  000  000       000      000   000  000       000
@@ -76,17 +77,8 @@ onMove  = -> saveBounds()
 
 saveBounds = -> prefs.set 'bounds', window.win.getBounds()
 
-clearListeners = ->
-
-    window.win.removeListener 'close', onClose
-    window.win.removeListener 'move',  onMove
-    window.win.webContents.removeAllListeners 'devtools-opened'
-    window.win.webContents.removeAllListeners 'devtools-closed'
-
 onClose = ->
     
-    clearListeners()
-
 #  0000000   000   000  000       0000000    0000000   0000000
 # 000   000  0000  000  000      000   000  000   000  000   000
 # 000   000  000 0 000  000      000   000  000000000  000   000
@@ -94,11 +86,8 @@ onClose = ->
 #  0000000   000   000  0000000   0000000   000   000  0000000
 
 window.onload = ->
-
-    window.win.on 'close', onClose
-    window.win.on 'move',  onMove
-    window.win.webContents.on 'devtools-opened', -> prefs.set 'devTools', true
-    window.win.webContents.on 'devtools-closed', -> prefs.set 'devTools'
+    
+    window.onresize()
 
 # 00000000   00000000  000       0000000    0000000   0000000
 # 000   000  000       000      000   000  000   000  000   000
@@ -144,16 +133,10 @@ window.onkeydown = (event) ->
         when 'right' then rts.camera.startMoveRight()
         when 'up'    then rts.camera.startMoveUp()
         when 'down'  then rts.camera.startMoveDown()
-        when 'esc'   then handle.loadMeta()
+        when 'esc'   then true
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
         when 'x'     then handle.placeBase()
         when 'z'     then handle.placeBuild()
-        when '1'     then handle.buyBot Bot.brain
-        when '2','t' then handle.buyBot Bot.trade
-        when '3','b' then handle.buyBot Bot.berta
-        when '4','m' then handle.buyBot Bot.mine
-        when '5'     then handle.buyBot Bot.build
-        when 'c', 'enter' then handle.call()
         when '.'     then prefs.set 'debug', not prefs.get 'debug'
         when 'f'     then world.storage[0].fill()
         when 'e'     then world.storage[0].clear()

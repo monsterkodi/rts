@@ -36,10 +36,6 @@ Bot = new Enum
         mine:       6
         icon:       7
     
-Bot.switchable  = [Bot.base,  Bot.brain, Bot.trade, Bot.berta]
-Bot.caged       = [Bot.base,  Bot.berta]
-Bot.limited     = [Bot.berta, Bot.mine]
-        
 Stone = new Enum
         red:        0
         gelb:       1
@@ -51,7 +47,7 @@ Stone = new Enum
         silver:     7
         
 Stone.resources = [Stone.red, Stone.gelb, Stone.blue, Stone.white]
-Stone.all       = [0..Stone.monster] # world.construct stones
+Stone.all       = [0..Stone.monster] 
         
 Bend = new Enum
         flat:       0

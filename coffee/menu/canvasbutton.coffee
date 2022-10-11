@@ -23,7 +23,7 @@ class CanvasButton
         
         @meshes = {}
         
-        if empty CanvasButton.renderer
+        if not CanvasButton.renderer
             CanvasButton.renderer = new THREE.WebGLRenderer antialias:true
             CanvasButton.renderer.setPixelRatio window.devicePixelRatio
             CanvasButton.renderer.setSize @width, @height

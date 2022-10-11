@@ -6,19 +6,8 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-AI        = require './ai'
-Packet    = require './packet'
-Tubes     = require './tubes'
-Cages     = require './cages'
 Boxes     = require './boxes'
-Spent     = require './spent'
 Graph     = require './graph'
-Bullet    = require './bullet'
-Orbits    = require './orbits'
-Cancer    = require './cancer'
-Monster   = require './monster'
-Storage   = require './storage'
-Plosion   = require './plosion'
 Resource  = require './resource'
 Construct = require './construct'
 
@@ -29,13 +18,8 @@ class World
         @stones    = {}
         @bots      = {}
         @resources = {}
-        @targets   = {}
-        @monsters  = []
-        @cancers   = []
         @bases     = []
-        @storage   = []
         @players   = []
-        @ai        = []
         @idBot     = []
         
         @vec  = vec()
@@ -43,10 +27,6 @@ class World
         
         window.world   = @
         
-        @cages         = new Cages @ 
-        @tubes         = new Tubes @
-        @spent         = new Spent @
-        @plosion       = new Plosion @
         window.boxes   = new Boxes @scene, 20000
         @resourceBoxes = new Boxes @scene, 10000
         
@@ -62,11 +42,7 @@ class World
         
         @create()
         
-        post.on 'storageChanged', @onStorageChanged
-        
         @setSpeed       prefs.get 'speed', 6
-        @setOpacity     prefs.get 'opacity', 6
-        @setCageOpacity prefs.get 'cageOpacity', 6
           
     #  0000000  00000000   00000000   0000000   000000000  00000000  
     # 000       000   000  000       000   000     000     000       
@@ -78,11 +54,7 @@ class World
         
         @construct.stones()
         @construct.bots()
-        @construct.targets()
-        @dirtyTubes()
         
-        @setCageOpacity 3
-        @setOpacity 7
         @setSpeed 6
         
         post.emit 'world', @
@@ -95,16 +67,8 @@ class World
     
     clear: ->
         
-        @tubes.clear()
-        @spent.clear()
-        Science.clear()
-        Bullet.clear()
-        Orbits.clear()
-        
         @players = []
         @bases   = []
-        @storage = []
-        @ai      = []
         
         for index,stone of @stones
             delete @stones[index]
@@ -116,39 +80,10 @@ class World
         for index,resource of @resources
             resource.del()
         @resources = {}
-        
-        while @monsters.length
-            @monsters[0].del()
-
-        for cancer in @cancers
-            cancer.del()
-        @cancers = []
-
-        for index,target of @targets
-            target.mesh.parent.remove target.mesh
-        @targets = {}
-        
+                
         boxes.clear()
         @botid = 0
                 
-    drawBrokenPath: (info) ->
-        
-        # log info
-        g = new THREE.Geometry
-        for open in info.open
-            p = @posAtIndex open
-            g.merge Geometry.box 0.1, p.x, p.y, p.z
-            
-        @scene.add new THREE.Mesh g, Materials.cancer
-        
-        p = @posAtIndex info.start
-        g = Geometry.coordinateCross 0.05, p.x, p.y, p.z
-        @scene.add new THREE.Mesh g, Materials.stone[0]
-
-        p = @posAtIndex info.goal
-        g = Geometry.coordinateCross 0.05, p.x, p.y, p.z
-        @scene.add new THREE.Mesh g, Materials.stone[1]
-        
     #  0000000   0000000   00     00  00000000  00000000    0000000   
     # 000       000   000  000   000  000       000   000  000   000  
     # 000       000000000  000000000  0000000   0000000    000000000  
@@ -166,43 +101,6 @@ class World
             rts.camera.focusOnPos @bases[0].pos
         rts.camera.update()
         
-    #  0000000   00000000    0000000    0000000  000  000000000  000   000  
-    # 000   000  000   000  000   000  000       000     000      000 000   
-    # 000   000  00000000   000000000  000       000     000       00000    
-    # 000   000  000        000   000  000       000     000        000     
-    #  0000000   000        000   000   0000000  000     000        000     
-    
-    setOpacity: (opacityIndex) ->
-        
-        @opacityIndex = clamp 0, config.world.opacity.length-1, opacityIndex
-        @opacity = config.world.opacity[@opacityIndex]
-
-        prefs.set 'opacity', @opacityIndex
-        
-        for stone in Stone.all
-            @construct.stoneMeshes[stone].material.transparent = true
-            @construct.stoneMeshes[stone].material.opacity = @opacity
-        
-        @resourceBoxes.cluster.material.transparent = true
-        @resourceBoxes.cluster.material.opacity = @opacity
-        post.emit 'worldOpacity', @opacity, @opacityIndex
-        
-    resetOpacity: -> @setOpacity 6
-    incrOpacity:  -> @setOpacity @opacityIndex + 1
-    decrOpacity:  -> @setOpacity @opacityIndex - 1
-        
-    setCageOpacity: (cageOpacityIndex) ->
-        
-        @cageOpacityIndex = clamp 0, config.world.cageOpacity.length-1, cageOpacityIndex
-        @cageOpacity = config.world.cageOpacity[@cageOpacityIndex]
-
-        prefs.set 'cageOpacity', @cageOpacityIndex
-        post.emit 'cageOpacity', @cageOpacity, @cageOpacityIndex
-        
-    resetCageOpacity: -> @setCageOpacity 6
-    incrCageOpacity:  -> @setCageOpacity @cageOpacityIndex + 1
-    decrCageOpacity:  -> @setCageOpacity @cageOpacityIndex - 1
-    
     #  0000000  00000000   00000000  00000000  0000000    
     # 000       000   000  000       000       000   000  
     # 0000000   00000000   0000000   0000000   000   000  
@@ -233,18 +131,7 @@ class World
         @simulate scaledDelta
         boxes.render()
         @resourceBoxes.render()
-        @cages.animate scaledDelta
-        @plosion.animate scaledDelta
-        Bullet.animate scaledDelta
-        Orbits.animate scaledDelta
         post.emit 'tick'
-        
-    dirtyTubes: -> @tubes.dirty = true        
-    updateTubes: ->
-        
-        if @tubes.dirty
-            @tubes.build()
-            @tubes.dirty = false
         
     simulate: (scaledDelta) ->
         
@@ -252,29 +139,9 @@ class World
         
         @cycles = Math.floor @timeSum/60
         
-        @spent.animate scaledDelta
-        @tubes.animate scaledDelta
-        
         for bot in @allBots()
             handle.tickBot scaledDelta, bot
-         
-        if valid @monsters
-            for i in [@monsters.length-1..0]
-                @monsters[i].animate scaledDelta
-                
-        if valid @cancers
-            for i in [@cancers.length-1..0]
-                @cancers[i].animate scaledDelta
-                
-        if valid @ai
-            for ai in @ai
-                ai.animate scaledDelta
-                    
-        @sample -= scaledDelta
-        if @sample <= 0
-            Graph.sampleStorage @storage[0] if @storage.length
-            @sample = 1.0
-                    
+                             
     # 00000000   00000000   0000000   0000000   000   000  00000000    0000000  00000000  
     # 000   000  000       000       000   000  000   000  000   000  000       000       
     # 0000000    0000000   0000000   000   000  000   000  0000000    000       0000000   
@@ -344,7 +211,7 @@ class World
             dist:0
             faceIndex:faceIndex
 
-        while valid check
+        while check.length
             ci = check.shift()
             known[ci] ?= faceIndex:ci
 
@@ -372,38 +239,10 @@ class World
     faceIndexClosestToPosReachableFromFaceIndex: (targetPos, sourceFaceIndex) ->
         
         faces = @facesReachableFromFaceIndex sourceFaceIndex
-        if valid faces
+        if faces.length
             faces.sort (a,b) => @posAtIndex(a).manhattan(targetPos)-@posAtIndex(b).manhattan(targetPos)
             first faces
             
-    # 00     00   0000000   000   000   0000000  000000000  00000000  00000000   
-    # 000   000  000   000  0000  000  000          000     000       000   000  
-    # 000000000  000   000  000 0 000  0000000      000     0000000   0000000    
-    # 000 0 000  000   000  000  0000       000     000     000       000   000  
-    # 000   000   0000000   000   000  0000000      000     00000000  000   000  
-    
-    scatterMonsters: (x,y,z,r,n) ->
-        
-        for i in [0...n]
-            f = Math.random() * r
-            p = @roundPos vec(x,y,z).plus Vector.random().mul f
-            @addMonster p.x, p.y, p.z
-    
-    addMonster: (x,y,z) ->
-        
-        monster = new Monster vec(x,y,z), Vector.normals[randInt 6]
-        @monsters.push monster
-        monster
-        
-    monsterClosestToPos: (pos) ->
-        
-        minDist = Number.MAX_VALUE
-        for monster in @monsters
-            if monster.pos.manhattan(pos) < minDist
-                minDist = monster.pos.manhattan(pos)
-                minMonster = monster
-        minMonster
-        
     enemyClosestToBot: (bot) ->
         
         minDist = Number.MAX_VALUE
@@ -413,15 +252,6 @@ class World
                 minEnemy = enemy
         minEnemy
         
-    addCancer: (x,y,z) ->
-        
-        @cancers.push new Cancer vec(x,y,z)
-        last @cancers
-        
-    addAI: (bot) ->
-        
-        @ai.push new AI bot
-                
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
     # 0000000    000   000     000     
@@ -429,8 +259,6 @@ class World
     # 0000000     0000000      000     
     
     addBot: (x,y,z, type=Bot.mine, player=0, face=null) -> 
-        
-        @dirtyTubes()
         
         p = @roundPos vec x,y,z
 
@@ -455,64 +283,27 @@ class World
         @botid += 1
             
         bot.posBelow = p.minus Vector.normals[face]
-        bot.mine = 1/Science.mineSpeed bot
+        bot.mine = 1/2
         
         if type != Bot.icon
             bot.hitPoints = bot.health = bot.maxHealth = config[Bot.string type].health
                 
-        if type in Bot.switchable
-            bot.state = 'off'
-        
         switch type 
             when Bot.base
-                Science.addPlayer()
-                @storage.push new Storage player
                 @players.push player
-                if player
-                    @addAI bot
                 @bases[player] = bot
-                bot.prod = 1/science(player).base.speed
+                bot.prod = 1/2
             when Bot.trade
-                bot.trade = 1/science(player).trade.speed
+                bot.trade = 1/2
                 bot.sell  = Stone.red
                 bot.buy   = Stone.blue
             when Bot.brain
-                bot.think = 1/science(player).brain.speed
-            when Bot.berta
-                bot.shoot = 1/science(player).berta.speed
-                if @botOfType(Bot.berta,player)?.state == 'on'
-                    bot.state = 'on'
+                bot.think = 1/2
                     
         @bots[index] = bot
         @idBot[bot.id] = bot
         bot
 
-    # 000   0000000   0000000   000   000  
-    # 000  000       000   000  0000  000  
-    # 000  000       000   000  000 0 000  
-    # 000  000       000   000  000  0000  
-    # 000   0000000   0000000   000   000  
-    
-    addIcon: (x,y,z, func) ->
-
-        iconBot = @addBot x,y,z, Bot.icon
-        if not func
-            Science.addPlayer()
-            @bases[0] = iconBot
-        else
-            iconBot.func = func
-        iconBot
-        
-    # 000000000   0000000   00000000    0000000   00000000  000000000  
-    #    000     000   000  000   000  000        000          000     
-    #    000     000000000  0000000    000  0000  0000000      000     
-    #    000     000   000  000   000  000   000  000          000     
-    #    000     000   000  000   000   0000000   00000000     000     
-    
-    addTarget: (x,y,z) ->
-        
-        @targets[@indexAt x,y,z] = {}
-        
     #  0000000   0000000   000       0000000   00000000   
     # 000       000   000  000      000   000  000   000  
     # 000       000   000  000      000   000  0000000    
@@ -526,12 +317,8 @@ class World
             stone = @resourceBelowBot bot
             if stone? and (bot.path? or bot.type == Bot.base)
                 bot.mesh.material = Materials.bot[stone]
-            else if @isMeta
-                bot.mesh.material = Materials.ai[0]
             else 
                 bot.mesh.material = Materials.bot[Stone.gray]
-        else
-            bot.mesh.material = Materials.ai[bot.player-1]
         
     baseForBot: (bot) -> @bases[bot.player]
         
@@ -547,24 +334,14 @@ class World
         for bot in @botsOfPlayer player 
             @removeBot bot
             
-        for ai in @ai
-            if ai.player == player
-                @ai.splice @ai.indexOf(ai), 1
-                break
-            
     removeBot: (bot) ->
         
         post.emit 'botWillBeRemoved', bot
-        Orbits.removeBot bot
-        Bullet.removeBot bot
-        @plosion.atBot bot
         @delBot bot
-        @dirtyTubes()
         post.emit 'botRemoved', bot.type, bot.player
         
     delBot: (bot) ->
         
-        @cages.removeCage bot
         index = @indexAtBot bot
         bot.highlight?.parent.remove bot.highlight
         bot.mesh?.parent.remove bot.mesh
@@ -595,34 +372,13 @@ class World
         bot.posBelow.copy bot.pos
         bot.posBelow.sub Vector.normals[bot.face]
         
-        @removeBuildGuide()
-        @dirtyTubes()
         @construct.updateBot bot
-        @cages.moveBot bot
                     
     canBotMoveTo: (bot, face, index) -> 
         
         return false if @isItemAtIndex(index) and @botAtIndex(index) != bot
-        @pathFromFaceToFace @faceIndexForBot(bot), @faceIndex(face, index)
+        true
     
-    pathFromFaceToFace: (fromFaceIndex, toFaceIndex) -> @tubes.astar.findPath fromFaceIndex, toFaceIndex
-    
-    pathFromPosToPos: (from, to) -> 
-    
-        if @noItemAtPos(to) 
-            return @tubes.astar.posPath from, to
-        # else
-            # log "pathFromPosToPos item! stone:#{Stone.string @stoneAtPos to} bot:#{Bot.string @botAtPos(to)?.type}", to
-        null
-    
-    bulletPath: (fromBot, toBot) -> @tubes.astar.bulletPath fromBot, toBot
-        
-    distanceFromFaceToFace: (fromFaceIndex, toFaceIndex) ->
-        
-        # log "distanceFromFaceToFace #{@stringForFaceIndex fromFaceIndex} #{@stringForFaceIndex toFaceIndex}"
-        
-        @pathFromFaceToFace(fromFaceIndex, toFaceIndex)?.length ? Number.MAX_VALUE
-        
     # 0000000    000   000  000  000      0000000    
     # 000   000  000   000  000  000      000   000  
     # 0000000    000   000  000  000      000   000  
@@ -671,7 +427,7 @@ class World
     
     isItemAt:  (x,y,z) -> @isItemAtIndex @indexAt x,y,z
     isItemAtPos:   (p) -> @isItemAtIndex @indexAtPos p
-    isItemAtIndex: (i) -> @isStoneAtIndex(i) or @botAtIndex(i) or Cancer.isCellAtIndex i
+    isItemAtIndex: (i) -> @isStoneAtIndex(i) or @botAtIndex(i)
     
     noBotAtPos:    (p) -> not @isBotAtPos p
     noStoneAtPos:  (p) -> not @isStoneAtPos p
@@ -760,7 +516,7 @@ class World
         check = [pi]
         known = new Set
         
-        while valid check
+        while check.length
             ci = check.shift()
             if @noItemAtIndex ci
                 pos = @posAtIndex ci
@@ -774,7 +530,7 @@ class World
                         check.push neighbor
         [null,null]
         
-    emptyResourceNearBase: (player=0) -> @emptyResourceNearBot @bases[player], science(player).path.length
+    emptyResourceNearBase: (player=0) -> @emptyResourceNearBot @bases[player], 6
         
     emptyResourceNearBot: (bot, maxDist=1000) ->
                 
@@ -787,7 +543,7 @@ class World
             faceIndex:fi
             empty:false
 
-        while valid check
+        while check.length
             ci = check.shift()
             known[ci] ?= faceIndex:ci
             if @emptyFaceIndex(ci) and ci != fi
@@ -824,7 +580,7 @@ class World
         check = [fi]
         known = new Set
         
-        while valid check
+        while check.length
             ci = check.shift()
             if @emptyFaceIndex ci
                 [face,index] = @splitFaceIndex ci
@@ -936,72 +692,12 @@ class World
     roundPos: (v) -> v.rounded()
     posBelowBot: (bot) -> bot.posBelow
                 
-    # 000   000  000   0000000   000   000  000      000   0000000   000   000  000000000  
-    # 000   000  000  000        000   000  000      000  000        000   000     000     
-    # 000000000  000  000  0000  000000000  000      000  000  0000  000000000     000     
-    # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
-    # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
-    
-    removeHighlight: ->
-        
-        @highBot?.highlight?.parent.remove @highBot?.highlight
-        delete @highBot?.highlight
-        delete @highBot
-        @removeBuildGuide()
-    
-    highlightPos: (v) -> @highlightBot @botAtPos @roundPos v
-        
-    highlightBot: (bot) ->
-        
-        return if bot.player != 0
-        if bot
-            if bot == @highBot 
-                @construct.orientFace bot.highlight, bot.face
-                return
-            @removeHighlight()
-            @highBot = bot
-            bot.highlight = @construct.highlight bot
-        else
-            @removeHighlight()
-            
     # 0000000    000   000  000  000      0000000    
     # 000   000  000   000  000  000      000   000  
     # 0000000    000   000  000  000      000   000  
     # 000   000  000   000  000  000      000   000  
     # 0000000     0000000   000  0000000  0000000    
     
-    onStorageChanged: (storage, stone, amount) =>
-
-        return if storage.player != 0
-        
-        if @highBot?.type == Bot.build and not @buildGuide
-            hit = rts.castRay false
-            if hit?.bot?
-                if hitInfo = handle.infoForBuildHit @highBot, hit
-                    if handle.canBuild hitInfo.norm
-                        @showBuildGuide @highBot, hitInfo
-            
-    removeBuildGuide: ->
-  
-        @buildGuide?.parent.remove @buildGuide
-        delete @buildGuide
-        
-    showBuildGuide: (bot, hitInfo) ->
-        
-        stone = @stoneBelowBot bot
-        if stone in Stone.resources
-            mat = Materials.bot[stone]
-        else
-            mat = Materials.bot[Stone.gray]
-        
-        geom = Geometry.cornerBoxGeom 0.3
-        @buildGuide = new THREE.Mesh geom, mat
-        @scene.add @buildGuide
-            
-        @buildGuide.bot = Bot.build
-        @buildGuide.position.copy bot.pos.plus hitInfo.norm.mul 0.3
-        @buildGuide.quaternion.copy Quaternion.unitVectors Vector.unitZ, hitInfo.norm
-                                
     #  0000000  000000000  00000000   000  000   000   0000000   
     # 000          000     000   000  000  0000  000  000        
     # 0000000      000     0000000    000  000 0 000  000  0000  

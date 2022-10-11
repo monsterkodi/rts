@@ -31,8 +31,6 @@ Color =
         blue:            color 0x4444ff
         white:           color 0x44aaff
         gray:            color 0x111111
-        monster:         color 0x333333
-        cancer:          color 0x0f0f0f
         silver:          color 0xaaaaaa
 
     spent: 

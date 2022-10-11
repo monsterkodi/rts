@@ -83,7 +83,7 @@ class AStar
     
         steps = 0
         
-        while valid openSet
+        while openSet.size > 0
             
             steps += 1
             if steps > 2000

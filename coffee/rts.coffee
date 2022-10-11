@@ -6,11 +6,13 @@
 000   000     000     0000000 
 ###
 
-{ prefs, post, randInt, randIntRange, clamp, elem, empty, valid, first, last, stopEvent, deg2rad, rad2deg, str, log, $, _ } = require 'kxk'
+kxk = require 'kxk'
+
+{ _, clamp, deg2rad, elem, first, klog, kstr, last, post, prefs, rad2deg, randInt, randIntRange, stopEvent } = require 'kxk'
 
 { Bot, Stone, Geom, Face, Edge, Bend } = require './constants'
 
-window.$            = $
+window.$            = kxk.$
 window._            = _
 window.post         = post
 window.prefs        = prefs
@@ -20,13 +22,11 @@ window.deg2rad      = deg2rad
 window.rad2deg      = rad2deg
 window.stopEvent    = stopEvent
 window.clamp        = clamp
-window.empty        = empty
-window.valid        = valid
 window.first        = first
 window.last         = last
 window.elem         = elem
-window.str          = str
-window.log          = log
+window.str          = kstr
+window.log          = klog
 
 window.Bot          = Bot
 window.Edge         = Edge
@@ -38,7 +38,6 @@ window.THREE        = require 'three'
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
 window.Color        = require './color'
-window.Science      = require './science'
 window.Geometry     = require './geometry'
 window.Materials    = require './materials'
 window.playSound    = (o,n,c) -> rts.sound.play o,n,c
@@ -60,7 +59,6 @@ class RTS
         
         window.rts = @
         window.config = Config.default
-        window.science = Science.science
                 
         @sound = new Sound
         
@@ -172,7 +170,6 @@ class RTS
             animation delta
         
         @menu.animate delta
-        world.updateTubes()
          
         if not @paused
             
@@ -201,63 +198,25 @@ class RTS
         
         @calcMouse event
         @downPos = @mouse.clone()
-        
-        if event.buttons == 1
-                        
-            if world.highBot?
-                @dragBot = world.highBot
-            else
-                delete @dragBot
-        else
-            @camMove = true
+        @camMove = event.button != 1
             
-        if event.button == 2
-            if @rightUp and window.performance.now() - @rightUp < 500
-                handle.doubleRightClick()
-            delete @rightUp
-                
     onMouseUp: (event) =>
 
-        if not @camMove
-            delete @dragBot
-                        
         delete @camMove
         
         @calcMouse event
 
         moved = @downPos?.dist @mouse
         if moved < 0.01
-            if event.button == 1
+            if event.button != 0
                 @focusOnHit()
-            else
-                if bot = world.highBot
-                    handle.botClicked bot
                     
-            if event.button == 2
-                @rightUp = window.performance.now()
-    
     onMouseMove: (event) =>
 
         @calcMouse event
         
-        return if event.buttons > 1
-        
-        hit = @castRay event.buttons == 1
-        
-        if not @dragBot
-                            
-            handle.mouseMoveHit hit
-                
-        else 
-            moved = @downPos?.dist @mouse
-            if moved < 0.01
-                return
-            
-            if hit?.face?
-                handle.moveBot @dragBot, hit.pos, hit.face
-
     onDblClick: (event) => 
-        # log 'doubleClick', event.target.button?
+
         if not event.target.button
             handle.doubleClick()
                             
@@ -270,8 +229,8 @@ class RTS
         @mouse
         
     focusOnHit: ->
-        
-        if hit = @castRay false
+
+        if hit = @castRay true # false
             if hit.bot
                 @camera.fadeToPos hit.bot.pos
             else    
@@ -285,9 +244,9 @@ class RTS
     
     filterHit: (intersects, ignoreHighlight) ->
         
-        intersects = intersects.filter (i) => i.object.stone? or i.object.bot
-        if ignoreHighlight
-            intersects = intersects.filter (i) => i.object != world.highBot?.mesh
+        # intersects = intersects.filter (i) => i.object.stone? or i.object.bot
+        # if ignoreHighlight
+            # intersects = intersects.filter (i) => i.object != world.highBot?.mesh
             
         intersects[0]
     
@@ -298,7 +257,7 @@ class RTS
 
         intersect = @filterHit intersects, ignoreHighlight
         
-        return if empty intersect
+        return if not intersect
         
         point = vec intersect.point
         pos = world.roundPos point
@@ -317,7 +276,7 @@ class RTS
             info.bot = world.botAtPos point
         
         stones = intersects.filter (i) => i.object.stone?
-        if valid stones
+        if stones.length
             info.face = world.faceAtPosNorm stones[0].point, stones[0].face.normal
         
         info

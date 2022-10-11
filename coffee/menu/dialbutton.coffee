@@ -6,7 +6,7 @@
 0000000    000  000   000  0000000    0000000     0000000      000        000      0000000   000   000
 ###
 
-{ drag } = require 'kxk'
+{ clamp, deg2rad, drag } = require 'kxk'
 
 CanvasButton = require './canvasbutton'
 
@@ -51,23 +51,21 @@ class DialButton extends CanvasButton
         
     initDots: ->
         
-        merg = new THREE.Geometry
-        
+        geoms = []
         for i in [-6..6]
             geom = Geometry.sphere 0.5
             geom.rotateX deg2rad 90
             p = vec(0,4,0).rotate vec(0,0,1), i*22.5
             geom.translate p.x, p.y, p.z
-            merg.merge geom
+            geoms.push geom
         
-        bufg = new THREE.BufferGeometry().fromGeometry merg
-        mesh = new THREE.Mesh bufg, Materials.menu.inactive
+        merg = THREE.BufferGeometryUtils.mergeBufferGeometries geoms
+        mesh = new THREE.Mesh merg, Materials.menu.inactive
         @scene.add mesh
         
         geom = Geometry.sphere 0.6
         geom.rotateX deg2rad 90
-        bufg = new THREE.BufferGeometry().fromGeometry geom
-        @dot = new THREE.Mesh bufg, Materials.menu.active
+        @dot = new THREE.Mesh geom, Materials.menu.active
         @scene.add @dot
         
     onDrag: (drag, event) => 

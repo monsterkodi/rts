@@ -18,7 +18,7 @@ class Resource
             
     sizeForAmount: (amount) ->
         
-        clamp 0.0, 0.5, 0.5 * Math.sqrt((amount-1)/512)
+        clamp 0.0, 0.99, amount/128
         
     deduct: (amount=1) ->
 
