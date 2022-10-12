@@ -33,13 +33,16 @@ class Camera extends PerspectiveCamera
         @pivotY = 0
         @moveX = 0
         @moveY = 0
+        @mouse = vec()
+        @downPos = vec()
+        @centerTarget = vec()
         @quat = quat()
 
-        @elem.addEventListener 'mousewheel', @onMouseWheel
-        @elem.addEventListener 'mousedown',  @onMouseDown
-        @elem.addEventListener 'keypress',   @onKeyPress
-        @elem.addEventListener 'keyrelease', @onKeyRelease
-        @elem.addEventListener 'dblclick',   @onDblClick
+        @elem.addEventListener 'mousewheel' @onMouseWheel
+        @elem.addEventListener 'mousedown'  @onMouseDown
+        @elem.addEventListener 'keypress'   @onKeyPress
+        @elem.addEventListener 'keyrelease' @onKeyRelease
+        @elem.addEventListener 'dblclick'   @onDblClick
         
         @update()
 
@@ -50,13 +53,13 @@ class Camera extends PerspectiveCamera
 
     del: =>
         
-        @elem.removeEventListener  'keypress',   @onKeyPress
-        @elem.removeEventListener  'keyrelease', @onKeyRelease
-        @elem.removeEventListener  'mousewheel', @onMouseWheel
-        @elem.removeEventListener  'mousedown',  @onMouseDown
-        @elem.removeEventListener  'dblclick',   @onDblClick
-        window.removeEventListener 'mouseup',    @onMouseUp
-        window.removeEventListener 'mousemove',  @onMouseDrag 
+        @elem.removeEventListener  'keypress'   @onKeyPress
+        @elem.removeEventListener  'keyrelease' @onKeyRelease
+        @elem.removeEventListener  'mousewheel' @onMouseWheel
+        @elem.removeEventListener  'mousedown'  @onMouseDown
+        @elem.removeEventListener  'dblclick'   @onDblClick
+        window.removeEventListener 'mouseup'    @onMouseUp
+        window.removeEventListener 'mousemove'  @onMouseDrag 
         
     # 00     00   0000000   000   000   0000000  00000000  
     # 000   000  000   000  000   000  000       000       
@@ -69,30 +72,30 @@ class Camera extends PerspectiveCamera
         @downButtons = event.buttons
         @mouseMoved  = false
             
-        @mouseX = event.clientX
-        @mouseY = event.clientY
+        @mouse.x = event.clientX
+        @mouse.y = event.clientY
         
-        @downPos = vec @mouseX, @mouseY
+        @downPos.copy @mouse
         
-        window.addEventListener 'mousemove', @onMouseDrag
-        window.addEventListener 'mouseup',   @onMouseUp
+        window.addEventListener 'mousemove' @onMouseDrag
+        window.addEventListener 'mouseup'   @onMouseUp
         
     onMouseUp: (event) => 
 
-        window.removeEventListener 'mousemove', @onMouseDrag
-        window.removeEventListener 'mouseup',   @onMouseUp
+        window.removeEventListener 'mousemove' @onMouseDrag
+        window.removeEventListener 'mouseup'   @onMouseUp
         
     onDblClick: (event) =>
         
     onMouseDrag: (event) =>
 
-        x = event.clientX-@mouseX
-        y = event.clientY-@mouseY
+        x = event.clientX-@mouse.x
+        y = event.clientY-@mouse.y
         
-        @mouseX = event.clientX
-        @mouseY = event.clientY
+        @mouse.x = event.clientX
+        @mouse.y = event.clientY
         
-        if @downPos.dist(vec @mouseX, @mouseY) > 60
+        if @downPos.dist(@mouse) > 60
             @mouseMoved = true
         
         if event.buttons == 4
@@ -163,14 +166,16 @@ class Camera extends PerspectiveCamera
     
     pan: (x,y) ->
         
-        right = vec -x, 0, 0 
-        right.applyQuaternion @quaternion
+        Vector.tmp.set -x, 0, 0 
+        Vector.tmp.applyQuaternion @quaternion
 
-        up = vec 0, y, 0 
-        up.applyQuaternion @quaternion
+        @center.add Vector.tmp
         
-        @center.add right.add up
-        @centerTarget?.copy @center
+        Vector.tmp.set 0, y, 0 
+        Vector.tmp.applyQuaternion @quaternion
+        
+        @center.add Vector.tmp
+        @centerTarget.copy @center
         @stopZoom()
         @update()
         if not @panBlocksWheel
@@ -193,13 +198,13 @@ class Camera extends PerspectiveCamera
                      
     focusOnPos: (v) ->
         
-        @centerTarget = vec v
-        @center = vec v
+        @centerTarget.copy v
+        @center.copy v
         @update()
          
     fadeToPos: (v) -> 
 
-        @centerTarget = vec v
+        @centerTarget.copy v
         @startFadeCenter()
 
     startFadeCenter: -> 
@@ -360,7 +365,11 @@ class Camera extends PerspectiveCamera
         @quat.rotateAxisAngle Vector.unitZ, @rotate
         @quat.rotateAxisAngle Vector.unitX, @degree
         
-        @position.copy @center.plus vec(0,0,@dist).applyQuaternion @quat
+        @position.copy @center
+        Vector.tmp.set 0,0,@dist
+        Vector.tmp.applyQuaternion @quat
+        @position.add Vector.tmp
+        
         @quaternion.copy @quat
         
         # log "camera:", @dist, @rotate, @degree

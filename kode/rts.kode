@@ -55,7 +55,7 @@ Handle  = require './handle'
 
 class RTS
 
-    constructor: (@view) ->
+    @: (@view) ->
         
         window.rts = @
         window.config = Config.default
@@ -83,55 +83,63 @@ class RTS
                 
         @scene = new THREE.Scene()
                 
-        @sun = new THREE.PointLight 0xffffff, 0.5
-        @sun.position.copy @player.camera.getPosition() if @player?
-        @sun.position.copy @camera.position
-        @scene.add @sun
+        @lightPlayer = new THREE.PointLight 0xffffff, 0.5
+        @lightPlayer.position.copy @player.camera.getPosition() if @player?
+        @lightPlayer.position.copy @camera.position
+        @scene.add @lightPlayer
 
-        shadowMapSize = new THREE.Vector2 2*2048, 2*2048
+        @lightShadow = new THREE.DirectionalLight
+        @lightShadow.intensity = 1.0
+        @lightShadow.castShadow = true
+        @lightShadow.position.set 100 0 100
+        @lightShadow.target.position.set 0 0 0
+        @lightShadow.shadow.mapSize.width  = 2*2048
+        @lightShadow.shadow.mapSize.height = 2*2048
+        @lightShadow.shadow.camera.near    = 0.5
+        @lightShadow.shadow.camera.far     = 500
+        @lightShadow.shadow.camera.left    = -50
+        @lightShadow.shadow.camera.right   =  50
+        @lightShadow.shadow.camera.top     =  50
+        @lightShadow.shadow.camera.bottom  = -50
+        @scene.add @lightShadow
+        @scene.add @lightShadow.target
+        @lightShadowHelper = new THREE.DirectionalLightHelper @lightShadow, 5, new THREE.Color 0xffff00
+        @lightShadowHelper.visible = false
+        @scene.add @lightShadowHelper
         
-        @light = new THREE.DirectionalLight
-        @light.intensity = 0.2
-        @light.position.z = 100
-        @light.castShadow = true
-        @light.shadow.mapSize = shadowMapSize
-        @scene.add @light
-
-        @light2 = new THREE.DirectionalLight
-        @light2.intensity = 0.5
-        @light2.position.set 50, 0, 50
-        @light2.target.position.set 0, 0, 1
-        @light2.castShadow = true
-        @light2.shadow.mapSize = shadowMapSize
-        @scene.add @light2
-        @scene.add @light2.target
+        @lightAmbient = new THREE.AmbientLight 0x333333
+        @scene.add @lightAmbient
         
-        @ambient = new THREE.AmbientLight 0x333333
-        @scene.add @ambient
+        @gridHelper = new THREE.GridHelper 100, 100, 0x444444, 0x111111
+        @gridHelper.rotateX deg2rad 90
+        @gridHelper.position.set 0 0 0.1
+        @gridHelper.visible = false
+        @scene.add @gridHelper
         
-        # @scene.add new THREE.CameraHelper @camera 
-        # gridHelper = new THREE.GridHelper 100, 100, 0x444444, 0x111111
-        # gridHelper.rotateX deg2rad 90
-        # gridHelper.position.set 0, 0,-0.001
-        # @scene.add gridHelper
-        # @scene.add new THREE.AxesHelper 50
+        @axesHelper = new THREE.AxesHelper 50
+        @axesHelper.position.set 0 0 0.1
+        @axesHelper.visible = false
+        @scene.add @axesHelper
         
-        # @scene.add new THREE.PointLightHelper @sun, 5
-        # @scene.add new THREE.DirectionalLightHelper @light, 5
-        # @light2Helper = new THREE.DirectionalLightHelper @light2, 5, new THREE.Color 0xffff00
-        # @scene.add @light2Helper
+        @shadowCameraHelper = new THREE.CameraHelper @lightShadow.shadow.camera
+        @shadowCameraHelper.visible = false
+        @scene.add @shadowCameraHelper
+        
+        @arrowHelper = new THREE.ArrowHelper vec(0 0 1), vec(), 1, 0x4444ff
+        @scene.add @arrowHelper
         
         new Map @scene # sets window.world
         window.handle = new Handle
                 
-        @mouse = vec()
+        @mouse   = vec()
+        @downPos = vec()
         
         @raycaster = new THREE.Raycaster()
         
-        document.addEventListener 'mousemove', @onMouseMove
-        document.addEventListener 'mousedown', @onMouseDown
-        document.addEventListener 'mouseup',   @onMouseUp
-        document.addEventListener 'dblclick',  @onDblClick
+        document.addEventListener 'mousemove' @onMouseMove
+        document.addEventListener 'mousedown' @onMouseDown
+        document.addEventListener 'mouseup'   @onMouseUp
+        document.addEventListener 'dblclick'  @onDblClick
         
         @menu = new Menu
         
@@ -156,7 +164,7 @@ class RTS
     togglePause: -> 
     
         @paused = not @paused
-        post.emit 'pause', @paused
+        post.emit 'pause' @paused
     
     animationStep: =>
         
@@ -174,8 +182,8 @@ class RTS
         if not @paused
             
             angle = -delta*0.5*world.speed
-            @light2.position.applyQuaternion Quaternion.axisAngle Vector.unitZ, angle
-            @light2Helper?.update()   
+            @lightShadow.position.applyQuaternion Quaternion.axisAngle Vector.unitZ, angle
+            @lightShadowHelper.update()   
             
             world.animate delta
              
@@ -197,7 +205,7 @@ class RTS
     onMouseDown: (event) =>
         
         @calcMouse event
-        @downPos = @mouse.clone()
+        @downPos.copy @mouse
         @camMove = event.button != 1
             
     onMouseUp: (event) =>
@@ -206,7 +214,7 @@ class RTS
         
         @calcMouse event
 
-        moved = @downPos?.dist @mouse
+        moved = @downPos.dist @mouse
         if moved < 0.01
             if event.button != 0
                 @focusOnHit()
@@ -214,6 +222,7 @@ class RTS
     onMouseMove: (event) =>
 
         @calcMouse event
+        hit = @castRay()
         
     onDblClick: (event) => 
 
@@ -230,11 +239,11 @@ class RTS
         
     focusOnHit: ->
 
-        if hit = @castRay true # false
+        if hit = @castRay()
             if hit.bot
                 @camera.fadeToPos hit.bot.pos
             else    
-                @camera.fadeToPos world.roundPos hit.point.minus hit.norm.mul 0.5
+                @camera.fadeToPos hit.pos
 
     #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
     # 000       000   000  000          000     000   000  000   000   000 000   
@@ -242,30 +251,30 @@ class RTS
     # 000       000   000       000     000     000   000  000   000     000     
     #  0000000  000   000  0000000      000     000   000  000   000     000     
     
-    filterHit: (intersects, ignoreHighlight) ->
-        
-        # intersects = intersects.filter (i) => i.object.stone? or i.object.bot
-        # if ignoreHighlight
-            # intersects = intersects.filter (i) => i.object != world.highBot?.mesh
-            
-        intersects[0]
-    
-    castRay: (ignoreHighlight) ->
+    castRay: ->
 
         @raycaster.setFromCamera @mouse, @camera
-        intersects = @raycaster.intersectObjects @scene.children, false
+        intersects = @raycaster.intersectObjects world.pickables, true
 
-        intersect = @filterHit intersects, ignoreHighlight
+        intersect = intersects[0]
         
         return if not intersect
         
         point = vec intersect.point
-        pos = world.roundPos point
+        pos   = world.roundPos point
+        
+        Vector.tmp.set 0 0 1
+        if not intersect.face
+            log intersect
+        norm = intersect.face ? intersect.face.normal : Vector.tmp
+        
+        @arrowHelper.setDirection norm
+        @arrowHelper.position.copy point
         
         info = 
             pos:    pos
             index:  world.indexAtPos pos
-            norm:   vec intersect.face.normal
+            norm:   norm
             point:  point
             dist:   intersect.distance
         
@@ -289,7 +298,7 @@ class RTS
     
     render: ->
 
-        @sun.position.copy @camera.position
+        @lightPlayer.position.copy @camera.position
         @renderer.render world.scene, @camera
         
         @fps.draw()

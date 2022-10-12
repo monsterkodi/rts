@@ -10,7 +10,7 @@ DialButton = require './dialbutton'
 
 class SpeedButton extends DialButton
 
-    constructor: (div) ->
+    @: (div) ->
     
         super div, 'speedButton canvasButtonInline'
         

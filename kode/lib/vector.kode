@@ -15,24 +15,15 @@ class Vector extends ThreeVector
     @counter: 0
     @tmp: new Vector
     
-    constructor: (x=0,y=0,z=0) ->
+    @: (x=0,y=0,z=0) ->
         
         Vector.counter += 1
         
         if x.x? and x.y?
             super x.x, x.y, x.z ? 0
-            # @x = x.x 
-            # @y = x.y
-            # @z = x.z ? 0
         else if Array.isArray x
-            # @x = x[0] 
-            # @y = x[1] 
-            # @z = x[2] ? 0
             super x[0], x[1], x[2] ? 0 
         else
-            # @x = x 
-            # @y = y
-            # @z = z ? 0
             super x, y, z ? 0
         if Number.isNaN @x
             throw new Error
@@ -110,9 +101,11 @@ class Vector extends ThreeVector
         m[0]+0.2*m[1]+0.1*m[2]
     
     manhattan: (o) -> Math.abs(o.x-@x)+Math.abs(o.y-@y)+Math.abs(o.z-@z)
-    dist:   (o) -> @minus(o).length()
     length:    -> Math.sqrt @x*@x + @y*@y + @z*@z
     dot:   (v) -> @x*v.x + @y*v.y + @z*v.z
+    dist:   (o) -> 
+        Vector.tmp.copy @
+        Vector.tmp.sub(o).length()
     
     mul:   (f) -> new Vector @x*f, @y*f, @z*f
     div:   (d) -> new Vector @x/d, @y/d, @z/d

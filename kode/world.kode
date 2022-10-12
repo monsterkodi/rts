@@ -7,17 +7,19 @@
 ###
 
 Boxes     = require './boxes'
+Rail      = require './rail'
 Graph     = require './graph'
 Resource  = require './resource'
 Construct = require './construct'
 
 class World
     
-    constructor: (@scene) ->
+    @: (@scene) ->
                 
         @stones    = {}
         @bots      = {}
         @resources = {}
+        @trains    = []
         @bases     = []
         @players   = []
         @idBot     = []
@@ -34,6 +36,7 @@ class World
         @sample  = 0
         @timeSum = 0
         @cycles  = 0
+        @pickables = []
                 
         @build()
         
@@ -42,7 +45,7 @@ class World
         
         @create()
         
-        @setSpeed       prefs.get 'speed', 6
+        @setSpeed prefs.get 'speed', 6
           
     #  0000000  00000000   00000000   0000000   000000000  00000000  
     # 000       000   000  000       000   000     000     000       
@@ -54,6 +57,7 @@ class World
         
         @construct.stones()
         @construct.bots()
+        @construct.trains()
         
         @setSpeed 6
         
@@ -252,6 +256,29 @@ class World
                 minEnemy = enemy
         minEnemy
         
+    addFloor: ->
+        
+        geom = new THREE.PlaneGeometry 1500 1500
+        @floor = new THREE.Mesh geom, Materials.floor
+        @floor.receiveShadow = true
+        @scene.add @floor
+        @pickables.push @floor
+        
+    addTrain: (x, y, z) ->
+        
+        @trains.push
+            pos: vec x, y, z
+            
+    addTrack: (points) ->
+        
+        rail = new Rail points, 100 0.5
+        rail.translate 0 0 0.75
+        mesh = new THREE.Mesh rail, Materials.train.rail
+        mesh.castShadow = true
+        mesh.receiveShadow = true
+        @pickables.push mesh
+        @scene.add mesh
+        
     # 0000000     0000000   000000000  
     # 000   000  000   000     000     
     # 0000000    000   000     000     
@@ -260,7 +287,7 @@ class World
     
     addBot: (x,y,z, type=Bot.mine, player=0, face=null) -> 
         
-        p = @roundPos vec x,y,z
+        p = @roundPos x,y,z
 
         if not face?
             [p,face] = @emptyPosFaceNearPos p
@@ -285,10 +312,9 @@ class World
         bot.posBelow = p.minus Vector.normals[face]
         bot.mine = 1/2
         
-        if type != Bot.icon
-            bot.hitPoints = bot.health = bot.maxHealth = config[Bot.string type].health
+        bot.hitPoints = bot.health = bot.maxHealth = config[Bot.string type].health
                 
-        switch type 
+        switch type
             when Bot.base
                 @players.push player
                 @bases[player] = bot
@@ -689,7 +715,10 @@ class World
         [face,index] = @splitFaceIndex faceIndex
         @posAtIndex index
     
-    roundPos: (v) -> v.rounded()
+    roundPos: (v) -> 
+        Vector.tmp.copy v
+        Vector.tmp.rounded()
+        
     posBelowBot: (bot) -> bot.posBelow
                 
     # 0000000    000   000  000  000      0000000    

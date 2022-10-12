@@ -20,10 +20,6 @@ Color =
         inactive:        color 0x333333
         activeHigh:      color 0xffffff
         inactiveHigh:    color 0x555555
-        state:
-            off:         color 0xff0000
-            on:          color 0x111111
-            paused:      color 0xff0000
 
     stone: 
         red:             color 0x881111
@@ -31,7 +27,7 @@ Color =
         blue:            color 0x4444ff
         white:           color 0x44aaff
         gray:            color 0x111111
-        silver:          color 0xaaaaaa
+        silver:          color 0xaaaaee
 
     spent: 
         red:             color 0x441111

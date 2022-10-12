@@ -6,6 +6,8 @@
  0000000   0000000   000   000  0000000      000     000   000   0000000    0000000     000   
 ###
 
+{ CSG } = require '../kode/csg/csg'
+        
 class Construct
 
     @: ->
@@ -13,20 +15,105 @@ class Construct
         @segmentMesh = [null,null,null,null]
         @stoneMeshes = {}     
         @stoneMaterials = {}
+        @meshes = {}
         
         for stone in Stone.all
             @stoneMaterials[stone] = Materials.stone[stone].clone()
+            
+    # 000  000   000  000  000000000  
+    # 000  0000  000  000     000     
+    # 000  000 0 000  000     000     
+    # 000  000  0000  000     000     
+    # 000  000   000  000     000     
+    
+    init: -> 
+        
+        @initTrains()
+        @initBotGeoms()
+        @initStoneSides()
+        
+    # 000000000  00000000    0000000   000  000   000   0000000  
+    #    000     000   000  000   000  000  0000  000  000       
+    #    000     0000000    000000000  000  000 0 000  0000000   
+    #    000     000   000  000   000  000  000  0000       000  
+    #    000     000   000  000   000  000  000   000  0000000   
+    
+    initTrains: ->
+        
+        ●▸ trains
+         
+        subtract  = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
+        intersect = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).intersect CSG.fromGeometry b
+        union     = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).union     CSG.fromGeometry b
+     
+        seg = 16
+        sphere   = new THREE.SphereGeometry   1.0 seg, seg
+        cylinder = new THREE.CylinderGeometry 1.0 1.0 2.0 seg
+        
+        rail = new THREE.BoxGeometry 3 2 1
+        rail.translate 0 0 -1
+        cylinder = subtract cylinder, rail
+        
+        sphere.translate 0 1 0
+        geom = union sphere, cylinder
+        sphere.translate 0 -2 0
+        pill = union geom, sphere
+         
+        wind = new THREE.BoxGeometry 1.5 0.5 0.5
+        wind.translate 0 -1.6 0.5
+        
+        side = new THREE.BoxGeometry 2 0.3 0.22
+        side.translate 0 -1.05 0.65
+        wind = union wind, side
+        
+        geom = subtract pill, wind
+
+        rail = new THREE.BoxGeometry 1 8 1
+        rail.translate 0 0 -1
+        geom = subtract geom, rail
+        
+        # count = geom.attributes.position.count
+        @meshes['train'] = new THREE.Mesh geom, Materials.train.body
+        @meshes['train'].receiveShadow = true
+        @meshes['train'].castShadow = true
+        
+        geom = intersect pill, wind
+        # s = 0.99
+        # geom.scale s, s, s
+        @meshes['train'].add new THREE.Mesh geom, Materials.train.window
+        
+        rail = new THREE.BoxGeometry 0.9 8 0.4
+        rail.translate 0 0 -0.73
+        railMesh = new THREE.Mesh rail, Materials.train.rail
+        railMesh.receiveShadow = true
+        railMesh.castShadow = true
+        @meshes['train'].add railMesh
+        
+        # @meshes['train'].geometry.translate 0 0 10
+         
+        ●▪ trains
+        
+    trains: ->
+                        
+        for train,index in world.trains
+            mesh = @meshes['train'].clone()
+            # mesh.bot = bot.type # needed for intersection test
+            world.scene.add mesh
+            train.mesh = mesh
+            world.pickables.push mesh
+            @updateTrain train
+
+    updateTrain: (train) ->
+        
+        if train.mesh
+            train.mesh.position.copy train.pos
+            train.mesh.translateZ 1
                 
 # 0000000     0000000   000000000   0000000   00000000   0000000   00     00   0000000  
 # 000   000  000   000     000     000        000       000   000  000   000  000       
 # 0000000    000   000     000     000  0000  0000000   000   000  000000000  0000000   
 # 000   000  000   000     000     000   000  000       000   000  000 0 000       000  
 # 0000000     0000000      000      0000000   00000000   0000000   000   000  0000000   
-
-    init: -> 
-        
-        @initBotGeoms()
-        @initStoneSides()
 
     initBotGeoms: ->
                 

@@ -10,7 +10,7 @@
 
 class Boxes
 
-    constructor: (scene, @maxBoxes=1000, geom=Geometry.cornerBox(), material, shadows=true) ->
+    @: (scene, @maxBoxes=1000, geom=Geometry.cornerBox(), material, shadows=true) ->
 
         @boxes = []
         @sz = vec()

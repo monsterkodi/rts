@@ -8,7 +8,7 @@
 
 class CanvasButton
     
-    constructor: (div, clss='canvasButton', @lightPos, @camPos) ->
+    @: (div, clss='canvasButton', @lightPos, @camPos) ->
         
         @highlighted = false
         

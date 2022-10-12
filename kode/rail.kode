@@ -1,0 +1,76 @@
+
+BufferGeometry = THREE.BufferGeometry
+
+class Rail extends BufferGeometry
+
+    @: (points, segments=64, radius=1) ->
+
+        super()
+        
+        path = new THREE.CatmullRomCurve3 points
+
+        @type = 'Rail'
+
+        frames = path.computeFrenetFrames segments, false
+
+        @tangents  = frames.tangents
+        @normals   = frames.normals
+        @binormals = frames.binormals
+
+        vertex = vec()
+        normal = vec()
+        P      = vec()
+
+        vertices = []
+        indices  = []
+
+        generateSegment = (i) ->
+
+            P = path.getPointAt i / segments, P
+
+            N = frames.normals[i]
+            B = frames.binormals[i]
+
+            for j in 0..4
+
+                v = j / 2 * Math.PI + Math.PI/4
+
+                sin =  Math.sin v
+                cos = -Math.cos v
+
+                normal.x = cos * N.x + sin * B.x
+                normal.y = cos * N.y + sin * B.y
+                normal.z = cos * N.z + sin * B.z
+                normal.normalize()
+
+                vertex.x = P.x + radius * normal.x
+                vertex.y = P.y + radius * normal.y
+                vertex.z = P.z + radius * normal.z
+
+                vertices.push vertex.x, vertex.y, vertex.z
+
+        generateIndices = ->
+
+            for j in 1..segments
+                for i in 1..4
+
+                    a =  5 * ( j - 1 ) + ( i - 1 )
+                    b =  5 * j + ( i - 1 )
+                    c =  5 * j + i
+                    d =  5 * ( j - 1 ) + i
+
+                    indices.push a, b, d
+                    indices.push b, c, d
+
+
+        for i in 0..segments
+            generateSegment i
+
+        generateIndices()
+
+        @setIndex indices
+        @setAttribute 'position' new THREE.Float32BufferAttribute vertices, 3
+        
+        @computeVertexNormals()
+
+module.exports = Rail

@@ -8,7 +8,7 @@
 
 class Resource
 
-    constructor: (@index, @stone, @amount) ->
+    @: (@index, @stone, @amount) ->
         
         @bxs = []
         for i in [0...6]

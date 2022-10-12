@@ -8,7 +8,7 @@
 
 class Enum
     
-    constructor: (e) ->
+    @: (e) ->
         
         @keys = Object.keys e
         @values = []

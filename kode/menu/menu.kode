@@ -10,7 +10,7 @@ SpeedButton   = require './speedbutton'
 
 class Menu
 
-    constructor: ->
+    @: ->
 
         main =$ "#main"
         @div = elem class:'buttons', style:"left:0px; top:0px"

@@ -10,7 +10,7 @@
 
 class Main extends app
 
-    constructor: ->
+    @: ->
         
         super
             dir:          __dirname

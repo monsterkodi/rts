@@ -8,21 +8,27 @@
 
 class Debug
 
-    constructor: () ->
+    @: ->
 
         @elem = elem class:'debug', style:'position:absolute; z-index:1; bottom:10px; left:10px;'
 
-        window.debug = cheatScience: false
+        @worldSpeed = @value text:'speed', value: world.speed.toFixed(1), reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         
-        @button text:'stones',        cb: -> world.toggleStones()
-
+        @button text:'info'   cb: -> prefs.set 'info', not prefs.get 'info'
+        @button text:'wire'   cb: -> Materials.toggleWire()
+        @button text:'shadow' cb: -> window.rts.shadowCameraHelper.visible = not window.rts.shadowCameraHelper.visible
+        @button text:'light'  cb: -> window.rts.lightShadowHelper.visible = not window.rts.lightShadowHelper.visible
+        @button text:'axes'   cb: -> window.rts.axesHelper.visible = not window.rts.axesHelper.visible
+        @button text:'grid'   cb: -> window.rts.gridHelper.visible = not window.rts.gridHelper.visible
+        @button text:'floor'  cb: -> world.floor.visible = not world.floor.visible
+                
         document.body.appendChild @elem
         
-        post.on 'worldSpeed', @updateWorldSpeed
+        post.on 'worldSpeed' @updateWorldSpeed
 
     del: -> 
     
-        post.removeListener 'worldSpeed', @updateWorldSpeed
+        post.removeListener 'worldSpeed' @updateWorldSpeed
         @elem.remove()
         
     # 00000000   00000000   0000000  00000000  000000000  

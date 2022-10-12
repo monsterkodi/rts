@@ -24,25 +24,8 @@ function Window extends win
     
     onMenuAction: (action, args) =>
         
-        switch action
-            when 'Fullscreen' 
-                window.win.setSimpleFullScreen not window.win.isSimpleFullScreen()
-                if window.win.isSimpleFullScreen()
-                    $("#titlebar").style.display = 'none'
-                    $("#main").style.top = '0'
-                    $("#main").style.borderLeft = 'none'
-                    $("#main").style.borderRight = 'none'
-                    $("#main").style.borderBottom = 'none'
-                else
-                    window.win.setWindowButtonVisibility false
-                    $("#titlebar").style.display = 'flex'
-                    $("#main").style.top = '30px'
-                    $("#main").style.borderLeft = '6px solid #222'
-                    $("#main").style.borderRight = '6px solid #222'
-                    $("#main").style.borderBottom = '6px solid #222'
-                window.win.webContents.focus()
         super action, args
-
+        
 w = new Window
     dir:    __dirname
     pkg:    require '../package.json'
@@ -120,12 +103,7 @@ window.onkeydown = (event) ->
         when 'down'  then rts.camera.startMoveDown()
         when 'esc'   then true
         when 'i'     then prefs.set 'info',  not prefs.get 'info'
-        when 'x'     then handle.placeBase()
-        when 'z'     then handle.placeBuild()
         when '.'     then prefs.set 'debug', not prefs.get 'debug'
-        when 'f'     then world.storage[0].fill()
-        when 'e'     then world.storage[0].clear()
-        when 'k'     then world.monsters[0]?.die()
         when 'space' then rts.togglePause()
         when '='     then world.incrSpeed(); world.incrSpeed()
         when '-'     then world.decrSpeed(); world.decrSpeed()

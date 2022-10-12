@@ -14,7 +14,7 @@ class Graph
     @avgsNum:     100
     @avgsSecs:    10 
     
-    constructor: ->
+    @: ->
         
         @width     = 4*Graph.avgsNum*2
         @height    = 100

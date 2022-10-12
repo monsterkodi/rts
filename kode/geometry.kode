@@ -83,41 +83,6 @@ class Geometry
         
         @cornerBoxGeom size, x, y, z
     
-    #  0000000  000000000   0000000   000000000  00000000  
-    # 000          000     000   000     000     000       
-    # 0000000      000     000000000     000     0000000   
-    #      000     000     000   000     000     000       
-    # 0000000      000     000   000     000     00000000  
-    
-    @state: (state) ->
-        
-        switch state
-            when 'off'  
-                geom = new THREE.BufferGeometry
-                vertices = new Float32Array [
-                    -1.5,  2,  1.5
-                    -1.5, -2,  1.5
-                    2.0,  0,  1.5
-                    -1.5,  2,  0
-                    -1.5,  2,  1.5
-                    2.0,  0,  0
-                    -1.5,  2,  1.5
-                    2.0,  0,  1.5
-                    2.0,  0,  0
-                    ]
-                geom.setAttribute 'position' new THREE.BufferAttribute vertices, 3
-                  
-            when 'on' 
-                left  = new THREE.BoxGeometry 2,4,1.5
-                left.translate -1.5, 0, 0     
-                right = new THREE.BoxGeometry 2,4,1.5
-                right.translate 1.5, 0, 0
-                geom  = THREE.BufferGeometryUtils.mergeBufferGeometries [ left, right ]
-            else
-                geom = new THREE.BoxGeometry 1.8, 1.8, 1.8
-                
-        geom
-        
     # 0000000     0000000   000   000  
     # 000   000  000   000   000 000   
     # 0000000    000   000    00000    
