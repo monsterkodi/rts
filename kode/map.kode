@@ -31,18 +31,78 @@ class Map extends World
         
         p = vec(d, -d-o,  d)
             
-        for x in 0...10
-            for y in 0...10
-                @addTrain x*3 y*5 0
-                
+        # for x in 0...10
+            # for y in 0...10
+                # @addTrain x*3 y*5 0
+  
         @addFloor()
+        @addTrain 0 0 0
         @addTrack [ 
-            vec -20, -20, 0 
-            vec 20, -20, 0 
-            vec 20, 20, 0 
-            vec -20, 20, 0 
-            vec -20, -20, 0]
-                                 
-        @setCamera dist:16, rotate:0, degree:0, pos:[0,0,0]
-        
+            vec   0 -20 0 
+            vec  20 -20 0 
+            vec  20   0 0
+            
+            vec  20   0 0
+            vec  20  20 0 
+            vec   0  20 0 
+
+            vec   0  20 0
+            vec -20  20 0 
+            vec -20   0 0 
+            
+            vec -20   0 0 
+            vec -20 -20 0 
+            vec   0 -20 0 
+            ]
+
+        @addTrack [ 
+            vec   0 -15 0 
+            vec  15 -15 0 
+            vec  15   0 0
+            
+            vec  15   0 0
+            vec  15  15 0 
+            vec   0  15 0 
+
+            vec   0  15 0
+            vec -15  15 0 
+            vec -15   0 0 
+            ]            
+            
+        @addTrack [ 
+            vec   0 -10 0 
+            vec  10 -10 0 
+            vec  10   0 0
+            
+            vec  10   0 0
+            vec  10  10 0 
+            vec   0  10 0 
+
+            vec   0  10 0
+            vec -10  10 0 
+            vec -10   0 0 
+            
+            vec -10   0 0 
+            vec -10 -10 0 
+            vec   0 -10 0 
+            ]            
+            
+        @addTrack [ 
+            vec -50   0 0 
+            vec -40   0 0 
+            vec -30   0 1
+
+            vec -30   0 1
+            vec -20   0 2 
+            vec -10   0 2
+            
+            vec  10   0 2
+            vec  20   0 2 
+            vec  30   0 1
+            
+            vec  30   0 1 
+            vec  40   0 0 
+            vec  50   0 0 
+            ]            
+            
 module.exports = Map

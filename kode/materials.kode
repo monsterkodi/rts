@@ -11,19 +11,19 @@ Materials =
     wireframe:      new THREE.MeshBasicMaterial    color:0xffffff, wireframe: true
     white:          new THREE.MeshStandardMaterial color:0xffffff    
     highlight:      new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:true, transparent:true, opacity:0.2
-    floor:          new THREE.MeshStandardMaterial color:0x111111, dithering:true
+    floor:          new THREE.MeshStandardMaterial color:0x222222, dithering:true
+    shadow:         new THREE.ShadowMaterial       opacity: 0.2
     train:
-        window:     new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5, roughness: 0.2,     dithering:true
-        # body:       new THREE.MeshStandardMaterial color:0x550000, metalness: 0.2, roughness: 0.4
-        body:       new THREE.MeshStandardMaterial color:0x783300, metalness: 0.2, roughness: 0.4,     dithering:true
-        rail:       new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45,    dithering:true, flatShading:true
+        window:     new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5, roughness: 0.2, 
+        body:       new THREE.MeshStandardMaterial color:0xffff00, metalness: 0.2, roughness: 0.4, 
+        rail:       new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true
     stone: [   
-                    new THREE.MeshStandardMaterial color:Color.stone.red,     dithering:true # red
-                    new THREE.MeshStandardMaterial color:Color.stone.gelb,    dithering:true # gelb
-                    new THREE.MeshStandardMaterial color:Color.stone.blue,    dithering:true # blue
-                    new THREE.MeshStandardMaterial color:Color.stone.white,   dithering:true # white
-                    new THREE.MeshPhongMaterial    color:Color.stone.gray,    dithering:true # gray
-                    new THREE.MeshStandardMaterial color:Color.stone.silver,  dithering:true, metalness: 0.8, roughness: 0.45 # silver
+                    new THREE.MeshStandardMaterial color:Color.stone.red,    # red
+                    new THREE.MeshStandardMaterial color:Color.stone.gelb,   # gelb
+                    new THREE.MeshStandardMaterial color:Color.stone.blue,   # blue
+                    new THREE.MeshStandardMaterial color:Color.stone.white,  # white
+                    new THREE.MeshPhongMaterial    color:Color.stone.gray,   # gray
+                    new THREE.MeshStandardMaterial color:Color.stone.silver,  metalness: 0.8, roughness: 0.45 # silver
     ]
     bot: [   
                     new THREE.MeshStandardMaterial color:Color.bot.red   # red
@@ -40,12 +40,31 @@ Materials =
     
     setWire: (wire) ->
         
-        Materials.wire = wire
+        prefs.set 'wire' wire
         for k,m of Materials.train
             m.wireframe = wire
-            
-    toggleWire: ->
+
+    getWire: -> prefs.get 'wire'
+    toggleWire: -> Materials.setWire not Materials.getWire()
+
+    setFlat: (flat) ->
         
-        Materials.setWire not Materials.wire
+        prefs.set 'flat' flat
+        for k,m of Materials.train
+            continue if k == 'rail'
+            m.flatShading = flat
+            m.needsUpdate = true
+            
+    getFlat: -> prefs.get 'flat'
+    toggleFlat: -> Materials.setFlat not Materials.getFlat()
+
+    setDither: (dither) ->
+        
+        Materials.floor.dithering = dither
+        Materials.floor.needsUpdate = true
+            
+    toggleDither: ->
+        
+        Materials.setDither not Materials.dither
         
 module.exports = Materials

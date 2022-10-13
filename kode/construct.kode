@@ -78,19 +78,8 @@ class Construct
         @meshes['train'].castShadow = true
         
         geom = intersect pill, wind
-        # s = 0.99
-        # geom.scale s, s, s
         @meshes['train'].add new THREE.Mesh geom, Materials.train.window
-        
-        rail = new THREE.BoxGeometry 0.9 8 0.4
-        rail.translate 0 0 -0.73
-        railMesh = new THREE.Mesh rail, Materials.train.rail
-        railMesh.receiveShadow = true
-        railMesh.castShadow = true
-        @meshes['train'].add railMesh
-        
-        # @meshes['train'].geometry.translate 0 0 10
-         
+                
         ●▪ trains
         
     trains: ->

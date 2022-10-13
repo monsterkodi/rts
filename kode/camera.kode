@@ -6,7 +6,7 @@
  0000000  000   000  000   000  00000000  000   000  000   000
 ###
 
-{ clamp, reduce } = require 'kxk'
+{ clamp, prefs, reduce } = require 'kxk'
 
 THREE = require 'three'
 PerspectiveCamera = THREE.PerspectiveCamera
@@ -25,7 +25,7 @@ class Camera extends PerspectiveCamera
         @dist    = 10
         @maxDist = @far/4
         @minDist = 0.9
-        @center  = vec 0, 0, 0
+        @center  = vec()
         @degree  = 60
         @rotate  = 0
         @wheelInert = 0
@@ -116,6 +116,8 @@ class Camera extends PerspectiveCamera
         @rotate += -0.1*x
         @degree += -0.1*y
         
+        @storePrefs()
+        
         @update()
            
     startPivotLeft: ->
@@ -177,7 +179,9 @@ class Camera extends PerspectiveCamera
         @center.add Vector.tmp
         @centerTarget.copy @center
         @stopZoom()
+        @storePrefs()
         @update()
+        
         if not @panBlocksWheel
             @panBlocksWheel = 1.0
             rts.animate @panBlocks
@@ -205,6 +209,7 @@ class Camera extends PerspectiveCamera
     fadeToPos: (v) -> 
 
         @centerTarget.copy v
+        @storePrefs()
         @startFadeCenter()
 
     startFadeCenter: -> 
@@ -351,6 +356,23 @@ class Camera extends PerspectiveCamera
         
     setFov: (fov) -> @fov = Math.max(2.0, Math.min fov, 175.0)
     
+    # 00000000   00000000   00000000  00000000   0000000  
+    # 000   000  000   000  000       000       000       
+    # 00000000   0000000    0000000   000000    0000000   
+    # 000        000   000  000       000            000  
+    # 000        000   000  00000000  000       0000000   
+    
+    storePrefs: ->
+        
+        prefs.set 'camera', 
+            degree: @degree 
+            rotate: @rotate 
+            dist:   @dist 
+            center:
+                x: @centerTarget.x
+                y: @centerTarget.y
+                z: @centerTarget.z
+    
     # 000   000  00000000   0000000     0000000   000000000  00000000  
     # 000   000  000   000  000   000  000   000     000     000       
     # 000   000  00000000   000   000  000000000     000     0000000   
@@ -372,6 +394,4 @@ class Camera extends PerspectiveCamera
         
         @quaternion.copy @quat
         
-        # log "camera:", @dist, @rotate, @degree
-
 module.exports = Camera

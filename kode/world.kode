@@ -45,7 +45,7 @@ class World
         
         @create()
         
-        @setSpeed prefs.get 'speed', 6
+        @setSpeed prefs.get 'speed' 1
           
     #  0000000  00000000   00000000   0000000   000000000  00000000  
     # 000       000   000  000       000   000     000     000       
@@ -59,9 +59,9 @@ class World
         @construct.bots()
         @construct.trains()
         
-        @setSpeed 6
+        @setSpeed prefs.get 'speed'
         
-        post.emit 'world', @
+        post.emit 'world' @
         
     #  0000000  000      00000000   0000000   00000000   
     # 000       000      000       000   000  000   000  
@@ -101,8 +101,8 @@ class World
         rts.camera.degree = cfg.degree ? 45
         if cfg.pos?
             rts.camera.focusOnPos vec cfg.pos
-        else
-            rts.camera.focusOnPos @bases[0].pos
+        else if cfg.center
+            rts.camera.focusOnPos vec cfg.center
         rts.camera.update()
         
     #  0000000  00000000   00000000  00000000  0000000    
@@ -119,7 +119,7 @@ class World
         prefs.set 'speed',      @speedIndex
         post.emit 'worldSpeed', @speed, @speedIndex
 
-    resetSpeed: -> @setSpeed 6
+    resetSpeed: -> @setSpeed 2
     incrSpeed:  -> @setSpeed @speedIndex + 1
     decrSpeed:  -> @setSpeed @speedIndex - 1
         
@@ -260,9 +260,14 @@ class World
         
         geom = new THREE.PlaneGeometry 1500 1500
         @floor = new THREE.Mesh geom, Materials.floor
-        @floor.receiveShadow = true
         @scene.add @floor
         @pickables.push @floor
+        
+        geom = new THREE.PlaneGeometry 1500 1500
+        geom.translate 0 0 0.2
+        @shadowFloor = new THREE.Mesh geom, Materials.shadow
+        @shadowFloor.receiveShadow = true
+        @scene.add @shadowFloor
         
     addTrain: (x, y, z) ->
         

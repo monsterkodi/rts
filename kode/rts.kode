@@ -83,13 +83,15 @@ class RTS
                 
         @scene = new THREE.Scene()
                 
-        @lightPlayer = new THREE.PointLight 0xffffff, 0.5
+        @lightAmbient = new THREE.AmbientLight 0xffffff, 0.2
+        @scene.add @lightAmbient
+        
+        @lightPlayer = new THREE.PointLight 0xffffff, 0.2
         @lightPlayer.position.copy @player.camera.getPosition() if @player?
         @lightPlayer.position.copy @camera.position
         @scene.add @lightPlayer
 
-        @lightShadow = new THREE.DirectionalLight
-        @lightShadow.intensity = 1.0
+        @lightShadow = new THREE.DirectionalLight 0xffffff, 0.5
         @lightShadow.castShadow = true
         @lightShadow.position.set 100 0 100
         @lightShadow.target.position.set 0 0 0
@@ -101,14 +103,22 @@ class RTS
         @lightShadow.shadow.camera.right   =  50
         @lightShadow.shadow.camera.top     =  50
         @lightShadow.shadow.camera.bottom  = -50
+        @lightShadow.shadowDarkness = 0.1
         @scene.add @lightShadow
-        @scene.add @lightShadow.target
+        # @scene.add @lightShadow.target
         @lightShadowHelper = new THREE.DirectionalLightHelper @lightShadow, 5, new THREE.Color 0xffff00
         @lightShadowHelper.visible = false
         @scene.add @lightShadowHelper
         
-        @lightAmbient = new THREE.AmbientLight 0x333333
-        @scene.add @lightAmbient
+        @shadowCameraHelper = new THREE.CameraHelper @lightShadow.shadow.camera
+        @shadowCameraHelper.visible = false
+        @scene.add @shadowCameraHelper
+                
+        new Map @scene # sets window.world
+        window.handle = new Handle
+             
+        if cam = prefs.get 'camera'
+            world.setCamera cam
         
         @gridHelper = new THREE.GridHelper 100, 100, 0x444444, 0x111111
         @gridHelper.rotateX deg2rad 90
@@ -116,20 +126,21 @@ class RTS
         @gridHelper.visible = false
         @scene.add @gridHelper
         
-        @axesHelper = new THREE.AxesHelper 50
-        @axesHelper.position.set 0 0 0.1
+        @axesHelper = new THREE.AxesHelper 10
+        @axesHelper.position.copy @camera.center
         @axesHelper.visible = false
+        @axesHelper.material.depthWrite = false
+        @axesHelper.material.depthTest = false
+        @axesHelper.material.depthFunc = THREE.NeverDepth
         @scene.add @axesHelper
-        
-        @shadowCameraHelper = new THREE.CameraHelper @lightShadow.shadow.camera
-        @shadowCameraHelper.visible = false
-        @scene.add @shadowCameraHelper
-        
-        @arrowHelper = new THREE.ArrowHelper vec(0 0 1), vec(), 1, 0x4444ff
+                
+        @arrowHelper = new THREE.ArrowHelper vec(0 0 1), @camera.center, 1, 0x8888ff
+        @arrowHelper.visible = false
         @scene.add @arrowHelper
-        
-        new Map @scene # sets window.world
-        window.handle = new Handle
+
+        @centerHelper = new THREE.ArrowHelper vec(0 0 1), @camera.center, 5, 0xff8888
+        @centerHelper.visible = false
+        @scene.add @centerHelper
                 
         @mouse   = vec()
         @downPos = vec()
@@ -232,18 +243,17 @@ class RTS
     calcMouse: (event) ->
         
         br = @view.getBoundingClientRect()
-        
-        @mouse.x = ((event.clientX-br.left) / br.width) * 2 - 1
-        @mouse.y = -((event.clientY-br.top) / br.height ) * 2 + 1
+        @mouse.x =  ((event.clientX - 6) / br.width) * 2 - 1
+        @mouse.y = -((event.clientY - br.top) / br.height ) * 2 + 1
         @mouse
         
     focusOnHit: ->
 
         if hit = @castRay()
-            if hit.bot
-                @camera.fadeToPos hit.bot.pos
-            else    
-                @camera.fadeToPos hit.pos
+            @camera.fadeToPos hit.pos
+            @centerHelper.setDirection hit.norm
+            @centerHelper.position.copy hit.point
+            @axesHelper.position.copy hit.point
 
     #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
     # 000       000   000  000          000     000   000  000   000   000 000   
@@ -263,10 +273,11 @@ class RTS
         point = vec intersect.point
         pos   = world.roundPos point
         
-        Vector.tmp.set 0 0 1
-        if not intersect.face
-            log intersect
-        norm = intersect.face ? intersect.face.normal : Vector.tmp
+        # Vector.tmp.set 0 0 1
+        # if not intersect.face
+            # log intersect
+        # norm = intersect.face ? intersect.face.normal : Vector.tmp
+        norm = intersect.face.normal
         
         @arrowHelper.setDirection norm
         @arrowHelper.position.copy point

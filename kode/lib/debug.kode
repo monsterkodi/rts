@@ -10,17 +10,28 @@ class Debug
 
     @: ->
 
-        @elem = elem class:'debug', style:'position:absolute; z-index:1; bottom:10px; left:10px;'
+        @elem = elem class:'debug' style:"position:absolute; z-index:1; bottom:10px; left:10px;"
+        @help = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:150px;' parent:@elem
+        @mats = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:300px;' parent:@elem
+        @grid = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:450px;' parent:@elem
+        @shdw = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:600px;' parent:@elem
 
         @worldSpeed = @value text:'speed', value: world.speed.toFixed(1), reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         
-        @button text:'info'   cb: -> prefs.set 'info', not prefs.get 'info'
-        @button text:'wire'   cb: -> Materials.toggleWire()
-        @button text:'shadow' cb: -> window.rts.shadowCameraHelper.visible = not window.rts.shadowCameraHelper.visible
-        @button text:'light'  cb: -> window.rts.lightShadowHelper.visible = not window.rts.lightShadowHelper.visible
-        @button text:'axes'   cb: -> window.rts.axesHelper.visible = not window.rts.axesHelper.visible
-        @button text:'grid'   cb: -> window.rts.gridHelper.visible = not window.rts.gridHelper.visible
-        @button text:'floor'  cb: -> world.floor.visible = not world.floor.visible
+        setInfo = (v) -> prefs.set 'info' v
+        getInfo = -> prefs.get 'info'
+        
+        @toggle text:'info'   set: setInfo, get: getInfo
+        @toggle text:'wire'   parent:@mats, set: Materials.setWire, get: Materials.getWire
+        @toggle text:'flat'   parent:@mats, set: Materials.setFlat, get: Materials.getFlat
+        # @button text:'dither' cb: -> Materials.toggleDither()
+        @toggle text:'axes'   pref:'axes'   parent:@help, obj: rts.axesHelper,         key:'visible'
+        @toggle text:'arrow'  pref:'arrow'  parent:@help, obj: rts.arrowHelper,        key:'visible'
+        @toggle text:'center' pref:'center' parent:@help, obj: rts.centerHelper,       key:'visible'
+        @toggle text:'shadow' pref:'shadow' parent:@shdw, obj: rts.shadowCameraHelper, key:'visible'
+        @toggle text:'light'  pref:'light'  parent:@shdw, obj: rts.lightShadowHelper,  key:'visible'
+        @toggle text:'grid'   pref:'grid'   parent:@grid, obj: rts.gridHelper,         key:'visible'
+        @toggle text:'floor'  pref:'floor'  parent:@grid, obj: world.floor,            key:'visible'
                 
         document.body.appendChild @elem
         
@@ -53,19 +64,52 @@ class Debug
 
     value: (cfg) ->
         
-        lbl = elem class:'label', text:cfg.text
-        val = elem class:'value', text:cfg.value, click:cfg.reset
-        inc = elem class:'incr',  text:'>', click:cfg.incr
-        dec = elem class:'decr',  text:'<', click:cfg.decr
-        box = elem class:'box',   children: [lbl, dec, val, inc], parent:@elem
+        lbl = elem class:'label' text:cfg.text
+        val = elem class:'value' text:cfg.value, click:cfg.reset
+        inc = elem class:'incr'  text:'>' click:cfg.incr
+        dec = elem class:'decr'  text:'<' click:cfg.decr
+        box = elem class:'box'   children: [lbl, dec, val, inc], parent:@elem
         
-    button: (cfg) -> elem class:'btn', text:cfg.text, click:cfg.cb, parent:@elem
-    toggle: (cfg) -> 
+    button: (cfg) -> elem class:'btn', text:cfg.text, click:cfg.cb, parent:cfg.parent ? @elem
+    
+    toggle: (cfg) ->
+        
         tgl = (cfg) -> (event) -> 
-            cfg.obj[cfg.key] = !cfg.obj[cfg.key]
-            event.target.innerHTML = cfg.text + " #{cfg.obj[cfg.key] and 'on' or 'off'}"
-            cfg.cb? cfg.obj[cfg.key]
-        btn = elem class:'btn', text:cfg.text+" #{cfg.obj[cfg.key] and 'on' or 'off'}", click:tgl(cfg), parent:@elem
+            
+            if cfg.get is func and cfg.set is func
+                cfg.set not cfg.get()
+            else
+                cfg.obj[cfg.key] = not cfg.obj[cfg.key]
+
+            if cfg.get is func
+                val = cfg.get()
+            else
+                val = cfg.obj[cfg.key]
+                
+            if cfg.pref
+                prefs.set cfg.pref, val
+                
+            event.target.classList[val ? 'add' : 'remove'] 'on'
+                
+            cfg.cb? val
+            
+        btn = elem class:'btn' text:cfg.text, click:tgl(cfg), parent:cfg.parent ? @elem
+        
+        if cfg.get is func
+            val = cfg.get()
+        else if cfg.pref
+            val = prefs.get cfg.pref
+        else
+            val = cfg.obj[cfg.key]
+        
+        if cfg.set is func
+            cfg.set val
+        else
+            cfg.obj[cfg.key] = val
+            
+        if val
+            btn.classList.add 'on'
+        btn
         
     clampZero: (v,d,m) ->
         v += d
