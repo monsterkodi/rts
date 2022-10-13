@@ -8,8 +8,6 @@
 
 { args, keyinfo, post, prefs, win } = require 'kxk'
 
-{ Bot } = require './constants'
-
 RTS        = require './rts'
 Vector     = require './lib/vector'
 Quaternion = require './lib/quaternion'
@@ -108,8 +106,6 @@ window.onkeydown = (event) ->
         when '='     then world.incrSpeed(); world.incrSpeed()
         when '-'     then world.decrSpeed(); world.decrSpeed()
         when '0'     then world.resetSpeed()
-        when 'p'     then world.plosion.atBot world.bases[0]
-        when 'o'     then handle.enemyDeath world.enemiesOfBot(world.bases[0])[0]
         # else 
             # log 'keydown', keyinfo.forEvent event
     

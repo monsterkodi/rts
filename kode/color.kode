@@ -21,43 +21,7 @@ Color =
         activeHigh:      color 0xffffff
         inactiveHigh:    color 0x555555
 
-    stone: 
-        red:             color 0x881111
-        gelb:            color 0xffaa00
-        blue:            color 0x4444ff
-        white:           color 0x44aaff
-        gray:            color 0x111111
-        silver:          color 0xaaaaee
-
-    spent: 
-        red:             color 0x441111
-        gelb:            color 0xaa4411
-        blue:            color 0x2222aa
-        white:           color 0x2288aa
-                
-    bot:
-        gray:            color 0xccccdd
-        
-    ai1:                 color 0x111111
-    ai2:                 color 0x551111
-    ai3:                 color 0x111133
-    ai4:                 color 0x003322
     segs:                color 0x111111
     path:                color 0xbbbbbb
-    cage:                
-        player:
-            base:            color 0x000033
-            berta:           color 0xffaa00
-        enemy:
-            base:            color 0x000033
-            berta:           color 0x660000
 
-Color.bot.red    = Color.stone.red
-Color.bot.gelb   = Color.stone.gelb
-Color.bot.blue   = Color.stone.blue
-Color.bot.white  = Color.stone.white
-
-Color.stones = [Color.stone.red, Color.stone.gelb, Color.stone.blue, Color.stone.white, Color.stone.gray, Color.stone.monster, Color.stone.cancer, Color.stone.silver]
-Color.orbits = [Color.stone.gelb, Color.ai1, Color.ai2, Color.ai3, Color.ai4]
-        
 module.exports = Color

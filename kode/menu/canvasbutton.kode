@@ -15,7 +15,6 @@ class CanvasButton
         @width     = 100
         @height    = 100
         @size      = vec @width*window.devicePixelRatio, @height*window.devicePixelRatio
-        @stoneSize = 0.5
         
         @name = 'CanvasButton'
         
@@ -72,7 +71,7 @@ class CanvasButton
     # 000   000  000  000   000  000   000  000      000  000   000  000   000     000     
     # 000   000  000   0000000   000   000  0000000  000   0000000   000   000     000     
     
-    highlight: => 
+    highlight: =>
         
         @highlighted = true
         @camera.fov = @highFov
@@ -106,15 +105,5 @@ class CanvasButton
             
             context = @canvas.getContext '2d'
             context.drawImage CanvasButton.renderer.domElement, 0, 0
-        
-    posForStone: (stone, i) ->
-        
-        pos = vec()
-        pos.x = stone*1.5-2.5
-        pos.y = 1.2*Math.floor (i-1)/8
-        pos.x += @stoneSize if (i-1)%4 in [1,2]
-        pos.z += @stoneSize if (i-1)%4 in [2,3]
-        pos.y += @stoneSize if (i-1)%8 > 3
-        pos
         
 module.exports = CanvasButton

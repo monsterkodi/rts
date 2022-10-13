@@ -6,8 +6,6 @@
 0000000     0000000   000   000  00000000  0000000 
 ###
 
-# require('three-instanced-mesh')(THREE)
-
 class Boxes
 
     @: (scene, @maxBoxes=1000, geom=Geometry.cornerBox(), material, shadows=true) ->
@@ -27,7 +25,6 @@ class Boxes
     lastBox:  -> @boxes[@lastIndex()]
     lastIndex: -> @numBoxes()-1
         
-    setStone: (box, stone) -> @setColor box, Color.stones[stone]
     setDir:   (box, dir)   -> @setRot box, Quaternion.unitVectors Vector.unitZ, dir
     setPos:   (box, pos)   -> 
         mat = new THREE.Matrix4
@@ -87,10 +84,7 @@ class Boxes
             @sz.set 0,0,0
             @setPos box, @sz
             
-        if cfg.color?
-            @setColor box, cfg.color
-        else
-            @setStone box, cfg.stone #? Stone.gray
+        @setColor box, cfg.color ? Color.white
         
         if cfg.dir?
             @setDir box, cfg.dir 

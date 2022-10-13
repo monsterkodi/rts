@@ -27,31 +27,6 @@ class Enum
         for key in @keys
             return key if @[key] == v
 
-Bot = new Enum
-        base:       1
-        brain:      2
-        trade:      3
-        build:      4
-        berta:      5
-        mine:       6
-        icon:       7
-    
-Stone = new Enum
-        red:        0
-        gelb:       1
-        blue:       2
-        white:      3
-        gray:       4
-        silver:     5
-        
-Stone.resources = [Stone.red, Stone.gelb, Stone.blue, Stone.white]
-Stone.all       = [0..Stone.silver]
-        
-Bend = new Enum
-        flat:       0
-        concave:    1
-        convex:     2
-    
 Face = new Enum
         PX:         0
         PY:         1
@@ -78,8 +53,6 @@ Geom = new Enum
         cubecross:  15
         
 module.exports = 
-    Bot:   Bot
-    Bend:  Bend
     Face:  Face
     Geom:  Geom
-    Stone: Stone
+    

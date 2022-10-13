@@ -17,21 +17,6 @@ Materials =
         window:     new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5, roughness: 0.2, 
         body:       new THREE.MeshStandardMaterial color:0xffff00, metalness: 0.2, roughness: 0.4, 
         rail:       new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true
-    stone: [   
-                    new THREE.MeshStandardMaterial color:Color.stone.red,    # red
-                    new THREE.MeshStandardMaterial color:Color.stone.gelb,   # gelb
-                    new THREE.MeshStandardMaterial color:Color.stone.blue,   # blue
-                    new THREE.MeshStandardMaterial color:Color.stone.white,  # white
-                    new THREE.MeshPhongMaterial    color:Color.stone.gray,   # gray
-                    new THREE.MeshStandardMaterial color:Color.stone.silver,  metalness: 0.8, roughness: 0.45 # silver
-    ]
-    bot: [   
-                    new THREE.MeshStandardMaterial color:Color.bot.red   # red
-                    new THREE.MeshStandardMaterial color:Color.bot.gelb  # gelb
-                    new THREE.MeshStandardMaterial color:Color.bot.blue  # blue
-                    new THREE.MeshStandardMaterial color:Color.bot.white # white
-                    new THREE.MeshStandardMaterial color:Color.bot.gray,  metalness: 0.9, roughness: 0.5 # gray
-    ]
     menu:
         active:       new THREE.MeshStandardMaterial color:Color.menu.active,       metalness: 0.9, roughness: 0.75
         inactive:     new THREE.MeshStandardMaterial color:Color.menu.inactive,     metalness: 0.9, roughness: 0.75

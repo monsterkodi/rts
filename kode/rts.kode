@@ -10,7 +10,7 @@ kxk = require 'kxk'
 
 { _, clamp, deg2rad, elem, first, klog, kstr, last, post, prefs, rad2deg, randInt, randIntRange, stopEvent } = require 'kxk'
 
-{ Bot, Stone, Geom, Face, Edge, Bend } = require './constants'
+{ Geom, Face, Edge } = require './constants'
 
 window.$            = kxk.$
 window._            = _
@@ -28,12 +28,9 @@ window.elem         = elem
 window.str          = kstr
 window.log          = klog
 
-window.Bot          = Bot
 window.Edge         = Edge
-window.Bend         = Bend
 window.Geom         = Geom
 window.Face         = Face
-window.Stone        = Stone
 window.THREE        = require 'three'
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
@@ -51,7 +48,6 @@ Menu    = require './menu/menu'
 World   = require './world'
 Map     = require './map'
 Camera  = require './camera'
-Handle  = require './handle'
 
 class RTS
 
@@ -115,7 +111,6 @@ class RTS
         @scene.add @shadowCameraHelper
                 
         new Map @scene # sets window.world
-        window.handle = new Handle
              
         if cam = prefs.get 'camera'
             world.setCamera cam
@@ -236,9 +231,6 @@ class RTS
         hit = @castRay()
         
     onDblClick: (event) => 
-
-        if not event.target.button
-            handle.doubleClick()
                             
     calcMouse: (event) ->
         
@@ -284,7 +276,6 @@ class RTS
         
         info = 
             pos:    pos
-            index:  world.indexAtPos pos
             norm:   norm
             point:  point
             dist:   intersect.distance
@@ -292,13 +283,6 @@ class RTS
         @scene.remove @cursor if @cursor
         delete @cursor
             
-        if intersect.object.bot
-            info.bot = world.botAtPos point
-        
-        stones = intersects.filter (i) => i.object.stone?
-        if stones.length
-            info.face = world.faceAtPosNorm stones[0].point, stones[0].face.normal
-        
         info
         
     # 00000000   00000000  000   000  0000000    00000000  00000000   

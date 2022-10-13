@@ -96,6 +96,10 @@ class Map extends World
             vec -20   0 2 
             vec -10   0 2
             
+            vec -10   0 2
+            vec   0   0 2
+            vec  10   0 2
+            
             vec  10   0 2
             vec  20   0 2 
             vec  30   0 1
