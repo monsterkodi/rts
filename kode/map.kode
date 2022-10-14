@@ -56,6 +56,9 @@ class Map extends World
         train = @addTrain track
         train.setColor Color.train.green
             
+        @addBoxcar train
+        @addBoxcar train
+        
         track = @addTrack [ 
             vec   0 -15 0 
             vec  15 -15 0 
@@ -160,8 +163,11 @@ class Map extends World
             ]         
             
         train = @addTrain track
+        @addBoxcar train
+        @addBoxcar train
         train.setColor Color.train.blue
         train.cfg.pingpong = true
+        
         
         # train = @addTrain()
         # train.setColor Color.train.white

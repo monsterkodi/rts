@@ -5,16 +5,18 @@ class Train
         
         @path  = @cfg.track?.path
         @speed = 0.02
+        @cars  = []
+        
+    addCar: (car) ->
+        
+        @cars.push car
         
     setColor: (color) ->
         
-        @mesh.material = @mesh.material.clone()
-        @mesh.material.color.copy color
-        @mesh.children[1].material = @mesh.children[1].material.clone()
-        @mesh.children[2].material = @mesh.children[2].material.clone()
-        @mesh.children[2].material.emissive.copy color
+        for car in @cars
+            car.setColor color
         
-    update: (delta) ->
+    update: (delta, timeSum) ->
         
         return if not @path
 
@@ -36,12 +38,8 @@ class Train
             if @cfg.pos >= 1.0
                 @cfg.pos -= 1.0
             
-        if @mesh
-            
-            @path.getPointAt @cfg.pos, @mesh.position
-            @path.getTangentAt @cfg.pos, Vector.tmp
-            Vector.tmp.add @mesh.position 
-            @mesh.up.set 0 0 1
-            @mesh.lookAt Vector.tmp
+        for car, index in @cars
+            car.update delta, timeSum
+            car.moveToPathPos @path, clamp 0 1 @cfg.pos-0.0135*index
             
 module.exports = Train

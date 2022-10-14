@@ -1,0 +1,6 @@
+
+Car = require './car'
+
+class Boxcar extends Car
+
+module.exports = Boxcar

@@ -9,6 +9,8 @@
 Boxes     = require './boxes'
 Rail      = require './rail'
 Train     = require './train'
+Engine    = require './engine'
+Boxcar    = require './boxcar'
 Graph     = require './graph'
 Construct = require './construct'
 
@@ -113,13 +115,7 @@ class World
     simulate: (scaledDelta) ->
         
         for train in @trains
-            x = 0.35*Math.sin 2*@timeSum
-            train.mesh.children[1].scale.set 1+x, 1 1
-            
-            c = 0.5+0.5*Math.sin 2*@timeSum
-            col = train.mesh.material.color
-            train.mesh.children[1].material.emissive.setRGB col.r*c, col.g*c, col.b*c
-            train.update scaledDelta
+            train.update scaledDelta, @timeSum            
         
     # 00000000  000       0000000    0000000   00000000   
     # 000       000      000   000  000   000  000   000  
@@ -141,6 +137,12 @@ class World
         @shadowFloor.receiveShadow = true
         @scene.add @shadowFloor
         
+    # 000000000  00000000    0000000   000  000   000  
+    #    000     000   000  000   000  000  0000  000  
+    #    000     0000000    000000000  000  000 0 000  
+    #    000     000   000  000   000  000  000  0000  
+    #    000     000   000  000   000  000  000   000  
+    
     addTrain: (track) ->
 
         train = new Train
@@ -149,12 +151,31 @@ class World
             
         @trains.push train
         
-        mesh = @construct.meshes['train'].clone()
-        @scene.add mesh
-        train.mesh = mesh
-        @pickables.push mesh
+        @addEngine train
         
         train
+
+    addEngine: (train) ->
+        
+        engine = new Engine @construct.meshes.engine.clone()
+            
+        @scene.add engine.mesh
+        @pickables.push engine.mesh
+        
+        train.addCar engine
+        
+        engine
+        
+    addBoxcar: (train) ->
+        
+        boxcar = new Boxcar @construct.meshes.boxcar.clone()
+            
+        @scene.add boxcar.mesh
+        @pickables.push boxcar.mesh
+        
+        train.addCar boxcar
+        
+        boxcar
             
     addTrack: (points) ->
         

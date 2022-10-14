@@ -1,0 +1,29 @@
+###
+ 0000000   0000000   00000000   
+000       000   000  000   000  
+000       000000000  0000000    
+000       000   000  000   000  
+ 0000000  000   000  000   000  
+###
+
+class Car
+    
+    @: (@mesh) ->
+        
+    update: (delta, timeSum) ->
+    
+    setColor: (color) ->
+        
+        @mesh.material = @mesh.material.clone()
+        @mesh.material.color.copy color
+
+    moveToPathPos: (path, pos) ->
+    
+        path.getPointAt pos, @mesh.position
+        path.getTangentAt pos, Vector.tmp
+        Vector.tmp.add @mesh.position 
+        @mesh.up.set 0 0 1
+        @mesh.lookAt Vector.tmp
+        
+module.exports = Car
+    

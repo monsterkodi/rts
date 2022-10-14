@@ -8,6 +8,10 @@
 
 { CSG } = require '../kode/csg/csg'
         
+subtract  = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
+intersect = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).intersect CSG.fromGeometry b
+union     = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).union     CSG.fromGeometry b
+
 class Construct
 
     @: ->
@@ -23,6 +27,7 @@ class Construct
     
     init: -> 
         
+        # count = geom.attributes.position.count
         @initGeoms()
         @initTrains()
         
@@ -38,10 +43,10 @@ class Construct
         r = radius ? 0.5
         s = segmts ? 8
         
-        top = new THREE.SphereGeometry r, s, s, 0, 2*Math.PI, 0, Math.PI/2
+        top = new THREE.SphereGeometry r, s, s/2, 0, 2*Math.PI, 0, Math.PI/2
         top.translate 0 l/2 0
         mid = new THREE.CylinderGeometry r, r, l, s, 1 true
-        bot = new THREE.SphereGeometry r, s, s, 0, 2*Math.PI, Math.PI/2, Math.PI/2
+        bot = new THREE.SphereGeometry r, s, s/2, 0, 2*Math.PI, Math.PI/2, Math.PI/2
         bot.translate 0 -l/2 0
         
         pill = THREE.BufferGeometryUtils.mergeBufferGeometries [top, mid, bot]
@@ -66,14 +71,21 @@ class Construct
     initTrains: ->
         
         ●▸ trains
-         
-        subtract  = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
-        intersect = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).intersect CSG.fromGeometry b
-        union     = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).union     CSG.fromGeometry b
-     
+        @initEngine()
+        @initBoxcar()
+        ●▪ trains
+    
+    # 00000000  000   000   0000000   000  000   000  00000000  
+    # 000       0000  000  000        000  0000  000  000       
+    # 0000000   000 0 000  000  0000  000  000 0 000  0000000   
+    # 000       000  0000  000   000  000  000  0000  000       
+    # 00000000  000   000   0000000   000  000   000  00000000  
+    
+    initEngine: ->
+             
         seg = 16
   
-        pill = @pill 2, 1, 16
+        pill = @pill 2 1 16
         
         cutm = new THREE.BoxGeometry 3 1 1
         cutm.translate 0 -0.5 0
@@ -82,10 +94,6 @@ class Construct
         cyl = new THREE.CylinderGeometry 0.5 0.5 4 16 1 
         cyl.rotateZ Math.PI/2
         body = subtract body, cyl
-        
-        # boxm = new THREE.BoxGeometry 1.2 1 1
-        # # boxm.translate 0 -0.5 0
-        # body = union body, boxm
         
         wind = new THREE.BoxGeometry 1.5 0.5 0.5
         wind.translate 0 0.5 1.6
@@ -103,10 +111,9 @@ class Construct
         geom = subtract geom, rail
         geom.translate 0 offset, 0
         
-        # count = geom.attributes.position.count
-        @meshes['train'] = new THREE.Mesh geom, Materials.train.body
-        @meshes['train'].receiveShadow = true
-        @meshes['train'].castShadow = true
+        @meshes.engine = new THREE.Mesh geom, Materials.train.body
+        @meshes.engine.receiveShadow = true
+        @meshes.engine.castShadow = true
         
         geom = intersect body, wind
         geom.translate 0 offset, 0
@@ -119,21 +126,66 @@ class Construct
         left.rotateX -0.41
         left.rotateZ Math.PI/4-0.1
         left.translate -0.554 0 0
+        
         right = new THREE.CylinderGeometry 0.2 0.2 0.2 16 1 false -Math.PI/2, Math.PI
         right.rotateX -0.41
         right.rotateZ -Math.PI/4+0.1
         right.translate  0.554 0 0
-        # center = new THREE.CylinderGeometry 0.25 0.25 0.05 16 1 
-        # center.translate 0 0.31 0.24
+
         light = THREE.BufferGeometryUtils.mergeBufferGeometries [left, right]
         light.rotateX Math.PI/2
         light.translate 0 offset+0.24, 1.67
         
-        @meshes['train'].add new THREE.Mesh geom,   Materials.train.window
-        @meshes['train'].add new THREE.Mesh piston, Materials.train.piston
-        @meshes['train'].add new THREE.Mesh light,  Materials.train.light
-                
-        ●▪ trains
-                                
+        @meshes.engine.add new THREE.Mesh geom,   Materials.train.window
+        @meshes.engine.add new THREE.Mesh piston, Materials.train.piston
+        @meshes.engine.add new THREE.Mesh light,  Materials.train.light
+                                                
+    # 0000000     0000000   000   000   0000000   0000000   00000000   
+    # 000   000  000   000   000 000   000       000   000  000   000  
+    # 0000000    000   000    00000    000       000000000  0000000    
+    # 000   000  000   000   000 000   000       000   000  000   000  
+    # 0000000     0000000   000   000   0000000  000   000  000   000  
+    
+    initBoxcar: ->
+             
+        seg = 16
+  
+        pill = @pill 2 1 16
+        
+        cutm = new THREE.BoxGeometry 3 1 1
+        cutm.translate 0 -0.5 0
+        body = subtract pill, cutm
+        
+        cyl = new THREE.CylinderGeometry 0.5 0.5 4 16 1 
+        cyl.rotateZ Math.PI/2
+        body = subtract body, cyl
+        
+        wind = new THREE.BoxGeometry 1.5 0.5 0.5
+        wind.translate 0 0.5 1.6
+        
+        offset = 1.6
+        
+        rail = new THREE.BoxGeometry 1 1 8
+        rail.translate 0 -1 0
+        geom = subtract pill, rail
+        
+        box = new THREE.BoxGeometry 2 1.5 2.7
+        box.translate 0 0.3 0
+        geom = subtract geom, box
+        
+        geom.translate 0 offset, 0
+        
+        @meshes.boxcar = new THREE.Mesh geom, Materials.train.body
+        @meshes.boxcar.receiveShadow = true
+        @meshes.boxcar.castShadow = true
+        
+        box = new THREE.BoxGeometry 2 2 2 
+        box.translate 0 offset+0.9 0
+        boxMesh = new THREE.Mesh box, Materials.train.cargo
+        boxMesh.receiveShadow = true
+        boxMesh.castShadow = true
+            
+        @meshes.boxcar.add boxMesh
+                        
 module.exports = Construct
 
