@@ -10,8 +10,6 @@ kxk = require 'kxk'
 
 { _, clamp, deg2rad, elem, first, klog, kstr, last, post, prefs, rad2deg, randInt, randIntRange, stopEvent } = require 'kxk'
 
-{ Geom, Face, Edge } = require './constants'
-
 window.$            = kxk.$
 window._            = _
 window.post         = post
@@ -28,9 +26,6 @@ window.elem         = elem
 window.str          = kstr
 window.log          = klog
 
-window.Edge         = Edge
-window.Geom         = Geom
-window.Face         = Face
 window.THREE        = require 'three'
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
@@ -79,7 +74,11 @@ class RTS
                 
         @scene = new THREE.Scene()
                 
-        @lightAmbient = new THREE.AmbientLight 0xffffff, 0.2
+        @brightness = 1
+        @lightIntensityAmbient = 0.2
+        @lightIntensityShadow  = 0.5
+        
+        @lightAmbient = new THREE.AmbientLight 0xffffff, @lightIntensityAmbient
         @scene.add @lightAmbient
         
         @lightPlayer = new THREE.PointLight 0xffffff, 0.2
@@ -87,7 +86,7 @@ class RTS
         @lightPlayer.position.copy @camera.position
         @scene.add @lightPlayer
 
-        @lightShadow = new THREE.DirectionalLight 0xffffff, 0.5
+        @lightShadow = new THREE.DirectionalLight 0xffffff, @lightIntensityShadow 
         @lightShadow.castShadow = true
         @lightShadow.position.set 100 0 100
         @lightShadow.target.position.set 0 0 0
@@ -99,7 +98,7 @@ class RTS
         @lightShadow.shadow.camera.right   =  50
         @lightShadow.shadow.camera.top     =  50
         @lightShadow.shadow.camera.bottom  = -50
-        @lightShadow.shadowDarkness = 0.1
+        # @lightShadow.shadowDarkness = 0.1
         @scene.add @lightShadow
         # @scene.add @lightShadow.target
         @lightShadowHelper = new THREE.DirectionalLightHelper @lightShadow, 5, new THREE.Color 0xffff00
@@ -109,9 +108,9 @@ class RTS
         @shadowCameraHelper = new THREE.CameraHelper @lightShadow.shadow.camera
         @shadowCameraHelper.visible = false
         @scene.add @shadowCameraHelper
-                
+            
         new Map @scene # sets window.world
-             
+                             
         if cam = prefs.get 'camera'
             world.setCamera cam
         
@@ -141,18 +140,58 @@ class RTS
         @downPos = vec()
         
         @raycaster = new THREE.Raycaster()
+
+        @debug = new Debug
+        if not prefs.get 'debug' 
+            @debug.hide()
+            # @debug = new Debug if not @debug
+        # else if @debug
+            # @debug.del()
+            # delete @debug
         
+        @menu = new Menu
+                
         document.addEventListener 'mousemove' @onMouseMove
         document.addEventListener 'mousedown' @onMouseDown
         document.addEventListener 'mouseup'   @onMouseUp
         document.addEventListener 'dblclick'  @onDblClick
-        
-        @menu = new Menu
-        
+                
         @lastAnimationTime = window.performance.now()
                 
+        world.create()
         @animationStep()
 
+    # 0000000    00000000   000   0000000   000   000  000000000  000   000  00000000   0000000   0000000  
+    # 000   000  000   000  000  000        000   000     000     0000  000  000       000       000       
+    # 0000000    0000000    000  000  0000  000000000     000     000 0 000  0000000   0000000   0000000   
+    # 000   000  000   000  000  000   000  000   000     000     000  0000  000            000       000  
+    # 0000000    000   000  000   0000000   000   000     000     000   000  00000000  0000000   0000000   
+    
+    setBrightness: (@brightness) =>
+        
+        c = Color.menu.background.clone()
+        c.multiplyScalar @brightness
+        @renderer.setClearColor c
+        @lightAmbient.intensity = @lightIntensityAmbient * @brightness
+        @lightShadow.intensity = @lightIntensityShadow * @brightness
+        post.emit 'brightness' @brightness
+        
+    getBrightness: =>
+        
+        return @brightness
+        
+    resetBrightness: =>
+        
+        @setBrightness 1
+        
+    incrBrightness: =>
+        
+        @setBrightness @getBrightness() + 0.1
+
+    decrBrightness: =>
+        
+        @setBrightness @getBrightness() - 0.1
+        
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
     # 000000000  000 0 000  000  000000000  000000000     000     0000000   
@@ -187,11 +226,11 @@ class RTS
          
         if not @paused
             
+            world.animate delta
+            
             angle = -delta*0.5*world.speed
             @lightShadow.position.applyQuaternion Quaternion.axisAngle Vector.unitZ, angle
             @lightShadowHelper.update()   
-            
-            world.animate delta
              
             oldWorldAnimations = @worldAnimations.clone()
             @worldAnimations = []
@@ -200,7 +239,7 @@ class RTS
                     
         @render()
 
-        setTimeout @animationStep, 1000/60
+        window.requestAnimationFrame @animationStep
             
     # 00     00   0000000   000   000   0000000  00000000  
     # 000   000  000   000  000   000  000       000       
@@ -307,12 +346,6 @@ class RTS
             @info.del()
             delete @info
             
-        if prefs.get 'debug'
-            @debug = new Debug if not @debug
-        else if @debug
-            @debug.del()
-            delete @debug
-
     # 00000000   00000000   0000000  000  0000000  00000000  0000000  
     # 000   000  000       000       000     000   000       000   000
     # 0000000    0000000   0000000   000    000    0000000   000   000

@@ -16,7 +16,8 @@ class Debug
         @grid = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:450px;' parent:@elem
         @shdw = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:600px;' parent:@elem
 
-        @worldSpeed = @value text:'speed', value: world.speed.toFixed(1), reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
+        @worldSpeed = @value text:'speed' value: world.speed.toFixed(1), reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
+        @brightness = @value text:'light' value: rts.getBrightness(), reset:rts.resetBrightness, incr:rts.incrBrightness, decr:rts.decrBrightness
         
         setInfo = (v) -> prefs.set 'info' v
         getInfo = -> prefs.get 'info'
@@ -36,7 +37,11 @@ class Debug
         document.body.appendChild @elem
         
         post.on 'worldSpeed' @updateWorldSpeed
+        post.on 'brightness' @updateBrightness
 
+    show: => @elem.style.display = 'block'
+    hide: => @elem.style.display = 'none'
+        
     del: -> 
     
         post.removeListener 'worldSpeed' @updateWorldSpeed
@@ -62,6 +67,10 @@ class Debug
         @worldSpeed?.children[2].innerHTML = world.speed.toFixed 1
         0
 
+    updateBrightness: =>  
+        @brightness?.children[2].innerHTML = rts.getBrightness().toFixed 1
+        0
+        
     value: (cfg) ->
         
         lbl = elem class:'label' text:cfg.text

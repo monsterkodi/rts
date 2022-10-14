@@ -16,7 +16,7 @@ class SpeedButton extends DialButton
         
         @name = 'SpeedButton'
         
-        post.on 'worldSpeed', @onWorldSpeed        
+        post.on 'worldSpeed' @onWorldSpeed
         @onWorldSpeed()
             
     setDial: (index) -> 

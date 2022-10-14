@@ -7,21 +7,15 @@ class Rail extends BufferGeometry
 
         super()
         
-        # path = new THREE.CatmullRomCurve3 points
+        @path = new THREE.CurvePath
         
-        path = new THREE.CurvePath
-        
-        # segnum = Math.floor points.length / 4
-        # for pi in 0...segnum
-            # path.add new THREE.CubicBezierCurve3 points[pi*4+0], points[pi*4+1], points[pi*4+2], points[pi*4+3]
-
         segnum = Math.floor points.length / 3
         for pi in 0...segnum
-            path.add new THREE.QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
+            @path.add new THREE.QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
             
         @type = 'Rail'
 
-        frames = path.computeFrenetFrames segments, false
+        frames = @path.computeFrenetFrames segments, false
 
         @tangents  = frames.tangents
         @normals   = frames.normals
@@ -34,9 +28,9 @@ class Rail extends BufferGeometry
         vertices = []
         indices  = []
 
-        generateSegment = (i) ->
+        generateSegment = (i) =>
 
-            P = path.getPointAt i / segments, P
+            P = @path.getPointAt i / segments, P
 
             N = frames.normals[i]
             B = frames.binormals[i]

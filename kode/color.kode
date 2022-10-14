@@ -9,6 +9,17 @@
 color = (v) -> new THREE.Color v
 
 Color =
+    
+    black:              color  0x000000
+    white:              color  0xffffff
+    
+    train:
+        yellow:         color  0xffff00
+        orange:         color  0xff8800
+        red:            color  0xff0000
+        green:          color  0x008800
+        blue:           color  0x8888ff
+        white:          color  0xffffff
 
     menu:
         background:      color 0x181818

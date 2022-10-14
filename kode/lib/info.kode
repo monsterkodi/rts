@@ -32,7 +32,7 @@ class Info
         add "vects: #{Vector.counter}"
         add "quats: #{Quaternion.counter}"
         add "calls: #{info.calls}"
-        add "trias: #{info.triangles}"
+        add "trias: #{info.triangles-1800000}"
         add "lines: #{info.lines}"
                     
         add '....................................................'

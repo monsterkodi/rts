@@ -8,6 +8,7 @@
 
 Boxes     = require './boxes'
 Rail      = require './rail'
+Train     = require './train'
 Graph     = require './graph'
 Construct = require './construct'
 
@@ -20,24 +21,20 @@ class World
         @vec  = vec()
         @vec2 = vec()
         
-        window.world   = @
+        window.world = @
         
         window.boxes   = new Boxes @scene, 20000
         @resourceBoxes = new Boxes @scene, 10000
         
         @timeSum = 0
-        @cycles  = 0
         @pickables = []
                 
-        @build()
-        
         @construct = new Construct
         @construct.init()
         
-        @create()
-        
+        @addFloor()
         @setSpeed prefs.get 'speed' 1
-          
+        
     #  0000000  00000000   00000000   0000000   000000000  00000000  
     # 000       000   000  000       000   000     000     000       
     # 000       0000000    0000000   000000000     000     0000000   
@@ -45,12 +42,6 @@ class World
     #  0000000  000   000  00000000  000   000     000     00000000  
     
     create: ->
-        
-        @construct.trains()
-        
-        @setSpeed prefs.get 'speed'
-        
-        post.emit 'world' @
         
     #  0000000  000      00000000   0000000   00000000   
     # 000       000      000       000   000  000   000  
@@ -90,8 +81,8 @@ class World
         @speedIndex = clamp 0, config.world.speed.length-1, speedIndex
         @speed = config.world.speed[@speedIndex]
         # log "speed #{@speedIndex} #{@speed}"
-        prefs.set 'speed',      @speedIndex
-        post.emit 'worldSpeed', @speed, @speedIndex
+        prefs.set 'speed'      @speedIndex
+        post.emit 'worldSpeed' @speed, @speedIndex
 
     resetSpeed: -> @setSpeed 2
     incrSpeed:  -> @setSpeed @speedIndex + 1
@@ -104,18 +95,31 @@ class World
     # 000   000  000   000  000  000   000  000   000     000     00000000  
     
     animate: (delta) ->
-        
+
         scaledDelta = delta * @speed
+        
+        @timeSum += scaledDelta
         @simulate scaledDelta
         boxes.render()
         @resourceBoxes.render()
         post.emit 'tick'
         
+    #  0000000  000  00     00  000   000  000       0000000   000000000  00000000  
+    # 000       000  000   000  000   000  000      000   000     000     000       
+    # 0000000   000  000000000  000   000  000      000000000     000     0000000   
+    #      000  000  000 0 000  000   000  000      000   000     000     000       
+    # 0000000   000  000   000   0000000   0000000  000   000     000     00000000  
+    
     simulate: (scaledDelta) ->
         
-        @timeSum += scaledDelta
-        
-        @cycles = Math.floor @timeSum/60
+        for train in @trains
+            x = 0.35*Math.sin 2*@timeSum
+            train.mesh.children[1].scale.set 1+x, 1 1
+            
+            c = 0.5+0.5*Math.sin 2*@timeSum
+            col = train.mesh.material.color
+            train.mesh.children[1].material.emissive.setRGB col.r*c, col.g*c, col.b*c
+            train.update scaledDelta
         
     # 00000000  000       0000000    0000000   00000000   
     # 000       000      000   000  000   000  000   000  
@@ -127,6 +131,7 @@ class World
         
         geom = new THREE.PlaneGeometry 1500 1500
         @floor = new THREE.Mesh geom, Materials.floor
+        @floor.visible = prefs.get 'floor'
         @scene.add @floor
         @pickables.push @floor
         
@@ -136,10 +141,20 @@ class World
         @shadowFloor.receiveShadow = true
         @scene.add @shadowFloor
         
-    addTrain: (x, y, z) ->
+    addTrain: (track) ->
+
+        train = new Train
+            pos:   0.5
+            track: track
+            
+        @trains.push train
         
-        @trains.push
-            pos: vec x, y, z
+        mesh = @construct.meshes['train'].clone()
+        @scene.add mesh
+        train.mesh = mesh
+        @pickables.push mesh
+        
+        train
             
     addTrack: (points) ->
         
@@ -150,9 +165,8 @@ class World
         mesh.receiveShadow = true
         @pickables.push mesh
         @scene.add mesh
+        rail
         
-    build: ->
-                        
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       
     # 00000000   000   000  0000000   

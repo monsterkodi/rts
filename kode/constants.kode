@@ -27,32 +27,14 @@ class Enum
         for key in @keys
             return key if @[key] == v
 
-Face = new Enum
-        PX:         0
-        PY:         1
-        PZ:         2
-        NX:         3
-        NY:         4
-        NZ:         5
-                                
-Geom = new Enum
-        cube:       1
-        cone:       2
-        sphere:     3
-        torus:      4
-        icosa:      5
-        dodeca:     6
-        tetra:      7
-        octa:       8
-        cylinder:   9
-        knot:       10
-        dodicos:    11
-        octacube:   12
-        toruscone:  13
-        tubecross:  14
-        cubecross:  15
-        
-module.exports = 
-    Face:  Face
-    Geom:  Geom
-    
+
+# Face = new Enum
+        # PX:         0
+        # PY:         1
+        # PZ:         2
+        # NX:         3
+        # NY:         4
+        # NZ:         5
+#                                 
+# module.exports = 
+    # Face:  Face

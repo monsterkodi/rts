@@ -14,7 +14,7 @@ class Map extends World
         
         super scene
         
-    build: -> @trainTest()
+    create: -> @trainTest()
 
     # 000000000  00000000    0000000   000  000   000   0000000  
     #    000     000   000  000   000  000  0000  000  000       
@@ -35,9 +35,7 @@ class Map extends World
             # for y in 0...10
                 # @addTrain x*3 y*5 0
   
-        @addFloor()
-        @addTrain 0 0 0
-        @addTrack [ 
+        track = @addTrack [ 
             vec   0 -20 0 
             vec  20 -20 0 
             vec  20   0 0
@@ -55,7 +53,10 @@ class Map extends World
             vec   0 -20 0 
             ]
 
-        @addTrack [ 
+        train = @addTrain track
+        train.setColor Color.train.green
+            
+        track = @addTrack [ 
             vec   0 -15 0 
             vec  15 -15 0 
             vec  15   0 0
@@ -67,9 +68,13 @@ class Map extends World
             vec   0  15 0
             vec -15  15 0 
             vec -15   0 0 
-            ]            
+            ]          
             
-        @addTrack [ 
+        train = @addTrain track
+        train.setColor Color.train.orange
+        train.cfg.pingpong = true
+            
+        track = @addTrack [ 
             vec   0 -10 0 
             vec  10 -10 0 
             vec  10   0 0
@@ -86,27 +91,79 @@ class Map extends World
             vec -10 -10 0 
             vec   0 -10 0 
             ]            
+
+        train = @addTrain track
+        train.setColor Color.train.red
             
-        @addTrack [ 
+        track = @addTrack [ 
             vec -50   0 0 
             vec -40   0 0 
-            vec -30   0 1
+            vec -30   0 2
 
-            vec -30   0 1
-            vec -20   0 2 
-            vec -10   0 2
+            vec -30   0 2
+            vec -20   0 4 
+            vec -10   0 4
             
-            vec -10   0 2
-            vec   0   0 2
-            vec  10   0 2
+            vec -10   0 4
+            vec   0   0 4
+            vec  10   0 4
             
-            vec  10   0 2
-            vec  20   0 2 
-            vec  30   0 1
+            vec  10   0 4
+            vec  20   0 4 
+            vec  30   0 2
             
-            vec  30   0 1 
+            vec  30   0 2 
             vec  40   0 0 
             vec  50   0 0 
-            ]            
+            ]         
             
+        train = @addTrain track
+        train.setColor Color.train.yellow
+        train.cfg.pingpong = true
+            
+        track = @addTrack [ 
+            vec 0  -100 0 
+            vec 0   -75 8 
+            vec 0   -50 8
+            
+            vec 0  -50 8 
+            vec 0    0 8 
+            vec 0   50 8
+            
+            vec 0   50 8
+            vec 0   75 8
+            vec 0  100 0
+            
+            ]         
+            
+        train = @addTrain track
+        train.setColor Color.train.white
+        train.cfg.pingpong = true
+        
+        # train = @addTrain track
+        # train.setColor Color.train.blue
+        # train.cfg.pingpong = true
+            
+        track = @addTrack [ 
+            vec 10  -150 0 
+            vec 10  -100 8 
+            vec 10   -50 8
+            
+            vec 10  -50 8 
+            vec 10    0 8 
+            vec 10   50 8
+            
+            vec 10   50 8
+            vec 10  100 8
+            vec 10  150 0
+            
+            ]         
+            
+        train = @addTrain track
+        train.setColor Color.train.blue
+        train.cfg.pingpong = true
+        
+        # train = @addTrain()
+        # train.setColor Color.train.white
+        
 module.exports = Map

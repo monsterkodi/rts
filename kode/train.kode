@@ -1,0 +1,47 @@
+
+class Train
+
+    @: (@cfg) ->
+        
+        @path  = @cfg.track?.path
+        @speed = 0.02
+        
+    setColor: (color) ->
+        
+        @mesh.material = @mesh.material.clone()
+        @mesh.material.color.copy color
+        @mesh.children[1].material = @mesh.children[1].material.clone()
+        @mesh.children[2].material = @mesh.children[2].material.clone()
+        @mesh.children[2].material.emissive.copy color
+        
+    update: (delta) ->
+        
+        return if not @path
+
+        advance = delta * @speed
+        
+        if @cfg.pingpong
+            if @cfg.forward
+                @cfg.pos += advance
+                if @cfg.pos >= 1.0
+                    @cfg.pos = 2.0 - @cfg.pos
+                    @cfg.forward = false
+            else
+                @cfg.pos -= advance
+                if @cfg.pos <= 0.0
+                    @cfg.pos *= -1
+                    @cfg.forward = true
+        else
+            @cfg.pos += advance
+            if @cfg.pos >= 1.0
+                @cfg.pos -= 1.0
+            
+        if @mesh
+            
+            @path.getPointAt @cfg.pos, @mesh.position
+            @path.getTangentAt @cfg.pos, Vector.tmp
+            Vector.tmp.add @mesh.position 
+            @mesh.up.set 0 0 1
+            @mesh.lookAt Vector.tmp
+            
+module.exports = Train

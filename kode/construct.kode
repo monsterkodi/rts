@@ -13,6 +13,7 @@ class Construct
     @: ->
         
         @meshes = {}
+        @geoms  = {}
         
     # 000  000   000  000  000000000  
     # 000  0000  000  000     000     
@@ -22,7 +23,39 @@ class Construct
     
     init: -> 
         
+        @initGeoms()
         @initTrains()
+        
+    #  0000000   00000000   0000000   00     00   0000000  
+    # 000        000       000   000  000   000  000       
+    # 000  0000  0000000   000   000  000000000  0000000   
+    # 000   000  000       000   000  000 0 000       000  
+    #  0000000   00000000   0000000   000   000  0000000   
+    
+    pill: (length, radius, segmts) ->
+
+        l = length ? 1
+        r = radius ? 0.5
+        s = segmts ? 8
+        
+        top = new THREE.SphereGeometry r, s, s, 0, 2*Math.PI, 0, Math.PI/2
+        top.translate 0 l/2 0
+        mid = new THREE.CylinderGeometry r, r, l, s, 1 true
+        bot = new THREE.SphereGeometry r, s, s, 0, 2*Math.PI, Math.PI/2, Math.PI/2
+        bot.translate 0 -l/2 0
+        
+        pill = THREE.BufferGeometryUtils.mergeBufferGeometries [top, mid, bot]
+        
+        pill.rotateX Math.PI/2
+        pill
+        
+    initGeoms: ->
+        
+        ●▸ geoms
+        
+        @geoms.pill = @pill 1
+        
+        ●▪ geoms
         
     # 000000000  00000000    0000000   000  000   000   0000000  
     #    000     000   000  000   000  000  0000  000  000       
@@ -39,54 +72,68 @@ class Construct
         union     = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).union     CSG.fromGeometry b
      
         seg = 16
-        sphere   = new THREE.SphereGeometry   1.0 seg, seg
-        cylinder = new THREE.CylinderGeometry 1.0 1.0 2.0 seg
+  
+        pill = @pill 2, 1, 16
         
-        rail = new THREE.BoxGeometry 3 2 1
-        rail.translate 0 0 -1
-        cylinder = subtract cylinder, rail
+        cutm = new THREE.BoxGeometry 3 1 1
+        cutm.translate 0 -0.5 0
+        body = subtract pill, cutm
         
-        sphere.translate 0 1 0
-        geom = union sphere, cylinder
-        sphere.translate 0 -2 0
-        pill = union geom, sphere
-         
+        cyl = new THREE.CylinderGeometry 0.5 0.5 4 16 1 
+        cyl.rotateZ Math.PI/2
+        body = subtract body, cyl
+        
+        # boxm = new THREE.BoxGeometry 1.2 1 1
+        # # boxm.translate 0 -0.5 0
+        # body = union body, boxm
+        
         wind = new THREE.BoxGeometry 1.5 0.5 0.5
-        wind.translate 0 -1.6 0.5
+        wind.translate 0 0.5 1.6
         
-        side = new THREE.BoxGeometry 2 0.3 0.22
-        side.translate 0 -1.05 0.65
+        side = new THREE.BoxGeometry 2 0.22 0.3
+        side.translate 0 0.65 1.05 
         wind = union wind, side
         
-        geom = subtract pill, wind
+        geom = subtract body, wind
 
-        rail = new THREE.BoxGeometry 1 8 1
-        rail.translate 0 0 -1
+        offset = 1.6
+        
+        rail = new THREE.BoxGeometry 1 1 8
+        rail.translate 0 -1 0
         geom = subtract geom, rail
+        geom.translate 0 offset, 0
         
         # count = geom.attributes.position.count
         @meshes['train'] = new THREE.Mesh geom, Materials.train.body
         @meshes['train'].receiveShadow = true
         @meshes['train'].castShadow = true
         
-        geom = intersect pill, wind
-        @meshes['train'].add new THREE.Mesh geom, Materials.train.window
+        geom = intersect body, wind
+        geom.translate 0 offset, 0
+        
+        piston = new THREE.CylinderGeometry 0.5 0.5 1.6 16 1 
+        piston.rotateZ Math.PI/2
+        piston.translate 0 offset, 0
+
+        left  = new THREE.CylinderGeometry 0.2 0.2 0.2 16 1 false -Math.PI/2, Math.PI
+        left.rotateX -0.41
+        left.rotateZ Math.PI/4-0.1
+        left.translate -0.554 0 0
+        right = new THREE.CylinderGeometry 0.2 0.2 0.2 16 1 false -Math.PI/2, Math.PI
+        right.rotateX -0.41
+        right.rotateZ -Math.PI/4+0.1
+        right.translate  0.554 0 0
+        # center = new THREE.CylinderGeometry 0.25 0.25 0.05 16 1 
+        # center.translate 0 0.31 0.24
+        light = THREE.BufferGeometryUtils.mergeBufferGeometries [left, right]
+        light.rotateX Math.PI/2
+        light.translate 0 offset+0.24, 1.67
+        
+        @meshes['train'].add new THREE.Mesh geom,   Materials.train.window
+        @meshes['train'].add new THREE.Mesh piston, Materials.train.piston
+        @meshes['train'].add new THREE.Mesh light,  Materials.train.light
                 
         ●▪ trains
-        
-    trains: ->
-                        
-        for train,index in world.trains
-            mesh = @meshes['train'].clone()
-            world.scene.add mesh
-            train.mesh = mesh
-            world.pickables.push mesh
-            @updateTrain train
-
-    updateTrain: (train) ->
-        
-        if train.mesh
-            train.mesh.position.copy train.pos
-            train.mesh.translateZ 1
-                
+                                
 module.exports = Construct
+
