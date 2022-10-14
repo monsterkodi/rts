@@ -17,13 +17,16 @@ class Engine extends Car
         @mesh.children[1].material = @mesh.children[1].material.clone()
         @mesh.children[2].material = @mesh.children[2].material.clone()
         @mesh.children[2].material.emissive.copy color
-    
-    update: (delta, timeSum) ->
+
+        @mesh.children[3].material = @mesh.children[3].material.clone()
+        @mesh.children[3].material.emissive.copy color
         
-        x = 0.35*Math.sin 2*timeSum
+    update: (delta, timeSum, train) ->
+        
+        x = 0.35*Math.sin 2*timeSum*train.speed
         @mesh.children[1].scale.set 1+x, 1 1
         
-        c = 0.5+0.5*Math.sin 2*timeSum
+        c = 0.5+0.5*Math.sin 2*timeSum*train.speed
         col = @mesh.material.color
         @mesh.children[1].material.emissive.setRGB col.r*c, col.g*c, col.b*c
         

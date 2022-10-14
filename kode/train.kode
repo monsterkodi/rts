@@ -1,10 +1,14 @@
 
+pathAdvancePos = (path, pos, advance) ->
+    
+    pos + advance/path.getLength()
+
 class Train
 
     @: (@cfg) ->
         
         @path  = @cfg.track?.path
-        @speed = 0.02
+        @speed = @cfg.speed ? 1
         @cars  = []
         
     addCar: (car) ->
@@ -24,22 +28,22 @@ class Train
         
         if @cfg.pingpong
             if @cfg.forward
-                @cfg.pos += advance
+                @cfg.pos = pathAdvancePos @path, @cfg.pos, advance
                 if @cfg.pos >= 1.0
                     @cfg.pos = 2.0 - @cfg.pos
                     @cfg.forward = false
             else
-                @cfg.pos -= advance
+                @cfg.pos = pathAdvancePos @path, @cfg.pos, -advance
                 if @cfg.pos <= 0.0
                     @cfg.pos *= -1
                     @cfg.forward = true
         else
-            @cfg.pos += advance
+            @cfg.pos = pathAdvancePos @path, @cfg.pos, advance
             if @cfg.pos >= 1.0
                 @cfg.pos -= 1.0
             
         for car, index in @cars
-            car.update delta, timeSum
-            car.moveToPathPos @path, clamp 0 1 @cfg.pos-0.0135*index
+            car.update delta, timeSum, @
+            car.moveToPathPos @path, clamp 0 1 pathAdvancePos @path, @cfg.pos, -4.2*index
             
 module.exports = Train

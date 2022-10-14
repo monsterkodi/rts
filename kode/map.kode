@@ -53,11 +53,11 @@ class Map extends World
             vec   0 -20 0 
             ]
 
-        train = @addTrain track
+        train = @addTrain track, 2
+        @addBoxcar train
+        @addBoxcar train
+        
         train.setColor Color.train.green
-            
-        @addBoxcar train
-        @addBoxcar train
         
         track = @addTrack [ 
             vec   0 -15 0 
@@ -73,7 +73,7 @@ class Map extends World
             vec -15   0 0 
             ]          
             
-        train = @addTrain track
+        train = @addTrain track, 0.5
         train.setColor Color.train.orange
         train.cfg.pingpong = true
             
@@ -143,10 +143,6 @@ class Map extends World
         train.setColor Color.train.white
         train.cfg.pingpong = true
         
-        # train = @addTrain track
-        # train.setColor Color.train.blue
-        # train.cfg.pingpong = true
-            
         track = @addTrack [ 
             vec 10  -150 0 
             vec 10  -100 8 
@@ -162,12 +158,12 @@ class Map extends World
             
             ]         
             
-        train = @addTrain track
+        train = @addTrain track, 4
+        @addBoxcar train
         @addBoxcar train
         @addBoxcar train
         train.setColor Color.train.blue
         train.cfg.pingpong = true
-        
         
         # train = @addTrain()
         # train.setColor Color.train.white

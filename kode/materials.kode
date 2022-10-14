@@ -19,7 +19,7 @@ Materials =
         piston:     new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1, roughness: 0.8 
         light:      new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1, roughness: 0.8
         cargo:      new THREE.MeshStandardMaterial color:0x333333, metalness: 0.2, roughness: 0.4 
-        rail:       new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true
+        rail:       new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     menu:
         active:       new THREE.MeshStandardMaterial color:Color.menu.active,       metalness: 0.9, roughness: 0.75
         inactive:     new THREE.MeshStandardMaterial color:Color.menu.inactive,     metalness: 0.9, roughness: 0.75

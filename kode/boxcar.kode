@@ -3,4 +3,11 @@ Car = require './car'
 
 class Boxcar extends Car
 
+    setColor: (color) ->
+        
+        super color
+        
+        @mesh.children[1].material = @mesh.children[1].material.clone()
+        @mesh.children[1].material.emissive.copy color
+
 module.exports = Boxcar
