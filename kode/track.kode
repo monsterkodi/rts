@@ -1,0 +1,28 @@
+###
+000000000  00000000    0000000    0000000  000   000
+   000     000   000  000   000  000       000  000 
+   000     0000000    000000000  000       0000000  
+   000     000   000  000   000  000       000  000 
+   000     000   000  000   000   0000000  000   000
+###
+
+Rail = require './rail'
+
+function Track
+
+    @: (points) ->
+        
+        @path = new THREE.CurvePath
+        
+        segnum = Math.floor points.length / 3
+        for pi in 0...segnum
+            @path.add new THREE.QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
+        
+        @rail = new Rail @path, 100 0.5
+        @rail.translate 0 0 0.75
+                
+        @mesh = new THREE.Mesh @rail, Materials.train.rail
+        @mesh.castShadow = true
+        @mesh.receiveShadow = true
+
+module.exports = Track

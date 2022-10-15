@@ -23,8 +23,8 @@ class Engine extends Car
         
     update: (delta, timeSum, train) ->
         
-        x = 0.35*Math.sin 2*timeSum*train.speed
-        @mesh.children[1].scale.set 1+x, 1 1
+        x = 0.2*Math.sin 2*timeSum*train.speed
+        @mesh.children[1].scale.set 1.2+x, 1 1
         
         c = 0.5+0.5*Math.sin 2*timeSum*train.speed
         col = @mesh.material.color

@@ -19,9 +19,6 @@ class Car
     
     moveToPathPos: (path, pos) ->
         
-        u2t = path.getUtoTmapping pos, path.getLength()/10
-        log u2t, path.getLength()
-    
         path.getPointAt pos, @mesh.position
         path.getTangentAt pos, Vector.tmp
         Vector.tmp.add @mesh.position 

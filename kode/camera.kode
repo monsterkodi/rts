@@ -305,10 +305,12 @@ class Camera extends PerspectiveCamera
         if @panBlocksWheel
             return
             
-        if @wheelInert == 0
-            @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0001
+        if Math.abs(@wheelInert) < 0.0001
+            @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.00005
         else
-            @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0003
+            @wheelInert += event.wheelDelta * (1+(@dist/@maxDist)*3) * 0.0002
+            
+        if Math.abs(@wheelInert) > 0.00003
             @startZoom()
 
     # 0000000   0000000    0000000   00     00  

@@ -7,7 +7,7 @@
 ###
 
 Boxes     = require './boxes'
-Rail      = require './rail'
+Track     = require './track'
 Train     = require './train'
 Engine    = require './engine'
 Boxcar    = require './boxcar'
@@ -167,27 +167,24 @@ class World
         
         engine
         
-    addBoxcar: (train) ->
+    addBoxcar: (train, num=1) ->
         
-        boxcar = new Boxcar @construct.meshes.boxcar.clone()
+        for n in 0...num
+            boxcar = new Boxcar @construct.meshes.boxcar.clone()
+                
+            @scene.add boxcar.mesh
+            @pickables.push boxcar.mesh
             
-        @scene.add boxcar.mesh
-        @pickables.push boxcar.mesh
-        
-        train.addCar boxcar
-        
-        boxcar
+            train.addCar boxcar
             
     addTrack: (points) ->
         
-        rail = new Rail points, 100 0.5
-        rail.translate 0 0 0.75
-        mesh = new THREE.Mesh rail, Materials.train.rail
-        mesh.castShadow = true
-        mesh.receiveShadow = true
-        @pickables.push mesh
-        @scene.add mesh
-        rail
+        track = new Track points
+        
+        @pickables.push track.mesh
+        @scene.add track.mesh
+        
+        track
         
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       

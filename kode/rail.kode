@@ -3,19 +3,13 @@ BufferGeometry = THREE.BufferGeometry
 
 class Rail extends BufferGeometry
 
-    @: (points, segments=64, radius=1) ->
+    @: (path, segments=64, radius=1) ->
 
         super()
-        
-        @path = new THREE.CurvePath
-        
-        segnum = Math.floor points.length / 3
-        for pi in 0...segnum
-            @path.add new THREE.QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
-            
+                    
         @type = 'Rail'
 
-        frames = @path.computeFrenetFrames segments, false
+        frames = path.computeFrenetFrames segments, false
 
         @tangents  = frames.tangents
         @normals   = frames.normals
@@ -30,7 +24,7 @@ class Rail extends BufferGeometry
 
         generateSegment = (i) =>
 
-            P = @path.getPointAt i / segments, P
+            P = path.getPointAt i / segments, P
 
             N = frames.normals[i]
             B = frames.binormals[i]
@@ -77,6 +71,6 @@ class Rail extends BufferGeometry
         
         @computeVertexNormals()
         
-        @path.updateArcLengths()
+        path.updateArcLengths()
 
 module.exports = Rail
