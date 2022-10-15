@@ -29,6 +29,8 @@ class Train
         
     block:   -> @speed = 0
     unblock: -> @speed = @topSpeed
+    
+    tailDelta: -> @path.delta-4.2*(@cars.length-1)
                 
     update: (delta, timeSum) ->
         

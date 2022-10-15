@@ -26,26 +26,25 @@ function Traffic
         for train in @trains
             path = train.path
             p = path.nextDistance()
-            s = path.prevDistance()
-            
-            if p < NODE_DISTANCE
+            if p < NODE_DISTANCE                         # train is close to target node
                 n = path.nextNode()
-                if n.train != train
-                    if not n.train
-                        n.setTrain train
-                    else
-                        if train not in n.blockedTrains
+                if n.train != train                      # if node is not owned by train
+                    if not n.train                       #      if node not occupied
+                        n.setTrain train                 #          train occupies node 
+                    else 
+                        if train not in n.blockedTrains  # if train not alreay blocked by node
                             if train.path.currentTrack()  != n.train.path.currentTrack() and 
                                 train.path.currentTrack() != n.train.path.prevTrack() and
                                 train.path.nextTrack()    != n.train.path.currentTrack()
-                                # log 'blocked!' n.name, train.name, n.train.name
-                                n.block train
+                                n.block train            #      train gets blocked
                             else 
                                 if n.train.path.prevTrack() == train.path.currentTrack()
-                                    n.setTrain train
+                                    n.setTrain train     # train is the new occupant
             
+            tailDelta = train.tailDelta()
+            s = path.prevDistanceAtDelta tailDelta
             if s > NODE_DISTANCE
-                n = path.prevNode()
+                n = path.prevNodeAtDelta tailDelta
                 if n.train == train
                     # log 'unblocks' n.name, train.name
                     n.unblock()

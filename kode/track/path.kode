@@ -29,13 +29,13 @@ function Path
         d      
         
     indexAtDelta: (d) ->
-        d = @normDelta d
+        nd = @normDelta d
         cd = 0
         for t,i in @tracks
             cd += t.curve.getLength()
-            if cd > d
+            if cd > nd
                 return i
-        log 'dafuk?' d, cd
+        log 'dafuk?' d, nd, cd
                
     getLength: -> @deltaAtIndex @tracks.length
                 
@@ -67,8 +67,9 @@ function Path
         
     currentIndex: -> @indexAtDelta @delta
     
-    nextNode:      -> @nodes[@currentIndex()]
-    prevNode:      -> @nodes[@normIndex @currentIndex()-1]
+    nextNode:        -> @nodes[@currentIndex()]
+    prevNode:        -> @nodes[@normIndex @currentIndex()-1]
+    prevNodeAtDelta: (d) -> @nodes[@normIndex @indexAtDelta(d)-1]
     
     prevTrack:    -> @tracks[@normIndex @currentIndex()-1]
     currentTrack: -> @tracks[@currentIndex()]
