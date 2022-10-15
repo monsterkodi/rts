@@ -24,6 +24,10 @@ window.last         = last
 window.elem         = elem
 
 window.THREE        = require 'three'
+window.Mesh         = THREE.Mesh
+window.BoxGeometry  = THREE.BoxGeometry
+window.SphereGeometry  = THREE.SphereGeometry
+window.CylinderGeometry  = THREE.CylinderGeometry
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
 window.Color        = require './const/color'
@@ -153,6 +157,8 @@ class RTS
                 
         world.create()
         @animationStep()
+        
+        @paused = prefs.get 'paused' false
 
     # 0000000    00000000   000   0000000   000   000  000000000  000   000  00000000   0000000   0000000  
     # 000   000  000   000  000  000        000   000     000     0000  000  000       000       000       
@@ -202,6 +208,7 @@ class RTS
     togglePause: -> 
     
         @paused = not @paused
+        prefs.set 'paused' @paused
         post.emit 'pause' @paused
     
     animationStep: =>
@@ -247,7 +254,7 @@ class RTS
         @camMove = event.button != 1
         
         @downHit = @castRay()
-        log @downHit
+        # log @downHit
             
     onMouseUp: (event) =>
 

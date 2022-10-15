@@ -1,0 +1,80 @@
+###
+000000000  00000000    0000000   00000000  00000000  000   0000000
+   000     000   000  000   000  000       000       000  000     
+   000     0000000    000000000  000000    000000    000  000     
+   000     000   000  000   000  000       000       000  000     
+   000     000   000  000   000  000       000       000   0000000
+###
+
+NODE_DISTANCE    = 9
+REAREND_DISTANCE = 5
+
+function Traffic
+
+    @: ->
+        
+        @nodes = []
+        @trains = []
+        @tracks = []
+    
+    simulate: (scaledDelta, timeSum) ->
+        
+        @nodeSignals()
+        
+    nodeSignals: ->
+        
+        for train in @trains
+            path = train.path
+            p = path.nextDistance()
+            s = path.prevDistance()
+            
+            if p < NODE_DISTANCE
+                n = path.nextNode()
+                if n.train != train
+                    if not n.train
+                        n.setTrain train
+                    else
+                        if train not in n.blockedTrains
+                            if train.path.currentTrack()  != n.train.path.currentTrack() and 
+                                train.path.currentTrack() != n.train.path.prevTrack() and
+                                train.path.nextTrack()    != n.train.path.currentTrack()
+                                # log 'blocked!' n.name, train.name, n.train.name
+                                n.block train
+                            else 
+                                if n.train.path.prevTrack() == train.path.currentTrack()
+                                    n.setTrain train
+            
+            if s > NODE_DISTANCE
+                n = path.prevNode()
+                if n.train == train
+                    # log 'unblocks' n.name, train.name
+                    n.unblock()
+                            
+    addNode:  (node)  -> @nodes.push  node
+    addTrain: (train) -> @trains.push train
+    addTrack: (track) -> @tracks.push track
+        
+    allowTrainAdvance: (train, advance) ->
+        
+        delta = train.path.delta+advance
+        track = train.path.trackAtDelta(delta)
+        for other in @trains
+            continue if other == train
+            if other.path.currentTrack() == track
+                trainToOther = other.path.prevDistance() - train.path.prevDistanceAtDelta(delta)
+                if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
+                    # log 'rearend!' train.name, train.path.prevDistanceAtDelta(delta)
+                    # log '   other' other.name, other.path.prevDistance()
+                    # train.speed = clamp 0 train.speed, other.speed
+                    return 0
+            else if other.path.prevTrack() == track
+                trainToOther = other.path.prevDistance() + train.path.nextDistanceAtDelta(delta)
+                if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
+                    # log 'rearend!2!' train.name, train.path.prevDistanceAtDelta(delta)
+                    # log '   other' other.name, other.path.prevDistance()
+                    # train.speed = clamp 0 train.speed, other.speed
+                    return 0
+                
+        advance
+
+module.exports = Traffic

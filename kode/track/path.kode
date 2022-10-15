@@ -13,10 +13,12 @@ function Path
         @delta  = 0
         @tracks = []
         @nodes  = []
+        @revers = []
         
     addTrackNode: (track, node) -> 
         @tracks.push track
         @nodes.push node
+        @revers.push track.node[0] == node
     
     normDelta: (d) ->
         length = @getLength()
@@ -24,7 +26,8 @@ function Path
             d -= length
         while d < 0
             d += length
-        d        
+        d      
+        
     indexAtDelta: (d) ->
         d = @normDelta d
         cd = 0
@@ -32,13 +35,14 @@ function Path
             cd += t.curve.getLength()
             if cd > d
                 return i
+        log 'dafuk?' d, cd
                
     getLength: -> @deltaAtIndex @tracks.length
                 
     deltaAtIndex: (i) ->
         cd = 0
         for ti in 0...i
-            cd += @tracks[ti].curve.getLength()
+            cd += @tracks[ti%@tracks.length].curve.getLength()
         cd
                 
     nodeAtDelta:  (d) -> @nodes[@indexAtDelta d]
@@ -48,28 +52,58 @@ function Path
         d = @normDelta d
         di = @indexAtDelta d
         restDelta = d - @deltaAtIndex di
-        restDelta / @tracks[di].curve.getLength()
-                
+        p = restDelta / @tracks[di].curve.getLength()
+        if @revers[di]
+            p = 1 - p
+        p
+        
+    normIndex: (i) ->  
+        length = @tracks.length
+        while i > length
+            i -= length
+        while i < 0
+            i += length
+        i      
+        
     currentIndex: -> @indexAtDelta @delta
-    currentNode:  -> @nodes[@currentIndex()]
-    currentTrack: -> @tracks[@currentIndex()]
-    currentCurve: -> @currentTrack().curve
     
+    nextNode:      -> @nodes[@currentIndex()]
+    prevNode:      -> @nodes[@normIndex @currentIndex()-1]
+    
+    prevTrack:    -> @tracks[@normIndex @currentIndex()-1]
+    currentTrack: -> @tracks[@currentIndex()]
+    nextTrack:    -> @tracks[@normIndex @currentIndex()+1]
+    
+    currentCurve: -> @currentTrack().curve
     currentPos:   -> @posAtDelta @delta
     
+    nextDistance:  -> @deltaAtIndex(@currentIndex()+1) - @delta
+    prevDistance:  -> @delta - @deltaAtIndex(@currentIndex())
+    nextDistanceAtDelta: (d) -> @deltaAtIndex(@indexAtDelta(d)+1) - d
+    prevDistanceAtDelta: (d) -> d - @deltaAtIndex(@indexAtDelta d)
+            
     advance: (delta) ->
         
         @delta += delta
-        length = @getLength()
-        if @delta > length
-            @delta -= length
+        @delta = @normDelta @delta
     
     getPoint: (point, delta=0) ->
         
         @curveAtDelta(@delta+delta).getPointAt @posAtDelta(@delta+delta), point
 
     getTangent: (point, delta=0) ->
+        if @revers[@indexAtDelta @delta+delta]
+            @curveAtDelta(@delta+delta).getTangentAt @posAtDelta(@delta+delta), point
+            point.multiplyScalar -1
+        else
+            @curveAtDelta(@delta+delta).getTangentAt @posAtDelta(@delta+delta), point
+
+    moveMesh: (mesh, delta) ->
         
-        @curveAtDelta(@delta+delta).getTangentAt @posAtDelta(@delta+delta), point
-        
+        @getPoint mesh.position, delta
+        @getTangent Vector.tmp, delta
+        Vector.tmp.add mesh.position 
+        mesh.up.set 0 0 1
+        mesh.lookAt Vector.tmp
+            
 module.exports = Path

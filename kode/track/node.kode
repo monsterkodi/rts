@@ -8,14 +8,16 @@
 
 function Node
 
-    @: (@position, @tangent) ->
+    @: (x, y, z, @name) ->
         
-        @position ?= vec 0 0 0
-        @dir      ?= vec 0 1 0
-        @up       ?= vec 0 0 1
+        @position = vec x, y, z
+        @dir      = vec 0 1 0
+        @up       = vec 0 0 1
         
         @inTracks  = []
         @outTracks = []
+        @blockedTrains = []
+        @blocks = []
         @gizmo = {}
         
         box = new THREE.BoxGeometry 2 1 2
@@ -37,7 +39,60 @@ function Node
 
         quat = Quaternion.axisAngle @up, degree
         @dir.applyQuaternion quat
+        @gizmo.center.quaternion.copy quat
         @gizmo.tangent.position.copy @position
         @gizmo.tangent.position.add @dir
+        
+    setTrain: (@train) ->
+        
+        if @train 
+            if not @nodeBox
+                c1 = new CylinderGeometry 0.25 0.25 1 16
+                c1.rotateX Math.PI/2
+                c2 = new CylinderGeometry 0.25 0.25 1 16
+                c2.rotateZ Math.PI/2
+                geom = THREE.BufferGeometryUtils.mergeBufferGeometries [c1, c2]
+                @nodeBox = new Mesh geom, @train.cars[0].mesh.material
+                @nodeBox.position.copy @position
+                @nodeBox.position.z += 0.75
+                world.scene.add @nodeBox
+            log 'node ' @name, 'train' @train.name
+            @nodeBox.material = @train.cars[0].mesh.material
+            for block in @blocks
+                block.material = @nodeBox.material
+        
+    block: (train) ->
+        
+        @blockedTrains.push train
+        train.block()
+        
+        geom = THREE.BufferGeometryUtils.mergeBufferGeometries [new BoxGeometry(0.5 1 0.5), new BoxGeometry(1 0.5 0.5)]
+        
+        mesh = new Mesh geom, @train.cars[0].mesh.material
+        train.path.getPoint mesh.position, 3
+        mesh.position.z += 0.75
+        train.path.getTangent Vector.tmp, 3
+        Vector.tmp.add mesh.position
+        mesh.lookAt Vector.tmp
+        world.scene.add mesh
+        @blocks.push mesh
+        
+    unblock: ->
+        
+        log 'unblock' @name
+        
+        @setTrain null
+        
+        for t in @blockedTrains
+            t.unblock()            
+        
+        for block in @blocks
+            block.removeFromParent()
+            
+        @nodeBox.removeFromParent()
+            
+        delete @nodeBox
+        @blockedTrains = []
+        @blocks = []
         
 module.exports = Node

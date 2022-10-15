@@ -10,7 +10,7 @@ Rail = require './rail'
 
 function Track
 
-    @: (points) ->
+    @: (points, @name) ->
         
         @node = []
         
@@ -24,6 +24,7 @@ function Track
         @rail.translate 0 0 0.75
                 
         @mesh = new THREE.Mesh @rail, Materials.train.rail
+        @mesh.name = @name
         @mesh.castShadow = true
         @mesh.receiveShadow = true
 

@@ -5,9 +5,10 @@ class Train
 
     @: (@cfg) ->
         
-        @path  = new Path
-        @speed = @cfg.speed ? 1
-        @cars  = []
+        @path     = new Path
+        @speed    = @cfg.speed ? 1
+        @topSpeed = @speed
+        @cars     = []
         
     addCar: (car) ->
         
@@ -17,12 +18,25 @@ class Train
         
         for car in @cars
             car.setColor color
+            
+    addPreview: ->
         
+        @preview = @cars[0].mesh.clone()
+        @preview.material = Materials.transparent
+        for c in @preview.children
+            c.material = Materials.transparent
+        world.scene.add @preview
+        
+    block:   -> @speed = 0
+    unblock: -> @speed = @topSpeed
+                
     update: (delta, timeSum) ->
         
         return if not @path
 
         advance = delta * @speed
+        
+        advance = world.traffic.allowTrainAdvance @, advance
         
         @path.advance advance
                 
@@ -30,4 +44,10 @@ class Train
             car.update delta, timeSum, @
             car.moveToPathDelta @path, -4.2*index
             
+        if @preview
+            #@path.moveMesh @preview, 8
+            log @path.delta, @path.currentIndex(), @path.nextNode().name
+            @preview.position.copy @path.nextNode().position
+            # @preview.needsUpdate = true
+                        
 module.exports = Train

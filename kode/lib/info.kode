@@ -28,7 +28,7 @@ class Info
 
         @elem.innerHTML = ''
 
-        add = (text) => elem class:'infoText', parent:@elem, text:text
+        add = (text) => elem class:'infoText' parent:@elem, text:text
         add "vects: #{Vector.counter}"
         add "quats: #{Quaternion.counter}"
         add "calls: #{info.calls}"
@@ -36,6 +36,11 @@ class Info
         add "lines: #{info.lines}"
                     
         add '....................................................'
+        
+        for train in world.trains
+            add "#{train.name}"
+            add "   prev #{train.path.prevDistance()}"
+            add "   next #{train.path.nextDistance()}"
 
 module.exports = Info
 

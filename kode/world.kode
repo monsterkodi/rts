@@ -12,17 +12,20 @@ Train     = require './train/train'
 Engine    = require './train/engine'
 Boxcar    = require './train/boxcar'
 Construct = require './construct'
+Traffic   = require './traffic'
 
 class World
     
     @: (@scene) ->
                 
-        @trains    = []
+        @trains = []
         
         @vec  = vec()
         @vec2 = vec()
         
         window.world = @
+        
+        @traffic = new Traffic
         
         # window.boxes   = new Boxes @scene, 20000
         
@@ -111,6 +114,8 @@ class World
     
     simulate: (scaledDelta) ->
         
+        @traffic.simulate scaledDelta, @timeSum
+        
         for train in @trains
             train.update scaledDelta, @timeSum            
         
@@ -140,11 +145,14 @@ class World
     #    000     000   000  000   000  000  000  0000  
     #    000     000   000  000   000  000  000   000  
     
-    addTrain: (speed = 1) ->
+    addTrain: (speed = 1, name='train') ->
 
         train = new Train
             speed: speed
             
+        train.name = name
+            
+        @traffic.addTrain train
         @trains.push train
         
         @addEngine train
@@ -178,48 +186,58 @@ class World
     #    000     000   000  000   000  000       000  000   
     #    000     000   000  000   000   0000000  000   000  
     
-    addNode: (x, y, z) ->
+    addNode: (x, y, z, name) ->
         
-        node = new Node vec(x, y, z)
+        node = new Node x, y, z, name
         @scene.add node.gizmo.center
         @scene.add node.gizmo.tangent
         
         @pickables.push node.gizmo.center
         @pickables.push node.gizmo.tangent
         
+        @traffic.addNode node
+        
         node
         
-    connectNodes: (n1, n2) ->
+    connectNodes: (n1, n2, name) -> @connectNodeTracks n1, n1.outTracks, n2, n2.inTracks, name
+        
+    connectNodeTracks: (n1, t1, n2, t2, name="#{n1.name} -> #{n2.name}") ->
         
         s = n1.position.distanceTo n2.position
         s *= 0.5
         
         d1 = n1.dir.clone()
         d1.scale s
+        if t1 != n1.outTracks
+            d1.scale -1
         d1.add n1.position
 
         d2 = n2.dir.clone()
-        d2.scale -s
+        d2.scale s
+        if t2 != n2.outTracks
+            d2.scale -1
         d2.add n2.position
         
         m = Vector.midPoint d1, d2
         
-        t = @addTrack [n1.position, d1, m, m, d2, n2.position]
+        t = @addTrack [n1.position, d1, m, m, d2, n2.position], name
         
         t.node[0] = n1
         t.node[1] = n2
         
-        n1.outTracks.push t
-        n2.inTracks.push t
+        t1.push t
+        t2.push t
         
         t
     
-    addTrack: (points) ->
+    addTrack: (points, name) ->
         
-        track = new Track points
+        track = new Track points, name
         
         @pickables.push track.mesh
         @scene.add track.mesh
+        
+        @traffic.addTrack track
         
         track
         
