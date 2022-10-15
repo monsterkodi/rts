@@ -60,6 +60,7 @@ class Map extends World
 
         train = @addTrain 1 'blue'
         # train.addPreview()
+        @addBoxcar train, 1
         train.setColor Color.train.blue
         train.path.addTrackNode t4, n2
         train.path.addTrackNode t5, n3
