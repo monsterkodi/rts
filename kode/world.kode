@@ -140,11 +140,9 @@ class World
     #    000     000   000  000   000  000  000  0000  
     #    000     000   000  000   000  000  000   000  
     
-    addTrain: (track, speed = 1) ->
+    addTrain: (speed = 1) ->
 
         train = new Train
-            pos:   0.5
-            track: track
             speed: speed
             
         @trains.push train
@@ -213,6 +211,8 @@ class World
         
         n1.outTracks.push t
         n2.inTracks.push t
+        
+        t
     
     addTrack: (points) ->
         

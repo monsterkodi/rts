@@ -1,13 +1,11 @@
 
-pathAdvancePos = (path, pos, advance) ->
+Path = require '../track/path'
     
-    pos + advance/path.getLength()
-
 class Train
 
     @: (@cfg) ->
         
-        @path  = @cfg.track?.path
+        @path  = new Path
         @speed = @cfg.speed ? 1
         @cars  = []
         
@@ -26,24 +24,10 @@ class Train
 
         advance = delta * @speed
         
-        if @cfg.pingpong
-            if @cfg.forward
-                @cfg.pos = pathAdvancePos @path, @cfg.pos, advance
-                if @cfg.pos >= 1.0
-                    @cfg.pos = 2.0 - @cfg.pos
-                    @cfg.forward = false
-            else
-                @cfg.pos = pathAdvancePos @path, @cfg.pos, -advance
-                if @cfg.pos <= 0.0
-                    @cfg.pos *= -1
-                    @cfg.forward = true
-        else
-            @cfg.pos = pathAdvancePos @path, @cfg.pos, advance
-            if @cfg.pos >= 1.0
-                @cfg.pos -= 1.0
-            
+        @path.advance advance
+                
         for car, index in @cars
             car.update delta, timeSum, @
-            car.moveToPathPos @path, clamp 0 1 pathAdvancePos @path, @cfg.pos, -4.2*index
+            car.moveToPathDelta @path, -4.2*index
             
 module.exports = Train

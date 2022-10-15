@@ -14,13 +14,13 @@ function Track
         
         @node = []
         
-        @path = new THREE.CurvePath
+        @curve = new THREE.CurvePath
         
         segnum = Math.floor points.length / 3
         for pi in 0...segnum
-            @path.add new THREE.QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
+            @curve.add new THREE.QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
         
-        @rail = new Rail @path, 100 0.5
+        @rail = new Rail @curve, 100 0.5
         @rail.translate 0 0 0.75
                 
         @mesh = new THREE.Mesh @rail, Materials.train.rail

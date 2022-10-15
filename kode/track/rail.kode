@@ -3,13 +3,13 @@ BufferGeometry = THREE.BufferGeometry
 
 class Rail extends BufferGeometry
 
-    @: (path, segments=64, radius=1) ->
+    @: (curve, segments=64, radius=1) ->
 
         super()
                     
         @type = 'Rail'
 
-        frames = path.computeFrenetFrames segments, false
+        frames = curve.computeFrenetFrames segments, false
 
         @tangents  = frames.tangents
         @normals   = frames.normals
@@ -24,7 +24,7 @@ class Rail extends BufferGeometry
 
         generateSegment = (i) =>
 
-            P = path.getPointAt i / segments, P
+            P = curve.getPointAt i / segments, P
 
             N = frames.normals[i]
             B = frames.binormals[i]
@@ -71,6 +71,6 @@ class Rail extends BufferGeometry
         
         @computeVertexNormals()
         
-        path.updateArcLengths()
+        curve.updateArcLengths()
 
 module.exports = Rail

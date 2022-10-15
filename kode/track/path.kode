@@ -10,8 +10,66 @@ function Path
 
     @: ->
         
-        @trackNodes = []
+        @delta  = 0
+        @tracks = []
+        @nodes  = []
         
-    addTrackNode: (track, node) -> @trackNodes.push [track, node]
+    addTrackNode: (track, node) -> 
+        @tracks.push track
+        @nodes.push node
+    
+    normDelta: (d) ->
+        length = @getLength()
+        while d > length
+            d -= length
+        while d < 0
+            d += length
+        d        
+    indexAtDelta: (d) ->
+        d = @normDelta d
+        cd = 0
+        for t,i in @tracks
+            cd += t.curve.getLength()
+            if cd > d
+                return i
+               
+    getLength: -> @deltaAtIndex @tracks.length
+                
+    deltaAtIndex: (i) ->
+        cd = 0
+        for ti in 0...i
+            cd += @tracks[ti].curve.getLength()
+        cd
+                
+    nodeAtDelta:  (d) -> @nodes[@indexAtDelta d]
+    trackAtDelta: (d) -> @tracks[@indexAtDelta d]
+    curveAtDelta: (d) -> @tracks[@indexAtDelta d].curve
+    posAtDelta:   (d) ->
+        d = @normDelta d
+        di = @indexAtDelta d
+        restDelta = d - @deltaAtIndex di
+        restDelta / @tracks[di].curve.getLength()
+                
+    currentIndex: -> @indexAtDelta @delta
+    currentNode:  -> @nodes[@currentIndex()]
+    currentTrack: -> @tracks[@currentIndex()]
+    currentCurve: -> @currentTrack().curve
+    
+    currentPos:   -> @posAtDelta @delta
+    
+    advance: (delta) ->
+        
+        @delta += delta
+        length = @getLength()
+        if @delta > length
+            @delta -= length
+    
+    getPoint: (point, delta=0) ->
+        
+        @curveAtDelta(@delta+delta).getPointAt @posAtDelta(@delta+delta), point
 
+    getTangent: (point, delta=0) ->
+        
+        @curveAtDelta(@delta+delta).getTangentAt @posAtDelta(@delta+delta), point
+        
 module.exports = Path

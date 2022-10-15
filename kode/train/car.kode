@@ -17,10 +17,10 @@ class Car
         @mesh.material = @mesh.material.clone()
         @mesh.material.color.copy color
     
-    moveToPathPos: (path, pos) ->
+    moveToPathDelta: (path, delta) ->
         
-        path.getPointAt pos, @mesh.position
-        path.getTangentAt pos, Vector.tmp
+        path.getPoint @mesh.position, delta
+        path.getTangent Vector.tmp, delta
         Vector.tmp.add @mesh.position 
         @mesh.up.set 0 0 1
         @mesh.lookAt Vector.tmp

@@ -31,28 +31,19 @@ class Map extends World
         t1 = @connectNodes n1, n2 
         t2 = @connectNodes n2, n1
                
-        track = @addTrack [ 
-            vec   0 -10 0 
-            vec  10 -10 0 
-            vec  10   0 0
-            
-            vec  10   0 0
-            vec  10  10 0 
-            vec   0  10 0 
-
-            vec   0  10 0
-            vec -10  10 0 
-            vec -10   0 0 
-            
-            vec -10   0 0 
-            vec -10 -10 0 
-            vec   0 -10 0 
-            ]            
-
-        train = @addTrain track
+        train = @addTrain()
+        @addBoxcar train, 2
         train.setColor Color.train.red
+        train.path.addTrackNode t1, n2
+        train.path.addTrackNode t2, n1
+
+        train = @addTrain()
+        @addBoxcar train, 4
+        train.setColor Color.train.yellow
+        train.path.addTrackNode t2, n1
+        train.path.addTrackNode t1, n2
         
-        return
+        return #########
         
         track = @addTrack [ 
             vec   0 -20 0 
