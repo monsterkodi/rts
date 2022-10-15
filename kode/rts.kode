@@ -8,7 +8,7 @@
 
 kxk = require 'kxk'
 
-{ _, clamp, deg2rad, elem, first, klog, kstr, last, post, prefs, rad2deg, randInt, randIntRange, stopEvent } = require 'kxk'
+{ _, deg2rad, elem, first, last, post, prefs, rad2deg, randInt, randIntRange, stopEvent } = require 'kxk'
 
 window.$            = kxk.$
 window._            = _
@@ -19,30 +19,29 @@ window.randIntRange = randIntRange
 window.deg2rad      = deg2rad
 window.rad2deg      = rad2deg
 window.stopEvent    = stopEvent
-window.clamp        = clamp
 window.first        = first
 window.last         = last
 window.elem         = elem
-window.str          = kstr
-window.log          = klog
 
 window.THREE        = require 'three'
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
-window.Color        = require './color'
-window.Geometry     = require './geometry'
-window.Materials    = require './materials'
+window.Color        = require './const/color'
+window.Geometry     = require './const/geometry'
+window.Materials    = require './const/materials'
 window.playSound    = (o,n,c) -> rts.sound.play o,n,c
    
 FPS     = require './lib/fps'
 Info    = require './lib/info'
 Debug   = require './lib/debug'
 Sound   = require './lib/sound'
-Config  = require './config'
+Config  = require './const/config'
 Menu    = require './menu/menu'
 World   = require './world'
 Map     = require './map'
-Camera  = require './camera'
+Camera  = require './lib/camera'
+
+tmpMatrix = new THREE.Matrix3
 
 class RTS
 
@@ -98,9 +97,7 @@ class RTS
         @lightShadow.shadow.camera.right   =  50
         @lightShadow.shadow.camera.top     =  50
         @lightShadow.shadow.camera.bottom  = -50
-        # @lightShadow.shadowDarkness = 0.1
         @scene.add @lightShadow
-        # @scene.add @lightShadow.target
         @lightShadowHelper = new THREE.DirectionalLightHelper @lightShadow, 5, new THREE.Color 0xffff00
         @lightShadowHelper.visible = false
         @scene.add @lightShadowHelper
@@ -144,10 +141,6 @@ class RTS
         @debug = new Debug
         if not prefs.get 'debug' 
             @debug.hide()
-            # @debug = new Debug if not @debug
-        # else if @debug
-            # @debug.del()
-            # delete @debug
         
         @menu = new Menu
                 
@@ -252,6 +245,9 @@ class RTS
         @calcMouse event
         @downPos.copy @mouse
         @camMove = event.button != 1
+        
+        @downHit = @castRay()
+        log @downHit
             
     onMouseUp: (event) =>
 
@@ -270,6 +266,8 @@ class RTS
         hit = @castRay()
         
     onDblClick: (event) => 
+        
+        log 'doubleClick'
                             
     calcMouse: (event) ->
         
@@ -281,7 +279,7 @@ class RTS
     focusOnHit: ->
 
         if hit = @castRay()
-            @camera.fadeToPos hit.pos
+            @camera.fadeToPoint hit.point
             @centerHelper.setDirection hit.norm
             @centerHelper.position.copy hit.point
             @axesHelper.position.copy hit.point
@@ -301,23 +299,22 @@ class RTS
         
         return if not intersect
         
-        point = vec intersect.point
-        pos   = world.roundPos point
+        point = intersect.point
+        norm  = intersect.face.normal.clone()
         
-        # Vector.tmp.set 0 0 1
-        # if not intersect.face
-            # log intersect
-        # norm = intersect.face ? intersect.face.normal : Vector.tmp
-        norm = intersect.face.normal
+        tmpMatrix.getNormalMatrix intersect.object.matrixWorld
+        norm.applyMatrix3 tmpMatrix
         
         @arrowHelper.setDirection norm
         @arrowHelper.position.copy point
         
         info = 
-            pos:    pos
-            norm:   norm
             point:  point
+            norm:   norm
             dist:   intersect.distance
+            drag:   intersect.object.drag
+            name:   intersect.object.name
+            mesh:   intersect.object
         
         @scene.remove @cursor if @cursor
         delete @cursor

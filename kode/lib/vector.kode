@@ -214,5 +214,11 @@ class Vector extends ThreeVector
                 
         angles.sort (a,b) -> a[0]-b[0]
         angles[0][1]
+        
+    @midPoint: (a, b) ->
+        
+        m = b.minus a
+        m.scale 0.5
+        m.add a
     
 module.exports = Vector

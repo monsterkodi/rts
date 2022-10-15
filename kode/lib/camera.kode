@@ -200,13 +200,13 @@ class Camera extends PerspectiveCamera
     # 000       000   000  000       000   000       000  
     # 000        0000000    0000000   0000000   0000000   
                      
-    focusOnPos: (v) ->
+    focusOnPoint: (v) ->
         
         @centerTarget.copy v
         @center.copy v
         @update()
          
-    fadeToPos: (v) -> 
+    fadeToPoint: (v) -> 
 
         @centerTarget.copy v
         @storePrefs()

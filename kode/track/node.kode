@@ -1,0 +1,43 @@
+###
+000   000   0000000   0000000    00000000
+0000  000  000   000  000   000  000     
+000 0 000  000   000  000   000  0000000 
+000  0000  000   000  000   000  000     
+000   000   0000000   0000000    00000000
+###
+
+function Node
+
+    @: (@position, @tangent) ->
+        
+        @position ?= vec 0 0 0
+        @dir      ?= vec 0 1 0
+        @up       ?= vec 0 0 1
+        
+        @inTracks  = []
+        @outTracks = []
+        @gizmo = {}
+        
+        box = new THREE.BoxGeometry 2 1 2
+        box.translate 0 0 0.75
+        @gizmo.center = new THREE.Mesh box, Materials.node.gizmo.center
+        @gizmo.center.position.copy @position
+        @gizmo.center.drag = @
+        @gizmo.center.name = 'node.center'
+
+        box = new THREE.BoxGeometry 1 1 1
+        box.translate 0 0 0.75
+        @gizmo.tangent = new THREE.Mesh box, Materials.node.gizmo.tangent
+        @gizmo.tangent.position.copy @position
+        @gizmo.tangent.position.add @dir
+        @gizmo.tangent.drag = @
+        @gizmo.tangent.name = 'node.tangent'
+        
+    rotate: (degree) ->
+
+        quat = Quaternion.axisAngle @up, degree
+        @dir.applyQuaternion quat
+        @gizmo.tangent.position.copy @position
+        @gizmo.tangent.position.add @dir
+        
+module.exports = Node

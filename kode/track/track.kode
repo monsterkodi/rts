@@ -12,6 +12,8 @@ function Track
 
     @: (points) ->
         
+        @node = []
+        
         @path = new THREE.CurvePath
         
         segnum = Math.floor points.length / 3

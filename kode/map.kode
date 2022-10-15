@@ -23,18 +23,37 @@ class Map extends World
     #    000     000   000  000   000  000  000   000  0000000   
     
     trainTest: ->
-                
-        d = 3
-        o = 2
-        r = 0
-        y = -(d+o)
         
-        p = vec(d, -d-o,  d)
+        n1 = @addNode  10 0 0
+        n2 = @addNode -10 0 0
+        n2.rotate 180
+        
+        t1 = @connectNodes n1, n2 
+        t2 = @connectNodes n2, n1
+               
+        track = @addTrack [ 
+            vec   0 -10 0 
+            vec  10 -10 0 
+            vec  10   0 0
             
-        # for x in 0...10
-            # for y in 0...10
-                # @addTrain x*3 y*5 0
-  
+            vec  10   0 0
+            vec  10  10 0 
+            vec   0  10 0 
+
+            vec   0  10 0
+            vec -10  10 0 
+            vec -10   0 0 
+            
+            vec -10   0 0 
+            vec -10 -10 0 
+            vec   0 -10 0 
+            ]            
+
+        train = @addTrain track
+        train.setColor Color.train.red
+        
+        return
+        
         track = @addTrack [ 
             vec   0 -20 0 
             vec  20 -20 0 
@@ -74,28 +93,7 @@ class Map extends World
         train = @addTrain track, 0.5
         train.setColor Color.train.orange
         train.cfg.pingpong = true
-            
-        track = @addTrack [ 
-            vec   0 -10 0 
-            vec  10 -10 0 
-            vec  10   0 0
-            
-            vec  10   0 0
-            vec  10  10 0 
-            vec   0  10 0 
-
-            vec   0  10 0
-            vec -10  10 0 
-            vec -10   0 0 
-            
-            vec -10   0 0 
-            vec -10 -10 0 
-            vec   0 -10 0 
-            ]            
-
-        train = @addTrain track
-        train.setColor Color.train.red
-            
+                        
         track = @addTrack [ 
             vec -50   0 0 
             vec -40   0 0 
@@ -162,7 +160,7 @@ class Map extends World
         train.setColor Color.train.blue
         train.cfg.pingpong = true
         
-        # train = @addTrain()
-        # train.setColor Color.train.white
+        train = @addTrain()
+        train.setColor Color.train.white
         
 module.exports = Map

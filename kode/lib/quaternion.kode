@@ -13,7 +13,7 @@ class Quaternion extends ThreeQuaternion
     @tmp: new Quaternion
     @counter: 0
     
-    constructor: (x=0, y=0, z=0, w=1) ->
+    @: (x=0, y=0, z=0, w=1) ->
         
         Quaternion.counter++
         
@@ -218,10 +218,10 @@ class Quaternion extends ThreeQuaternion
         x = deg2rad x
         y = deg2rad y
         z = deg2rad z
-        q=new Quaternion  Math.cos(x/2) * Math.cos(y/2) * Math.cos(z/2) + Math.sin(x/2) * Math.sin(y/2) * Math.sin(z/2),
-                          Math.sin(x/2) * Math.cos(y/2) * Math.cos(z/2) - Math.cos(x/2) * Math.sin(y/2) * Math.sin(z/2),
-                          Math.cos(x/2) * Math.sin(y/2) * Math.cos(z/2) + Math.sin(x/2) * Math.cos(y/2) * Math.sin(z/2),
-                          Math.cos(x/2) * Math.cos(y/2) * Math.sin(z/2) - Math.sin(x/2) * Math.sin(y/2) * Math.cos(z/2)
+        q = new Quaternion Math.cos(x/2) * Math.cos(y/2) * Math.cos(z/2) + Math.sin(x/2) * Math.sin(y/2) * Math.sin(z/2),
+                           Math.sin(x/2) * Math.cos(y/2) * Math.cos(z/2) - Math.cos(x/2) * Math.sin(y/2) * Math.sin(z/2),
+                           Math.cos(x/2) * Math.sin(y/2) * Math.cos(z/2) + Math.sin(x/2) * Math.cos(y/2) * Math.sin(z/2),
+                           Math.cos(x/2) * Math.cos(y/2) * Math.sin(z/2) - Math.sin(x/2) * Math.sin(y/2) * Math.cos(z/2)
         q.normalize()
 
 Quaternion.rot_0 = new Quaternion()

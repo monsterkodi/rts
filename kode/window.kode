@@ -27,7 +27,7 @@ function Window extends win
 w = new Window
     dir:    __dirname
     pkg:    require '../package.json'
-    menu:   '../kode/menu.noon'
+    menu:   '../kode/menu/menu.noon'
     icon:   '../img/menu@2x.png'
     context: (items) -> 
     onLoad: -> 

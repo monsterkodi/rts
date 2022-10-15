@@ -8,7 +8,10 @@
 
 function Path
 
-    @: () ->
-
+    @: ->
+        
+        @trackNodes = []
+        
+    addTrackNode: (track, node) -> @trackNodes.push [track, node]
 
 module.exports = Path

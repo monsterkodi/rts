@@ -21,6 +21,8 @@ class Engine extends Car
         @mesh.children[3].material = @mesh.children[3].material.clone()
         @mesh.children[3].material.emissive.copy color
         
+        @mesh.name = 'engine'
+        
     update: (delta, timeSum, train) ->
         
         x = 0.2*Math.sin 2*timeSum*train.speed
