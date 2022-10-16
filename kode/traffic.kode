@@ -6,7 +6,8 @@
    000     000   000  000   000  000       000       000   0000000
 ###
 
-NODE_DISTANCE    = 12
+HEAD_DISTANCE    = 12
+TAIL_DISTANCE    = 8
 REAREND_DISTANCE = 6
 
 function Traffic
@@ -17,6 +18,10 @@ function Traffic
         @trains = []
         @tracks = []
     
+    addNode:  (node)  -> @nodes.push  node
+    addTrain: (train) -> @trains.push train
+    addTrack: (track) -> @tracks.push track
+        
     simulate: (scaledDelta, timeSum) ->
         
         @nodeSignals()
@@ -26,7 +31,7 @@ function Traffic
         for train in @trains
             path = train.path
             p = path.nextDistance()
-            if p < NODE_DISTANCE                         # train is close to target node
+            if p < HEAD_DISTANCE                         # train is close to target node
                 n = path.nextNode()
                 if n.train != train                      # if node is not owned by train
                     if not n.train                       #      if node not occupied
@@ -42,17 +47,12 @@ function Traffic
                                     n.setTrain train     # train is the new occupant
             
             tailDelta = train.tailDelta()
-            s = path.prevDistanceAtDelta tailDelta
-            if s > NODE_DISTANCE
-                n = path.prevNodeAtDelta tailDelta
+            s = path.prevDistance tailDelta
+            if s > TAIL_DISTANCE
+                n = path.prevNode tailDelta
                 if n.train == train
-                    # log 'unblocks' n.name, train.name
                     n.unblock()
-                            
-    addNode:  (node)  -> @nodes.push  node
-    addTrain: (train) -> @trains.push train
-    addTrack: (track) -> @tracks.push track
-        
+                                    
     allowTrainAdvance: (train, advance) ->
         
         delta = train.path.delta+advance
@@ -60,23 +60,13 @@ function Traffic
         for other in @trains
             continue if other == train
             if other.tailTrack() == track
-                trainToOther = other.tailPrevDistance() - train.path.prevDistanceAtDelta(delta)
-                # if train.name == 'red' then log 'rearend!' trainToOther, other.name, other.tailPrevDistance()
+                trainToOther = other.tailPrevDistance() - train.path.prevDistance(delta)
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
-                    # log 'rearend!' train.name, train.path.prevDistanceAtDelta(delta)
-                    # log '   other' other.name, other.path.prevDistance()
-                    # log 'rearend!' train.name, other.name, trainToOther
                     return 0
             else if other.prevTailTrack() == track
-                trainToOther = other.tailPrevDistance() + train.path.nextDistanceAtDelta(delta)
-                # if train.name == 'red' then log 'rearend2' trainToOther, other.name
-                # if trainToOther < REAREND_DISTANCE
-                    # log 'rearend2' train.name, other.name, trainToOther
+                trainToOther = other.tailPrevDistance() + train.path.nextDistance(delta)
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
-                    # log 'rearend!2!' train.name, train.path.prevDistanceAtDelta(delta)
-                    # log '   other' other.name, other.path.prevDistance()
                     return 0
-                
         advance
 
 module.exports = Traffic

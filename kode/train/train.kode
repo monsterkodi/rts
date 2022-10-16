@@ -33,7 +33,7 @@ class Train
     tailDelta:     -> @path.normDelta @path.delta-4.2*(@cars.length-1)
     tailTrack:     -> @path.trackAtDelta @tailDelta()
     prevTailTrack: -> @path.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]
-    tailPrevDistance: -> @path.prevDistanceAtDelta @tailDelta()
+    tailPrevDistance: -> @path.prevDistance @tailDelta()
                 
     update: (delta, timeSum) ->
         

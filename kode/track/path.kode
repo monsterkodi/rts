@@ -19,15 +19,20 @@ function Path
         @tracks.push track
         @nodes.push node
         @revers.push track.node[0] == node
-    
-    normDelta: (d) ->
-        length = @getLength()
-        while d > length
-            d -= length
-        while d < 0
-            d += length
-        d      
-        
+                           
+    getLength: -> 
+        cd = 0
+        for ti in 0...@tracks.length
+            cd += @tracks[ti].curve.getLength()
+        cd
+                
+    deltaAtIndex: (index) ->
+        index = @normIndex index
+        cd = 0
+        for ti in 0...index
+            cd += @tracks[ti].curve.getLength()
+        cd
+            
     indexAtDelta: (d) ->
         nd = @normDelta d
         cd = 0
@@ -36,17 +41,8 @@ function Path
             if cd >= nd
                 return i
         log 'dafuk?' d, nd, cd
-               
-    getLength: -> @deltaAtIndex @tracks.length
-                
-    deltaAtIndex: (index) ->
-        cd = 0
-        for ti in 0...@normIndex index
-            cd += @tracks[ti].curve.getLength()
-        cd
-                
+        
     nodeAtDelta:  (d) -> @nodes[@indexAtDelta d]
-    trackAtDelta: (d) -> @tracks[@indexAtDelta d]
     curveAtDelta: (d) -> @tracks[@indexAtDelta d].curve
     posAtDelta:   (d) ->
         d = @normDelta d
@@ -56,20 +52,11 @@ function Path
         if @revers[di]
             p = 1 - p
         p
-        
-    normIndex: (i) ->  
-        length = @tracks.length
-        while i > length
-            i -= length
-        while i < 0
-            i += length
-        i      
-        
+                
     currentIndex: -> @indexAtDelta @delta
     
-    nextNode:        -> @nodes[@currentIndex()]
-    prevNode:        -> @nodes[@normIndex @currentIndex()-1]
-    prevNodeAtDelta: (d) -> @nodes[@normIndex @indexAtDelta(d)-1]
+    nextNode: (d=@delta) -> @nodes[@indexAtDelta(d)]
+    prevNode: (d=@delta) -> @nodes[@normIndex @indexAtDelta(d)-1]
     
     prevTrack:    -> @tracks[@normIndex @currentIndex()-1]
     currentTrack: -> @tracks[@currentIndex()]
@@ -80,33 +67,41 @@ function Path
     currentCurve: -> @currentTrack().curve
     currentPos:   -> @posAtDelta @delta
     
-    nextDistance:  -> @deltaAtIndex(@currentIndex()+1) - @delta
-    prevDistance:  -> @delta - @deltaAtIndex(@currentIndex())
-    nextDistanceAtDelta: (d) -> @deltaAtIndex(@indexAtDelta(d)+1) - d
-    prevDistanceAtDelta: (d) -> d - @deltaAtIndex(@indexAtDelta d)
+    nextDistance: (d=@delta) -> @normDelta @deltaAtIndex(@indexAtDelta(d)+1) - d
+    prevDistance: (d=@delta) -> @normDelta d - @deltaAtIndex(@indexAtDelta(d))
             
     advance: (delta) ->
         
-        @delta += delta
-        @delta = @normDelta @delta
+        @delta = @normDelta @delta+delta
     
-    getPoint: (point, delta=0) ->
-        
-        @curveAtDelta(@delta+delta).getPointAt @posAtDelta(@delta+delta), point
+    getPoint: (point, offset=0) ->
+        d = @delta+offset
+        @curveAtDelta(d).getPointAt @posAtDelta(d), point
 
-    getTangent: (point, delta=0) ->
-        if @revers[@indexAtDelta @delta+delta]
-            @curveAtDelta(@delta+delta).getTangentAt @posAtDelta(@delta+delta), point
+    getTangent: (point, offset=0) ->
+        d = @delta+offset
+        if @revers[@indexAtDelta d]
+            @curveAtDelta(d).getTangentAt @posAtDelta(d), point
             point.multiplyScalar -1
         else
-            @curveAtDelta(@delta+delta).getTangentAt @posAtDelta(@delta+delta), point
+            @curveAtDelta(d).getTangentAt @posAtDelta(d), point
 
-    moveMesh: (mesh, delta) ->
+    moveMesh: (mesh, offset) ->
         
-        @getPoint mesh.position, delta
-        @getTangent Vector.tmp, delta
+        @getPoint mesh.position, offset
+        @getTangent Vector.tmp, offset
         Vector.tmp.add mesh.position 
         mesh.up.set 0 0 1
         mesh.lookAt Vector.tmp
+        
+    normDelta: (d) ->
+         
+        length = @getLength()
+        (d+10*length) % length
+        
+    normIndex: (i) ->
+         
+        length = @tracks.length
+        (i+10*length) % length
             
 module.exports = Path
