@@ -7,6 +7,7 @@
 ###
 
 Rail = require './rail'
+CurveCtrl = require '../lib/curvectrl'
 
 function Track
 
@@ -16,13 +17,38 @@ function Track
         
         @curve = new THREE.CurvePath
         
+        @ctrls = []
+        
         segnum = Math.floor points.length / 3
         for pi in 0...segnum
-            @curve.add new THREE.QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
+            c = new QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
+            @curve.add c
+            @ctrls.push new CurveCtrl c, @curve, pi
+        @ctrls.push new CurveCtrl c, @curve, segnum
+                    
+        @createRail()
+                
+    updateNode: (n) ->
+        
+        if n == @node[0]
+            @ctrls[0].moveTo n.position
+        else
+            @ctrls[-1].moveTo n.position
+        
+        @curve.updateArcLengths()
+        @createRail()
+        
+    createRail: ->
         
         @rail = new Rail @curve, 100 0.5
         @rail.translate 0 0 0.75
-                
+        if @mesh
+            @mesh.geometry = @rail
+        else
+            @createMesh()                
+        
+    createMesh: ->    
+    
         @mesh = new THREE.Mesh @rail, Materials.train.rail
         @mesh.name = @name
         @mesh.castShadow = true

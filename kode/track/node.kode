@@ -23,27 +23,57 @@ function Node
         box = new THREE.BoxGeometry 2 1 2
         box.translate 0 0 0.75
         @gizmo.center = new THREE.Mesh box, Materials.node.gizmo.center
-        @gizmo.center.position.copy @position
-        @gizmo.center.drag = @
+        @gizmo.center.onDrag = @onDrag
         @gizmo.center.name = 'node.center'
-        @gizmo.center.visible = false
+        # @gizmo.center.visible = false
 
         box = new THREE.BoxGeometry 1 1 1
         box.translate 0 0 0.75
         @gizmo.tangent = new THREE.Mesh box, Materials.node.gizmo.tangent
-        @gizmo.tangent.position.copy @position
-        @gizmo.tangent.position.add @dir
-        @gizmo.tangent.drag = @
+        @gizmo.tangent.position.copy @dir
+        @gizmo.tangent.onDrag = @onDrag
         @gizmo.tangent.name = 'node.tangent'
-        @gizmo.tangent.visible = false
+        # @gizmo.tangent.visible = false
+        
+        @mesh = new THREE.Group
+        @mesh.add @gizmo.center
+        @mesh.add @gizmo.tangent
+        @mesh.position.copy @position
+        
+    onDrag: (line, obj) =>
+
+        plane = new THREE.Plane
+        plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
+        plane.intersectLine line, Vector.tmp
+        
+        @position.copy Vector.tmp
+        @mesh.position.copy @position
+        
+        @updateTracks()
+        
+        for i in 0...@blockedTrains.length
+            
+            block = @blocks[i]
+            train = @blockedTrains[i]
+            train.path.getPoint block.position, 3
+            block.position.z += 0.75
+        
+        if @nodeBox
+            @nodeBox.position.copy @position
+            @nodeBox.position.z += 0.75
+        
+    updateTracks: ->
+        
+        for track in @outTracks
+            track.updateNode @
+        for track in @inTracks
+            track.updateNode @
         
     rotate: (degree) ->
 
         quat = Quaternion.axisAngle @up, degree
         @dir.applyQuaternion quat
-        @gizmo.center.quaternion.copy quat
-        @gizmo.tangent.position.copy @position
-        @gizmo.tangent.position.add @dir
+        @mesh.quaternion.copy quat
         
     setTrain: (@train) ->
         

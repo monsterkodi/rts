@@ -1,0 +1,52 @@
+###
+ 0000000  000   000  00000000   000   000  00000000   0000000  000000000  00000000   000    
+000       000   000  000   000  000   000  000       000          000     000   000  000    
+000       000   000  0000000     000 000   0000000   000          000     0000000    000    
+000       000   000  000   000     000     000       000          000     000   000  000    
+ 0000000   0000000   000   000      0      00000000   0000000     000     000   000  0000000
+###
+
+function CurveCtrl
+
+    @: (@curve, @curvePath, @index) ->
+        
+        @isLast  = @index >= @curvePath.curves.length
+        @isFirst = @index == 0
+        
+        geom = new BoxGeometry 1 1 1
+        geom.translate 0 0 0.75
+        @mesh = new Mesh geom, Materials.node.gizmo.center
+        @mesh.position.copy @curve.v1
+        @mesh.onDrag = @onDrag
+        @mesh.name = 'ctrl'
+        world.pickables.push @mesh
+        world.scene.add @mesh
+        
+    onDrag: (line, obj) =>
+
+        plane = new THREE.Plane
+        plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
+        plane.intersectLine line, @mesh.position
+                
+    moveTo: (point) ->
+        
+        delta = Vector.tmp
+        delta.copy point
+               
+        if @isLast
+            delta.sub @curve.v2
+            @curve.v2.add delta
+            @curve.v1.add delta
+        else
+            delta.sub @curve.v0
+            @curve.v0.add delta
+            @curve.v1.add delta
+            
+        @curve.updateArcLengths()
+
+    nextCurve: ->
+        
+        if @index < @curvePath.curves.length-1
+            @curvePath.curves[@index+1]
+                
+module.exports = CurveCtrl

@@ -130,6 +130,7 @@ class World
         geom = new THREE.PlaneGeometry 1500 1500
         @floor = new THREE.Mesh geom, Materials.floor
         @floor.visible = prefs.get 'floor'
+        @floor.name = 'floor'
         @scene.add @floor
         @pickables.push @floor
         
@@ -137,6 +138,7 @@ class World
         geom.translate 0 0 0.2
         @shadowFloor = new THREE.Mesh geom, Materials.shadow
         @shadowFloor.receiveShadow = true
+        @shadowFloor.name = 'shadow'
         @scene.add @shadowFloor
         
     # 000000000  00000000    0000000   000  000   000  
@@ -189,11 +191,8 @@ class World
     addNode: (x, y, z, name) ->
         
         node = new Node x, y, z, name
-        @scene.add node.gizmo.center
-        @scene.add node.gizmo.tangent
-        
-        @pickables.push node.gizmo.center
-        @pickables.push node.gizmo.tangent
+        @scene.add node.mesh        
+        @pickables.push node.mesh
         
         @traffic.addNode node
         
@@ -220,7 +219,7 @@ class World
         
         m = Vector.midPoint d1, d2
         
-        t = @addTrack [n1.position, d1, m, m, d2, n2.position], name
+        t = @addTrack [n1.position.clone(), d1, m, m, d2, n2.position.clone()], name
         
         t.node[0] = n1
         t.node[1] = n2

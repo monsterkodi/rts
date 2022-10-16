@@ -23,11 +23,13 @@ window.first        = first
 window.last         = last
 window.elem         = elem
 
-window.THREE        = require 'three'
-window.Mesh         = THREE.Mesh
-window.BoxGeometry  = THREE.BoxGeometry
-window.SphereGeometry  = THREE.SphereGeometry
-window.CylinderGeometry  = THREE.CylinderGeometry
+window.THREE                 = require 'three'
+window.Mesh                  = THREE.Mesh
+window.BoxGeometry           = THREE.BoxGeometry
+window.SphereGeometry        = THREE.SphereGeometry
+window.CylinderGeometry      = THREE.CylinderGeometry
+window.QuadraticBezierCurve3 = THREE.QuadraticBezierCurve3
+
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
 window.Color        = require './const/color'
@@ -254,11 +256,12 @@ class RTS
         @camMove = event.button != 1
         
         @downHit = @castRay()
-        # log @downHit
+        log @downHit
             
     onMouseUp: (event) =>
 
         delete @camMove
+        delete @downHit
         
         @calcMouse event
 
@@ -270,7 +273,13 @@ class RTS
     onMouseMove: (event) =>
 
         @calcMouse event
-        hit = @castRay()
+        hit = @castRay() # to update arrowHelper
+        
+        if event.buttons == 1
+            if @downHit?.mesh?.onDrag is func
+                pickFar = vec(@mouse.x, @mouse.y, 1).unproject @camera
+                line = new THREE.Line3 @camera.position, pickFar            
+                @downHit.mesh.onDrag line, @downHit.mesh
         
     onDblClick: (event) => 
         
@@ -316,11 +325,10 @@ class RTS
         @arrowHelper.position.copy point
         
         info = 
+            name:   intersect.object.name
             point:  point
             norm:   norm
             dist:   intersect.distance
-            drag:   intersect.object.drag
-            name:   intersect.object.name
             mesh:   intersect.object
         
         @scene.remove @cursor if @cursor
