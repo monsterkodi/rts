@@ -33,16 +33,16 @@ function Path
         cd = 0
         for t,i in @tracks
             cd += t.curve.getLength()
-            if cd > nd
+            if cd >= nd
                 return i
         log 'dafuk?' d, nd, cd
                
     getLength: -> @deltaAtIndex @tracks.length
                 
-    deltaAtIndex: (i) ->
+    deltaAtIndex: (index) ->
         cd = 0
-        for ti in 0...i
-            cd += @tracks[ti%@tracks.length].curve.getLength()
+        for ti in 0...@normIndex index
+            cd += @tracks[ti].curve.getLength()
         cd
                 
     nodeAtDelta:  (d) -> @nodes[@indexAtDelta d]
@@ -75,6 +75,8 @@ function Path
     currentTrack: -> @tracks[@currentIndex()]
     nextTrack:    -> @tracks[@normIndex @currentIndex()+1]
     
+    trackAtDelta: (d) -> @tracks[@normIndex @indexAtDelta d]
+        
     currentCurve: -> @currentTrack().curve
     currentPos:   -> @posAtDelta @delta
     

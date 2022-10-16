@@ -204,7 +204,7 @@ class World
     connectNodeTracks: (n1, t1, n2, t2, name="#{n1.name} -> #{n2.name}") ->
         
         s = n1.position.distanceTo n2.position
-        s *= 0.5
+        s *= 0.48
         
         d1 = n1.dir.clone()
         d1.scale s

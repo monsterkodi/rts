@@ -26,6 +26,7 @@ function Node
         @gizmo.center.position.copy @position
         @gizmo.center.drag = @
         @gizmo.center.name = 'node.center'
+        @gizmo.center.visible = false
 
         box = new THREE.BoxGeometry 1 1 1
         box.translate 0 0 0.75
@@ -34,6 +35,7 @@ function Node
         @gizmo.tangent.position.add @dir
         @gizmo.tangent.drag = @
         @gizmo.tangent.name = 'node.tangent'
+        @gizmo.tangent.visible = false
         
     rotate: (degree) ->
 
@@ -56,7 +58,6 @@ function Node
                 @nodeBox.position.copy @position
                 @nodeBox.position.z += 0.75
                 world.scene.add @nodeBox
-            log 'node ' @name, 'train' @train.name
             @nodeBox.material = @train.cars[0].mesh.material
             for block in @blocks
                 block.material = @nodeBox.material
@@ -78,8 +79,6 @@ function Node
         @blocks.push mesh
         
     unblock: ->
-        
-        log 'unblock' @name
         
         @setTrain null
         
