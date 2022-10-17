@@ -17,7 +17,7 @@ class Debug
         @shdw = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:600px;' parent:@elem
 
         @worldSpeed = @value text:'speed' value: world.speed.toFixed(1), reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
-        @brightness = @value text:'light' value: rts.getBrightness(), reset:rts.resetBrightness, incr:rts.incrBrightness, decr:rts.decrBrightness
+        @brightness = @value text:'light' value: rts.getBrightness().toFixed(1), reset:rts.resetBrightness, incr:rts.incrBrightness, decr:rts.decrBrightness
         
         setInfo = (v) -> prefs.set 'info' v
         getInfo = -> prefs.get 'info'

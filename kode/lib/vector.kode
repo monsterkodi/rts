@@ -128,10 +128,9 @@ class Vector extends ThreeVector
         0    
     
     negate:  -> @scale -1
-    scale: (f) ->
-        @x *= f
-        @y *= f
-        @z *= f
+    
+    scale: (f) -> 
+        @multiplyScalar f
         @
         
     reset: ->
@@ -215,10 +214,10 @@ class Vector extends ThreeVector
         angles.sort (a,b) -> a[0]-b[0]
         angles[0][1]
         
-    @midPoint: (a, b) ->
+    @midPoint: (a, b, f=0.5) ->
         
         m = b.minus a
-        m.scale 0.5
+        m.scale f
         m.add a
     
 module.exports = Vector

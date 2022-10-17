@@ -6,6 +6,8 @@
  0000000   0000000   000   000      0      00000000   0000000     000     000   000  0000000
 ###
 
+MIN_CTRL_DIST = 2
+
 function CurveCtrl
 
     @: (@curve, @curvePath, @index, @dragCB) ->
@@ -19,63 +21,95 @@ function CurveCtrl
         @ctrlStart  = @curve.v1
         @ctrlEnd    = @curve.v2
         
-        @group = new THREE.Group
+        @group = new Group
         
         if @isMid
             geom = new BoxGeometry 1 1 1
-            geom.translate 0 0 0.75
             mesh = new Mesh geom, Materials.ctrl.end
             @prevCtrlEnd = @curvePath.curves[@index-1].v2
             mesh.position.copy @prevCtrlEnd
             mesh.onDrag = @onDrag 
-            world.pickables.push @group
             mesh.name = 'prevCtrlEnd'
+            mesh.visible = false
             @meshPrevCtrlEnd = mesh
             @group.add mesh
         
         if not @isFirst
-            geom = new BoxGeometry 1 1 1
-            geom.translate 0 0 0.75
+            geom = new BoxGeometry 0.71 1 1 
             mesh = new Mesh geom, Materials.ctrl.curve
             mesh.position.copy @curveStart
             mesh.onDrag = @onDrag 
-            world.pickables.push @group
+            world.pickables.push mesh
             mesh.name = 'curveStart'
+            # mesh.ctrl = @
+            mesh.onHover = @onHover
+            mesh.castShadow = true
+            mesh.receiveShadow = true
+            
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add mesh.position
+            mesh.lookAt Vector.tmp
+            
             @meshCurveStart = mesh
             @group.add mesh
         
         geom = new BoxGeometry 1 1 1
-        geom.rotateZ Math.PI/4
-        geom.translate 0 0 0.75
         mesh = new Mesh geom, @isFirst ? Materials.ctrl.transparent : Materials.ctrl.start
         if not @isFirst
             mesh.onDrag = @onDrag 
-            world.pickables.push @group
         mesh.position.copy @ctrlStart
         mesh.name = 'ctrlStart'
+        mesh.visible = false
         @meshCtrlStart = mesh
         @group.add mesh
-            
-        if @isLast
-            geom = new BoxGeometry 0.5 0.5 0.5
-            geom.translate 0 0 0.75
-            mesh = new Mesh geom, Materials.ctrl.transparent
-            mesh.position.copy @ctrlEnd
-            mesh.name = 'ctrlEnd'
-            @meshCtrlEnd = mesh
-            @group.add mesh
             
         @group.name = 'ctrl'
         world.scene.add @group
         
-    onDrag: (line, obj) =>
-
-        log obj.name
+    onHover: =>
         
+        if CurveCtrl.activeCtrl != @
+            if CurveCtrl.activeCtrl
+                CurveCtrl.activeCtrl.deactivate()
+            CurveCtrl.activeCtrl = @
+            Node = require '../track/node'
+            Node.clearActive()
+            @activate()
+        
+    @clearActive: ->
+        
+        if CurveCtrl.activeCtrl
+            CurveCtrl.activeCtrl.deactivate()
+            CurveCtrl.activeCtrl = null
+            
+    activate: =>
+        
+        @meshPrevCtrlEnd.visible = true
+        @meshCtrlStart.visible = true
+        
+        world.pickables.push @meshPrevCtrlEnd
+        world.pickables.push @meshCtrlStart
+        
+    deactivate: =>
+
+        @meshPrevCtrlEnd.visible = false
+        @meshCtrlStart.visible = false
+        
+        i = world.pickables.indexOf @meshPrevCtrlEnd
+        world.pickables.splice i, 1
+        i = world.pickables.indexOf @meshCtrlStart
+        world.pickables.splice i, 1
+        
+    onDrag: (ray, obj) =>
+
         if obj.name == 'curveStart'
-            plane = new THREE.Plane
+            
+            plane = new Plane
             plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
-            plane.intersectLine line, Vector.tmp
+            ray.intersectPlane plane, Vector.tmp
+            
+            Vector.tmp.round()
+            
             delta = Vector.tmp.minus @curveStart
             @curveStart.add delta
             @ctrlStart.add delta
@@ -83,19 +117,21 @@ function CurveCtrl
             @meshPrevCtrlEnd.position.copy @prevCtrlEnd
             @meshCurveStart.position.copy @curveStart
             @meshCtrlStart.position.copy @ctrlStart
-            @curve.updateArcLengths()
-            @dragCB?()
-        else if obj.name == 'ctrlStart'
+            
+        if obj.name == 'ctrlStart'
             
             z = @ctrlStart.z
-            plane = new THREE.Plane
+            plane = new Plane
             plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
-            plane.intersectLine line, @ctrlStart
+            ray.intersectPlane plane, @ctrlStart
+            @ctrlStart.round()
             
-            if 6 > @ctrlStart.distanceTo @curveStart
+            dist = @ctrlStart.distanceTo @curveStart
+            return if dist < 1
+            if MIN_CTRL_DIST > dist
                 @ctrlStart.sub @curveStart
                 @ctrlStart.normalize()
-                @ctrlStart.multiplyScalar 4
+                @ctrlStart.multiplyScalar MIN_CTRL_DIST
                 @ctrlStart.add @curveStart
                 
             @ctrlStart.z = z
@@ -107,19 +143,33 @@ function CurveCtrl
             @prevCtrlEnd.setLength -dist
             @prevCtrlEnd.add @curveStart
             @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-            @curve.updateArcLengths()
-            @dragCB?()
-        else if obj.name == 'prevCtrlEnd'
+            
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshCurveStart.position
+            @meshCurveStart.lookAt Vector.tmp
+            
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshCtrlStart.position
+            @meshCtrlStart.lookAt Vector.tmp
+
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshPrevCtrlEnd.position
+            @meshPrevCtrlEnd.lookAt Vector.tmp
+
+        if obj.name == 'prevCtrlEnd'
             
             z = @prevCtrlEnd.z
-            plane = new THREE.Plane
+            plane = new Plane
             plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
-            plane.intersectLine line, @prevCtrlEnd
+            ray.intersectPlane plane, @prevCtrlEnd
+            @prevCtrlEnd.round()
             
-            if 6 > @prevCtrlEnd.distanceTo @curveStart
+            dist = @prevCtrlEnd.distanceTo @curveStart
+            return if dist < 1
+            if MIN_CTRL_DIST > dist
                 @prevCtrlEnd.sub @curveStart
                 @prevCtrlEnd.normalize()
-                @prevCtrlEnd.multiplyScalar 4
+                @prevCtrlEnd.multiplyScalar MIN_CTRL_DIST
                 @prevCtrlEnd.add @curveStart
                 
             @prevCtrlEnd.z = z
@@ -131,9 +181,21 @@ function CurveCtrl
             @ctrlStart.setLength -dist
             @ctrlStart.add @curveStart
             @meshCtrlStart.position.copy @ctrlStart
-            @curve.updateArcLengths()
-            @dragCB?()
             
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshCurveStart.position
+            @meshCurveStart.lookAt Vector.tmp
+            
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshCtrlStart.position
+            @meshCtrlStart.lookAt Vector.tmp
+
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshPrevCtrlEnd.position
+            @meshPrevCtrlEnd.lookAt Vector.tmp
+            
+        @curve.updateArcLengths()
+        @dragCB?()
                 
     moveStartTo: (point) ->
         
@@ -156,8 +218,6 @@ function CurveCtrl
         @curveEnd.add delta
         @ctrlEnd.add delta
         
-        @meshCtrlEnd.position.copy @ctrlEnd
-            
         @curve.updateArcLengths()
         
 module.exports = CurveCtrl

@@ -44,18 +44,22 @@ function Track
         
     createRail: ->
         
-        @rail = new Rail @curve, 100 0.5
-        @rail.translate 0 0 0.75
+        @rail = new Rail @curve, 100
         if @mesh
             @mesh.geometry = @rail
         else
             @createMesh()                
         
+    onDoubleClick: ->
+        
+        log 'split track!'
+            
     createMesh: ->    
     
         @mesh = new THREE.Mesh @rail, Materials.train.rail
         @mesh.name = @name
         @mesh.castShadow = true
         @mesh.receiveShadow = true
+        @mesh.handler = @
 
 module.exports = Track

@@ -26,8 +26,12 @@ window.elem         = elem
 window.THREE                 = require 'three'
 window.Ray                   = THREE.Ray
 window.Mesh                  = THREE.Mesh
+window.Line3                 = THREE.Line3
+window.Group                 = THREE.Group
+window.Plane                 = THREE.Plane
 window.Sphere                = THREE.Sphere
 window.BoxGeometry           = THREE.BoxGeometry
+window.PlaneGeometry         = THREE.PlaneGeometry
 window.SphereGeometry        = THREE.SphereGeometry
 window.CylinderGeometry      = THREE.CylinderGeometry
 window.QuadraticBezierCurve3 = THREE.QuadraticBezierCurve3
@@ -49,6 +53,8 @@ Menu    = require './menu/menu'
 World   = require './world'
 Map     = require './map'
 Camera  = require './lib/camera'
+Node    = require './track/node'
+CurveCtrl = require './lib/curvectrl'
 
 tmpMatrix = new THREE.Matrix3
 
@@ -82,14 +88,14 @@ class RTS
                 
         @scene = new THREE.Scene()
                 
-        @brightness = 1
         @lightIntensityAmbient = 0.2
+        @lightIntensityPlayer  = 0.2
         @lightIntensityShadow  = 0.5
         
         @lightAmbient = new THREE.AmbientLight 0xffffff, @lightIntensityAmbient
         @scene.add @lightAmbient
         
-        @lightPlayer = new THREE.PointLight 0xffffff, 0.2
+        @lightPlayer = new THREE.PointLight 0xffffff, @lightIntensityPlayer
         @lightPlayer.position.copy @player.camera.getPosition() if @player?
         @lightPlayer.position.copy @camera.position
         @scene.add @lightPlayer
@@ -114,7 +120,9 @@ class RTS
         @shadowCameraHelper = new THREE.CameraHelper @lightShadow.shadow.camera
         @shadowCameraHelper.visible = false
         @scene.add @shadowCameraHelper
-            
+        
+        @setBrightness prefs.get 'brightness' 1.0
+        
         new Map @scene # sets window.world
                              
         if cam = prefs.get 'camera'
@@ -173,12 +181,14 @@ class RTS
     
     setBrightness: (@brightness) =>
         
-        c = Color.menu.background.clone()
+        c = Color.clear.clone()
         c.multiplyScalar @brightness
         @renderer.setClearColor c
         @lightAmbient.intensity = @lightIntensityAmbient * @brightness
         @lightShadow.intensity = @lightIntensityShadow * @brightness
+        @lightPlayer.intensity = @lightIntensityPlayer * @brightness
         post.emit 'brightness' @brightness
+        prefs.set 'brightness' @brightness
         
     getBrightness: =>
         
@@ -259,7 +269,10 @@ class RTS
         @camMove = event.button != 1
         
         @downHit = @castRay()
-        log @downHit
+
+        if @downHit?.name == 'floor' and event.buttons == 1
+            Node.clearActive()
+            CurveCtrl.clearActive()
             
     onMouseUp: (event) =>
 
@@ -280,13 +293,20 @@ class RTS
         
         if event.buttons == 1
             if @downHit?.mesh?.onDrag is func
-                pickFar = vec(@mouse.x, @mouse.y, 1).unproject @camera
-                line = new THREE.Line3 @camera.position, pickFar            
-                @downHit.mesh.onDrag line, @downHit.mesh
+                @downHit.mesh.onDrag @mouseRay(), @downHit.mesh
+        else if event.buttons == 0 and hit
+            if hit.mesh?.onHover is func
+                hit.mesh.onHover()
+            # if hit.name == 'curveStart'
+                # hit.mesh.ctrl.onHover()
+            # if hit.name.startsWith 'node'
+                # hit.mesh.node.onHover()
         
     onDblClick: (event) => 
         
-        log 'doubleClick'
+        log 'doubleClick' hit = @castRay()
+        if hit.mesh?.handler?.onDoubleClick is func
+            hit.mesh?.handler?.onDoubleClick @mouseRay()
                             
     calcMouse: (event) ->
         
@@ -302,6 +322,10 @@ class RTS
             @centerHelper.setDirection hit.norm
             @centerHelper.position.copy hit.point
             @axesHelper.position.copy hit.point
+            
+    mouseRay: ->
+        
+        new Ray @camera.position, vec(@mouse.x, @mouse.y, 1).unproject(@camera).normalize()
 
     #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
     # 000       000   000  000          000     000   000  000   000   000 000   

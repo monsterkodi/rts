@@ -127,16 +127,17 @@ class World
     
     addFloor: ->
         
-        geom = new THREE.PlaneGeometry 1500 1500
-        @floor = new THREE.Mesh geom, Materials.floor
+        geom = new PlaneGeometry 1500 1500
+        geom.translate 0 0 -0.75
+        @floor = new Mesh geom, Materials.floor
         @floor.visible = prefs.get 'floor'
         @floor.name = 'floor'
         @scene.add @floor
         @pickables.push @floor
         
-        geom = new THREE.PlaneGeometry 1500 1500
-        geom.translate 0 0 0.2
-        @shadowFloor = new THREE.Mesh geom, Materials.shadow
+        geom = new PlaneGeometry 1500 1500
+        geom.translate 0 0 0.2-0.75
+        @shadowFloor = new Mesh geom, Materials.shadow
         @shadowFloor.receiveShadow = true
         @shadowFloor.name = 'shadow'
         @scene.add @shadowFloor
@@ -205,25 +206,28 @@ class World
         s = n1.position.distanceTo n2.position
         s *= 0.5
         
-        c1 = n1.dir.clone()
+        d1 = n1.dir.clone()
+
         d1.scale s
         if t1 != n1.outTracks
-            d1.scale -0.5
-        else
-            d1.scale  0.5
+            d1.negate()
         d1.add n1.position
-
+        
         d2 = n2.dir.clone()
         d2.scale s
         if t2 != n2.outTracks
-            d2.scale -0.5
-        else
-            d2.scale  0.5
+            d2.negate()
         d2.add n2.position
         
-        m = Vector.midPoint d1, d2
+        m  = Vector.midPoint d1, d2
+
+        f = 0.553
+        c1 = Vector.midPoint n1.position, d1, f
+        c2 = Vector.midPoint m, d1, f
+        c3 = Vector.midPoint m, d2, f
+        c4 = Vector.midPoint n2.position, d2, f
         
-        t = @addTrack [n1.position.clone(), d1, d1.clone(), m, m, d2, d2.clone(), n2.position.clone()], name
+        t = @addTrack [n1.position.clone(), c1, c2, m, m, c3, c4, n2.position.clone()], name
         
         t.node[0] = n1
         t.node[1] = n2

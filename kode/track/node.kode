@@ -6,6 +6,8 @@
 000   000   0000000   0000000    00000000
 ###
 
+CurveCtrl = require '../lib/curvectrl'
+
 function Node
 
     @: (x, y, z, @name) ->
@@ -20,33 +22,60 @@ function Node
         @blocks = []
         @gizmo = {}
         
-        box = new THREE.BoxGeometry 2 1 2
-        box.translate 0 0 0.75
-        @gizmo.center = new THREE.Mesh box, Materials.node.gizmo.center
+        geom = new CylinderGeometry 0.6 0.6 0.71 16
+        geom.rotateX Math.PI/2
+        @gizmo.center = new Mesh geom, Materials.ctrl.curve
         @gizmo.center.onDrag = @onDrag
         @gizmo.center.name = 'node.center'
+        # @gizmo.center.node = @
+        @gizmo.center.onHover = @onHover
         # @gizmo.center.visible = false
 
-        box = new THREE.BoxGeometry 1 1 1
-        box.translate 0 0 0.75
-        @gizmo.tangent = new THREE.Mesh box, Materials.node.gizmo.tangent
+        box = new BoxGeometry 1 1 1
+        @gizmo.tangent = new Mesh box, Materials.node.gizmo.tangent
         @gizmo.tangent.position.copy @dir
         @gizmo.tangent.onDrag = @onDrag
         @gizmo.tangent.name = 'node.tangent'
-        # @gizmo.tangent.visible = false
+        @gizmo.tangent.node = @
+        @gizmo.tangent.visible = false
         
-        @mesh = new THREE.Group
+        @mesh = new Group
         @mesh.add @gizmo.center
         @mesh.add @gizmo.tangent
         @mesh.position.copy @position
         
-    onDrag: (line, obj) =>
+    onHover: =>
+        
+        if Node.activeNode != @
+            if Node.activeNode
+                Node.activeNode.deactivate()
+            Node.activeNode = @
+            CurveCtrl.clearActive()
+            @activate()
+        
+    @clearActive: ->
+        
+        if Node.activeNode
+            Node.activeNode.deactivate()
+            Node.activeNode = null
+            
+    activate: ->
+        
+        # @gizmo.center.visible = true
+        @gizmo.tangent.visible = true
+        
+    deactivate: ->
+
+        # @gizmo.center.visible = false
+        @gizmo.tangent.visible = false
+        
+    onDrag: (ray, obj) =>
 
         plane = new THREE.Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
-        plane.intersectLine line, Vector.tmp
+        ray.intersectPlane plane, @position
         
-        @position.copy Vector.tmp
+        @position.round()
         @mesh.position.copy @position
         
         @updateTracks()
@@ -56,11 +85,9 @@ function Node
             block = @blocks[i]
             train = @blockedTrains[i]
             train.path.getPoint block.position, 3
-            block.position.z += 0.75
         
         if @nodeBox
             @nodeBox.position.copy @position
-            @nodeBox.position.z += 0.75
         
     updateTracks: ->
         
@@ -81,12 +108,11 @@ function Node
             if not @nodeBox
                 c1 = new CylinderGeometry 0.25 0.25 1 16
                 c1.rotateX Math.PI/2
-                c2 = new CylinderGeometry 0.25 0.25 1 16
+                c2 = new CylinderGeometry 0.25 0.25 1.4 16
                 c2.rotateZ Math.PI/2
                 geom = THREE.BufferGeometryUtils.mergeBufferGeometries [c1, c2]
                 @nodeBox = new Mesh geom, @train.cars[0].mesh.material
                 @nodeBox.position.copy @position
-                @nodeBox.position.z += 0.75
                 world.scene.add @nodeBox
             @nodeBox.material = @train.cars[0].mesh.material
             for block in @blocks
@@ -101,7 +127,6 @@ function Node
         
         mesh = new Mesh geom, @train.cars[0].mesh.material
         train.path.getPoint mesh.position, 3
-        mesh.position.z += 0.75
         train.path.getTangent Vector.tmp, 3
         Vector.tmp.add mesh.position
         mesh.lookAt Vector.tmp

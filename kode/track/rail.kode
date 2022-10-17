@@ -3,7 +3,7 @@ BufferGeometry = THREE.BufferGeometry
 
 class Rail extends BufferGeometry
 
-    @: (curve, segments=64, radius=1) ->
+    @: (curve, segments=64) ->
 
         super()
                     
@@ -26,27 +26,34 @@ class Rail extends BufferGeometry
 
             P = curve.getPointAt i / segments, P
 
-            N = frames.normals[i]
-            B = frames.binormals[i]
+            N = frames.normals[i].clone().multiplyScalar 0.35
+            B = frames.binormals[i].clone().multiplyScalar 0.35
 
-            for j in 0..4
+            v = P.clone()
+            v.add N
+            v.add B
+            vertices.push v.x, v.y, v.z
+                
+            v = P.clone()
+            v.add N
+            v.sub B
+            vertices.push v.x, v.y, v.z
+            
+            v = P.clone()
+            v.sub N
+            v.sub B
+            vertices.push v.x, v.y, v.z
 
-                v = j / 2 * Math.PI + Math.PI/4
+            v = P.clone()
+            v.sub N
+            v.add B
+            vertices.push v.x, v.y, v.z
 
-                sin =  Math.sin v
-                cos = -Math.cos v
-
-                normal.x = cos * N.x + sin * B.x
-                normal.y = cos * N.y + sin * B.y
-                normal.z = cos * N.z + sin * B.z
-                normal.normalize()
-
-                vertex.x = P.x + radius * normal.x
-                vertex.y = P.y + radius * normal.y
-                vertex.z = P.z + radius * normal.z
-
-                vertices.push vertex.x, vertex.y, vertex.z
-
+            v = P.clone()
+            v.add N
+            v.add B
+            vertices.push v.x, v.y, v.z
+            
         generateIndices = ->
 
             for j in 1..segments
@@ -59,7 +66,6 @@ class Rail extends BufferGeometry
 
                     indices.push a, b, d
                     indices.push b, c, d
-
 
         for i in 0..segments
             generateSegment i
