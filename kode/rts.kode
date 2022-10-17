@@ -24,11 +24,14 @@ window.last         = last
 window.elem         = elem
 
 window.THREE                 = require 'three'
+window.Ray                   = THREE.Ray
 window.Mesh                  = THREE.Mesh
+window.Sphere                = THREE.Sphere
 window.BoxGeometry           = THREE.BoxGeometry
 window.SphereGeometry        = THREE.SphereGeometry
 window.CylinderGeometry      = THREE.CylinderGeometry
 window.QuadraticBezierCurve3 = THREE.QuadraticBezierCurve3
+window.CubicBezierCurve3     = THREE.CubicBezierCurve3
 
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'

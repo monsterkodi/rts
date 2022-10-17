@@ -19,21 +19,25 @@ function Track
         
         @ctrls = []
         
-        segnum = Math.floor points.length / 3
+        segnum = Math.floor points.length / 4
         for pi in 0...segnum
-            c = new QuadraticBezierCurve3 points[pi*3+0], points[pi*3+1], points[pi*3+2]
+            c = new CubicBezierCurve3 points[pi*4+0], points[pi*4+1], points[pi*4+2], points[pi*4+3]
             @curve.add c
-            @ctrls.push new CurveCtrl c, @curve, pi
-        @ctrls.push new CurveCtrl c, @curve, segnum
+            @ctrls.push new CurveCtrl c, @curve, pi, @ctrlMoved
                     
+        @createRail()
+        
+    ctrlMoved: =>
+        
+        @curve.updateArcLengths()
         @createRail()
                 
     updateNode: (n) ->
         
         if n == @node[0]
-            @ctrls[0].moveTo n.position
+            @ctrls[0].moveStartTo n.position
         else
-            @ctrls[-1].moveTo n.position
+            @ctrls[-1].moveEndTo n.position
         
         @curve.updateArcLengths()
         @createRail()

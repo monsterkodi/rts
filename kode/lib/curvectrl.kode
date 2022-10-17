@@ -8,45 +8,156 @@
 
 function CurveCtrl
 
-    @: (@curve, @curvePath, @index) ->
+    @: (@curve, @curvePath, @index, @dragCB) ->
         
-        @isLast  = @index >= @curvePath.curves.length
+        @isLast  = @index == @curvePath.curves.length-1
         @isFirst = @index == 0
+        @isMid   = not @isFirst
+
+        @curveStart = @curve.v0
+        @curveEnd   = @curve.v3
+        @ctrlStart  = @curve.v1
+        @ctrlEnd    = @curve.v2
+        
+        @group = new THREE.Group
+        
+        if @isMid
+            geom = new BoxGeometry 1 1 1
+            geom.translate 0 0 0.75
+            mesh = new Mesh geom, Materials.ctrl.end
+            @prevCtrlEnd = @curvePath.curves[@index-1].v2
+            mesh.position.copy @prevCtrlEnd
+            mesh.onDrag = @onDrag 
+            world.pickables.push @group
+            mesh.name = 'prevCtrlEnd'
+            @meshPrevCtrlEnd = mesh
+            @group.add mesh
+        
+        if not @isFirst
+            geom = new BoxGeometry 1 1 1
+            geom.translate 0 0 0.75
+            mesh = new Mesh geom, Materials.ctrl.curve
+            mesh.position.copy @curveStart
+            mesh.onDrag = @onDrag 
+            world.pickables.push @group
+            mesh.name = 'curveStart'
+            @meshCurveStart = mesh
+            @group.add mesh
         
         geom = new BoxGeometry 1 1 1
+        geom.rotateZ Math.PI/4
         geom.translate 0 0 0.75
-        @mesh = new Mesh geom, Materials.node.gizmo.center
-        @mesh.position.copy @curve.v1
-        @mesh.onDrag = @onDrag
-        @mesh.name = 'ctrl'
-        world.pickables.push @mesh
-        world.scene.add @mesh
+        mesh = new Mesh geom, @isFirst ? Materials.ctrl.transparent : Materials.ctrl.start
+        if not @isFirst
+            mesh.onDrag = @onDrag 
+            world.pickables.push @group
+        mesh.position.copy @ctrlStart
+        mesh.name = 'ctrlStart'
+        @meshCtrlStart = mesh
+        @group.add mesh
+            
+        if @isLast
+            geom = new BoxGeometry 0.5 0.5 0.5
+            geom.translate 0 0 0.75
+            mesh = new Mesh geom, Materials.ctrl.transparent
+            mesh.position.copy @ctrlEnd
+            mesh.name = 'ctrlEnd'
+            @meshCtrlEnd = mesh
+            @group.add mesh
+            
+        @group.name = 'ctrl'
+        world.scene.add @group
         
     onDrag: (line, obj) =>
 
-        plane = new THREE.Plane
-        plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
-        plane.intersectLine line, @mesh.position
+        log obj.name
+        
+        if obj.name == 'curveStart'
+            plane = new THREE.Plane
+            plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
+            plane.intersectLine line, Vector.tmp
+            delta = Vector.tmp.minus @curveStart
+            @curveStart.add delta
+            @ctrlStart.add delta
+            @prevCtrlEnd.add delta
+            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
+            @meshCurveStart.position.copy @curveStart
+            @meshCtrlStart.position.copy @ctrlStart
+            @curve.updateArcLengths()
+            @dragCB?()
+        else if obj.name == 'ctrlStart'
+            
+            z = @ctrlStart.z
+            plane = new THREE.Plane
+            plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
+            plane.intersectLine line, @ctrlStart
+            
+            if 6 > @ctrlStart.distanceTo @curveStart
+                @ctrlStart.sub @curveStart
+                @ctrlStart.normalize()
+                @ctrlStart.multiplyScalar 4
+                @ctrlStart.add @curveStart
                 
-    moveTo: (point) ->
+            @ctrlStart.z = z
+            @meshCtrlStart.position.copy @ctrlStart
+            
+            dist = @prevCtrlEnd.distanceTo @curveStart
+            @prevCtrlEnd.copy @ctrlStart
+            @prevCtrlEnd.sub @curveStart
+            @prevCtrlEnd.setLength -dist
+            @prevCtrlEnd.add @curveStart
+            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
+            @curve.updateArcLengths()
+            @dragCB?()
+        else if obj.name == 'prevCtrlEnd'
+            
+            z = @prevCtrlEnd.z
+            plane = new THREE.Plane
+            plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
+            plane.intersectLine line, @prevCtrlEnd
+            
+            if 6 > @prevCtrlEnd.distanceTo @curveStart
+                @prevCtrlEnd.sub @curveStart
+                @prevCtrlEnd.normalize()
+                @prevCtrlEnd.multiplyScalar 4
+                @prevCtrlEnd.add @curveStart
+                
+            @prevCtrlEnd.z = z
+            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
+            
+            dist = @ctrlStart.distanceTo @curveStart
+            @ctrlStart.copy @prevCtrlEnd
+            @ctrlStart.sub @curveStart
+            @ctrlStart.setLength -dist
+            @ctrlStart.add @curveStart
+            @meshCtrlStart.position.copy @ctrlStart
+            @curve.updateArcLengths()
+            @dragCB?()
+            
+                
+    moveStartTo: (point) ->
         
         delta = Vector.tmp
         delta.copy point
                
-        if @isLast
-            delta.sub @curve.v2
-            @curve.v2.add delta
-            @curve.v1.add delta
-        else
-            delta.sub @curve.v0
-            @curve.v0.add delta
-            @curve.v1.add delta
+        delta.sub @curveStart
+        @curveStart.add delta
+        @ctrlStart.add delta
+        @meshCtrlStart.position.copy @ctrlStart
             
         @curve.updateArcLengths()
 
-    nextCurve: ->
+    moveEndTo: (point) ->
         
-        if @index < @curvePath.curves.length-1
-            @curvePath.curves[@index+1]
-                
+        delta = Vector.tmp
+        delta.copy point
+               
+        delta.sub @curveEnd
+        @curveEnd.add delta
+        @ctrlEnd.add delta
+        
+        @meshCtrlEnd.position.copy @ctrlEnd
+            
+        @curve.updateArcLengths()
+        
 module.exports = CurveCtrl
