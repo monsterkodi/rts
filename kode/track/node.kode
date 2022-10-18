@@ -137,7 +137,7 @@ function Node
         
         c1 = dir.clone().scale( 5).add n1.position
         c2 = dir.clone().scale(-5).add n2.position
-        t = world.addTrack [n1.position.clone(), c1, c2, n2.position.clone()]
+        t = world.addTrack n1, n2, [c1, c2]
                 
         t.node[0] = n1
         t.node[1] = n2

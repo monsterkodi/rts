@@ -198,7 +198,7 @@ function World extends Convert
         
     connectNodes: (n1, n2, name) -> @connectNodeTracks n1, n1.outTracks, n2, n2.inTracks, name
         
-    connectNodeTracks: (n1, t1, n2, t2, name="#{n1.name} -> #{n2.name}") ->
+    connectNodeTracks: (n1, n1Tracks, n2, n2Tracks, name="#{n1.name} -> #{n2.name}") ->
         
         s = n1.position.distanceTo n2.position
         s *= 0.5
@@ -206,13 +206,13 @@ function World extends Convert
         d1 = n1.dir.clone()
 
         d1.scale s
-        if t1 != n1.outTracks
+        if n1Tracks != n1.outTracks
             d1.negate()
         d1.add n1.position
         
         d2 = n2.dir.clone()
         d2.scale s
-        if t2 != n2.outTracks
+        if n2Tracks != n2.outTracks
             d2.negate()
         d2.add n2.position
         
@@ -224,19 +224,28 @@ function World extends Convert
         c3 = Vector.midPoint m, d2, f
         c4 = Vector.midPoint n2.position, d2, f
         
-        t = @addTrack [n1.position.clone(), c1, c2, m, m, c3, c4, n2.position.clone()], name
-        
-        t.node[0] = n1
-        t.node[1] = n2
-        
-        t1.push t
-        t2.push t
+        t = @addTrack n1, n2, [c1, c2, m, c3, c4], name
+                
+        n1Tracks.push t
+        n2Tracks.push t
         
         t
     
-    addTrack: (points, name) ->
+    addTrack: (n1, n2, ctrlPoints, name) ->
         
-        new Track points, name
+        points = [n1.position.clone()] 
+        
+        for point,index in ctrlPoints
+            points.push point
+            if index % 3 == 2
+                points.push point
+        
+        points.push n2.position.clone()
+        
+        track = new Track points, name
+        track.node[0] = n1
+        track.node[1] = n2
+        track
         
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       

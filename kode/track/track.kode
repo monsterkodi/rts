@@ -13,20 +13,19 @@ function Track
 
     @: (points, @name) ->
         
-        @node = []
-        
         @curve = new CurvePath
-        
+        @node = []
         @ctrls = []
         
-        segnum = Math.floor points.length / 4
+        curveNum = Math.floor points.length / 4
         
-        log segnum
+        # log curveNum
         
-        for pi in 0...segnum
-            c = new CubicBezierCurve3 points[pi*4+0], points[pi*4+1], points[pi*4+2], points[pi*4+3]
+        for curveIndex in 0...curveNum
+            p = points.slice curveIndex*4, curveIndex*4+4
+            c = new CubicBezierCurve3 p[0], p[1], p[2], p[3]
             @curve.add c
-            @ctrls.push new CurveCtrl c, @curve, pi, @ctrlMoved
+            @ctrls.push new CurveCtrl c, @curve, curveIndex, @ctrlMoved
                     
         @createRail()        
         
@@ -109,12 +108,25 @@ function Track
         for curve in @curve.curves
             points = points.concat [curve.v0, curve.v1, curve.v2, curve.v3]
         points
+
+    getCtrlPoints: (includeLast) ->
+        
+        points = []
+        for curve in @curve.curves
+            points = points.concat [curve.v1, curve.v2, curve.v3]
+        points.pop() if not includeLast
+        points
         
     getPointsFromNode: (node) ->
         
         points = @getPoints()
-        log points
         if node == @node[1] ➜ points.reverse()
         points
 
+    getCtrlPointsFromNode: (node, includeLast) ->
+        
+        points = @getCtrlPoints includeLast
+        if node == @node[1] ➜ points.reverse()
+        points
+        
 module.exports = Track

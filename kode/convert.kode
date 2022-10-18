@@ -13,7 +13,9 @@ function Convert
         post.on 'convertNodeToCtrl' @onConvertNodeToCtrl
         post.on 'convertCtrlToNode' @onConvertCtrlToNode
 
-    onConvertCtrlToNode: (ctrl) => log 'onConvertCtrlToNode' ctrl
+    onConvertCtrlToNode: (ctrl) => 
+    
+        log 'onConvertCtrlToNode' ctrl
     
     onConvertNodeToCtrl: (node) => 
         
@@ -29,12 +31,10 @@ function Convert
         outTracks = outNode.siblingTracks outTrack
         ▴ inTracks and outTracks
         
-        inPoints = inTrack.getPointsFromNode inNode
-        outPoints = outTrack.getPointsFromNode node
+        inPoints = inTrack.getCtrlPointsFromNode inNode, true
+        outPoints = outTrack.getCtrlPointsFromNode node
         
-        log inPoints, outPoints
-        
-        t = @addTrack inPoints.concat outPoints
+        t = @addTrack inNode, outNode, inPoints.concat outPoints
         
         t.node[0] = inNode
         t.node[1] = outNode
