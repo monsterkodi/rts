@@ -31,12 +31,12 @@ class Quaternion extends ThreeQuaternion
     @unitVectors: (n1, n2) -> 
         
         Quaternion.tmp.setFromUnitVectors n1, n2
-        Quaternion.tmp
+        Quaternion.tmp.clone()
             
     @axisAngle: (axis, angle) -> 
         
         Quaternion.tmp.setFromAxisAngle axis, deg2rad angle
-        Quaternion.tmp
+        Quaternion.tmp.clone()
             
     rotateAxisAngle: (axis, angle) ->
         

@@ -36,7 +36,9 @@ window.SphereGeometry        = THREE.SphereGeometry
 window.CylinderGeometry      = THREE.CylinderGeometry
 window.QuadraticBezierCurve3 = THREE.QuadraticBezierCurve3
 window.CubicBezierCurve3     = THREE.CubicBezierCurve3
-
+window.merge = ->
+    THREE.BufferGeometryUtils.mergeBufferGeometries.apply null, [arguments]
+    
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
 window.Color        = require './const/color'
@@ -269,6 +271,8 @@ class RTS
         @camMove = event.button != 1
         
         @downHit = @castRay()
+        @downRay = @mouseRay()
+        @lastRay = @mouseRay()
 
         if @downHit?.name == 'floor' and event.buttons == 1
             Node.clearActive()
@@ -276,8 +280,13 @@ class RTS
             
     onMouseUp: (event) =>
 
+        if @downHit?.mesh?.onDragDone is func
+            @downHit.mesh.onDragDone @mouseRay(), @downHit, @downRay, @lastRay
+        
         delete @camMove
         delete @downHit
+        delete @downRay
+        delete @lastRay
         
         @calcMouse event
 
@@ -293,14 +302,12 @@ class RTS
         
         if event.buttons == 1
             if @downHit?.mesh?.onDrag is func
-                @downHit.mesh.onDrag @mouseRay(), @downHit.mesh
+                mouseRay = @mouseRay()
+                @downHit.mesh.onDrag @mouseRay(), @downHit, @downRay, @lastRay
+                @lastRay = mouseRay
         else if event.buttons == 0 and hit
             if hit.mesh?.onHover is func
                 hit.mesh.onHover()
-            # if hit.name == 'curveStart'
-                # hit.mesh.ctrl.onHover()
-            # if hit.name.startsWith 'node'
-                # hit.mesh.node.onHover()
         
     onDblClick: (event) => 
         

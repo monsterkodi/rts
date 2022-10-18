@@ -32,7 +32,22 @@ function Track
         @curve.updateArcLengths()
         @createRail()
                 
-    updateNode: (n) ->
+    nodeRotated: (n) ->
+        
+        if @ in n.outTracks
+            dir = vec n.dir
+        else
+            dir = vec(n.dir).negated()
+        
+        if n == @node[0]
+            @ctrls[0].rotateStart dir
+        else if n == @node[1]
+            @ctrls[-1].rotateEnd dir
+        
+        @curve.updateArcLengths()
+        @createRail()
+
+    nodeMoved: (n) ->
         
         if n == @node[0]
             @ctrls[0].moveStartTo n.position

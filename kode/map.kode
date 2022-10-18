@@ -20,9 +20,9 @@ class Map extends World
     
     trainTest: ->
         
-        n1 = @addNode  20 0 0 'n1'
-        n2 = @addNode -20 0 0 'n2'
-        n3 = @addNode   0 0 0 'n3' 
+        n1 = @addNode [ 20 0 0] 'n1'
+        n2 = @addNode [-20 0 0] 'n2'
+        n3 = @addNode [  0 0 0] 'n3' 
         
         n2.rotate 180
         n3.rotate 180
@@ -31,7 +31,7 @@ class Map extends World
         t2 = @connectNodes n2, n1, 't2'
         t3 = @connectNodes n1, n3, 't3'
         t4 = @connectNodeTracks n3, n3.outTracks, n2, n2.outTracks, 't4'
-        t5 = @connectNodeTracks n3, n3.inTracks, n2, n2.inTracks, 't5'
+        t5 = @connectNodeTracks n3, n3.inTracks,  n2, n2.inTracks, 't5'
         t6 = @connectNodes n3, n1, 't6'
                
         train = @addTrain 1 'red'

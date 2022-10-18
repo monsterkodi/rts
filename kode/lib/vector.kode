@@ -13,7 +13,10 @@ ThreeVector = THREE.Vector3
 class Vector extends ThreeVector
 
     @counter: 0
-    @tmp: new Vector
+    @tmp:  new Vector
+    @tmp1: new Vector
+    @tmp2: new Vector
+    @tmp3: new Vector
     
     @: (x=0,y=0,z=0) ->
         
@@ -128,10 +131,12 @@ class Vector extends ThreeVector
         0    
     
     negate:  -> @scale -1
+    negated: -> @clone().negate()
     
     scale: (f) -> 
         @multiplyScalar f
         @
+    scaled: (f) -> @clone().scale f
         
     reset: ->
         @x = @y = @z = 0

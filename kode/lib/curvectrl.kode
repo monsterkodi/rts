@@ -17,15 +17,15 @@ function CurveCtrl
         @isMid   = not @isFirst
 
         @curveStart = @curve.v0
-        @curveEnd   = @curve.v3
         @ctrlStart  = @curve.v1
         @ctrlEnd    = @curve.v2
+        @curveEnd   = @curve.v3
         
         @group = new Group
         
         if @isMid
             geom = new BoxGeometry 1 1 1
-            mesh = new Mesh geom, Materials.ctrl.end
+            mesh = new Mesh geom, Materials.ctrl.start
             @prevCtrlEnd = @curvePath.curves[@index-1].v2
             mesh.position.copy @prevCtrlEnd
             mesh.onDrag = @onDrag 
@@ -41,7 +41,7 @@ function CurveCtrl
             mesh.onDrag = @onDrag 
             world.pickables.push mesh
             mesh.name = 'curveStart'
-            # mesh.ctrl = @
+            mesh.handler = @
             mesh.onHover = @onHover
             mesh.castShadow = true
             mesh.receiveShadow = true
@@ -86,6 +86,8 @@ function CurveCtrl
         
         @meshPrevCtrlEnd.visible = true
         @meshCtrlStart.visible = true
+        @meshCurveStart.material = Materials.ctrl.start
+        @meshCurveStart.scale.set 1.2 1.2 1.2
         
         world.pickables.push @meshPrevCtrlEnd
         world.pickables.push @meshCtrlStart
@@ -94,22 +96,23 @@ function CurveCtrl
 
         @meshPrevCtrlEnd.visible = false
         @meshCtrlStart.visible = false
+        @meshCurveStart.material = Materials.ctrl.curve
+        @meshCurveStart.scale.set 1 1 1
         
         i = world.pickables.indexOf @meshPrevCtrlEnd
         world.pickables.splice i, 1
         i = world.pickables.indexOf @meshCtrlStart
         world.pickables.splice i, 1
         
-    onDrag: (ray, obj) =>
+    onDrag: (ray, hit) =>
 
-        if obj.name == 'curveStart'
-            
-            plane = new Plane
-            plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
-            ray.intersectPlane plane, Vector.tmp
-            
-            Vector.tmp.round()
-            
+        plane = new Plane
+        plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
+        ray.intersectPlane plane, Vector.tmp
+        Vector.tmp.round()
+        
+        if hit.mesh.name == 'curveStart'
+                        
             delta = Vector.tmp.minus @curveStart
             @curveStart.add delta
             @ctrlStart.add delta
@@ -118,13 +121,10 @@ function CurveCtrl
             @meshCurveStart.position.copy @curveStart
             @meshCtrlStart.position.copy @ctrlStart
             
-        if obj.name == 'ctrlStart'
+        if hit.mesh.name == 'ctrlStart'
             
             z = @ctrlStart.z
-            plane = new Plane
-            plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
-            ray.intersectPlane plane, @ctrlStart
-            @ctrlStart.round()
+            @ctrlStart.copy Vector.tmp
             
             dist = @ctrlStart.distanceTo @curveStart
             return if dist < 1
@@ -156,13 +156,10 @@ function CurveCtrl
             Vector.tmp.add @meshPrevCtrlEnd.position
             @meshPrevCtrlEnd.lookAt Vector.tmp
 
-        if obj.name == 'prevCtrlEnd'
+        if hit.mesh.name == 'prevCtrlEnd'
             
             z = @prevCtrlEnd.z
-            plane = new Plane
-            plane.setFromNormalAndCoplanarPoint Vector.unitZ, obj.getWorldPosition(Vector.tmp)
-            ray.intersectPlane plane, @prevCtrlEnd
-            @prevCtrlEnd.round()
+            @prevCtrlEnd.copy Vector.tmp
             
             dist = @prevCtrlEnd.distanceTo @curveStart
             return if dist < 1
@@ -199,8 +196,7 @@ function CurveCtrl
                 
     moveStartTo: (point) ->
         
-        delta = Vector.tmp
-        delta.copy point
+        delta = Vector.tmp.copy point
                
         delta.sub @curveStart
         @curveStart.add delta
@@ -211,13 +207,28 @@ function CurveCtrl
 
     moveEndTo: (point) ->
         
-        delta = Vector.tmp
-        delta.copy point
+        delta = Vector.tmp.copy point
                
         delta.sub @curveEnd
         @curveEnd.add delta
         @ctrlEnd.add delta
         
+        @curve.updateArcLengths()
+        
+    rotateStart: (dir) ->
+        
+        length = @ctrlStart.distanceTo @curveStart
+        @ctrlStart.copy dir
+        @ctrlStart.setLength length
+        @ctrlStart.add @curveStart
+        @curve.updateArcLengths()
+        
+    rotateEnd: (dir) ->
+        
+        length = @ctrlEnd.distanceTo @curveEnd
+        @ctrlEnd.copy dir
+        @ctrlEnd.setLength length
+        @ctrlEnd.add @curveEnd
         @curve.updateArcLengths()
         
 module.exports = CurveCtrl

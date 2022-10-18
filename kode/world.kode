@@ -189,9 +189,9 @@ class World
     #    000     000   000  000   000  000       000  000   
     #    000     000   000  000   000   0000000  000   000  
     
-    addNode: (x, y, z, name) ->
+    addNode: (point, name) ->
         
-        node = new Node x, y, z, name
+        node = new Node point, name
         @scene.add node.mesh        
         @pickables.push node.mesh
         
