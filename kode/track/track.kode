@@ -7,7 +7,7 @@
 ###
 
 Rail = require './rail'
-CurveCtrl = require '../lib/curvectrl'
+CurveCtrl = require '../track/curvectrl'
 
 function Track
 
@@ -15,17 +15,33 @@ function Track
         
         @node = []
         
-        @curve = new THREE.CurvePath
+        @curve = new CurvePath
         
         @ctrls = []
         
         segnum = Math.floor points.length / 4
+        
+        log segnum
+        
         for pi in 0...segnum
             c = new CubicBezierCurve3 points[pi*4+0], points[pi*4+1], points[pi*4+2], points[pi*4+3]
             @curve.add c
             @ctrls.push new CurveCtrl c, @curve, pi, @ctrlMoved
                     
-        @createRail()
+        @createRail()        
+        
+    del: ->
+        
+        world.removePickable @mesh
+        world.removeObject @mesh
+        for ctrl in @ctrls
+            ctrl.del()
+        @mesh?.removeFromParent()
+        delete @curve
+        delete @node
+        delete @ctrls
+        delete @mesh
+        delete @rail
         
     ctrlMoved: =>
         
@@ -65,16 +81,40 @@ function Track
         else
             @createMesh()                
         
-    onDoubleClick: ->
-        
-        log 'split track!'
-            
     createMesh: ->    
     
-        @mesh = new THREE.Mesh @rail, Materials.train.rail
+        @mesh = new Mesh @rail, Materials.train.rail
         @mesh.name = @name
         @mesh.castShadow = true
         @mesh.receiveShadow = true
         @mesh.handler = @
+        
+        world.addObject @mesh
+        world.addPickable @mesh
+        
+    onDoubleClick: ->
+        
+        log 'split track!'
+        
+    nodeOpposite: (node) ->
+        
+        if      
+            node == @node[0] ➜ return @node[1]
+            node == @node[1] ➜ return @node[0]
+                             ➜ log 'nodeOpposite.dafuk?'
+                             
+    getPoints: ->
+        
+        points = []
+        for curve in @curve.curves
+            points = points.concat [curve.v0, curve.v1, curve.v2, curve.v3]
+        points
+        
+    getPointsFromNode: (node) ->
+        
+        points = @getPoints()
+        log points
+        if node == @node[1] ➜ points.reverse()
+        points
 
 module.exports = Track

@@ -39,7 +39,6 @@ function CurveCtrl
             mesh = new Mesh geom, Materials.ctrl.curve
             mesh.position.copy @curveStart
             mesh.onDrag = @onDrag 
-            world.pickables.push mesh
             mesh.name = 'curveStart'
             mesh.handler = @
             mesh.onHover = @onHover
@@ -51,6 +50,7 @@ function CurveCtrl
             mesh.lookAt Vector.tmp
             
             @meshCurveStart = mesh
+            world.addPickable @meshCurveStart
             @group.add mesh
         
         geom = new BoxGeometry 1 1 1
@@ -64,7 +64,21 @@ function CurveCtrl
         @group.add mesh
             
         @group.name = 'ctrl'
-        world.scene.add @group
+        world.addObject @group
+        
+    del: ->
+        
+        CurveCtrl.clearActive()
+        world.removeObject @group
+        world.removePickable @meshCurveStart
+        delete @group
+        delete @meshCtrlStart
+        delete @meshCurveStart
+        delete @meshPrevCtrlEnd
+        
+    onDoubleClick: (ray, hit) ->
+        
+        post.emit 'convertCtrlToNode' @
         
     onHover: =>
         
@@ -76,6 +90,12 @@ function CurveCtrl
             Node.clearActive()
             @activate()
         
+    #  0000000    0000000  000000000  000  000   000  00000000  
+    # 000   000  000          000     000  000   000  000       
+    # 000000000  000          000     000   000 000   0000000   
+    # 000   000  000          000     000     000     000       
+    # 000   000   0000000     000     000      0      00000000  
+    
     @clearActive: ->
         
         if CurveCtrl.activeCtrl
@@ -104,6 +124,12 @@ function CurveCtrl
         i = world.pickables.indexOf @meshCtrlStart
         world.pickables.splice i, 1
         
+    # 0000000    00000000    0000000    0000000   
+    # 000   000  000   000  000   000  000        
+    # 000   000  0000000    000000000  000  0000  
+    # 000   000  000   000  000   000  000   000  
+    # 0000000    000   000  000   000   0000000   
+    
     onDrag: (ray, hit) =>
 
         plane = new Plane
@@ -194,6 +220,12 @@ function CurveCtrl
         @curve.updateArcLengths()
         @dragCB?()
                 
+    # 00     00   0000000   000   000  00000000  
+    # 000   000  000   000  000   000  000       
+    # 000000000  000   000   000 000   0000000   
+    # 000 0 000  000   000     000     000       
+    # 000   000   0000000       0      00000000  
+    
     moveStartTo: (point) ->
         
         delta = Vector.tmp.copy point
@@ -215,6 +247,12 @@ function CurveCtrl
         
         @curve.updateArcLengths()
         
+    # 00000000    0000000   000000000   0000000   000000000  00000000  
+    # 000   000  000   000     000     000   000     000     000       
+    # 0000000    000   000     000     000000000     000     0000000   
+    # 000   000  000   000     000     000   000     000     000       
+    # 000   000   0000000      000     000   000     000     00000000  
+    
     rotateStart: (dir) ->
         
         length = @ctrlStart.distanceTo @curveStart

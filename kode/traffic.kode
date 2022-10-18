@@ -14,13 +14,9 @@ function Traffic
 
     @: ->
         
-        @nodes = []
         @trains = []
-        @tracks = []
     
-    addNode:  (node)  -> @nodes.push  node
     addTrain: (train) -> @trains.push train
-    addTrack: (track) -> @tracks.push track
         
     simulate: (scaledDelta, timeSum) ->
         

@@ -1,0 +1,50 @@
+###
+ 0000000   0000000   000   000  000   000  00000000  00000000   000000000
+000       000   000  0000  000  000   000  000       000   000     000   
+000       000   000  000 0 000   000 000   0000000   0000000       000   
+000       000   000  000  0000     000     000       000   000     000   
+ 0000000   0000000   000   000      0      00000000  000   000     000   
+###
+
+function Convert
+
+    @: (@world) ->
+        
+        post.on 'convertNodeToCtrl' @onConvertNodeToCtrl
+        post.on 'convertCtrlToNode' @onConvertCtrlToNode
+
+    onConvertCtrlToNode: (ctrl) => log 'onConvertCtrlToNode' ctrl
+    
+    onConvertNodeToCtrl: (node) => 
+        
+        inTrack = node.inTracks[0]
+        outTrack = node.outTracks[0]
+        ▴ inTrack and outTrack
+        
+        inNode = inTrack.nodeOpposite node
+        outNode = outTrack.nodeOpposite node
+        ▴ inNode and outNode
+        
+        inTracks = inNode.siblingTracks inTrack
+        outTracks = outNode.siblingTracks outTrack
+        ▴ inTracks and outTracks
+        
+        inPoints = inTrack.getPointsFromNode inNode
+        outPoints = outTrack.getPointsFromNode node
+        
+        log inPoints, outPoints
+        
+        t = @addTrack inPoints.concat outPoints
+        
+        t.node[0] = inNode
+        t.node[1] = outNode
+        
+        inTracks.push t
+        outTracks.push t
+        
+        inNode.removeTrack inTrack
+        outNode.removeTrack outTrack
+        
+        node.del()
+        
+module.exports = Convert

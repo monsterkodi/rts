@@ -30,6 +30,7 @@ window.Line3                 = THREE.Line3
 window.Group                 = THREE.Group
 window.Plane                 = THREE.Plane
 window.Sphere                = THREE.Sphere
+window.CurvePath             = THREE.CurvePath
 window.BoxGeometry           = THREE.BoxGeometry
 window.PlaneGeometry         = THREE.PlaneGeometry
 window.SphereGeometry        = THREE.SphereGeometry
@@ -56,7 +57,7 @@ World   = require './world'
 Map     = require './map'
 Camera  = require './lib/camera'
 Node    = require './track/node'
-CurveCtrl = require './lib/curvectrl'
+CurveCtrl = require './track/curvectrl'
 
 tmpMatrix = new THREE.Matrix3
 
@@ -311,9 +312,11 @@ class RTS
         
     onDblClick: (event) => 
         
-        log 'doubleClick' hit = @castRay()
-        if hit.mesh?.handler?.onDoubleClick is func
-            hit.mesh?.handler?.onDoubleClick @mouseRay()
+        if hit = @castRay()
+            if hit.mesh?.handler?.onDoubleClick is func
+                hit.mesh?.handler?.onDoubleClick @mouseRay(), hit
+            else
+                log 'unhandled doubleClick' hit = @castRay()
                             
     calcMouse: (event) ->
         

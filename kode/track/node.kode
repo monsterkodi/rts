@@ -6,7 +6,7 @@
 000   000   0000000   0000000    00000000
 ###
 
-CurveCtrl = require '../lib/curvectrl'
+CurveCtrl = require '../track/curvectrl'
 
 function Node
 
@@ -27,6 +27,7 @@ function Node
         @gizmo.center = new Mesh geom, Materials.ctrl.curve
         @gizmo.center.onDrag = @onDrag
         @gizmo.center.name = 'node.center'
+        @gizmo.center.handler = @
         @gizmo.center.onHover = @onHover
 
         geom = new CylinderGeometry 1.5 1.5 0.4 32
@@ -62,12 +63,27 @@ function Node
         @gizmo.tangent.add outMesh
         @gizmo.tangent.add inMesh
         
-        @mesh = new Group
-        @mesh.add @gizmo.center
-        @mesh.add @gizmo.tangent
-        @mesh.position.copy @position
+        @group = new Group
+        @group.add @gizmo.center
+        @group.add @gizmo.tangent
+        @group.position.copy @position
+        
+        world.addPickable @group
         
         @rotate 0
+        
+    del: ->
+        
+        Node.clearActive()
+        @group.removeFromParent()
+        world.removePickable @group
+        delete @group
+        
+    onDoubleClick: (ray, hit) =>
+        
+        if @inTracks.length == 1 and @outTracks.length == 1
+            log 'convert to ctrl'
+            post.emit 'convertNodeToCtrl' @
         
     onHover: =>
         
@@ -78,6 +94,12 @@ function Node
             CurveCtrl.clearActive()
             @activate()
         
+    #  0000000    0000000  000000000  000  000   000  00000000  
+    # 000   000  000          000     000  000   000  000       
+    # 000000000  000          000     000   000 000   0000000   
+    # 000   000  000          000     000     000     000       
+    # 000   000   0000000     000     000      0      00000000  
+    
     @clearActive: ->
         
         if Node.activeNode
@@ -96,6 +118,12 @@ function Node
         @gizmo.center.material = Materials.ctrl.curve  
         @gizmo.tangent.visible = false
             
+    # 0000000    00000000    0000000    0000000   
+    # 000   000  000   000  000   000  000        
+    # 000   000  0000000    000000000  000  0000  
+    # 000   000  000   000  000   000  000   000  
+    # 0000000    000   000  000   000   0000000   
+    
     startDrag: (tracks) ->
         
         dir = vec @dir
@@ -141,7 +169,7 @@ function Node
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
         ray.intersectPlane plane, dragNode.position
         dragNode.position.round()
-        dragNode.mesh.position.copy dragNode.position
+        dragNode.group.position.copy dragNode.position
         @dragTrack.nodeMoved dragNode
         
     onDragDone: =>
@@ -155,7 +183,7 @@ function Node
         ray.intersectPlane plane, @position
         
         @position.round()
-        @mesh.position.copy @position
+        @group.position.copy @position
         
         for track in @outTracks
             track.nodeMoved @
@@ -171,6 +199,12 @@ function Node
         if @nodeBox
             @nodeBox.position.copy @position
                 
+    # 00000000    0000000   000000000   0000000   000000000  00000000  
+    # 000   000  000   000     000     000   000     000     000       
+    # 0000000    000   000     000     000000000     000     0000000   
+    # 000   000  000   000     000     000   000     000     000       
+    # 000   000   0000000      000     000   000     000     00000000  
+    
     onRotate: (ray, hit, downRay, lastRay) =>
 
         point = vec()
@@ -194,16 +228,22 @@ function Node
 
         quat = Quaternion.axisAngle @up, degree
         @dir.applyQuaternion quat
-        @mesh.quaternion.multiply quat
-        @nodeBox?.quaternion.copy @mesh.quaternion
+        @group.quaternion.multiply quat
+        @nodeBox?.quaternion.copy @group.quaternion
         
     setDir: (dir) ->
         
         quat = Quaternion.unitVectors @dir, dir
         @dir.copy dir
-        @mesh.quaternion.multiply quat
-        @nodeBox?.quaternion.copy @mesh.quaternion
+        @group.quaternion.multiply quat
+        @nodeBox?.quaternion.copy @group.quaternion
         
+    # 000000000  00000000    0000000   000  000   000  
+    #    000     000   000  000   000  000  0000  000  
+    #    000     0000000    000000000  000  000 0 000  
+    #    000     000   000  000   000  000  000  0000  
+    #    000     000   000  000   000  000  000   000  
+    
     setTrain: (@train) ->
         
         if @train 
@@ -215,12 +255,18 @@ function Node
                 geom = THREE.BufferGeometryUtils.mergeBufferGeometries [c1, c2]
                 @nodeBox = new Mesh geom, @train.cars[0].mesh.material
                 @nodeBox.position.copy @position
-                @nodeBox.quaternion.copy @mesh.quaternion
-                world.scene.add @nodeBox
+                @nodeBox.quaternion.copy @group.quaternion
+                world.addObject @nodeBox
             @nodeBox.material = @train.cars[0].mesh.material
             for block in @blocks
                 block.material = @nodeBox.material
         
+    # 0000000    000       0000000    0000000  000   000  
+    # 000   000  000      000   000  000       000  000   
+    # 0000000    000      000   000  000       0000000    
+    # 000   000  000      000   000  000       000  000   
+    # 0000000    0000000   0000000    0000000  000   000  
+    
     block: (train) ->
         
         @blockedTrains.push train
@@ -233,7 +279,7 @@ function Node
         train.path.getTangent Vector.tmp, 3
         Vector.tmp.add mesh.position
         mesh.lookAt Vector.tmp
-        world.scene.add mesh
+        world.addObject mesh
         @blocks.push mesh
         
     unblock: ->
@@ -244,12 +290,30 @@ function Node
             t.unblock()            
         
         for block in @blocks
-            block.removeFromParent()
-            
-        @nodeBox.removeFromParent()
+            world.removeObject block
+        world.removeObject @nodeBox
             
         delete @nodeBox
         @blockedTrains = []
         @blocks = []
+        
+    # 000000000  00000000    0000000    0000000  000   000  
+    #    000     000   000  000   000  000       000  000   
+    #    000     0000000    000000000  000       0000000    
+    #    000     000   000  000   000  000       000  000   
+    #    000     000   000  000   000   0000000  000   000  
+    
+    removeTrack: (track) ->
+        
+        tracks = @siblingTracks track
+        tracks.splice tracks.indexOf(track), 1
+        track.del()
+        
+    siblingTracks: (track) ->
+        
+        if 
+            track in @inTracks  ➜ @inTracks
+            track in @outTracks ➜ @outTracks
+                                ➜ log 'no siblingTrack' 
         
 module.exports = Node

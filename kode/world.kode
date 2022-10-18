@@ -12,9 +12,10 @@ Train     = require './train/train'
 Engine    = require './train/engine'
 Boxcar    = require './train/boxcar'
 Construct = require './construct'
+Convert   = require './convert'
 Traffic   = require './traffic'
 
-class World
+function World extends Convert
     
     @: (@scene) ->
                 
@@ -192,11 +193,7 @@ class World
     addNode: (point, name) ->
         
         node = new Node point, name
-        @scene.add node.mesh        
-        @pickables.push node.mesh
-        
-        @traffic.addNode node
-        
+        @scene.add node.group        
         node
         
     connectNodes: (n1, n2, name) -> @connectNodeTracks n1, n1.outTracks, n2, n2.inTracks, name
@@ -239,14 +236,7 @@ class World
     
     addTrack: (points, name) ->
         
-        track = new Track points, name
-        
-        @pickables.push track.mesh
-        @scene.add track.mesh
-        
-        @traffic.addTrack track
-        
-        track
+        new Track points, name
         
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       
@@ -272,4 +262,27 @@ class World
         Vector.tmp.copy v
         Vector.tmp.rounded()
         
+    # 00000000   000   0000000  000   000   0000000   0000000    000      00000000   0000000  
+    # 000   000  000  000       000  000   000   000  000   000  000      000       000       
+    # 00000000   000  000       0000000    000000000  0000000    000      0000000   0000000   
+    # 000        000  000       000  000   000   000  000   000  000      000            000  
+    # 000        000   0000000  000   000  000   000  0000000    0000000  00000000  0000000   
+    
+    addPickable: (mesh) ->
+        
+        @pickables.push mesh
+        
+    removePickable: (mesh) ->
+        
+        if mesh in @pickables
+            @pickables.splice @pickables.indexOf(mesh), 1
+        
+    addObject: (mesh) ->
+        
+        @scene.add mesh
+        
+    removeObject: (mesh) ->
+        
+        mesh.removeFromParent()
+            
 module.exports = World
