@@ -282,21 +282,25 @@ class RTS
             
     onMouseUp: (event) =>
 
+        @calcMouse event
+        
         if @downHit?.mesh?.onDragDone is func
             @downHit.mesh.onDragDone @mouseRay(), @downHit, @downRay, @lastRay
         
+        moved = @downPos.dist @mouse
+        if moved < 0.01
+            if event.button != 0
+                @focusOnHit()
+                
+        # if event.buttons == 1
+        if @downHit?.mesh?.handler?.onMouseUp is func
+            @downHit?.mesh?.handler?.onMouseUp @downRay, @downHit
+                    
         delete @camMove
         delete @downRay
         delete @lastRay
         # keep downHit!
         
-        @calcMouse event
-
-        moved = @downPos.dist @mouse
-        if moved < 0.01
-            if event.button != 0
-                @focusOnHit()
-                    
     onMouseMove: (event) =>
 
         @calcMouse event
@@ -309,8 +313,18 @@ class RTS
         else if event.buttons == 0 and hit
             if hit.mesh?.onHover is func
                 hit.mesh.onHover mouseRay, hit, @lastRay
+            if @lastHit?.mesh != hit.mesh 
+                if @lastHit?.mesh?.onLeave is func
+                    @lastHit.mesh.onLeave mouseRay, @lastHit, @lastRay
+                else if @lastHit?.mesh?.handler?.onLeave is func
+                    @lastHit.mesh.handler.onLeave mouseRay, @lastHit, @lastRay
+                if hit.mesh?.onEnter is func
+                    hit.mesh.onEnter mouseRay, hit, @lastRay
+                else if hit.mesh?.handler?.onEnter is func
+                    hit.mesh.handler.onEnter mouseRay, hit, @lastRay
             else if hit.mesh.name == 'floor'
                 world.hideCompass()
+            @lastHit = hit
                 
         @lastRay = mouseRay
 

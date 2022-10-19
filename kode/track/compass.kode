@@ -17,19 +17,17 @@ function Compass
         
         geom = new CylinderGeometry 1.5 1.5 0.4 32
         geom.rotateX Math.PI/2
-        @wheel = new Mesh geom, Materials.ctrl.curve
+        @wheel = new Mesh geom, Materials.compass.wheel
         @wheel.onDrag = @onRotate
-        @wheel.onHover = @onHover
         @wheel.name = 'compass.wheel'
         @group.add @wheel
         
         geom = new CylinderGeometry 0.84 0.84 0.85 32
         geom.rotateX Math.PI/2
-        @center = new Mesh geom, Materials.ctrl.start
+        @center = new Mesh geom, Materials.compass.center
         @center.onDrag = @onDrag
         @center.name = 'compass.center'
         @center.handler = @
-        @center.onHover = @onHover
         @group.add @center
         
         geom = new CylinderGeometry 0.2 0.2 1.2 16
@@ -45,10 +43,9 @@ function Compass
             geom.rotateX Math.PI/2
             geom.translate 0 1.16 0
             geom.rotateZ i * Math.PI/4
-            dot = new Mesh geom, Materials.ctrl.start.clone()
+            dot = new Mesh geom, Materials.compass.center.clone()
             dot.material.color = Color.dot[i]
             dot.onDrag  = @onRotate
-            dot.onHover = @onHover
             dot.handler = @
             dot.name = "compass.dot#{i}"
             @dots.push dot
@@ -56,7 +53,6 @@ function Compass
         
     onDrag: (ray, hit, downRay, lastRay) => 
         
-        @clearScales()
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
         ray.intersectPlane plane, @group.position
@@ -66,8 +62,7 @@ function Compass
             
     onRotate: (ray, hit, downRay, lastRay) => 
         
-        @clearScales()
-        
+        @clearHighlight()
         point = vec()
         hit.mesh.getWorldPosition point
         plane = new Plane
@@ -101,14 +96,23 @@ function Compass
     getDir: -> vec(0 1 0).applyQuaternion @wheel.quaternion
     getUp:  -> vec(0 0 1).applyQuaternion @wheel.quaternion
     
-    onHover: (ray, hit) => 
-
-        @clearScales()
+    onEnter: (ray, hit) => 
+        
         if hit.name.startsWith 'compass.dot'
-            dotIndex = parseInt hit.name[-1]
-            @dots[dotIndex].scale.set 1 1 1.2
+            dot = @dots[parseInt hit.name[-1]]
+            dot.scale.set 1 1 1.2
+            dot.material.emissive.copy dot.material.color
         if hit.name == 'compass.center'
             @center.scale.set 1 1 1.2
+            
+    onLeave: (ray, hit) =>
+        
+        if hit.name.startsWith 'compass.dot'
+            dot = @dots[parseInt hit.name[-1]]
+            dot.scale.set 1 1 1
+            dot.material.emissive.copy Color.black
+        if hit.name == 'compass.center'    
+            @center.scale.set 1 1 1
     
     onMouseDown: (ray, hit) => 
 
@@ -116,7 +120,12 @@ function Compass
             dotIndex = parseInt hit.name[-1]
             @dots[dotIndex].scale.set 1 1 1
         if hit.name == 'compass.center'
+            @group.visible = false
             @center.scale.set 1 1 1
+            
+    onMouseUp: (ray, hit) =>
+        
+        @group.visible = true
         
     onClick: (ray, hit) => 
         
@@ -134,10 +143,11 @@ function Compass
         else
             log 'onDoubleClick' hit
 
-    clearScales: ->
-        
+    clearHighlight: ->
+
         for dot in @dots
             dot.scale.set 1 1 1
+            dot.material.emissive.copy Color.black
         @center.scale.set 1 1 1
                         
 module.exports = Compass
