@@ -95,13 +95,15 @@ function Path
         mesh.lookAt Vector.tmp
         
     normDelta: (d) ->
-         
+        
         length = @getLength()
+        return 0 if not length
         (d+10*length) % length
         
     normIndex: (i) ->
          
         length = @tracks.length
+        return 0 if not length
         (i+10*length) % length
             
 module.exports = Path

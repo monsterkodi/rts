@@ -48,7 +48,7 @@ function World extends Convert
     showCompass: (object, point, dir) ->
         
         if object and object != @compass.object
-            log 'showCompass' object
+            # log 'showCompass' object
             @addObject   @compass.group
             @addPickable @compass.group
             @compass.object = null
@@ -59,7 +59,7 @@ function World extends Convert
     hideCompass: (object) =>
         
         if @compass.object == object or not object and @compass.object
-            log 'hideCompass'
+            # log 'hideCompass'
             @removePickable @compass.group
             @removeObject   @compass.group
             @compass.object = null
@@ -129,7 +129,6 @@ function World extends Convert
         
         @timeSum += scaledDelta
         @simulate scaledDelta
-        # boxes.render()
         post.emit 'tick'
         
     #  0000000  000  00     00  000   000  000       0000000   000000000  00000000  
@@ -217,37 +216,36 @@ function World extends Convert
     
     addNode: (point, name) ->
         
-        node = new Node point, name
-        @scene.add node.group        
+        node = new Node vec(point), name
         node
         
     connectNodes: (n1, n2, name) -> @connectNodeTracks n1, n1.outTracks, n2, n2.inTracks, name
         
     connectNodeTracks: (n1, n1Tracks, n2, n2Tracks, name="#{n1.name} -> #{n2.name}") ->
         
-        s = n1.position.distanceTo n2.position
+        s = n1.getPos().distanceTo n2.getPos()
         s *= 0.5
         
-        d1 = n1.dir.clone()
+        d1 = n1.getDir()
 
         d1.scale s
         if n1Tracks != n1.outTracks
             d1.negate()
-        d1.add n1.position
+        d1.add n1.getPos()
         
-        d2 = n2.dir.clone()
+        d2 = n2.getDir()
         d2.scale s
         if n2Tracks != n2.outTracks
             d2.negate()
-        d2.add n2.position
+        d2.add n2.getPos()
         
         m  = Vector.midPoint d1, d2
 
         f = 0.553
-        c1 = Vector.midPoint n1.position, d1, f
+        c1 = Vector.midPoint n1.getPos(), d1, f
         c2 = Vector.midPoint m, d1, f
         c3 = Vector.midPoint m, d2, f
-        c4 = Vector.midPoint n2.position, d2, f
+        c4 = Vector.midPoint n2.getPos(), d2, f
         
         t = @addTrack n1, n2, [c1, c2, m, c3, c4], name
                 
@@ -258,14 +256,14 @@ function World extends Convert
     
     addTrack: (n1, n2, ctrlPoints, name) ->
         
-        points = [n1.position.clone()] 
+        points = [n1.getPos()]
         
         for point,index in ctrlPoints
             points.push point
             if index % 3 == 2
                 points.push point
         
-        points.push n2.position.clone()
+        points.push n2.getPos()
         
         track = new Track points, name
         track.node[0] = n1
@@ -306,17 +304,17 @@ function World extends Convert
         
         if mesh not in @pickables
             @pickables.push mesh
-            log 'add' @pickables.length
-            for pickable in @pickables
-                log pickable.name
+            # log 'add' @pickables.length
+            # for pickable in @pickables
+                # log pickable.name
         
     removePickable: (mesh) ->
         
         if mesh in @pickables
             @pickables.splice @pickables.indexOf(mesh), 1
-            log 'remove' @pickables.length
-            for pickable in @pickables
-                log pickable.name
+            # log 'remove' @pickables.length
+            # for pickable in @pickables
+                # log pickable.name
         
     addObject: (mesh) ->
         

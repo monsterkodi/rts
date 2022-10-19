@@ -35,7 +35,7 @@ function CurveCtrl
             @group.add mesh
         
         if not @isFirst
-            geom = new BoxGeometry 0.71 1 1 
+            geom = new BoxGeometry 1 1 0.71
             mesh = new Mesh geom, Materials.ctrl.curve
             mesh.onDrag = @onDrag 
             mesh.name = 'curveStart'
@@ -132,112 +132,95 @@ function CurveCtrl
     onDrag: (ray, hit) =>
 
         plane = new Plane
-        plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
+        plane.setFromNormalAndCoplanarPoint Vector.unitZ, @getPos()
         ray.intersectPlane plane, Vector.tmp
         Vector.tmp.round()
-        
-        if hit.mesh.name == 'curveStart'
-                        
-            # delta = Vector.tmp.minus @curveStart
-            # @curveStart.add delta
-            # @ctrlStart.add delta
-            # @prevCtrlEnd.add delta
-            # @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-            # @meshCurveStart.position.copy @curveStart
-            # @meshCtrlStart.position.copy @ctrlStart
-            
+                    
         if hit.mesh.name == 'ctrlStart'
             
-            # z = @ctrlStart.z
-            # @ctrlStart.copy Vector.tmp
-#             
-            # dist = @ctrlStart.distanceTo @curveStart
-            # return if dist < 1
-            # if MIN_CTRL_DIST > dist
-                # @ctrlStart.sub @curveStart
-                # @ctrlStart.normalize()
-                # @ctrlStart.multiplyScalar MIN_CTRL_DIST
-                # @ctrlStart.add @curveStart
-#                 
-            # @ctrlStart.z = z
-            # @meshCtrlStart.position.copy @ctrlStart
-#             
-            # dist = @prevCtrlEnd.distanceTo @curveStart
-            # @prevCtrlEnd.copy @ctrlStart
-            # @prevCtrlEnd.sub @curveStart
-            # @prevCtrlEnd.setLength -dist
-            # @prevCtrlEnd.add @curveStart
-            # @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-#             
-            # @curve.getTangent 0, Vector.tmp
-            # Vector.tmp.add @meshCurveStart.position
-            # @meshCurveStart.lookAt Vector.tmp
-#             
-            # @curve.getTangent 0, Vector.tmp
-            # Vector.tmp.add @meshCtrlStart.position
-            # @meshCtrlStart.lookAt Vector.tmp
+            z = @ctrlStart.z
+            @ctrlStart.copy Vector.tmp
+             
+            dist = @ctrlStart.distanceTo @curveStart
+            return if dist < 1
+            if MIN_CTRL_DIST > dist
+                @ctrlStart.sub @curveStart
+                @ctrlStart.normalize()
+                @ctrlStart.multiplyScalar MIN_CTRL_DIST
+                @ctrlStart.add @curveStart
+                 
+            @ctrlStart.z = z
+            @meshCtrlStart.position.copy @ctrlStart
+             
+            dist = @prevCtrlEnd.distanceTo @curveStart
+            @prevCtrlEnd.copy @ctrlStart
+            @prevCtrlEnd.sub @curveStart
+            @prevCtrlEnd.setLength -dist
+            @prevCtrlEnd.add @curveStart
+            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
+             
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshCurveStart.position
+            @meshCurveStart.lookAt Vector.tmp
+             
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshCtrlStart.position
+            @meshCtrlStart.lookAt Vector.tmp
 
-            # @curve.getTangent 0, Vector.tmp
-            # Vector.tmp.add @meshPrevCtrlEnd.position
-            # @meshPrevCtrlEnd.lookAt Vector.tmp
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshPrevCtrlEnd.position
+            @meshPrevCtrlEnd.lookAt Vector.tmp
 
         if hit.mesh.name == 'prevCtrlEnd'
             
-            # z = @prevCtrlEnd.z
-            # @prevCtrlEnd.copy Vector.tmp
-#             
-            # dist = @prevCtrlEnd.distanceTo @curveStart
-            # return if dist < 1
-            # if MIN_CTRL_DIST > dist
-                # @prevCtrlEnd.sub @curveStart
-                # @prevCtrlEnd.normalize()
-                # @prevCtrlEnd.multiplyScalar MIN_CTRL_DIST
-                # @prevCtrlEnd.add @curveStart
-#                 
-            # @prevCtrlEnd.z = z
-            # @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-#             
-            # dist = @ctrlStart.distanceTo @curveStart
-            # @ctrlStart.copy @prevCtrlEnd
-            # @ctrlStart.sub @curveStart
-            # @ctrlStart.setLength -dist
-            # @ctrlStart.add @curveStart
-            # @meshCtrlStart.position.copy @ctrlStart
-#             
-            # @curve.getTangent 0, Vector.tmp
-            # Vector.tmp.add @meshCurveStart.position
-            # @meshCurveStart.lookAt Vector.tmp
-#             
-            # @curve.getTangent 0, Vector.tmp
-            # Vector.tmp.add @meshCtrlStart.position
-            # @meshCtrlStart.lookAt Vector.tmp
+            z = @prevCtrlEnd.z
+            @prevCtrlEnd.copy Vector.tmp
+             
+            dist = @prevCtrlEnd.distanceTo @curveStart
+            return if dist < 1
+            if MIN_CTRL_DIST > dist
+                @prevCtrlEnd.sub @curveStart
+                @prevCtrlEnd.normalize()
+                @prevCtrlEnd.multiplyScalar MIN_CTRL_DIST
+                @prevCtrlEnd.add @curveStart
+                 
+            @prevCtrlEnd.z = z
+            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
+             
+            dist = @ctrlStart.distanceTo @curveStart
+            @ctrlStart.copy @prevCtrlEnd
+            @ctrlStart.sub @curveStart
+            @ctrlStart.setLength -dist
+            @ctrlStart.add @curveStart
+            @meshCtrlStart.position.copy @ctrlStart
+             
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshCurveStart.position
+            @meshCurveStart.lookAt Vector.tmp
+             
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshCtrlStart.position
+            @meshCtrlStart.lookAt Vector.tmp
 
-            # @curve.getTangent 0, Vector.tmp
-            # Vector.tmp.add @meshPrevCtrlEnd.position
-            # @meshPrevCtrlEnd.lookAt Vector.tmp
+            @curve.getTangent 0, Vector.tmp
+            Vector.tmp.add @meshPrevCtrlEnd.position
+            @meshPrevCtrlEnd.lookAt Vector.tmp
             
         @curve.updateArcLengths()
         @dragCB?()
                 
-    compassRotated: (dir) => 
-        
-        # Vector.tmp.copy dir
-        # Vector.tmp.add @meshCurveStart.position
-        # @meshCurveStart.lookAt Vector.tmp
-#         
-        # Vector.tmp.copy dir
-        # Vector.tmp.add @meshCtrlStart.position
-        # @meshCtrlStart.lookAt Vector.tmp
-
-        # Vector.tmp.copy dir
-        # Vector.tmp.add @meshPrevCtrlEnd.position
-        # @meshPrevCtrlEnd.lookAt Vector.tmp
-        
+    compassRotated: (dir) => @setDir dir
+                
     setDir: (dir) ->
         
         quat = Quaternion.unitVectors Vector.unitY, dir
         @group.quaternion.copy quat
-               
+        
+        @meshCtrlStart.getWorldPosition @ctrlStart
+        @meshPrevCtrlEnd?.getWorldPosition @prevCtrlEnd
+        
+        @curve.updateArcLengths()
+        @dragCB?()
         
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       
