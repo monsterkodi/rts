@@ -6,11 +6,18 @@
 000   000   0000000   0000000    00000000
 ###
 
-CurveCtrl = require '../track/curvectrl'
+CurveCtrl = require './curvectrl'
+Compass   = require './compass'
 
 function Node
 
+    @numNodes: 0
+
     @: (point, @name) ->
+        
+        Node.numNodes++
+        
+        @name = "n#{Node.numNodes}" if not @name
         
         @position = vec point
         @dir      = vec 0 1 0
@@ -24,48 +31,29 @@ function Node
         
         geom = new CylinderGeometry 0.7 0.7 0.71 32
         geom.rotateX Math.PI/2
-        @gizmo.center = new Mesh geom, Materials.ctrl.curve
-        @gizmo.center.onDrag = @onDrag
-        @gizmo.center.name = 'node.center'
-        @gizmo.center.handler = @
-        @gizmo.center.onHover = @onHover
-
-        geom = new CylinderGeometry 1.5 1.5 0.4 32
-        geom.rotateX Math.PI/2
-        @gizmo.tangent = new Mesh geom, Materials.ctrl.curve #Materials.node.gizmo.tangent
-        @gizmo.tangent.onDrag = @onRotate
-        @gizmo.tangent.name = 'node.tangent'
-        @gizmo.tangent.node = @
-        @gizmo.tangent.visible = false
-        
-        g1 = new CylinderGeometry 0.33 0.33 0.71*1.2 24
-        g1.rotateX Math.PI/2
-        g1.translate 0 1.16 0
-        g2 = new CylinderGeometry 0.33 0.33 0.71*1.2 24
-        g2.rotateX Math.PI/2
-        g2.translate 0 -1.16 0
-        geom = merge g1, g2
-        dotMesh = new Mesh geom, Materials.ctrl.start
-        dotMesh.onDrag = @onRotate        
-        dotMesh.name = 'node.tangent'
-        @gizmo.tangent.add dotMesh
+        @center = new Mesh geom, Materials.ctrl.curve
+        @center.name = 'node.center'
+        # @center.handler = @
+        # @center.onDrag  = @onDrag
+        @center.onHover = @onHover
         
         geom = new BoxGeometry 1 1 1
-        outMesh = new Mesh geom, Materials.ctrl.start
-        outMesh.position.add @dir.scaled 2
-        outMesh.onDrag = @onOutDrag
-        outMesh.onDragDone = @onDragDone
-        inMesh = new Mesh geom, Materials.ctrl.start
-        inMesh.position.add @dir.negated().scale 2
-        inMesh.onDrag = @onInDrag
-        inMesh.onDragDone = @onDragDone
         
-        @gizmo.tangent.add outMesh
-        @gizmo.tangent.add inMesh
+        @outMesh = new Mesh geom, Materials.ctrl.start
+        @outMesh.position.add @dir.scaled 2
+        @outMesh.onDrag = @onOutDrag
+        @outMesh.onDragDone = @onDragDone
+        
+        @inMesh = new Mesh geom, Materials.ctrl.start
+        @inMesh.position.add @dir.negated().scale 2
+        @inMesh.onDrag = @onInDrag
+        @inMesh.onDragDone = @onDragDone
         
         @group = new Group
-        @group.add @gizmo.center
-        @group.add @gizmo.tangent
+        @group.name = @name
+        @group.add @center
+        @group.add @inMesh
+        @group.add @outMesh
         @group.position.copy @position
         
         world.addPickable @group
@@ -74,50 +62,19 @@ function Node
         
     del: ->
         
-        Node.clearActive()
+        world.hideCompass @
         @group.removeFromParent()
         world.removePickable @group
         delete @group
         
-    onDoubleClick: (ray, hit) =>
+    compassCenterDoubleClicked: =>
         
         if @inTracks.length == 1 and @outTracks.length == 1
             log 'convert to ctrl'
             post.emit 'convertNodeToCtrl' @
         
-    onHover: =>
+    onHover: => world.showCompass @, @position, @dir
         
-        if Node.activeNode != @
-            if Node.activeNode
-                Node.activeNode.deactivate()
-            Node.activeNode = @
-            CurveCtrl.clearActive()
-            @activate()
-        
-    #  0000000    0000000  000000000  000  000   000  00000000  
-    # 000   000  000          000     000  000   000  000       
-    # 000000000  000          000     000   000 000   0000000   
-    # 000   000  000          000     000     000     000       
-    # 000   000   0000000     000     000      0      00000000  
-    
-    @clearActive: ->
-        
-        if Node.activeNode
-            Node.activeNode.deactivate()
-            Node.activeNode = null
-            
-    activate: ->
-        
-        @gizmo.center.scale.set 1.2 1.2 1.2
-        @gizmo.center.material = Materials.ctrl.start
-        @gizmo.tangent.visible = true
-        
-    deactivate: ->
-        
-        @gizmo.center.scale.set 1 1 1
-        @gizmo.center.material = Materials.ctrl.curve  
-        @gizmo.tangent.visible = false
-            
     # 0000000    00000000    0000000    0000000   
     # 000   000  000   000  000   000  000        
     # 000   000  0000000    000000000  000  0000  
@@ -181,8 +138,14 @@ function Node
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
         ray.intersectPlane plane, @position
-        
         @position.round()
+        @setPosition @position
+        
+    compassMoved: (point) => @setPosition point
+        
+    setPosition: (point) ->
+        
+        @position.copy point
         @group.position.copy @position
         
         for track in @outTracks
@@ -196,9 +159,6 @@ function Node
             train = @blockedTrains[i]
             train.path.getPoint block.position, 3
         
-        if @nodeBox
-            @nodeBox.position.copy @position
-                
     # 00000000    0000000   000000000   0000000   000000000  00000000  
     # 000   000  000   000     000     000   000     000     000       
     # 0000000    000   000     000     000000000     000     0000000   
@@ -219,24 +179,27 @@ function Node
         angle = @dir.angle(Vector.tmp2)-@dir.angle(Vector.tmp)
         if angle
             @rotate Math.sign(@dir.crossed(@up).dot Vector.tmp) * -angle
-            for track in @outTracks
-                track.nodeRotated @
-            for track in @inTracks
-                track.nodeRotated @
             
     rotate: (degree) ->
 
         quat = Quaternion.axisAngle @up, degree
-        @dir.applyQuaternion quat
-        @group.quaternion.multiply quat
-        @nodeBox?.quaternion.copy @group.quaternion
+        dir = @dir.clone()
+        dir.applyQuaternion quat
+        @setDir dir
+        
+    compassRotated: (dir) => @setDir dir
         
     setDir: (dir) ->
         
-        quat = Quaternion.unitVectors @dir, dir
         @dir.copy dir
-        @group.quaternion.multiply quat
-        @nodeBox?.quaternion.copy @group.quaternion
+        log @dir
+        quat = Quaternion.unitVectors Vector.unitY, dir
+        @group.quaternion.copy quat
+        
+        for track in @outTracks
+            track.nodeRotated @
+        for track in @inTracks
+            track.nodeRotated @
         
     # 000000000  00000000    0000000   000  000   000  
     #    000     000   000  000   000  000  0000  000  
@@ -250,13 +213,11 @@ function Node
             if not @nodeBox
                 c1 = new CylinderGeometry 0.25 0.25 1 16
                 c1.rotateX Math.PI/2
-                c2 = new CylinderGeometry 0.25 0.25 1.4 16
+                c2 = new CylinderGeometry 0.25 0.25 1.6 16
                 c2.rotateZ Math.PI/2
                 geom = THREE.BufferGeometryUtils.mergeBufferGeometries [c1, c2]
                 @nodeBox = new Mesh geom, @train.cars[0].mesh.material
-                @nodeBox.position.copy @position
-                @nodeBox.quaternion.copy @group.quaternion
-                world.addObject @nodeBox
+                @group.add @nodeBox
             @nodeBox.material = @train.cars[0].mesh.material
             for block in @blocks
                 block.material = @nodeBox.material
@@ -291,8 +252,8 @@ function Node
         
         for block in @blocks
             world.removeObject block
-        world.removeObject @nodeBox
-            
+        
+        @nodeBox.removeFromParent()
         delete @nodeBox
         @blockedTrains = []
         @blocks = []

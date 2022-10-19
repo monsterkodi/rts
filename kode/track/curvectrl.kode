@@ -27,7 +27,7 @@ function CurveCtrl
             geom = new BoxGeometry 1 1 1
             mesh = new Mesh geom, Materials.ctrl.start
             @prevCtrlEnd = @curvePath.curves[@index-1].v2
-            mesh.position.copy @prevCtrlEnd
+            mesh.position.y = -@prevCtrlDist()
             mesh.onDrag = @onDrag 
             mesh.name = 'prevCtrlEnd'
             mesh.visible = false
@@ -37,7 +37,6 @@ function CurveCtrl
         if not @isFirst
             geom = new BoxGeometry 0.71 1 1 
             mesh = new Mesh geom, Materials.ctrl.curve
-            mesh.position.copy @curveStart
             mesh.onDrag = @onDrag 
             mesh.name = 'curveStart'
             mesh.handler = @
@@ -45,9 +44,9 @@ function CurveCtrl
             mesh.castShadow = true
             mesh.receiveShadow = true
             
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add mesh.position
-            mesh.lookAt Vector.tmp
+            # @curve.getTangent 0, Vector.tmp
+            # Vector.tmp.add mesh.position
+            # mesh.lookAt Vector.tmp
             
             @meshCurveStart = mesh
             world.addPickable @meshCurveStart
@@ -57,18 +56,22 @@ function CurveCtrl
         mesh = new Mesh geom, @isFirst ? Materials.ctrl.transparent : Materials.ctrl.start
         if not @isFirst
             mesh.onDrag = @onDrag 
-        mesh.position.copy @ctrlStart
+        # mesh.position.copy @ctrlStart
+        # mesh.position.sub @curveStart
+        mesh.position.y = @ctrlStartDist()
         mesh.name = 'ctrlStart'
         mesh.visible = false
         @meshCtrlStart = mesh
         @group.add mesh
+        @group.position.copy @curveStart
+        @setDir @curve.getTangent 0, Vector.tmp
             
         @group.name = 'ctrl'
         world.addObject @group
         
     del: ->
         
-        CurveCtrl.clearActive()
+        world.hideCompass @
         world.removeObject @group
         world.removePickable @meshCurveStart
         delete @group
@@ -76,19 +79,23 @@ function CurveCtrl
         delete @meshCurveStart
         delete @meshPrevCtrlEnd
         
-    onDoubleClick: (ray, hit) ->
+    compassCenterDoubleClicked: =>
         
         post.emit 'convertCtrlToNode' @
         
     onHover: =>
-        
-        if CurveCtrl.activeCtrl != @
-            if CurveCtrl.activeCtrl
-                CurveCtrl.activeCtrl.deactivate()
-            CurveCtrl.activeCtrl = @
-            Node = require '../track/node'
-            Node.clearActive()
+
+        if world.compass.object != @
             @activate()
+            
+    prevCtrlDist: ->
+
+        @prevCtrlEnd.distanceTo @curveStart
+
+    ctrlStartDist: ->
+
+        @ctrlStart.distanceTo @curveStart
+        
         
     #  0000000    0000000  000000000  000  000   000  00000000  
     # 000   000  000          000     000  000   000  000       
@@ -96,34 +103,26 @@ function CurveCtrl
     # 000   000  000          000     000     000     000       
     # 000   000   0000000     000     000      0      00000000  
     
-    @clearActive: ->
-        
-        if CurveCtrl.activeCtrl
-            CurveCtrl.activeCtrl.deactivate()
-            CurveCtrl.activeCtrl = null
-            
     activate: =>
         
         @meshPrevCtrlEnd.visible = true
         @meshCtrlStart.visible = true
-        @meshCurveStart.material = Materials.ctrl.start
-        @meshCurveStart.scale.set 1.2 1.2 1.2
         
-        world.pickables.push @meshPrevCtrlEnd
-        world.pickables.push @meshCtrlStart
+        world.addPickable @meshPrevCtrlEnd
+        world.addPickable @meshCtrlStart
+        
+        world.showCompass @, @getPos(), @getDir() 
         
     deactivate: =>
 
         @meshPrevCtrlEnd.visible = false
         @meshCtrlStart.visible = false
-        @meshCurveStart.material = Materials.ctrl.curve
-        @meshCurveStart.scale.set 1 1 1
         
-        i = world.pickables.indexOf @meshPrevCtrlEnd
-        world.pickables.splice i, 1
-        i = world.pickables.indexOf @meshCtrlStart
-        world.pickables.splice i, 1
+        world.removePickable @meshPrevCtrlEnd
+        world.removePickable @meshCtrlStart
         
+        world.hideCompass @
+                
     # 0000000    00000000    0000000    0000000   
     # 000   000  000   000  000   000  000        
     # 000   000  0000000    000000000  000  0000  
@@ -139,87 +138,107 @@ function CurveCtrl
         
         if hit.mesh.name == 'curveStart'
                         
-            delta = Vector.tmp.minus @curveStart
-            @curveStart.add delta
-            @ctrlStart.add delta
-            @prevCtrlEnd.add delta
-            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-            @meshCurveStart.position.copy @curveStart
-            @meshCtrlStart.position.copy @ctrlStart
+            # delta = Vector.tmp.minus @curveStart
+            # @curveStart.add delta
+            # @ctrlStart.add delta
+            # @prevCtrlEnd.add delta
+            # @meshPrevCtrlEnd.position.copy @prevCtrlEnd
+            # @meshCurveStart.position.copy @curveStart
+            # @meshCtrlStart.position.copy @ctrlStart
             
         if hit.mesh.name == 'ctrlStart'
             
-            z = @ctrlStart.z
-            @ctrlStart.copy Vector.tmp
-            
-            dist = @ctrlStart.distanceTo @curveStart
-            return if dist < 1
-            if MIN_CTRL_DIST > dist
-                @ctrlStart.sub @curveStart
-                @ctrlStart.normalize()
-                @ctrlStart.multiplyScalar MIN_CTRL_DIST
-                @ctrlStart.add @curveStart
-                
-            @ctrlStart.z = z
-            @meshCtrlStart.position.copy @ctrlStart
-            
-            dist = @prevCtrlEnd.distanceTo @curveStart
-            @prevCtrlEnd.copy @ctrlStart
-            @prevCtrlEnd.sub @curveStart
-            @prevCtrlEnd.setLength -dist
-            @prevCtrlEnd.add @curveStart
-            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-            
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshCurveStart.position
-            @meshCurveStart.lookAt Vector.tmp
-            
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshCtrlStart.position
-            @meshCtrlStart.lookAt Vector.tmp
+            # z = @ctrlStart.z
+            # @ctrlStart.copy Vector.tmp
+#             
+            # dist = @ctrlStart.distanceTo @curveStart
+            # return if dist < 1
+            # if MIN_CTRL_DIST > dist
+                # @ctrlStart.sub @curveStart
+                # @ctrlStart.normalize()
+                # @ctrlStart.multiplyScalar MIN_CTRL_DIST
+                # @ctrlStart.add @curveStart
+#                 
+            # @ctrlStart.z = z
+            # @meshCtrlStart.position.copy @ctrlStart
+#             
+            # dist = @prevCtrlEnd.distanceTo @curveStart
+            # @prevCtrlEnd.copy @ctrlStart
+            # @prevCtrlEnd.sub @curveStart
+            # @prevCtrlEnd.setLength -dist
+            # @prevCtrlEnd.add @curveStart
+            # @meshPrevCtrlEnd.position.copy @prevCtrlEnd
+#             
+            # @curve.getTangent 0, Vector.tmp
+            # Vector.tmp.add @meshCurveStart.position
+            # @meshCurveStart.lookAt Vector.tmp
+#             
+            # @curve.getTangent 0, Vector.tmp
+            # Vector.tmp.add @meshCtrlStart.position
+            # @meshCtrlStart.lookAt Vector.tmp
 
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshPrevCtrlEnd.position
-            @meshPrevCtrlEnd.lookAt Vector.tmp
+            # @curve.getTangent 0, Vector.tmp
+            # Vector.tmp.add @meshPrevCtrlEnd.position
+            # @meshPrevCtrlEnd.lookAt Vector.tmp
 
         if hit.mesh.name == 'prevCtrlEnd'
             
-            z = @prevCtrlEnd.z
-            @prevCtrlEnd.copy Vector.tmp
-            
-            dist = @prevCtrlEnd.distanceTo @curveStart
-            return if dist < 1
-            if MIN_CTRL_DIST > dist
-                @prevCtrlEnd.sub @curveStart
-                @prevCtrlEnd.normalize()
-                @prevCtrlEnd.multiplyScalar MIN_CTRL_DIST
-                @prevCtrlEnd.add @curveStart
-                
-            @prevCtrlEnd.z = z
-            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-            
-            dist = @ctrlStart.distanceTo @curveStart
-            @ctrlStart.copy @prevCtrlEnd
-            @ctrlStart.sub @curveStart
-            @ctrlStart.setLength -dist
-            @ctrlStart.add @curveStart
-            @meshCtrlStart.position.copy @ctrlStart
-            
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshCurveStart.position
-            @meshCurveStart.lookAt Vector.tmp
-            
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshCtrlStart.position
-            @meshCtrlStart.lookAt Vector.tmp
+            # z = @prevCtrlEnd.z
+            # @prevCtrlEnd.copy Vector.tmp
+#             
+            # dist = @prevCtrlEnd.distanceTo @curveStart
+            # return if dist < 1
+            # if MIN_CTRL_DIST > dist
+                # @prevCtrlEnd.sub @curveStart
+                # @prevCtrlEnd.normalize()
+                # @prevCtrlEnd.multiplyScalar MIN_CTRL_DIST
+                # @prevCtrlEnd.add @curveStart
+#                 
+            # @prevCtrlEnd.z = z
+            # @meshPrevCtrlEnd.position.copy @prevCtrlEnd
+#             
+            # dist = @ctrlStart.distanceTo @curveStart
+            # @ctrlStart.copy @prevCtrlEnd
+            # @ctrlStart.sub @curveStart
+            # @ctrlStart.setLength -dist
+            # @ctrlStart.add @curveStart
+            # @meshCtrlStart.position.copy @ctrlStart
+#             
+            # @curve.getTangent 0, Vector.tmp
+            # Vector.tmp.add @meshCurveStart.position
+            # @meshCurveStart.lookAt Vector.tmp
+#             
+            # @curve.getTangent 0, Vector.tmp
+            # Vector.tmp.add @meshCtrlStart.position
+            # @meshCtrlStart.lookAt Vector.tmp
 
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshPrevCtrlEnd.position
-            @meshPrevCtrlEnd.lookAt Vector.tmp
+            # @curve.getTangent 0, Vector.tmp
+            # Vector.tmp.add @meshPrevCtrlEnd.position
+            # @meshPrevCtrlEnd.lookAt Vector.tmp
             
         @curve.updateArcLengths()
         @dragCB?()
                 
+    compassRotated: (dir) => 
+        
+        # Vector.tmp.copy dir
+        # Vector.tmp.add @meshCurveStart.position
+        # @meshCurveStart.lookAt Vector.tmp
+#         
+        # Vector.tmp.copy dir
+        # Vector.tmp.add @meshCtrlStart.position
+        # @meshCtrlStart.lookAt Vector.tmp
+
+        # Vector.tmp.copy dir
+        # Vector.tmp.add @meshPrevCtrlEnd.position
+        # @meshPrevCtrlEnd.lookAt Vector.tmp
+        
+    setDir: (dir) ->
+        
+        quat = Quaternion.unitVectors Vector.unitY, dir
+        @group.quaternion.copy quat
+               
+        
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       
     # 000000000  000   000   000 000   0000000   
@@ -246,6 +265,24 @@ function CurveCtrl
         @ctrlEnd.add delta
         
         @curve.updateArcLengths()
+        
+    compassMoved: (point) => @setPos point
+    
+    setPos: (point) ->
+        
+        delta = vec(point).minus @curveStart
+        
+        @curveStart.add delta
+        @ctrlStart.add delta
+        @prevCtrlEnd.add delta
+        @group.position.copy @curveStart
+        
+        @curve.updateArcLengths()
+        @dragCB?()
+
+    getPos: -> @group.position
+    getDir: -> vec(0 1 0).applyQuaternion @group.quaternion
+        
         
     # 00000000    0000000   000000000   0000000   000000000  00000000  
     # 000   000  000   000     000     000   000     000     000       

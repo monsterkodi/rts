@@ -11,6 +11,7 @@ Track     = require './track/track'
 Train     = require './train/train'
 Engine    = require './train/engine'
 Boxcar    = require './train/boxcar'
+Compass   = require './track/compass'
 Construct = require './construct'
 Convert   = require './convert'
 Traffic   = require './traffic'
@@ -20,9 +21,6 @@ function World extends Convert
     @: (@scene) ->
                 
         @trains = []
-        
-        @vec  = vec()
-        @vec2 = vec()
         
         window.world = @
         
@@ -36,8 +34,35 @@ function World extends Convert
         @construct = new Construct
         @construct.init()
         
+        @compass = new Compass
+        
         @addFloor()
         @setSpeed prefs.get 'speed' 1
+        
+    #  0000000   0000000   00     00  00000000    0000000    0000000   0000000  
+    # 000       000   000  000   000  000   000  000   000  000       000       
+    # 000       000   000  000000000  00000000   000000000  0000000   0000000   
+    # 000       000   000  000 0 000  000        000   000       000       000  
+    #  0000000   0000000   000   000  000        000   000  0000000   0000000   
+    
+    showCompass: (object, point, dir) ->
+        
+        if object and object != @compass.object
+            log 'showCompass' object
+            @addObject   @compass.group
+            @addPickable @compass.group
+            @compass.object = null
+            @compass.group.position.copy point
+            @compass.setDir dir
+            @compass.object = object
+
+    hideCompass: (object) =>
+        
+        if @compass.object == object or not object and @compass.object
+            log 'hideCompass'
+            @removePickable @compass.group
+            @removeObject   @compass.group
+            @compass.object = null
         
     #  0000000  00000000   00000000   0000000   000000000  00000000  
     # 000       000   000  000       000   000     000     000       
@@ -279,12 +304,19 @@ function World extends Convert
     
     addPickable: (mesh) ->
         
-        @pickables.push mesh
+        if mesh not in @pickables
+            @pickables.push mesh
+            log 'add' @pickables.length
+            for pickable in @pickables
+                log pickable.name
         
     removePickable: (mesh) ->
         
         if mesh in @pickables
             @pickables.splice @pickables.indexOf(mesh), 1
+            log 'remove' @pickables.length
+            for pickable in @pickables
+                log pickable.name
         
     addObject: (mesh) ->
         

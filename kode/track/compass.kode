@@ -1,0 +1,143 @@
+###
+ 0000000   0000000   00     00  00000000    0000000    0000000   0000000
+000       000   000  000   000  000   000  000   000  000       000     
+000       000   000  000000000  00000000   000000000  0000000   0000000 
+000       000   000  000 0 000  000        000   000       000       000
+ 0000000   0000000   000   000  000        000   000  0000000   0000000 
+###
+
+function Compass
+
+    @: ->
+
+        @dots = []
+
+        @group = new Group
+        @group.name = 'compass'
+        
+        geom = new CylinderGeometry 1.5 1.5 0.4 32
+        geom.rotateX Math.PI/2
+        @wheel = new Mesh geom, Materials.ctrl.curve
+        @wheel.onDrag = @onRotate
+        @wheel.onHover = @onHover
+        @wheel.name = 'compass.wheel'
+        @group.add @wheel
+        
+        geom = new CylinderGeometry 0.84 0.84 0.85 32
+        geom.rotateX Math.PI/2
+        @center = new Mesh geom, Materials.ctrl.start
+        @center.onDrag = @onDrag
+        @center.name = 'compass.center'
+        @center.handler = @
+        @center.onHover = @onHover
+        @group.add @center
+        
+        geom = new CylinderGeometry 0.2 0.2 1.2 16
+        geom.rotateX Math.PI/2
+        geom.translate 0 1.16 0
+        @head = new Mesh geom, Materials.compass.head
+        @head.noHitTest = true
+        @head.name = 'compass.head'
+        @wheel.add @head
+
+        for i in 0...8
+            geom = new CylinderGeometry 0.33 0.33 0.71*1.2 24
+            geom.rotateX Math.PI/2
+            geom.translate 0 1.16 0
+            geom.rotateZ i * Math.PI/4
+            dot = new Mesh geom, Materials.ctrl.start.clone()
+            dot.material.color = Color.dot[i]
+            dot.onDrag  = @onRotate
+            dot.onHover = @onHover
+            dot.handler = @
+            dot.name = "compass.dot#{i}"
+            @dots.push dot
+            @group.add dot
+        
+    onDrag: (ray, hit, downRay, lastRay) => 
+        
+        @clearScales()
+        plane = new Plane
+        plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
+        ray.intersectPlane plane, @group.position
+        @group.position.round()
+        
+        @object?.compassMoved? @group.position
+            
+    onRotate: (ray, hit, downRay, lastRay) => 
+        
+        @clearScales()
+        
+        point = vec()
+        hit.mesh.getWorldPosition point
+        plane = new Plane
+        plane.setFromNormalAndCoplanarPoint Vector.unitZ, point
+        lastRay.intersectPlane plane, Vector.tmp
+        ray.intersectPlane plane, Vector.tmp2
+        
+        Vector.tmp.sub point
+        Vector.tmp2.sub point
+        dir = @getDir()
+        angle = dir.angle(Vector.tmp2)-dir.angle(Vector.tmp)
+        if angle
+            @rotateBy Math.sign(dir.crossed(@getUp()).dot Vector.tmp) * -angle
+        
+    rotateBy: (degree) ->
+
+        @wheel.quaternion.multiply Quaternion.axisAngle @getUp(), degree
+        @object?.compassRotated? @getDir()
+
+    rotateTo: (degree) ->
+    
+        @wheel.quaternion.identity()
+        @wheel.quaternion.copy Quaternion.axisAngle @getUp(), degree
+        @object?.compassRotated? @getDir()
+        
+    setDir: (dir) ->
+        
+        @wheel.quaternion.copy Quaternion.unitVectors Vector.unitY, dir
+        @object?.compassRotated? @getDir()
+        
+    getDir: -> vec(0 1 0).applyQuaternion @wheel.quaternion
+    getUp:  -> vec(0 0 1).applyQuaternion @wheel.quaternion
+    
+    onHover: (ray, hit) => 
+
+        @clearScales()
+        if hit.name.startsWith 'compass.dot'
+            dotIndex = parseInt hit.name[-1]
+            @dots[dotIndex].scale.set 1 1 1.2
+        if hit.name == 'compass.center'
+            @center.scale.set 1 1 1.2
+    
+    onMouseDown: (ray, hit) => 
+
+        if hit.name.startsWith 'compass.dot'
+            dotIndex = parseInt hit.name[-1]
+            @dots[dotIndex].scale.set 1 1 1
+        if hit.name == 'compass.center'
+            @center.scale.set 1 1 1
+        
+    onClick: (ray, hit) => 
+        
+        if hit.name.startsWith 'compass.dot'
+            dotIndex = parseInt hit.name[-1]
+            @dots[dotIndex].scale.set 1 1 1.2
+            @rotateTo dotIndex * 360/8
+        if hit.name == 'compass.center'
+            @center.scale.set 1 1 1.2
+        
+    onDoubleClick: (ray, hit) => 
+    
+        if hit.name == 'compass.center'
+            @object?.compassCenterDoubleClicked?()
+        else
+            log 'onDoubleClick' hit
+
+    clearScales: ->
+        
+        for dot in @dots
+            dot.scale.set 1 1 1
+        @center.scale.set 1 1 1
+                        
+module.exports = Compass

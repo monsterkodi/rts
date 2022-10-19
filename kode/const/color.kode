@@ -12,6 +12,20 @@ Color =
     
     black:              color  0x000000
     white:              color  0xffffff
+   
+    compass:
+        head: color 0x8888ff
+        tail: color 0x6666dd
+    dot: [  
+            color  0x00ff00
+            color  0x555555
+            color  0xff0000
+            color  0x555555
+            color  0x008800
+            color  0x555555
+            color  0xff0000
+            color  0x555555
+         ]
     
     train:
         yellow:         color  0xffff00
@@ -21,6 +35,9 @@ Color =
         blue:           color  0x8888ff
         white:          color  0xffffff
 
+    track:
+        color 0x111111
+        
     menu:
         background:      color 0x181818
         backgroundHover: color 0x202020

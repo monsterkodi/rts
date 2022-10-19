@@ -11,7 +11,13 @@ CurveCtrl = require '../track/curvectrl'
 
 function Track
 
+    @numTracks: 0
+
     @: (points, @name) ->
+        
+        Track.numTracks++
+        
+        @name = "t#{Track.numTracks}" if not @name
         
         @curve = new CurvePath
         @node = []

@@ -168,6 +168,7 @@ class RTS
         document.addEventListener 'mousedown' @onMouseDown
         document.addEventListener 'mouseup'   @onMouseUp
         document.addEventListener 'dblclick'  @onDblClick
+        document.addEventListener 'click'     @onClick
                 
         @lastAnimationTime = window.performance.now()
                 
@@ -274,10 +275,10 @@ class RTS
         @downHit = @castRay()
         @downRay = @mouseRay()
         @lastRay = @mouseRay()
-
-        if @downHit?.name == 'floor' and event.buttons == 1
-            Node.clearActive()
-            CurveCtrl.clearActive()
+            
+        if event.buttons == 1
+            if @downHit?.mesh?.handler?.onMouseDown is func
+                @downHit?.mesh?.handler?.onMouseDown @downRay, @downHit
             
     onMouseUp: (event) =>
 
@@ -285,9 +286,9 @@ class RTS
             @downHit.mesh.onDragDone @mouseRay(), @downHit, @downRay, @lastRay
         
         delete @camMove
-        delete @downHit
         delete @downRay
         delete @lastRay
+        # keep downHit!
         
         @calcMouse event
 
@@ -299,16 +300,28 @@ class RTS
     onMouseMove: (event) =>
 
         @calcMouse event
-        hit = @castRay() # to update arrowHelper
+        hit = @castRay()
+        mouseRay = @mouseRay()
         
         if event.buttons == 1
             if @downHit?.mesh?.onDrag is func
-                mouseRay = @mouseRay()
-                @downHit.mesh.onDrag @mouseRay(), @downHit, @downRay, @lastRay
-                @lastRay = mouseRay
+                @downHit.mesh.onDrag mouseRay, @downHit, @downRay, @lastRay
         else if event.buttons == 0 and hit
             if hit.mesh?.onHover is func
-                hit.mesh.onHover()
+                hit.mesh.onHover mouseRay, hit, @lastRay
+            else if hit.mesh.name == 'floor'
+                world.hideCompass()
+                
+        @lastRay = mouseRay
+
+    onClick: (event) => 
+        
+        if hit = @castRay()
+            if hit.mesh?.handler?.onClick is func
+                if @downHit.mesh == hit.mesh
+                    hit.mesh?.handler?.onClick @mouseRay(), hit
+            else
+                log 'unhandled click' hit
         
     onDblClick: (event) => 
         
@@ -316,7 +329,7 @@ class RTS
             if hit.mesh?.handler?.onDoubleClick is func
                 hit.mesh?.handler?.onDoubleClick @mouseRay(), hit
             else
-                log 'unhandled doubleClick' hit = @castRay()
+                log 'unhandled doubleClick' hit
                             
     calcMouse: (event) ->
         
@@ -348,9 +361,12 @@ class RTS
         @raycaster.setFromCamera @mouse, @camera
         intersects = @raycaster.intersectObjects world.pickables, true
 
+        intersects = intersects.filter (i) -> i.object.noHitTest != true
         intersect = intersects[0]
         
         return if not intersect
+        
+        # log intersect.object.name
         
         point = intersect.point
         norm  = intersect.face.normal.clone()
@@ -367,10 +383,7 @@ class RTS
             norm:   norm
             dist:   intersect.distance
             mesh:   intersect.object
-        
-        @scene.remove @cursor if @cursor
-        delete @cursor
-            
+                    
         info
         
     # 00000000   00000000  000   000  0000000    00000000  00000000   

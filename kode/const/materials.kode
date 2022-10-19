@@ -18,13 +18,16 @@ Materials =
         start:       new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.2
         end:         new THREE.MeshStandardMaterial color:0x888888, metalness: 0.5, roughness: 0.2
         curve:       new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
+    compass:
+        head:        new THREE.MeshStandardMaterial color:Color.compass.head, metalness: 0.5, roughness: 0.2
+        tail:        new THREE.MeshStandardMaterial color:Color.compass.tail, metalness: 0.5, roughness: 0.2
     train:
         window:     new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5, roughness: 0.2 
         body:       new THREE.MeshStandardMaterial color:0xffff00, metalness: 0.2, roughness: 0.4 
         piston:     new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1, roughness: 0.8 
         light:      new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1, roughness: 0.8
         cargo:      new THREE.MeshStandardMaterial color:0x333333, metalness: 0.2, roughness: 0.4 
-        rail:       new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
+        rail:       new THREE.MeshStandardMaterial color:Color.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     menu:
         active:       new THREE.MeshStandardMaterial color:Color.menu.active,       metalness: 0.9, roughness: 0.75
         inactive:     new THREE.MeshStandardMaterial color:Color.menu.inactive,     metalness: 0.9, roughness: 0.75
