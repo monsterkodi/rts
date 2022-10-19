@@ -218,6 +218,10 @@ class Camera extends PerspectiveCamera
             rts.animate @fadeCenter
             @fading = true
             
+    stopFading: ->
+        
+        @fading = false
+            
     fadeCenter: (deltaSeconds) =>
         
         return if not @fading
@@ -238,6 +242,16 @@ class Camera extends PerspectiveCamera
     
     moveFactor: -> @dist/2
     
+    startMoveForward: ->
+
+        @moveZ = -@moveFactor()
+        @startMove()
+
+    startMoveBackward: ->
+
+        @moveZ = @moveFactor()
+        @startMove()
+        
     startMoveLeft: ->
         
         @moveX = -@moveFactor()
@@ -263,10 +277,11 @@ class Camera extends PerspectiveCamera
         @moving = false
         @moveX = 0
         @moveY = 0
+        @moveZ = 0
        
     startMove: -> 
         
-        @fading = false
+        @stopFading()
         if not @moving
             rts.animate @moveCenter
             @moving = true
@@ -278,6 +293,7 @@ class Camera extends PerspectiveCamera
         dir = vec()
         dir.add Vector.unitX.mul @moveX
         dir.add Vector.unitY.mul @moveY
+        dir.add Vector.unitZ.mul @moveZ
         dir.scale deltaSeconds
         dir.applyQuaternion @quaternion
         
@@ -285,6 +301,18 @@ class Camera extends PerspectiveCamera
         @update()
         
         rts.animate @moveCenter
+        
+    moveLeft:       -> @moveXYZ -1   0   0
+    moveRight:      -> @moveXYZ  1   0   0
+    moveUp:         -> @moveXYZ  0   1   0
+    moveDown:       -> @moveXYZ  0  -1   0
+    moveForward:    -> @moveXYZ  0   0  -1
+    moveBackward:   -> @moveXYZ  0   0   1
+    moveXYZ: (x, y, z) ->
+        @stopMoving()
+        @stopFading()
+        @center.add vec(x,y,z).applyQuaternion @quaternion
+        @update()
         
     # 000   000  000   000  00000000  00000000  000      
     # 000 0 000  000   000  000       000       000      
@@ -342,7 +370,7 @@ class Camera extends PerspectiveCamera
     
     inertZoom: (deltaSeconds) =>
 
-        @setDistFactor 1 - clamp -0.02, 0.02, @wheelInert
+        @setDistFactor 1 - clamp -0.02 0.02 @wheelInert
         @wheelInert = reduce @wheelInert, deltaSeconds*0.3
         
         if Math.abs(@wheelInert) > 0.00000001

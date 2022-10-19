@@ -89,33 +89,38 @@ window.onresize = (event) ->
 window.onkeydown = (event) ->
     
     switch keyinfo.forEvent(event).key
-        'w'     ➜ rts.camera.startZoomIn()
-        's'     ➜ rts.camera.startZoomOut()
-        'a'     ➜ rts.camera.startPivotLeft()
-        'd'     ➜ rts.camera.startPivotRight()
-        'q'     ➜ rts.camera.startPivotUp()
-        'e'     ➜ rts.camera.startPivotDown()
-        'left'  ➜ rts.camera.startMoveLeft()
-        'right' ➜ rts.camera.startMoveRight()
-        'up'    ➜ rts.camera.startMoveUp()
-        'down'  ➜ rts.camera.startMoveDown()
-        'esc'   ➜ true
-        'f'     ➜ Materials.toggleFlat()
-        'i'     ➜ prefs.set 'info'  not prefs.get 'info'
-        '.'     ➜ prefs.set 'debug' not prefs.get 'debug'; if prefs.get 'debug' then rts.debug.show() else rts.debug.hide()
-        'space' ➜ rts.togglePause()
-        '='     ➜ world.incrSpeed(); world.incrSpeed()
-        '-'     ➜ world.decrSpeed(); world.decrSpeed()
-        '0'     ➜ world.resetSpeed()
+        # 'w' 'up'    ➜ rts.camera.moveForward()
+        # 's' 'down'  ➜ rts.camera.moveBackward()
+        # 'a' 'left'  ➜ rts.camera.moveLeft()
+        # 'd' 'right' ➜ rts.camera.moveRight()
+        # 'e'         ➜ rts.camera.moveUp()
+        # 'q'         ➜ rts.camera.moveDown()
+        'w' 'up'    ➜ rts.camera.startMoveForward()
+        's' 'down'  ➜ rts.camera.startMoveBackward()
+        'a' 'left'  ➜ rts.camera.startMoveLeft()
+        'd' 'right' ➜ rts.camera.startMoveRight()
+        'e'         ➜ rts.camera.startMoveUp()
+        'q'         ➜ rts.camera.startMoveDown()
+        'z'         ➜ rts.camera.startPivotLeft()
+        'c'         ➜ rts.camera.startPivotRight()
+        'r'         ➜ rts.camera.startPivotUp()
+        'v'         ➜ rts.camera.startPivotDown()
+        'esc'       ➜ true
+        'f'         ➜ Materials.toggleFlat()
+        'i'         ➜ prefs.set 'info'  not prefs.get 'info'
+        '.'         ➜ prefs.set 'debug' not prefs.get 'debug'; if prefs.get 'debug' then rts.debug.show() else rts.debug.hide()
+        'space'     ➜ rts.togglePause()
+        '='         ➜ world.incrSpeed(); world.incrSpeed()
+        '-'         ➜ world.decrSpeed(); world.decrSpeed()
+        '0'         ➜ world.resetSpeed()
         # else 
             # log 'keydown', keyinfo.forEvent event
     
 window.onkeyup = (event) ->
     
     switch keyinfo.forEvent(event).key
-        's' 'w'                     ➜ rts.camera.stopZoom()
-        'a' 'd' 'q' 'e'             ➜ rts.camera.stopPivot()
-        'left' 'right' 'up' 'down'  ➜ rts.camera.stopMoving()
+        'z' 'c' 'r' 'v'                                     ➜ rts.camera.stopPivot()
+        's' 'w' 'up' 'down' 'a' 'd' 'e' 'q' 'left' 'right'  ➜ rts.camera.stopMoving()
     
 post.on 'menuAction' (action) ->
     
