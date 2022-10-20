@@ -18,8 +18,9 @@ class Camera extends PerspectiveCamera
         width  = opt.view.clientWidth
         height = opt.view.clientHeight
         
-        super 70, width/height, 0.01, 900 # fov, aspect, near, far
+        super 70, width/height, 1, 100000 # fov, aspect, near, far
         
+        @fov     = 70
         @size    = vec width, height 
         @elem    = opt.view
         @dist    = 10
@@ -29,14 +30,15 @@ class Camera extends PerspectiveCamera
         @degree  = 60
         @rotate  = 0
         @wheelInert = 0
-        @pivotX = 0
-        @pivotY = 0
-        @moveX = 0
-        @moveY = 0
-        @mouse = vec()
+        @pivotX  = 0
+        @pivotY  = 0
+        @moveX   = 0
+        @moveY   = 0
+        @moveZ   = 0
+        @mouse   = vec()
         @downPos = vec()
         @centerTarget = vec()
-        @quat = quat()
+        @quat         = quat()
 
         @elem.addEventListener 'mousewheel' @onMouseWheel
         @elem.addEventListener 'mousedown'  @onMouseDown
@@ -384,7 +386,7 @@ class Camera extends PerspectiveCamera
         @dist = clamp @minDist, @maxDist, @dist*factor
         @update()
         
-    setFov: (fov) -> @fov = Math.max(2.0, Math.min fov, 175.0)
+    setFov: (fov) -> @fov = clamp 2.0 175.0 fov
     
     # 00000000   00000000   00000000  00000000   0000000  
     # 000   000  000   000  000       000       000       
@@ -411,24 +413,22 @@ class Camera extends PerspectiveCamera
     
     update: -> 
         
-        @degree = clamp 0, 180, @degree
+        @degree = clamp 0 180 @degree
         
         @quat.reset()
         @quat.rotateAxisAngle Vector.unitZ, @rotate
         @quat.rotateAxisAngle Vector.unitX, @degree
         
         @position.copy @center
-        Vector.tmp.set 0,0,@dist
+        Vector.tmp.set 0 0 @dist
         Vector.tmp.applyQuaternion @quat
         @position.add Vector.tmp
-        
         @quaternion.copy @quat
+        @updateProjectionMatrix()
         
         if compass = window.world?.compass
             s = clamp 1 6 @dist/30
             compass.group.scale.set s, s, s
-            compass.object?.inMesh?.scale.set s, s, s
-            compass.object?.outMesh?.scale.set s, s, s
             compass.center.material.transparent = true
             compass.center.material.opacity = clamp 0 1 1.5-s/2
             compass.wheel.material.transparent = true

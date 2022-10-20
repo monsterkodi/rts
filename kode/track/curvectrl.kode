@@ -10,6 +10,9 @@ MIN_CTRL_DIST = 2
 
 function CurveCtrl
 
+    @active: new Set
+    @deactivateAll: -> CurveCtrl.active.forEach (ctrl) -> ctrl.deactivate()
+
     @: (@curve, @curvePath, @index, @dragCB) ->
         
         @isLast  = @index == @curvePath.curves.length-1
@@ -49,6 +52,7 @@ function CurveCtrl
             geom = new BoxGeometry 1 1 0.71
             mesh = new Mesh geom, Materials.ctrl.curve
             mesh.onDrag = @onDrag 
+            mesh.onClick = @onCenterClick
             mesh.name = 'curveStart'
             mesh.handler = @
             mesh.castShadow = true
@@ -100,41 +104,44 @@ function CurveCtrl
         
         post.emit 'convertCtrlToNode' @
         
-    onHover: =>
-
-        if world.compass.object != @
-            @activate()
-                    
     #  0000000    0000000  000000000  000  000   000  00000000  
     # 000   000  000          000     000  000   000  000       
     # 000000000  000          000     000   000 000   0000000   
     # 000   000  000          000     000     000     000       
     # 000   000   0000000     000     000      0      00000000  
     
+    onCenterClick: => world.showCompass @, @getPos(), @getDir() 
+    
     onLeave: (ray, hit) =>
         
-        if hit.mesh.name == 'ctrlStart'
-            @meshCtrlStart.material = Materials.ctrl.start
-            @meshCtrlRod.material   = Materials.ctrl.start
         if hit.mesh.name == 'prevCtrlEnd'
             @meshPrevCtrlEnd.material = Materials.ctrl.start
             @meshPrevCtrlRod.material = Materials.ctrl.start
+        if hit.mesh.name == 'curveStart'
+            @meshCurveStart.material = Materials.ctrl.curve
+        if hit.mesh.name == 'ctrlStart'
+            @meshCtrlStart.material = Materials.ctrl.start
+            @meshCtrlRod.material   = Materials.ctrl.start
         
     onEnter: (ray, hit) =>
         
-        log hit.mesh.name
-        
         if hit.mesh.name == 'curveStart'
-            if world.compass.object != @
-                @activate()
-        if hit.mesh.name == 'ctrlStart'
-            @meshCtrlStart.material = Materials.ctrl.highlight
-            @meshCtrlRod.material   = Materials.ctrl.highlight
+            @meshCurveStart.material = Materials.ctrl.highlight
+            @activate()
         if hit.mesh.name == 'prevCtrlEnd'
             @meshPrevCtrlEnd.material = Materials.ctrl.highlight
             @meshPrevCtrlRod.material = Materials.ctrl.highlight
+        if hit.mesh.name == 'ctrlStart'
+            @meshCtrlStart.material = Materials.ctrl.highlight
+            @meshCtrlRod.material   = Materials.ctrl.highlight
     
+    isActive: => CurveCtrl.active.has @
+            
     activate: =>
+        
+        return if @isActive()
+        
+        CurveCtrl.active.add @
         
         @meshPrevCtrlEnd.visible = true
         @meshPrevCtrlRod.visible = true
@@ -144,19 +151,22 @@ function CurveCtrl
         world.addPickable @meshPrevCtrlEnd
         world.addPickable @meshCtrlStart
         
-        world.showCompass @, @getPos(), @getDir() 
-        
     deactivate: =>
 
-        @meshPrevCtrlEnd.visible = false
+        world.hideCompass @
+        
+        return if not @isActive()
+        
+        CurveCtrl.active.delete @
+        
+        @meshPrevCtrlEnd?.visible = false
         @meshPrevCtrlRod.visible = false
         @meshCtrlStart.visible = false
         @meshCtrlRod.visible = false
         
+        @meshCurveStart?.material = Materials.ctrl.curve
         world.removePickable @meshPrevCtrlEnd
         world.removePickable @meshCtrlStart
-        
-        world.hideCompass @
                 
     # 0000000    00000000    0000000    0000000   
     # 000   000  000   000  000   000  000        
@@ -169,6 +179,8 @@ function CurveCtrl
     
     onDrag: (ray, hit) =>
 
+        log 'curvectrl onDrag' hit.mesh.name, hit.name
+        
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, @getPos()
         ray.intersectPlane plane, Vector.tmp
@@ -215,6 +227,9 @@ function CurveCtrl
             @meshPrevCtrlRod.position.y = -dist/2
             @meshPrevCtrlRod.scale.set 1 dist, 1
             @meshPrevCtrlEnd.position.y = -dist
+            
+        if hit.mesh.name == 'curveStart'
+            @setPos Vector.tmp
             
         @curve.updateArcLengths()
         @dragCB?()
@@ -275,7 +290,6 @@ function CurveCtrl
 
     getPos: -> @group.position
     getDir: -> vec(0 1 0).applyQuaternion @group.quaternion
-        
         
     # 00000000    0000000   000000000   0000000   000000000  00000000  
     # 000   000  000   000     000     000   000     000     000       

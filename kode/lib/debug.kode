@@ -25,7 +25,6 @@ class Debug
         @toggle text:'info'   set: setInfo, get: getInfo
         @toggle text:'wire'   parent:@mats, set: Materials.setWire, get: Materials.getWire
         @toggle text:'flat'   parent:@mats, set: Materials.setFlat, get: Materials.getFlat
-        # @button text:'dither' cb: -> Materials.toggleDither()
         @toggle text:'axes'   pref:'axes'   parent:@help, obj: rts.axesHelper,         key:'visible'
         @toggle text:'arrow'  pref:'arrow'  parent:@help, obj: rts.arrowHelper,        key:'visible'
         @toggle text:'center' pref:'center' parent:@help, obj: rts.centerHelper,       key:'visible'

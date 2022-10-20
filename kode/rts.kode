@@ -47,16 +47,16 @@ window.Geometry     = require './const/geometry'
 window.Materials    = require './const/materials'
 window.playSound    = (o,n,c) -> rts.sound.play o,n,c
    
-FPS     = require './lib/fps'
-Info    = require './lib/info'
-Debug   = require './lib/debug'
-Sound   = require './lib/sound'
-Config  = require './const/config'
-Menu    = require './menu/menu'
-World   = require './world'
-Map     = require './map'
-Camera  = require './lib/camera'
-Node    = require './track/node'
+FPS       = require './lib/fps'
+Info      = require './lib/info'
+Debug     = require './lib/debug'
+Sound     = require './lib/sound'
+Config    = require './const/config'
+Menu      = require './menu/menu'
+World     = require './world'
+Map       = require './map'
+Camera    = require './lib/camera'
+Node      = require './track/node'
 CurveCtrl = require './track/curvectrl'
 
 tmpMatrix = new THREE.Matrix3
@@ -168,7 +168,7 @@ class RTS
         document.addEventListener 'mousedown' @onMouseDown
         document.addEventListener 'mouseup'   @onMouseUp
         document.addEventListener 'dblclick'  @onDblClick
-        document.addEventListener 'click'     @onClick
+        # document.addEventListener 'click'     @onClick
                 
         @lastAnimationTime = window.performance.now()
                 
@@ -278,7 +278,9 @@ class RTS
             
         if event.buttons == 1
             if @downHit?.mesh?.handler?.onMouseDown is func
-                @downHit?.mesh?.handler?.onMouseDown @downRay, @downHit
+                @downHit.mesh.handler.onMouseDown @downRay, @downHit
+                
+        post.emit 'mouseDown' @downRay, @downHit
             
     onMouseUp: (event) =>
 
@@ -287,15 +289,17 @@ class RTS
         if @downHit?.mesh?.onDragDone is func
             @downHit.mesh.onDragDone @mouseRay(), @downHit, @downRay, @lastRay
         
+        if @downHit?.mesh?.handler?.onMouseUp is func
+            @downHit.mesh.handler.onMouseUp @downRay, @downHit
+            
+        post.emit 'mouseUp' @mouseRay(), @downHit, @downRay, @lastRay
+            
         moved = @downPos.dist @mouse
         if moved < 0.01
+            @onClick event
             if event.button != 0
                 @focusOnHit()
-                
-        # if event.buttons == 1
-        if @downHit?.mesh?.handler?.onMouseUp is func
-            @downHit?.mesh?.handler?.onMouseUp @downRay, @downHit
-                    
+                                    
         delete @camMove
         delete @downRay
         delete @lastRay
@@ -310,9 +314,11 @@ class RTS
         if event.buttons == 1
             if @downHit?.mesh?.onDrag is func
                 @downHit.mesh.onDrag mouseRay, @downHit, @downRay, @lastRay
-        else if event.buttons == 0 and hit
-            if hit.mesh?.onHover is func
-                hit.mesh.onHover mouseRay, hit, @lastRay
+        
+        if hit
+            
+            post.emit 'mouseMove' mouseRay, hit, @lastRay
+            
             if @lastHit?.mesh != hit.mesh 
                 if @lastHit?.mesh?.onLeave is func
                     @lastHit.mesh.onLeave mouseRay, @lastHit, @lastRay
@@ -322,8 +328,7 @@ class RTS
                     hit.mesh.onEnter mouseRay, hit, @lastRay
                 else if hit.mesh?.handler?.onEnter is func
                     hit.mesh.handler.onEnter mouseRay, hit, @lastRay
-            else if hit.mesh.name == 'floor'
-                world.hideCompass()
+                    
             @lastHit = hit
                 
         @lastRay = mouseRay
@@ -331,11 +336,20 @@ class RTS
     onClick: (event) => 
         
         if hit = @castRay()
-            if hit.mesh?.handler?.onClick is func
+            ray = @mouseRay()
+            if hit.mesh?.onClick is func
                 if @downHit.mesh == hit.mesh
-                    hit.mesh?.handler?.onClick @mouseRay(), hit
+                    hit.mesh.onClick ray, hit
+            else if hit.mesh?.handler?.onClick is func
+                if @downHit.mesh == hit.mesh
+                    hit.mesh.handler.onClick ray, hit
+            else if hit.name == 'floor'
+                world.hideCompass()
+                CurveCtrl.deactivateAll()
             else
                 log 'unhandled click' hit
+                
+            post.emit 'mouseClick' ray, hit
         
     onDblClick: (event) => 
         
@@ -362,7 +376,8 @@ class RTS
             
     mouseRay: ->
         
-        new Ray @camera.position, vec(@mouse.x, @mouse.y, 1).unproject(@camera).normalize()
+        dir = vec(@mouse.x, @mouse.y, 1).unproject(@camera).normalize()
+        new Ray @camera.position, dir
 
     #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
     # 000       000   000  000          000     000   000  000   000   000 000   

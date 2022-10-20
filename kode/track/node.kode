@@ -12,6 +12,7 @@ Compass   = require './compass'
 function Node
 
     @numNodes: 0
+    Node.clickMode: false
 
     @: (point, @name) ->
         
@@ -33,34 +34,41 @@ function Node
         geom.rotateX Math.PI/2
         @center = new Mesh geom, Materials.node.center
         @center.name = 'node.center'
-        @center.onHover = @onHover
+        @center.onClick = @onClickCenter
+        @center.onEnter = @onEnterCenter
+        @center.onLeave = @onLeaveCenter
+        @center.onDrag  = @onDrag
         
         geom = new CylinderGeometry 0.5 0.5 1 32
         geom.translate 0 0 -2
         geom.rotateX Math.PI/2
         
         @outMesh = new Mesh geom, Materials.node.out
-        @outMesh.onDrag = @onOutDrag
+        @outMesh.name       = @name + '.out'
+        @outMesh.onDrag     = @onOutDrag
         @outMesh.onDragDone = @onDragDone
-        @outMesh.onEnter = @onEnterOut
-        @outMesh.onLeave = @onLeaveOut
+        @outMesh.onEnter    = @onEnterOut
+        @outMesh.onLeave    = @onLeaveOut
+        @outMesh.onClick    = @onClickInOut
 
         geom = new CylinderGeometry 0.5 0.5 1 32
         geom.translate 0 0 2
         geom.rotateX Math.PI/2
         
         @inMesh = new Mesh geom, Materials.node.in
-        @inMesh.onDrag = @onInDrag
+        @inMesh.name       = @name + '.in'
+        @inMesh.onDrag     = @onInDrag
         @inMesh.onDragDone = @onDragDone
-        @inMesh.onEnter = @onEnterIn
-        @inMesh.onLeave = @onLeaveIn
+        @inMesh.onEnter    = @onEnterIn
+        @inMesh.onLeave    = @onLeaveIn
+        @inMesh.onClick    = @onClickInOut
         
         @group.add @center
         @group.add @inMesh
         @group.add @outMesh
         
         world.addPickable @group
-        world.addObject @group
+        world.addObject   @group
         
         @rotate 0
         
@@ -77,11 +85,50 @@ function Node
             log 'convert to ctrl'
             post.emit 'convertNodeToCtrl' @
         
-    onHover: => world.showCompass @, @getPos(), @getDir()
-    onEnterIn: => @inMesh.material = Materials.node.highlightIn
-    onLeaveIn: => @inMesh.material = Materials.node.in
-    onEnterOut: => @outMesh.material = Materials.node.highlightOut
-    onLeaveOut: => @outMesh.material = Materials.node.out
+    onClickCenter: => 
+        if not Node.clickMode
+            if world.compass.object == @
+                log 'hideCompass' Node.clickMode
+                world.hideCompass @
+            else
+                log 'showCompass' Node.clickMode
+                world.showCompass @, @getPos(), @getDir()
+            
+    onEnterIn:     => @inMesh.material  = Materials.node.highlightIn
+    onLeaveIn:     => @inMesh.material  = Materials.node.in
+    onEnterCenter: => @center.material  = Materials.ctrl.highlight
+    onLeaveCenter: => @center.material  = Materials.node.center
+    onEnterOut:    => @outMesh.material = Materials.node.highlightOut
+    onLeaveOut:    => @outMesh.material = Materials.node.out
+    
+    onClickInOut: (ray, hit) => 
+
+        return if Node.clickMode
+        
+        @clickTracks = hit.name?.endsWith('.in') ? @inTracks : @outTracks
+        Node.clickMode = true
+        log 'onClickInOut start' Node.clickMode, @dragTrack
+        if not @dragTrack
+            @startDrag @clickTracks
+        
+        post.on 'mouseMove'  @onMouseMove
+        post.on 'mouseDown'  @onMouseDown
+        post.on 'mouseUp'    @onMouseUp
+        
+    onMouseMove: (ray, hit) =>
+        
+        if Node.clickMode
+            @moveInOutDrag ray, hit
+        
+    onMouseDown: (ray, hit) =>
+    onMouseUp: (ray, hit) =>
+        
+        delete @clickTracks
+        log 'onMouseUp' Node.clickMode
+        post.removeListener 'mouseMove'  @onMouseMove
+        post.removeListener 'mouseDown'  @onMouseDown
+        post.removeListener 'mouseUp'    @onMouseUp
+        Node.clickMode = false
         
     # 0000000    00000000    0000000    0000000   
     # 000   000  000   000  000   000  000        
@@ -109,7 +156,9 @@ function Node
         
         tracks.push t
         n2.inTracks.push t
-                        
+        
+        log 'start drag'
+        
         @dragTrack = t
         
     onInDrag: (ray, hit) =>
@@ -131,15 +180,17 @@ function Node
         dragNode = @dragTrack.node[1]
             
         plane = new Plane
-        plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
+        plane.setFromNormalAndCoplanarPoint Vector.unitZ, @getPos()
         ray.intersectPlane plane, Vector.tmp
         Vector.tmp.round()
         dragNode.group.position.copy Vector.tmp # setPos?
         @dragTrack.nodeMoved dragNode
         
     onDragDone: =>
-        
-        delete @dragTrack
+        log 'dragDone'
+        if not Node.clickMode
+            log 'delTrack'
+            delete @dragTrack
             
     onDrag: (ray, hit) =>
 
@@ -166,7 +217,6 @@ function Node
             block = @blocks[i]
             train = @blockedTrains[i]
             train.path.getPoint block.position, 3
-            
         
     # 00000000    0000000   000000000   0000000   000000000  00000000  
     # 000   000  000   000     000     000   000     000     000       

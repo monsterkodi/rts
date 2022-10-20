@@ -56,15 +56,10 @@ function World extends Convert
             
             s = clamp 1 6 rts.camera.dist/30
             @compass.group.scale.set s, s, s
-            @compass.object.inMesh?.scale.set s, s, s
-            @compass.object.outMesh?.scale.set s, s, s
 
     hideCompass: (object) =>
         
         if @compass.object == object or not object and @compass.object
-            
-            @compass.object?.inMesh?.scale.set 1 1 1
-            @compass.object?.outMesh?.scale.set 1 1 1
             
             @removePickable @compass.group
             @removeObject   @compass.group
