@@ -36,8 +36,9 @@ function CurveCtrl
             @meshPrevCtrlEnd = mesh
             @group.add @meshPrevCtrlEnd
 
-            geom = new BoxGeometry 0.35 @prevCtrlDist(), 0.35
+            geom = new BoxGeometry 0.35 1 0.35
             mesh = new Mesh geom, Materials.ctrl.start
+            mesh.scale.set 1 @prevCtrlDist(), 1
             mesh.position.y = -@prevCtrlDist()/2
             mesh.name = 'prevCtrlRod'
             mesh.visible = false
@@ -71,8 +72,9 @@ function CurveCtrl
         @meshCtrlStart = mesh
         @group.add @meshCtrlStart
 
-        geom = new BoxGeometry 0.35 @ctrlStartDist(), 0.35
+        geom = new BoxGeometry 0.35 1 0.35
         mesh = new Mesh geom, Materials.ctrl.start
+        mesh.scale.set 1 @ctrlStartDist(), 1
         mesh.position.y = @ctrlStartDist()/2
         mesh.name = 'ctrlRod'
         mesh.visible = false
@@ -174,73 +176,45 @@ function CurveCtrl
                     
         if hit.mesh.name == 'ctrlStart'
             
-            z = @ctrlStart.z
-            @ctrlStart.copy Vector.tmp
-             
-            dist = @ctrlStartDist()
+            ray = new Ray @curveStart, @getDir()
+            newPos = vec()
+            ray.closestPointToPoint Vector.tmp, newPos
+            
+            dist = newPos.distanceTo @curveStart
             return if dist < 1
-            if MIN_CTRL_DIST > dist
+            if dist < MIN_CTRL_DIST
                 @ctrlStart.sub @curveStart
                 @ctrlStart.normalize()
                 @ctrlStart.multiplyScalar MIN_CTRL_DIST
                 @ctrlStart.add @curveStart
-                 
-            @ctrlStart.z = z
-            @meshCtrlStart.position.copy @ctrlStart
-             
-            dist = @prevCtrlDist()
-            @prevCtrlEnd.copy @ctrlStart
-            @prevCtrlEnd.sub @curveStart
-            @prevCtrlEnd.setLength -dist
-            @prevCtrlEnd.add @curveStart
-            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-             
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshCurveStart.position
-            @meshCurveStart.lookAt Vector.tmp
-             
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshCtrlStart.position
-            @meshCtrlStart.lookAt Vector.tmp
-
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshPrevCtrlEnd.position
-            @meshPrevCtrlEnd.lookAt Vector.tmp
-
+                dist = @ctrlStartDist()
+            else
+                @ctrlStart.copy newPos
+            
+            @meshCtrlRod.position.y = dist/2
+            @meshCtrlRod.scale.set 1 dist, 1
+            @meshCtrlStart.position.y = dist
+            
         if hit.mesh.name == 'prevCtrlEnd'
             
-            z = @prevCtrlEnd.z
-            @prevCtrlEnd.copy Vector.tmp
-             
-            dist = @prevCtrlEnd.distanceTo @curveStart
+            ray = new Ray @curveStart, @getDir().negate()
+            newPos = vec()
+            ray.closestPointToPoint Vector.tmp, newPos
+            
+            dist = newPos.distanceTo @curveStart
             return if dist < 1
-            if MIN_CTRL_DIST > dist
+            if dist < MIN_CTRL_DIST
                 @prevCtrlEnd.sub @curveStart
                 @prevCtrlEnd.normalize()
                 @prevCtrlEnd.multiplyScalar MIN_CTRL_DIST
                 @prevCtrlEnd.add @curveStart
-                 
-            @prevCtrlEnd.z = z
-            @meshPrevCtrlEnd.position.copy @prevCtrlEnd
-             
-            dist = @ctrlStart.distanceTo @curveStart
-            @ctrlStart.copy @prevCtrlEnd
-            @ctrlStart.sub @curveStart
-            @ctrlStart.setLength -dist
-            @ctrlStart.add @curveStart
-            @meshCtrlStart.position.copy @ctrlStart
-             
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshCurveStart.position
-            @meshCurveStart.lookAt Vector.tmp
-             
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshCtrlStart.position
-            @meshCtrlStart.lookAt Vector.tmp
-
-            @curve.getTangent 0, Vector.tmp
-            Vector.tmp.add @meshPrevCtrlEnd.position
-            @meshPrevCtrlEnd.lookAt Vector.tmp
+                dist = @prevCtrlDist()
+            else
+                @prevCtrlEnd.copy newPos
+            
+            @meshPrevCtrlRod.position.y = -dist/2
+            @meshPrevCtrlRod.scale.set 1 dist, 1
+            @meshPrevCtrlEnd.position.y = -dist
             
         @curve.updateArcLengths()
         @dragCB?()

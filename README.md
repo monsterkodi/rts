@@ -2,13 +2,7 @@
 ![screenshot](img/rts.png)
 ![screenshot](img/rts01.png)
 
-- rotation compass gizmo
-    - 8 arrows (click to snap)
-- crtl
-    - boxes straighten only 
-    - rotation compass
 - node
-    - rotation compass
     - track create on click
         - covert middle nodes to ctrls
         - in-between drag sets dir of node
