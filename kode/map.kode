@@ -34,23 +34,23 @@ class Map extends World
         t5 = @connectNodeTracks n3, n3.inTracks,  n2, n2.inTracks, 't5'
         t6 = @connectNodes n3, n1, 't6'
                
-        # train = @addTrain 1 'red'
-        # @addBoxcar train, 3
-        # train.setColor Color.train.red
-        # train.path.addTrackNode t1, n2
-        # train.path.addTrackNode t2, n1
-        # train.path.addTrackNode t1, n2
-        # train.path.addTrackNode t2, n1
-        # train.path.addTrackNode t3, n3
-        # train.path.addTrackNode t4, n2
-        # train.path.addTrackNode t5, n3
-        # train.path.addTrackNode t6, n1
+        train = @addTrain 1 'red'
+        @addBoxcar train, 3
+        train.setColor Color.train.red
+        train.path.addTrackNode t1, n2
+        train.path.addTrackNode t2, n1
+        train.path.addTrackNode t1, n2
+        train.path.addTrackNode t2, n1
+        train.path.addTrackNode t3, n3
+        train.path.addTrackNode t4, n2
+        train.path.addTrackNode t5, n3
+        train.path.addTrackNode t6, n1
 
-        # train = @addTrain 1 'yellow'
-        # @addBoxcar train, 4
-        # train.setColor Color.train.yellow
-        # train.path.addTrackNode t2, n1
-        # train.path.addTrackNode t1, n2
+        train = @addTrain 1 'yellow'
+        @addBoxcar train, 4
+        train.setColor Color.train.yellow
+        train.path.addTrackNode t2, n1
+        train.path.addTrackNode t1, n2
 
         train = @addTrain 1 'blue'
         @addBoxcar train, 2

@@ -14,9 +14,10 @@ Materials =
     floor:              new THREE.MeshStandardMaterial color:0x222222, dithering:true
     shadow:             new THREE.ShadowMaterial       opacity: 0.2, depthWrite:false
     ctrl:
-        transparent:    new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.05
-        start:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.2
-        end:            new THREE.MeshStandardMaterial color:0x888888, metalness: 0.5, roughness: 0.2
+        transparent:    new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.0
+        start:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5
+        highlight:      new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
+        # end:            new THREE.MeshStandardMaterial color:0x888888, metalness: 0.5, roughness: 0.5
         curve:          new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     compass:
         head:           new THREE.MeshStandardMaterial color:Color.compass.head,       metalness: 0.5, roughness: 0.5

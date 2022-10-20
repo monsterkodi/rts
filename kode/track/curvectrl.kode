@@ -22,6 +22,7 @@ function CurveCtrl
         @curveEnd   = @curve.v3
         
         @group = new Group
+        @group.name = 'ctrl'
         
         if @isMid
             geom = new BoxGeometry 1 1 1
@@ -30,43 +31,57 @@ function CurveCtrl
             mesh.position.y = -@prevCtrlDist()
             mesh.onDrag = @onDrag 
             mesh.name = 'prevCtrlEnd'
+            mesh.handler = @
             mesh.visible = false
             @meshPrevCtrlEnd = mesh
-            @group.add mesh
-        
+            @group.add @meshPrevCtrlEnd
+
+            geom = new BoxGeometry 0.35 @prevCtrlDist(), 0.35
+            mesh = new Mesh geom, Materials.ctrl.start
+            mesh.position.y = -@prevCtrlDist()/2
+            mesh.name = 'prevCtrlRod'
+            mesh.visible = false
+            @meshPrevCtrlRod = mesh
+            @group.add @meshPrevCtrlRod
+            
         if not @isFirst
             geom = new BoxGeometry 1 1 0.71
             mesh = new Mesh geom, Materials.ctrl.curve
             mesh.onDrag = @onDrag 
             mesh.name = 'curveStart'
             mesh.handler = @
-            mesh.onHover = @onHover
             mesh.castShadow = true
             mesh.receiveShadow = true
             
-            # @curve.getTangent 0, Vector.tmp
-            # Vector.tmp.add mesh.position
-            # mesh.lookAt Vector.tmp
-            
             @meshCurveStart = mesh
             world.addPickable @meshCurveStart
-            @group.add mesh
+            @group.add @meshCurveStart
         
         geom = new BoxGeometry 1 1 1
-        mesh = new Mesh geom, @isFirst ? Materials.ctrl.transparent : Materials.ctrl.start
+        mesh = new Mesh geom, Materials.ctrl.start
         if not @isFirst
             mesh.onDrag = @onDrag 
-        # mesh.position.copy @ctrlStart
-        # mesh.position.sub @curveStart
+        else
+            mesh.material = Materials.ctrl.transparent
+            
+        mesh.handler = @
         mesh.position.y = @ctrlStartDist()
         mesh.name = 'ctrlStart'
         mesh.visible = false
         @meshCtrlStart = mesh
-        @group.add mesh
+        @group.add @meshCtrlStart
+
+        geom = new BoxGeometry 0.35 @ctrlStartDist(), 0.35
+        mesh = new Mesh geom, Materials.ctrl.start
+        mesh.position.y = @ctrlStartDist()/2
+        mesh.name = 'ctrlRod'
+        mesh.visible = false
+        @meshCtrlRod = mesh
+        @group.add @meshCtrlRod
+        
         @group.position.copy @curveStart
         @setDir @curve.getTangent 0, Vector.tmp
             
-        @group.name = 'ctrl'
         world.addObject @group
         
     del: ->
@@ -87,26 +102,42 @@ function CurveCtrl
 
         if world.compass.object != @
             @activate()
-            
-    prevCtrlDist: ->
-
-        @prevCtrlEnd.distanceTo @curveStart
-
-    ctrlStartDist: ->
-
-        @ctrlStart.distanceTo @curveStart
-        
-        
+                    
     #  0000000    0000000  000000000  000  000   000  00000000  
     # 000   000  000          000     000  000   000  000       
     # 000000000  000          000     000   000 000   0000000   
     # 000   000  000          000     000     000     000       
     # 000   000   0000000     000     000      0      00000000  
     
+    onLeave: (ray, hit) =>
+        
+        if hit.mesh.name == 'ctrlStart'
+            @meshCtrlStart.material = Materials.ctrl.start
+            @meshCtrlRod.material   = Materials.ctrl.start
+        if hit.mesh.name == 'prevCtrlEnd'
+            @meshPrevCtrlEnd.material = Materials.ctrl.start
+            @meshPrevCtrlRod.material = Materials.ctrl.start
+        
+    onEnter: (ray, hit) =>
+        
+        log hit.mesh.name
+        
+        if hit.mesh.name == 'curveStart'
+            if world.compass.object != @
+                @activate()
+        if hit.mesh.name == 'ctrlStart'
+            @meshCtrlStart.material = Materials.ctrl.highlight
+            @meshCtrlRod.material   = Materials.ctrl.highlight
+        if hit.mesh.name == 'prevCtrlEnd'
+            @meshPrevCtrlEnd.material = Materials.ctrl.highlight
+            @meshPrevCtrlRod.material = Materials.ctrl.highlight
+    
     activate: =>
         
         @meshPrevCtrlEnd.visible = true
+        @meshPrevCtrlRod.visible = true
         @meshCtrlStart.visible = true
+        @meshCtrlRod.visible = true
         
         world.addPickable @meshPrevCtrlEnd
         world.addPickable @meshCtrlStart
@@ -116,7 +147,9 @@ function CurveCtrl
     deactivate: =>
 
         @meshPrevCtrlEnd.visible = false
+        @meshPrevCtrlRod.visible = false
         @meshCtrlStart.visible = false
+        @meshCtrlRod.visible = false
         
         world.removePickable @meshPrevCtrlEnd
         world.removePickable @meshCtrlStart
@@ -128,6 +161,9 @@ function CurveCtrl
     # 000   000  0000000    000000000  000  0000  
     # 000   000  000   000  000   000  000   000  
     # 0000000    000   000  000   000   0000000   
+    
+    prevCtrlDist:  -> @prevCtrlEnd.distanceTo @curveStart
+    ctrlStartDist: -> @ctrlStart.distanceTo @curveStart
     
     onDrag: (ray, hit) =>
 
@@ -141,7 +177,7 @@ function CurveCtrl
             z = @ctrlStart.z
             @ctrlStart.copy Vector.tmp
              
-            dist = @ctrlStart.distanceTo @curveStart
+            dist = @ctrlStartDist()
             return if dist < 1
             if MIN_CTRL_DIST > dist
                 @ctrlStart.sub @curveStart
@@ -152,7 +188,7 @@ function CurveCtrl
             @ctrlStart.z = z
             @meshCtrlStart.position.copy @ctrlStart
              
-            dist = @prevCtrlEnd.distanceTo @curveStart
+            dist = @prevCtrlDist()
             @prevCtrlEnd.copy @ctrlStart
             @prevCtrlEnd.sub @curveStart
             @prevCtrlEnd.setLength -dist
