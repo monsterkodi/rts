@@ -24,26 +24,30 @@ window.last         = last
 window.elem         = elem
 
 window.THREE                 = require 'three'
-window.Ray                   = THREE.Ray
-window.Mesh                  = THREE.Mesh
-window.Line3                 = THREE.Line3
-window.Group                 = THREE.Group
-window.Plane                 = THREE.Plane
-window.Sphere                = THREE.Sphere
-window.CurvePath             = THREE.CurvePath
-window.BoxGeometry           = THREE.BoxGeometry
-window.PlaneGeometry         = THREE.PlaneGeometry
-window.SphereGeometry        = THREE.SphereGeometry
-window.CylinderGeometry      = THREE.CylinderGeometry
-window.QuadraticBezierCurve3 = THREE.QuadraticBezierCurve3
-window.CubicBezierCurve3     = THREE.CubicBezierCurve3
-window.merge = ->
-    THREE.BufferGeometryUtils.mergeBufferGeometries.apply null, [arguments]
+expose = """
+    Ray
+    Mesh
+    Line3
+    Group
+    Plane
+    Sphere
+    CurvePath
+    BoxGeometry
+    PlaneGeometry
+    SphereGeometry
+    CylinderGeometry
+    QuadraticBezierCurve3
+    CubicBezierCurve3
+    BufferAttribute       
+    BufferGeometry       
+    """
+for e in expose.split '\n'
+    window[e] = THREE[e]
     
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
 window.Color        = require './const/color'
-window.Geometry     = require './const/geometry'
+window.Geom         = require './const/geometry'
 window.Materials    = require './const/materials'
 window.playSound    = (o,n,c) -> rts.sound.play o,n,c
    

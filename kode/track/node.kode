@@ -200,8 +200,6 @@ function Node
         Vector.tmp.round()
         @setPos Vector.tmp
         
-    compassMoved: (point) => @setPos point
-        
     getPos: => @group.position.clone()
     setPos: (point) ->
         

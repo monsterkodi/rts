@@ -15,20 +15,11 @@ function Compass
         @group = new Group
         @group.name = 'compass'
         
-        geom = new CylinderGeometry 1.5 1.5 0.4 32
-        geom.rotateX Math.PI/2
+        geom = Geom.cylindonut 0.4 1.5 1 32 
         @wheel = new Mesh geom, Materials.compass.wheel
         @wheel.onDrag = @onRotate
         @wheel.name = 'compass.wheel'
         @group.add @wheel
-        
-        geom = new CylinderGeometry 0.84 0.84 0.85 32
-        geom.rotateX Math.PI/2
-        @center = new Mesh geom, Materials.compass.center
-        @center.onDrag = @onDrag
-        @center.name = 'compass.center'
-        @center.handler = @
-        @group.add @center
         
         geom = new CylinderGeometry 0.2 0.2 1.2 16
         geom.rotateX Math.PI/2
@@ -50,16 +41,7 @@ function Compass
             dot.name = "compass.dot#{i}"
             @dots.push dot
             @group.add dot
-        
-    onDrag: (ray, hit, downRay, lastRay) => 
-        
-        plane = new Plane
-        plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
-        ray.intersectPlane plane, @group.position
-        @group.position.round()
-        
-        @object?.compassMoved? @group.position
-            
+                    
     onRotate: (ray, hit, downRay, lastRay) => 
         
         @clearHighlight()
@@ -102,8 +84,6 @@ function Compass
             dot = @dots[parseInt hit.name[-1]]
             dot.scale.set 1 1 1.2
             dot.material.emissive.copy dot.material.color
-        if hit.name == 'compass.center'
-            @center.scale.set 1 1 1.2
             
     onLeave: (ray, hit) =>
         
@@ -111,17 +91,12 @@ function Compass
             dot = @dots[parseInt hit.name[-1]]
             dot.scale.set 1 1 1
             dot.material.emissive.copy Color.black
-        if hit.name == 'compass.center'    
-            @center.scale.set 1 1 1
     
     onMouseDown: (ray, hit) => 
 
         if hit.name.startsWith 'compass.dot'
             dotIndex = parseInt hit.name[-1]
             @dots[dotIndex].scale.set 1 1 1
-        if hit.name == 'compass.center'
-            @group.visible = false
-            @center.scale.set 1 1 1
             
     onMouseUp: (ray, hit) =>
         
@@ -133,8 +108,6 @@ function Compass
             dotIndex = parseInt hit.name[-1]
             @dots[dotIndex].scale.set 1 1 1.2
             @rotateTo dotIndex * 360/8
-        if hit.name == 'compass.center'
-            @center.scale.set 1 1 1.2
         
     onDoubleClick: (ray, hit) => 
     
@@ -148,6 +121,5 @@ function Compass
         for dot in @dots
             dot.scale.set 1 1 1
             dot.material.emissive.copy Color.black
-        @center.scale.set 1 1 1
                         
 module.exports = Compass

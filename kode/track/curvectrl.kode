@@ -274,8 +274,6 @@ function CurveCtrl
         
         @curve.updateArcLengths()
         
-    compassMoved: (point) => @setPos point
-    
     setPos: (point) ->
         
         delta = vec(point).minus @curveStart
