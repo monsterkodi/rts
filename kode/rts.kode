@@ -172,7 +172,6 @@ class RTS
         document.addEventListener 'mousedown' @onMouseDown
         document.addEventListener 'mouseup'   @onMouseUp
         document.addEventListener 'dblclick'  @onDblClick
-        # document.addEventListener 'click'     @onClick
                 
         @lastAnimationTime = window.performance.now()
                 
@@ -299,8 +298,9 @@ class RTS
         post.emit 'mouseUp' @mouseRay(), @downHit, @downRay, @lastRay
             
         moved = @downPos.dist @mouse
-        if moved < 0.01
+        if moved < 0.001
             @onClick event
+        if moved < 0.01
             if event.button != 0
                 @focusOnHit()
                                     
@@ -358,8 +358,11 @@ class RTS
     onDblClick: (event) => 
         
         if hit = @castRay()
-            if hit.mesh?.handler?.onDoubleClick is func
-                hit.mesh?.handler?.onDoubleClick @mouseRay(), hit
+            
+            if hit.mesh?.onDoubleClick is func
+                hit.mesh.onDoubleClick @mouseRay(), hit
+            else if hit.mesh?.handler?.onDoubleClick is func
+                hit.mesh.handler.onDoubleClick @mouseRay(), hit
             else
                 log 'unhandled doubleClick' hit
                             

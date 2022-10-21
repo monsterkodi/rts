@@ -35,7 +35,7 @@ class Menu
 
         @calcMouse event
         event.target.button?.middleClick?(event) if event.button == 1
-        event.target.button?.rightClick?(event) if event.button == 2
+        event.target.button?.rightClick?(event)  if event.button == 2
 
     onMouseEnter: (event) =>
 

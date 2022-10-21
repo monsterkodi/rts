@@ -15,9 +15,8 @@ Materials =
     shadow:             new THREE.ShadowMaterial       opacity: 0.2, depthWrite:false
     ctrl:
         transparent:    new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.0
-        start:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5
         highlight:      new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
-        # end:            new THREE.MeshStandardMaterial color:0x888888, metalness: 0.5, roughness: 0.5
+        start:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5
         curve:          new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     compass:
         head:           new THREE.MeshStandardMaterial color:Color.compass.head,       metalness: 0.5, roughness: 0.5
@@ -37,7 +36,7 @@ Materials =
         highlightIn:    new THREE.MeshStandardMaterial color:Color.node.in,  metalness: 0.5, roughness: 0.5, emissive: Color.node.in
         highlightOut:   new THREE.MeshStandardMaterial color:Color.node.out,  metalness: 0.5, roughness: 0.5, emissive: Color.node.out
     menu:
-        active:         new THREE.MeshStandardMaterial color:Color.menu.active,       metalness: 0.9, roughness: 0.75
+        active:         new THREE.MeshStandardMaterial color:Color.menu.active,       metalness: 0.2, roughness: 0.5, emissive:Color.menu.active
         inactive:       new THREE.MeshStandardMaterial color:Color.menu.inactive,     metalness: 0.9, roughness: 0.75
         activeHigh:     new THREE.MeshStandardMaterial color:Color.menu.activeHigh,   metalness: 0.9, roughness: 0.75
         inactiveHigh:   new THREE.MeshStandardMaterial color:Color.menu.inactiveHigh, metalness: 0.9, roughness: 0.75

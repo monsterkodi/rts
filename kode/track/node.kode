@@ -30,11 +30,11 @@ function Node
         @group.name = @name
         @group.position.copy point
         
-        geom = new CylinderGeometry 0.7 0.7 0.71 32
-        geom.rotateX Math.PI/2
+        geom = Geom.cylinder 0.71 0.7 32
         @center = new Mesh geom, Materials.node.center
         @center.name = 'node.center'
         @center.onClick = @onClickCenter
+        @center.onDoubleClick = @onDoubleClickCenter
         @center.onEnter = @onEnterCenter
         @center.onLeave = @onLeaveCenter
         @center.onDrag  = @onDrag
@@ -79,10 +79,9 @@ function Node
         world.removePickable @group
         delete @group
         
-    compassCenterDoubleClicked: =>
+    onDoubleClickCenter: =>
         
         if @inTracks.length == 1 and @outTracks.length == 1
-            log 'convert to ctrl'
             post.emit 'convertNodeToCtrl' @
         
     onClickCenter: => 
@@ -138,6 +137,8 @@ function Node
     
     startDrag: (tracks) ->
         
+        world.hideCompass @
+        
         dir = @getDir()
         if tracks == @inTracks
             dir.negate()
@@ -187,13 +188,12 @@ function Node
         @dragTrack.nodeMoved dragNode
         
     onDragDone: =>
-        log 'dragDone'
         if not Node.clickMode
-            log 'delTrack'
             delete @dragTrack
             
     onDrag: (ray, hit) =>
 
+        world.hideCompass @
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
         ray.intersectPlane plane, Vector.tmp

@@ -16,7 +16,6 @@ class DialButton extends CanvasButton
     
         super div, clss, vec(-4,4,6), vec(0,0,1).normal().mul 10
         
-        @scene.background = Color.menu.background
         @name = 'DialButton'
         
         @drag = new drag
@@ -24,7 +23,15 @@ class DialButton extends CanvasButton
             onStart: @onDrag
             onMove:  @onDrag
         
-    setDial: (index) -> @update()
+    dialChanged: (index) ->             
+    setDial: (index) -> 
+    
+        for dot in @dots
+            dot.material = Materials.menu.inactive
+            dot.scale.set 1 1 1
+        @dots[index].material = Materials.menu.active
+        @dots[index].scale.set 3 3 3
+        @update()
 
     initCamera: ->
 
@@ -38,24 +45,17 @@ class DialButton extends CanvasButton
         
     initDots: ->
         
-        geoms = []
+        @dots = []
         for i in [-6..6]
-            geom = Geom.sphere 0.5
+            geom = Geom.sphere 0.3
             geom.rotateX deg2rad 90
-            p = vec(0,4,0).rotate vec(0,0,1), i*22.5
-            geom.translate p.x, p.y, p.z
-            geoms.push geom
+            p = vec(0,4,0).rotate vec(0,0,1), -i*22.5
+            mesh = new Mesh geom, Materials.menu.inactive
+            mesh.position.copy p
+            @dots.push mesh
+            @scene.add mesh
         
-        merg = THREE.BufferGeometryUtils.mergeBufferGeometries geoms
-        mesh = new THREE.Mesh merg, Materials.menu.inactive
-        @scene.add mesh
-        
-        geom = Geom.sphere 0.6
-        geom.rotateX deg2rad 90
-        @dot = new THREE.Mesh geom, Materials.menu.active
-        @scene.add @dot
-        
-    onDrag: (drag, event) => 
+    onDrag: (drag, event) =>
         
         br = @canvas.getBoundingClientRect()
         
@@ -64,6 +64,7 @@ class DialButton extends CanvasButton
         angle = Math.sign(ctr2Pos.dot(vec 1,0,0)) * ctr2Pos.angle(vec 0,1,0)
         sectn = clamp -6, 6, Math.round angle/22.5
         
-        @setDial sectn
+        @setDial     sectn+6
+        @dialChanged sectn+6
         
 module.exports = DialButton

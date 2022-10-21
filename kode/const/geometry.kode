@@ -9,10 +9,14 @@
 { CSG } = require '../../kode/lib/csg'
 require "../../three/examples/js/utils/BufferGeometryUtils"
 
-merge     = -> THREE.BufferGeometryUtils.mergeBufferGeometries.apply null, [arguments]
 subtract  = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
 intersect = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).intersect CSG.fromGeometry b
 union     = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).union     CSG.fromGeometry b
+merge     = -> 
+    if arguments.length == 1 and arguments[0] is Array
+        THREE.BufferGeometryUtils.mergeBufferGeometries arguments[0]
+    else
+        THREE.BufferGeometryUtils.mergeBufferGeometries.apply null, [arguments]
 
 class Geometry
     
@@ -84,7 +88,7 @@ class Geometry
         bottomside.copy topside
         bottomside.rotateX deg2rad -180
                 
-        cube = BufferGeometryUtils.mergeBufferGeometries [topside, rightside, backside, bottomside, leftside, frontside]
+        cube = merge topside, rightside, backside, bottomside, leftside, frontside
         cube.translate x, y, z
         cube.computeVertexNormals()
         cube.computeBoundingSphere()
@@ -112,10 +116,36 @@ class Geometry
     #      000  000        000   000  000       000   000  000       
     # 0000000   000        000   000  00000000  000   000  00000000  
     
-    @sphere: (size=1, x=0, y=0, z=0) ->
+    @sphere: (size=1, sgmt=16, x=0, y=0, z=0) ->
         
-        geom = new SphereGeometry size, 6, 6
+        geom = new SphereGeometry size, sgmt, sgmt
         geom.translate x, y, z
+        geom
+        
+    #  0000000  000   000  000      000  000   000  0000000    00000000  00000000   
+    # 000        000 000   000      000  0000  000  000   000  000       000   000  
+    # 000         00000    000      000  000 0 000  000   000  0000000   0000000    
+    # 000          000     000      000  000  0000  000   000  000       000   000  
+    #  0000000     000     0000000  000  000   000  0000000    00000000  000   000  
+    
+    @cylinder: (height=1, radius=0.5, sgmt=24, x=0, y=0, z=0) ->
+        
+        geom = new CylinderGeometry radius, radius, height, sgmt
+        geom.rotateX Math.PI/2
+        geom.translate x, y, z
+        geom
+        
+    #  0000000  000   000  000      000  000   000  0000000     0000000   000   000  000   000  000000000  
+    # 000        000 000   000      000  0000  000  000   000  000   000  0000  000  000   000     000     
+    # 000         00000    000      000  000 0 000  000   000  000   000  000 0 000  000   000     000     
+    # 000          000     000      000  000  0000  000   000  000   000  000  0000  000   000     000     
+    #  0000000     000     0000000  000  000   000  0000000     0000000   000   000   0000000      000     
+    
+    @cylindonut: (height=1, outerRadius=1, innerRadius=outerRadius/2, sgmt=24) ->
+        
+        geom  = @cylinder height, outerRadius, sgmt
+        inner = @cylinder height, innerRadius, sgmt
+        geom  = @subtract geom, inner
         geom
         
     # 00000000   000  000      000      
@@ -136,21 +166,9 @@ class Geometry
         bot = new SphereGeometry r, s, s/2, 0, 2*Math.PI, Math.PI/2, Math.PI/2
         bot.translate 0 -l/2 0
         
-        pill = merge top, mid, bot
+        pill = @merge top, mid, bot
         
         pill.rotateX Math.PI/2
         pill
         
-    #  0000000  000   000  000      000  000   000  0000000     0000000   000   000  000   000  000000000  
-    # 000        000 000   000      000  0000  000  000   000  000   000  0000  000  000   000     000     
-    # 000         00000    000      000  000 0 000  000   000  000   000  000 0 000  000   000     000     
-    # 000          000     000      000  000  0000  000   000  000   000  000  0000  000   000     000     
-    #  0000000     000     0000000  000  000   000  0000000     0000000   000   000   0000000      000     
-    
-    @cylindonut: (height=1, outerRadius=1, innerRadius=outerRadius/2, segmts=24) ->
-        
-        geom = new CylinderGeometry outerRadius, outerRadius, height, segmts
-        geom.rotateX Math.PI/2
-        geom
-
 module.exports = Geometry

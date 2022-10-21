@@ -19,14 +19,12 @@ class SpeedButton extends DialButton
         post.on 'worldSpeed' @onWorldSpeed
         @onWorldSpeed()
             
-    setDial: (index) -> 
+    dialChanged: (index) ->
     
-        world.setSpeed index+6
+        world.setSpeed index
                 
     onWorldSpeed: =>
         
-        p = vec(0,4,0).rotate vec(0,0,1), 180-45-world.speedIndex*22.5
-        @dot.position.copy p
-        @update()
-
+        @setDial world.speedIndex
+        
 module.exports = SpeedButton

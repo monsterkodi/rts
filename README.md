@@ -10,8 +10,8 @@
     
 - convertCtrlToNode
 
-- keyboard shortcut for grid, wire, top view
-- fix wire mode
+- keyboard shortcut for grid, wire, top view, reset camera
+- fix wire mode?
 - grid with subdivisions (10, 5)
 - fix rotation gizmo (if not top view)
 - adaptive grid size (tracks bounding box + margin)

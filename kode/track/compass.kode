@@ -15,7 +15,7 @@ function Compass
         @group = new Group
         @group.name = 'compass'
         
-        geom = Geom.cylindonut 0.4 1.5 1 32 
+        geom = Geom.cylindonut 0.71 1.5 Math.sqrt(2)/2 32 
         @wheel = new Mesh geom, Materials.compass.wheel
         @wheel.onDrag = @onRotate
         @wheel.name = 'compass.wheel'
@@ -32,7 +32,7 @@ function Compass
         for i in 0...8
             geom = new CylinderGeometry 0.33 0.33 0.71*1.2 24
             geom.rotateX Math.PI/2
-            geom.translate 0 1.16 0
+            geom.translate 0 1.1 0
             geom.rotateZ i * Math.PI/4
             dot = new Mesh geom, Materials.compass.center.clone()
             dot.material.color = Color.dot[i]

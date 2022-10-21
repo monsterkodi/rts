@@ -48,9 +48,8 @@ Color =
         background:      color 0x181818
         backgroundHover: color 0x202020
         progress:        color 0x8888ff
-        health:          color 0xff0000
         disconnected:    color 0x000000
-        active:          color 0xcccccc
+        active:          color 0x333333
         inactive:        color 0x333333
         activeHigh:      color 0xffffff
         inactiveHigh:    color 0x555555

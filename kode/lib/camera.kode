@@ -429,9 +429,5 @@ class Camera extends PerspectiveCamera
         if compass = window.world?.compass
             s = clamp 1 6 @dist/30
             compass.group.scale.set s, s, s
-            # compass.center.material.transparent = true
-            # compass.center.material.opacity = clamp 0 1 1.5-s/2
-            compass.wheel.material.transparent = true
-            compass.wheel.material.opacity = clamp 0 1 1.5-s/2
         
 module.exports = Camera

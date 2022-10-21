@@ -12,25 +12,25 @@ class CanvasButton
         
         @highlighted = false
         
-        @width     = 100
-        @height    = 100
-        @size      = vec @width*window.devicePixelRatio, @height*window.devicePixelRatio
+        @width  = 100
+        @height = 100
+        @size   = vec @width*window.devicePixelRatio, @height*window.devicePixelRatio
         
         @name = 'CanvasButton'
         
         @meshes = {}
         
         if not CanvasButton.renderer
-            CanvasButton.renderer = new THREE.WebGLRenderer antialias:true
+            CanvasButton.renderer = new THREE.WebGLRenderer antialias:true, alpha:true
             CanvasButton.renderer.setPixelRatio window.devicePixelRatio
             CanvasButton.renderer.setSize @width, @height
+            CanvasButton.renderer.setClearColor 0 0
 
         @canvas = elem 'canvas', class:clss, width:@size.x, height:@size.y
         div.appendChild @canvas
         
         @canvas.button = @        
         @scene = new THREE.Scene()
-        @scene.background = Color.menu.backgroundHover
         
         @highFov  ?= 33
         @normFov  ?= 40
@@ -74,19 +74,13 @@ class CanvasButton
     highlight: =>
         
         @highlighted = true
-        @camera.fov = @highFov
-        @camera.updateProjectionMatrix()
-        @update()
     
     unhighlight: =>
         
         @highlighted = false
-        @camera.fov = @normFov
-        @camera.updateProjectionMatrix()
-        @update()
         
     update: => 
-        # log "update #{@name}"
+
         @dirty = true
         
     animate: (delta) ->
@@ -99,11 +93,11 @@ class CanvasButton
         
             @dirty = false
             
-            # log "render #{@name}"
-            
+            CanvasButton.renderer.clear()
             CanvasButton.renderer.render @scene, @camera
             
             context = @canvas.getContext '2d'
-            context.drawImage CanvasButton.renderer.domElement, 0, 0
+            context.clearRect 0 0 2*@width, 2*@height
+            context.drawImage CanvasButton.renderer.domElement, 0 0
         
 module.exports = CanvasButton
