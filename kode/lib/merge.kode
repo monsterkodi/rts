@@ -1,0 +1,189 @@
+###
+00     00  00000000  00000000    0000000   00000000
+000   000  000       000   000  000        000     
+000000000  0000000   0000000    000  0000  0000000 
+000 0 000  000       000   000  000   000  000     
+000   000  00000000  000   000   0000000   00000000
+###
+
+# method from three/examples/BufferGeometryUtils
+
+merge = (geometries, useGroups) ->
+
+    isIndexed = geometries[0].index != null
+    attributesUsed = new Set Object.keys geometries[0].attributes
+    morphAttributesUsed = new Set Object.keys geometries[0].morphAttributes
+    attributes = {}
+    morphAttributes = {}
+    morphTargetsRelative = geometries[0].morphTargetsRelative
+    mergedGeometry = new THREE.BufferGeometry()
+    offset = 0
+
+    for i in 0...geometries.length
+
+        geometry = geometries[i]
+        attributesCount = 0 # ensure that all geometries are indexed, or none
+
+        if isIndexed != (geometry.index != null)
+
+            error 'merge failed with geometry at index ' + i + '. All geometries must have compatible attributes; make sure index attribute exists among all geometries, or in none of them.'
+            return null
+
+        # gather attributes, exit early if they're different
+
+        for name of geometry.attributes
+
+            if not attributesUsed.has name
+                error 'merge failed with geometry at index ' + i + '. All geometries must have compatible attributes; make sure "' + name + '" attribute exists among all geometries, or in none of them.'
+                return null
+
+            if attributes[name] == undefined ➜ attributes[name] = []
+            log name, geometry.attributes[name]
+            attributes[name].push geometry.attributes[name]
+            attributesCount++
+
+        # ensure geometries have the same number of attributes
+
+        if attributesCount != attributesUsed.size
+            error 'merge failed with geometry at index ' + i + '. Make sure all geometries have the same number of attributes.'
+            error "      expected attributesCount #{attributesCount} to equal attributesUsed.size #{attributesUsed.size}"
+            error "      attributesUsed:" attributesUsed
+            error "      geometry.attributes:" geometry.attributes
+            return null
+
+        # gather morph attributes, exit early if they're different
+
+        if morphTargetsRelative != geometry.morphTargetsRelative
+            error 'merge failed with geometry at index ' + i + '. .morphTargetsRelative must be consistent throughout all geometries.'
+            return null
+
+        for name of geometry.morphAttributes
+
+            if not morphAttributesUsed.has name
+                error 'merge failed with geometry at index ' + i + '.  .morphAttributes must be consistent throughout all geometries.'
+                return null
+
+            if morphAttributes[name] == undefined ➜ morphAttributes[name] = []
+            morphAttributes[name].push geometry.morphAttributes[name]
+
+        mergedGeometry.userData.mergedUserData ?= []
+        mergedGeometry.userData.mergedUserData.push geometry.userData
+
+        if useGroups
+
+            if isIndexed
+                count = geometry.index.count
+
+            else if geometry.attributes.position != undefined
+                count = geometry.attributes.position.count
+
+            else
+                error 'merge failed with geometry at index ' + i + '. The geometry must have either an index or a position attribute'
+                return null
+
+            mergedGeometry.addGroup offset, count, i
+            offset += count
+
+    # merge indices
+
+    if isIndexed
+
+        indexOffset = 0
+        mergedIndex = []
+
+        for i in 0...geometries.length
+
+            index = geometries[i].index
+
+            for j in 0...index.count
+                mergedIndex.push index.getX(j) + indexOffset
+
+            indexOffset += geometries[i].attributes.position.count
+
+        mergedGeometry.setIndex mergedIndex 
+
+    # merge attributes
+
+    for name of attributes
+
+        mergedAttribute = mergeAttributes attributes[name]
+
+        if not mergedAttribute
+
+            error 'merge failed while trying to merge the ' + name + ' attribute.' 
+            return null
+
+        mergedGeometry.setAttribute name, mergedAttribute
+
+    # merge morph attributes
+
+    for name of morphAttributes
+
+        numMorphTargets = morphAttributes[name][0].length
+        if numMorphTargets == 0 ➜ break
+        mergedGeometry.morphAttributes = mergedGeometry.morphAttributes or {}
+        mergedGeometry.morphAttributes[name] = []
+
+        for i in 0...numMorphTargets
+
+            morphAttributesToMerge = []
+
+            for j in 0...morphAttributes[name].length
+
+                morphAttributesToMerge.push morphAttributes[name][j][i]
+
+            mergedMorphAttribute = mergeBufferAttributes morphAttributesToMerge
+
+            if not mergedMorphAttribute
+
+                error 'merge failed while trying to merge the ' + name + ' morphAttribute.'
+                return null
+
+            mergedGeometry.morphAttributes[name].push mergedMorphAttribute
+
+    log mergedGeometry
+    mergedGeometry
+    
+mergeAttributes = (attributes) ->
+
+    arrayLength = 0
+
+    for i in 0...attributes.length
+
+        attribute = attributes[i]
+
+        if attribute.isInterleavedBufferAttribute
+            error 'mergeAttributes failed. InterleavedBufferAttributes are not supported.'
+            return null
+
+        if TypedArray == undefined ➜ TypedArray = attribute.array.constructor
+
+        if TypedArray != attribute.array.constructor
+            error 'mergeAttributes failed. THREE.BufferAttribute.array must be of consistent array types across matching attributes.'
+            return null
+
+        if itemSize == undefined ➜ itemSize = attribute.itemSize
+
+        if itemSize != attribute.itemSize
+            error 'mergeAttributes failed. THREE.BufferAttribute.itemSize must be consistent across matching attributes.'
+            return null
+
+        if normalized == undefined ➜ normalized = attribute.normalized
+
+        if normalized != attribute.normalized
+            error 'mergeAttributes failed. THREE.BufferAttribute.normalized must be consistent across matching attributes.'
+            return null
+
+        arrayLength += attribute.array.length
+
+    array = new TypedArray arrayLength
+    offset = 0
+
+    for i in 0...attributes.length
+
+        array.set attributes[i].array, offset 
+        offset += attributes[i].array.length
+
+    new THREE.BufferAttribute array, itemSize, normalized
+
+module.exports = merge

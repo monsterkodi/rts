@@ -7,16 +7,16 @@
 ###
 
 { CSG } = require '../../kode/lib/csg'
-require "../../kode/lib/BufferGeometryUtils"
+geomMerge = require "../lib/merge"
 
 subtract  = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
 intersect = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).intersect CSG.fromGeometry b
 union     = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).union     CSG.fromGeometry b
 merge     = -> 
     if arguments.length == 1 and arguments[0] is Array
-        THREE.BufferGeometryUtils.mergeBufferGeometries arguments[0]
+        geomMerge arguments[0]
     else
-        THREE.BufferGeometryUtils.mergeBufferGeometries.apply null, [arguments]
+        geomMerge.apply null, [arguments]
 
 class Geometry
     

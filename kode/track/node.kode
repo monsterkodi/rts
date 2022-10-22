@@ -269,7 +269,7 @@ function Node
                 c1.rotateX Math.PI/2
                 c2 = new CylinderGeometry 0.25 0.25 1.6 16
                 c2.rotateZ Math.PI/2
-                geom = THREE.BufferGeometryUtils.mergeBufferGeometries [c1, c2]
+                geom = Geom.merge c1, c2
                 @nodeBox = new Mesh geom, @train.cars[0].mesh.material
                 @group.add @nodeBox
             @nodeBox.material = @train.cars[0].mesh.material
