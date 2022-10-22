@@ -13,11 +13,13 @@ function CurveCtrl
     @active: new Set
     @deactivateAll: -> CurveCtrl.active.forEach (ctrl) -> ctrl.deactivate()
 
-    @: (@curve, @curvePath, @index, @dragCB) ->
+    @: (@track, @index) ->
         
-        @isLast  = @index == @curvePath.curves.length-1
-        @isFirst = @index == 0
-        @isMid   = not @isFirst
+        @curvePath  = @track.curve
+        @curve      = @curvePath.curves[@index]
+        @isLast     = @index == @curvePath.curves.length-1
+        @isFirst    = @index == 0
+        @isMid      = not @isFirst
 
         @curveStart = @curve.v0
         @ctrlStart  = @curve.v1
@@ -113,10 +115,8 @@ function CurveCtrl
     onCenterClick: => 
     
             if world.compass.object == @
-                log 'curvectrl hideCompass'
                 world.hideCompass @
             else
-                log 'curvectrl showCompass'
                 world.showCompass @, @getPos(), @getDir() 
     
     onLeave: (ray, hit) =>
@@ -241,7 +241,7 @@ function CurveCtrl
             @setPos Vector.tmp
             
         @curve.updateArcLengths()
-        @dragCB?()
+        @track.ctrlMoved()
                 
     compassRotated: (dir) => @setDir dir
                 
@@ -254,7 +254,7 @@ function CurveCtrl
         @meshPrevCtrlEnd?.getWorldPosition @prevCtrlEnd
         
         @curve.updateArcLengths()
-        @dragCB?()
+        @track.ctrlMoved()
         
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       
@@ -293,7 +293,7 @@ function CurveCtrl
         @group.position.copy @curveStart
         
         @curve.updateArcLengths()
-        @dragCB?()
+        @track.ctrlMoved()
 
     getPos: -> @group.position
     getDir: -> vec(0 1 0).applyQuaternion @group.quaternion

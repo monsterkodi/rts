@@ -12,7 +12,8 @@ Compass   = require './compass'
 function Node
 
     @numNodes: 0
-    Node.clickMode: false
+    @clickMode: false
+    @skipCenter: false
 
     @: (point, @name) ->
         
@@ -45,6 +46,7 @@ function Node
         
         @outMesh = new Mesh geom, Materials.node.out
         @outMesh.name       = @name + '.out'
+        @outMesh.node       = @
         @outMesh.onDrag     = @onOutDrag
         @outMesh.onDragDone = @onDragDone
         @outMesh.onEnter    = @onEnterOut
@@ -57,6 +59,7 @@ function Node
         
         @inMesh = new Mesh geom, Materials.node.in
         @inMesh.name       = @name + '.in'
+        @inMesh.node       = @
         @inMesh.onDrag     = @onInDrag
         @inMesh.onDragDone = @onDragDone
         @inMesh.onEnter    = @onEnterIn
@@ -84,13 +87,15 @@ function Node
         if @inTracks.length == 1 and @outTracks.length == 1
             post.emit 'convertNodeToCtrl' @
         
-    onClickCenter: => 
+    onClickCenter: =>
+        
+        if Node.skipCenter
+            Node.skipCenter = false
+            return
         if not Node.clickMode
             if world.compass.object == @
-                log 'hideCompass' Node.clickMode
                 world.hideCompass @
             else
-                log 'showCompass' Node.clickMode
                 world.showCompass @, @getPos(), @getDir()
             
     onEnterIn:     => @inMesh.material  = Materials.node.highlightIn
@@ -103,30 +108,40 @@ function Node
     onClickInOut: (ray, hit) => 
 
         return if Node.clickMode
+        return if Node.skipCenter
+        Node.clickMode = true
         
         @clickTracks = hit.name?.endsWith('.in') ? @inTracks : @outTracks
-        Node.clickMode = true
-        log 'onClickInOut start' Node.clickMode, @dragTrack
+
         if not @dragTrack
             @startDrag @clickTracks
         
-        post.on 'mouseMove'  @onMouseMove
-        post.on 'mouseDown'  @onMouseDown
-        post.on 'mouseUp'    @onMouseUp
+        post.on 'mouseMove' @onMouseMove
+        post.on 'mouseDown' @onMouseDown
+        post.on 'mouseUp'   @onMouseUp
         
     onMouseMove: (ray, hit) =>
         
         if Node.clickMode
             @moveInOutDrag ray, hit
+            
+            # log 'node.onMouseMove' hit.name
+            
+            if hitName = hit?.name
+                if not hitName.startsWith(@name) and not hitName.startsWith @dragTrack.node[1].name
+                    if hitName.endsWith('.in') or hitName.endsWith('.out')
+                        log "could connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
         
     onMouseDown: (ray, hit) =>
     onMouseUp: (ray, hit) =>
         
+        @onDragDone ray, hit
         delete @clickTracks
-        log 'onMouseUp' Node.clickMode
-        post.removeListener 'mouseMove'  @onMouseMove
-        post.removeListener 'mouseDown'  @onMouseDown
-        post.removeListener 'mouseUp'    @onMouseUp
+        # log 'onMouseUp' Node.clickMode
+        post.removeListener 'mouseMove' @onMouseMove
+        post.removeListener 'mouseDown' @onMouseDown
+        post.removeListener 'mouseUp'   @onMouseUp
+        Node.skipCenter = true
         Node.clickMode = false
         
     # 0000000    00000000    0000000    0000000   
@@ -158,21 +173,17 @@ function Node
         tracks.push t
         n2.inTracks.push t
         
-        log 'start drag'
-        
         @dragTrack = t
         
     onInDrag: (ray, hit) =>
         
-        if not @dragTrack
-            @startDrag @inTracks
+        if not @dragTrack ➜ @startDrag @inTracks
             
         @moveInOutDrag ray, hit
                     
     onOutDrag: (ray, hit) =>
         
-        if not @dragTrack
-            @startDrag @outTracks
+        if not @dragTrack ➜ @startDrag @outTracks
 
         @moveInOutDrag ray, hit
             
@@ -187,9 +198,29 @@ function Node
         dragNode.group.position.copy Vector.tmp # setPos?
         @dragTrack.nodeMoved dragNode
         
-    onDragDone: =>
-        if not Node.clickMode
-            delete @dragTrack
+    onDragDone: (ray, hit) =>
+        
+        if hitName = hit?.name
+
+            if not hitName.startsWith(@name) and not hitName.startsWith @dragTrack.node[1].name
+                
+                isIn  = hitName.endsWith '.in'
+                isOut = hitName.endsWith '.out'
+                if isIn or isOut
+                    if n2 = hit.mesh.node
+                        log "connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
+                        t2 = isIn ? n2.inTracks : n2.outTracks
+                        @dragTrack.node[1].del()
+                        @dragTrack.node[1] = n2
+                        t2.push @dragTrack
+                        ctrl = @dragTrack.ctrls[-1]
+                        ctrl.curve.v3.copy n2.getPos()
+                        ctrl.curve.v2.copy n2.getDir().times(5)
+                        if isIn ➜ ctrl.curve.v2.negate() 
+                        ctrl.curve.v2.add n2.getPos()
+                        @dragTrack.ctrlMoved()
+        
+        delete @dragTrack
             
     onDrag: (ray, hit) =>
 

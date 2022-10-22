@@ -1,14 +1,12 @@
 name            rts
 productName     rts
-version         0.4.0
+version         0.5.0
 main            js/main.js
 author          monsterkodi
 license         Unlicense
 dependencies
-                kxk             ../kxk
-                three           ^0.145.0
-                three-instanced-mesh  ^0.96.2
-                three-js-csg    ^72.0.0
+                kxk     ../kxk
+                three   ^0.145.0
 devDependencies
                 electron-builder  ^23.6.0
                 electron        ^21.1.0

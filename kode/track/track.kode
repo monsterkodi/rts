@@ -17,19 +17,20 @@ function Track
         
         Track.numTracks++
         
-        @name = "t#{Track.numTracks}" if not @name
+        @name  = "t#{Track.numTracks}" if not @name
         
         @curve = new CurvePath
-        @node = []
+        @node  = []
         @ctrls = []
         
         curveNum = Math.floor points.length / 4
         
-        for curveIndex in 0...curveNum
-            p = points.slice curveIndex*4, curveIndex*4+4
-            c = new CubicBezierCurve3 p[0], p[1], p[2], p[3]
-            @curve.add c
-            @ctrls.push new CurveCtrl c, @curve, curveIndex, @ctrlMoved
+        for index in 0...curveNum
+            p = points.slice index*4, index*4+4
+            @curve.add new CubicBezierCurve3 p[0], p[1], p[2], p[3]
+        
+        for index in 0...curveNum
+            @ctrls.push new CurveCtrl @, index
                     
         @createRail()        
         

@@ -23,7 +23,7 @@ window.first        = first
 window.last         = last
 window.elem         = elem
 
-window.THREE                 = require 'three'
+window.THREE        = require 'three'
 expose = """
     Ray
     Mesh
@@ -288,22 +288,26 @@ class RTS
     onMouseUp: (event) =>
 
         @calcMouse event
+                 
+        hit = @castRay()
         
         if @downHit?.mesh?.onDragDone is func
-            @downHit.mesh.onDragDone @mouseRay(), @downHit, @downRay, @lastRay
+            @downHit.mesh.onDragDone @mouseRay(), hit, @downRay, @downHit
         
         if @downHit?.mesh?.handler?.onMouseUp is func
             @downHit.mesh.handler.onMouseUp @downRay, @downHit
-            
-        post.emit 'mouseUp' @mouseRay(), @downHit, @downRay, @lastRay
-            
+                    
+        post.emit 'mouseUp' @mouseRay(), hit, @downRay, @downHit
+        
         moved = @downPos.dist @mouse
         if moved < 0.001
             @onClick event
         if moved < 0.01
             if event.button != 0
                 @focusOnHit()
-                                    
+        
+        Node.skipCenter = false
+                
         delete @camMove
         delete @downRay
         delete @lastRay
