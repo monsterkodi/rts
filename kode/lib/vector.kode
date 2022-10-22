@@ -130,12 +130,11 @@ class Vector extends ThreeVector
                 return rad2deg Math.acos x*p + y*q + z*r
         0    
     
-    negate:  -> @scale -1
-    negated: -> @clone().negate()
+    negate:  -> @multiplyScalar -1
+    negated: -> @clone().multiplyScalar -1
     
-    scale: (f) -> 
-        @multiplyScalar f
-        @
+    times: (f) -> @multiplyScalar f
+    scale: (f) -> @multiplyScalar f
     scaled: (f) -> @clone().scale f
         
     reset: ->
@@ -148,6 +147,8 @@ class Vector extends ThreeVector
         @set randRange(-1,1),randRange(-1,1),randRange(-1,1)
         @normalize()
         @
+        
+    lerp: (a,t) -> @add Vector.tmp.copy(a).sub(@).times(t)        
     
     @random: -> new Vector().randomize()
             

@@ -38,7 +38,6 @@ merge = (geometries, useGroups) ->
                 return null
 
             if attributes[name] == undefined ➜ attributes[name] = []
-            log name, geometry.attributes[name]
             attributes[name].push geometry.attributes[name]
             attributesCount++
 
@@ -141,7 +140,7 @@ merge = (geometries, useGroups) ->
 
             mergedGeometry.morphAttributes[name].push mergedMorphAttribute
 
-    log mergedGeometry
+    # log mergedGeometry
     mergedGeometry
     
 mergeAttributes = (attributes) ->

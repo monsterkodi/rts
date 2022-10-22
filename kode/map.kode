@@ -10,7 +10,11 @@ World = require './world'
 
 class Map extends World
         
-    create: -> @trainTest()
+    create: -> 
+    
+        # @addObject new Mesh Geom.test(), Materials.ctrl.start
+        # @addObject new Mesh Geom.test(), Materials.wireframe
+        @trainTest()
 
     # 000000000  00000000    0000000   000  000   000   0000000  
     #    000     000   000  000   000  000  0000  000  000       

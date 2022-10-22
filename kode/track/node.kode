@@ -287,7 +287,7 @@ function Node
         @blockedTrains.push train
         train.block()
         
-        geom = THREE.BufferGeometryUtils.mergeBufferGeometries [new BoxGeometry(0.5 1 0.5), new BoxGeometry(1 0.5 0.5)]
+        geom = Geom.merge new BoxGeometry(0.5 1 0.5), new BoxGeometry(1 0.5 0.5)
         
         mesh = new Mesh geom, @train.cars[0].mesh.material
         train.path.getPoint mesh.position, 3

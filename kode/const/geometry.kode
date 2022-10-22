@@ -6,7 +6,7 @@
  0000000   00000000   0000000   000   000  00000000     000     000   000     000   
 ###
 
-{ CSG } = require '../../kode/lib/csg'
+CSG       = require "../lib/csg"
 geomMerge = require "../lib/merge"
 
 subtract  = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
@@ -25,79 +25,10 @@ class Geometry
     @subtract:  subtract
     @intersect: intersect
     
-    @cornerBoxGeom: (size=1, x=0, y=0, z=0) ->
-                    
-        o = size/2
-        s = 0.9*o
-        i = 0.8*o
+    @test: ->
         
-        topside = new BufferGeometry()
-        
-        vertices = new Float32Array [
-            i,  i, o
-            -i,  i, o
-            -i, -i, o
-            i,  i, o
-            -i, -i, o
-            i, -i, o
-            s,  s, s
-            -s,  s, s
-            -i,  i, o
-            s,  s, s
-            -i,  i, o
-            i,  i, o
-            -s,  s, s
-            -s, -s, s
-            -i, -i, o
-            -s,  s, s
-            -i, -i, o
-            -i,  i, o
-            -s, -s, s
-            s, -s, s
-            i, -i, o
-            -s, -s, s
-            i, -i, o
-            -i, -i, o
-            s,  s, s
-            i,  i, o
-            i, -i, o
-            s,  s, s
-            i, -i, o
-            s, -s, s
-        ]
-        
-        topside.setAttribute 'position' new BufferAttribute vertices, 3
-
-        rightside = new BufferGeometry()
-        rightside.copy topside
-        rightside.rotateY deg2rad 90
-
-        leftside = new BufferGeometry()
-        leftside.copy topside
-        leftside.rotateY deg2rad -90
-
-        backside = new BufferGeometry()
-        backside.copy topside
-        backside.rotateX deg2rad -90
-
-        frontside = new BufferGeometry()
-        frontside.copy topside
-        frontside.rotateX deg2rad 90
-
-        bottomside = new BufferGeometry()
-        bottomside.copy topside
-        bottomside.rotateX deg2rad -180
+        @subtract @box(), @box(0.5, 0.5)
                 
-        cube = merge topside, rightside, backside, bottomside, leftside, frontside
-        cube.translate x, y, z
-        cube.computeVertexNormals()
-        cube.computeBoundingSphere()
-        cube
-        
-    @cornerBox: (size=1, x=0, y=0, z=0) ->
-        
-        @cornerBoxGeom size, x, y, z
-    
     # 0000000     0000000   000   000  
     # 000   000  000   000   000 000   
     # 0000000    000   000    00000    
@@ -170,5 +101,80 @@ class Geometry
         
         pill.rotateX Math.PI/2
         pill
+        
+    #  0000000   0000000   00000000   000   000  00000000  00000000   0000000     0000000   000   000  
+    # 000       000   000  000   000  0000  000  000       000   000  000   000  000   000   000 000   
+    # 000       000   000  0000000    000 0 000  0000000   0000000    0000000    000   000    00000    
+    # 000       000   000  000   000  000  0000  000       000   000  000   000  000   000   000 000   
+    #  0000000   0000000   000   000  000   000  00000000  000   000  0000000     0000000   000   000  
+    
+    @cornerBox: (size=1, x=0, y=0, z=0) ->
+                    
+        o = size/2
+        s = 0.9*o
+        i = 0.8*o
+        
+        topside = new BufferGeometry()
+        
+        vertices = new Float32Array [
+            i,  i, o
+            -i,  i, o
+            -i, -i, o
+            i,  i, o
+            -i, -i, o
+            i, -i, o
+            s,  s, s
+            -s,  s, s
+            -i,  i, o
+            s,  s, s
+            -i,  i, o
+            i,  i, o
+            -s,  s, s
+            -s, -s, s
+            -i, -i, o
+            -s,  s, s
+            -i, -i, o
+            -i,  i, o
+            -s, -s, s
+            s, -s, s
+            i, -i, o
+            -s, -s, s
+            i, -i, o
+            -i, -i, o
+            s,  s, s
+            i,  i, o
+            i, -i, o
+            s,  s, s
+            i, -i, o
+            s, -s, s
+        ]
+        
+        topside.setAttribute 'position' new BufferAttribute vertices, 3
+
+        rightside = new BufferGeometry()
+        rightside.copy topside
+        rightside.rotateY deg2rad 90
+
+        leftside = new BufferGeometry()
+        leftside.copy topside
+        leftside.rotateY deg2rad -90
+
+        backside = new BufferGeometry()
+        backside.copy topside
+        backside.rotateX deg2rad -90
+
+        frontside = new BufferGeometry()
+        frontside.copy topside
+        frontside.rotateX deg2rad 90
+
+        bottomside = new BufferGeometry()
+        bottomside.copy topside
+        bottomside.rotateX deg2rad -180
+                
+        cube = merge topside, rightside, backside, bottomside, leftside, frontside
+        cube.translate x, y, z
+        cube.computeVertexNormals()
+        cube.computeBoundingSphere()
+        cube
         
 module.exports = Geometry

@@ -1,0 +1,493 @@
+
+# Copyright (c) 2011 Evan Wallace (http:#madebyevan.com/), under the MIT license.
+# THREE.js rework by thrax
+
+# Holds a binary space partition tree representing a 3D solid. Two solids can
+# be combined using the `union`, `subtract` and `intersect` methods.
+
+#  0000000   0000000   0000000   
+# 000       000       000        
+# 000       0000000   000  0000  
+# 000            000  000   000  
+#  0000000  0000000    0000000   
+
+class CSG
+    
+    @: -> @polygons = []
+    
+    clone: ->
+        
+        csg = new CSG
+        csg.polygons = @polygons.map (p) -> p.clone()
+        csg
+
+    union: (csg) ->
+        
+        a = new Node @clone().polygons
+        b = new Node csg.clone().polygons
+        a.clipTo b
+        b.clipTo a
+        b.invert()
+        b.clipTo a
+        b.invert()
+        a.build b.allPolygons()
+        CSG.fromPolygons a.allPolygons()
+
+    subtract: (csg) ->
+        
+        a = new Node @clone().polygons
+        b = new Node csg.clone().polygons
+        a.invert()
+        a.clipTo b
+        b.clipTo a
+        b.invert()
+        b.clipTo a
+        b.invert()
+        a.build b.allPolygons()
+        a.invert()
+        CSG.fromPolygons a.allPolygons()
+
+    intersect: (csg) ->
+        
+        a = new Node @clone().polygons
+        b = new Node csg.clone().polygons
+        a.invert()
+        b.clipTo a
+        b.invert()
+        a.clipTo b
+        b.clipTo a
+        a.build b.allPolygons()
+        a.invert()
+        CSG.fromPolygons a.allPolygons()
+
+    # Return a new CSG solid with solid and empty space switched. This solid is not modified.
+    
+    # inverse: -> 
+        # csg = @clone()
+        # csg.polygons.forEach (p) -> p.flip()
+        # csg
+
+# Construct a CSG solid from a list of `Polygon` instances.
+
+CSG.fromPolygons = (polygons) ->
+    csg = new CSG()
+    csg.polygons = polygons
+    csg
+    
+tv0 = new Vector()
+tv1 = new Vector()
+    
+# 000   000  00000000  00000000   000000000  00000000  000   000  
+# 000   000  000       000   000     000     000        000 000   
+#  000 000   0000000   0000000       000     0000000     00000    
+#    000     000       000   000     000     000        000 000   
+#     0      00000000  000   000     000     00000000  000   000  
+
+class Vertex 
+
+    @: (pos, normal, uv, color) ->
+        
+        @pos    = new Vector().copy pos
+        @normal = new Vector().copy normal
+        if uv
+            @uv = new Vector().copy(uv) 
+            @uv.z=0
+        if color ➜ @color = new Vector().copy color
+
+    clone: -> new Vertex @pos, @normal, @uv, @color
+
+    flip: -> @normal.negate()
+
+    interpolate: (other, t) ->
+        
+        pos = @pos.clone().lerp other.pos, t
+        normal = @normal.clone().lerp other.normal, t
+        uv = @uv and other.uv and @uv.clone().lerp other.uv, t
+        color = @color and other.color and @color.clone().lerp other.color, t
+        new Vertex pos, normal, uv, color
+
+# 00000000   000       0000000   000   000  00000000  
+# 000   000  000      000   000  0000  000  000       
+# 00000000   000      000000000  000 0 000  0000000   
+# 000        000      000   000  000  0000  000       
+# 000        0000000  000   000  000   000  00000000  
+
+class Plane 
+    
+    @EPSILON: 1e-5
+    
+    @: (normal, w) ->
+        @normal = normal
+        @w = w
+
+    clone: -> new Plane @normal.clone(), @w 
+
+    flip: -> 
+        @normal.negate()
+        @w = -@w
+
+    # Split `polygon` by this plane if needed, then put the polygon or polygon
+    # fragments in the appropriate lists. Coplanar polygons go into either
+    # `coplanarFront` or `coplanarBack` depending on their orientation with
+    # respect to this plane. Polygons in front or in back of this plane go into
+    # either `front` or `back`.
+    
+    splitPolygon: (polygon, coplanarFront, coplanarBack, front, back) ->
+        
+        COPLANAR = 0
+        FRONT    = 1
+        BACK     = 2
+        SPANNING = 3
+
+        # Classify each point as well as the entire polygon into one of the above four classes.
+        
+        polygonType = 0
+        types = []
+        
+        for i in 0...polygon.vertices.length
+            t = @normal.dot(polygon.vertices[i].pos) - @w
+            type = (t < -Plane.EPSILON) ? BACK : (t > Plane.EPSILON) ? FRONT : COPLANAR
+            polygonType |= type
+            types.push type
+
+        # Put the polygon in the correct list, splitting it when necessary.
+        switch polygonType
+            when FRONT
+                front.push polygon
+            when BACK
+                back.push polygon
+            when COPLANAR
+                (@normal.dot(polygon.plane.normal) > 0 ? coplanarFront : coplanarBack).push polygon
+            when SPANNING
+                f = []
+                b = []
+                for i in 0...polygon.vertices.length
+                    j = (i + 1) % polygon.vertices.length
+                    ti = types[i]
+                    tj = types[j]
+                    vi = polygon.vertices[i]
+                    vj = polygon.vertices[j]
+                    if ti != BACK
+                        f.push vi
+                    if ti != FRONT
+                        b.push ti != BACK ? vi.clone() : vi
+                    if (ti | tj) == SPANNING
+                        t = (@w - @normal.dot(vi.pos)) / @normal.dot(tv0.copy(vj.pos).sub(vi.pos))
+                        v = vi.interpolate vj, t
+                        f.push v
+                        b.push v.clone()
+                if f.length >= 3
+                    front.push new Polygon f,polygon.shared
+                if b.length >= 3
+                    back.push(new Polygon b,polygon.shared
+        @
+
+Plane.fromPoints = (a, b, c) ->
+    n = tv0.copy(b).sub(a).cross(tv1.copy(c).sub(a)).normalize()
+    new Plane n.clone(), n.dot(a)
+
+# Represents a convex polygon. The vertices used to initialize a polygon must
+# be coplanar and form a convex loop. They do not have to be `Vertex`
+# instances but they must behave similarly (duck typing can be used for
+# customization).
+# 
+# Each convex polygon has a `shared` property, which is shared between all
+# polygons that are clones of each other or were split from the same polygon.
+# This can be used to define per-polygon properties (such as surface color).
+
+# 00000000    0000000   000      000   000   0000000    0000000   000   000  
+# 000   000  000   000  000       000 000   000        000   000  0000  000  
+# 00000000   000   000  000        00000    000  0000  000   000  000 0 000  
+# 000        000   000  000         000     000   000  000   000  000  0000  
+# 000         0000000   0000000     000      0000000    0000000   000   000  
+
+class Polygon 
+    
+    @: (vertices, shared) ->
+        @vertices = vertices
+        @shared = shared
+        @plane = Plane.fromPoints(vertices[0].pos, vertices[1].pos, vertices[2].pos)
+
+    clone: -> new Polygon @vertices.map((v)->v.clone()), @shared
+    flip: -> 
+        @vertices.reverse().forEach (v) -> v.flip()
+        @plane.flip()
+        @
+
+# Holds a node in a BSP tree. A BSP tree is built from a collection of polygons
+# by picking a polygon to split along. That polygon (and all other coplanar
+# polygons) are added directly to that node and the other polygons are added to
+# the front and/or back subtrees. This is not a leafy BSP tree since there is
+# no distinction between internal and leaf nodes.
+
+# 000   000   0000000   0000000    00000000  
+# 0000  000  000   000  000   000  000       
+# 000 0 000  000   000  000   000  0000000   
+# 000  0000  000   000  000   000  000       
+# 000   000   0000000   0000000    00000000  
+
+class Node 
+    
+    @: (polygons) ->
+        @plane = null
+        @front = null
+        @back  = null
+        @polygons = []
+        if polygons
+            @build polygons
+
+    clone: ->
+        
+        node = new Node()
+        node.plane = @plane and @plane.clone()
+        node.front = @front and @front.clone()
+        node.back  = @back  and @back.clone()
+        node.polygons = @polygons.map (p) -> p.clone()
+        node
+
+    invert: -> # Convert solid space to empty space and empty space to solid space.
+        
+        for p in @polygons
+            p.flip()
+        
+        @plane?.flip()
+        @front?.invert()
+        @back?.invert()
+        temp = @front
+        @front = @back
+        @back = temp
+        @
+
+    clipPolygons: (polygons) -> # Recursively remove all polygons in `polygons` that are inside this BSP tree.
+
+        if not @plane ➜ return polygons.slice()
+        front = []
+        back = []
+        for p in polygons
+            @plane.splitPolygon p, front, back, front, back
+        if @front
+            front = @front.clipPolygons front
+        if @back
+            back = @back.clipPolygons back
+        else 
+            back = []
+        front.concat back
+
+    clipTo: (bsp) -> # Remove all polygons in this BSP tree that are inside the other BSP tree
+
+        @polygons = bsp.clipPolygons @polygons
+        @front?.clipTo bsp
+        @back?.clipTo bsp
+        @
+
+    allPolygons: -> 
+        
+        polygons = @polygons.slice()
+        if @front
+            polygons = polygons.concat @front.allPolygons()
+        if @back
+            polygons = polygons.concat @back.allPolygons()
+        polygons
+
+    # Build a BSP tree out of `polygons`. When called on an existing tree, the
+    # new polygons are filtered down to the bottom of the tree and become new
+    # nodes there. Each set of polygons is partitioned using the first polygon
+    # (no heuristic is used to pick a good split).
+    
+    build: (polygons) ->
+
+        return if empty polygons
+            
+        @plane ?= polygons[0].plane.clone()
+        
+        front = []
+        back  = []
+        
+        for p in polygons
+            @plane.splitPolygon p, @polygons, @polygons, front, back
+
+        if front.length
+            @front ?= new Node()
+            @front.build front
+            
+        if back.length
+            @back ?= new Node()
+            @back.build back
+        @
+
+# 00000000  00000000    0000000   00     00   0000000   00000000   0000000   00     00  
+# 000       000   000  000   000  000   000  000        000       000   000  000   000  
+# 000000    0000000    000   000  000000000  000  0000  0000000   000   000  000000000  
+# 000       000   000  000   000  000 0 000  000   000  000       000   000  000 0 000  
+# 000       000   000   0000000   000   000   0000000   00000000   0000000   000   000  
+
+CSG.fromGeometry = (geom,objectIndex) ->
+    
+    polys = []
+    
+    if geom.isBufferGeometry
+
+        posattr    = geom.attributes.position
+        normalattr = geom.attributes.normal
+        uvattr     = geom.attributes.uv
+        colorattr  = geom.attributes.color
+
+        if geom.index
+            index = geom.index.array
+        else 
+            index = new Array (posattr.array.length / posattr.itemSize) | 0
+            for i in 0...index.length
+                index[i] = i
+
+        triCount = (index.length / 3) | 0
+        polys = new Array triCount
+        i = 0
+        l = index.length
+        pli = 0
+        while i < l
+            vertices = new Array 3
+            for j in 0...3
+                vi = index[i + j]
+                vp = vi * 3
+                vt = vi * 2
+                x = posattr.array[vp]
+                y = posattr.array[vp + 1]
+                z = posattr.array[vp + 2]
+                nx = normalattr.array[vp]
+                ny = normalattr.array[vp + 1]
+                nz = normalattr.array[vp + 2]
+                vertices[j] = new Vertex({ x, y, z }, { x: nx, y: ny, z: nz }, 
+                    uvattr ? {x:uvattr.array[vt], y:uvattr.array[vt+1], z:0} : null, 
+                    colorattr ? {x:colorattr.array[vt],y:colorattr.array[vt+1],z:colorattr.array[vt+2]} : null)
+
+            polys[pli] = new Polygon vertices,objectIndex
+            i += 3
+            pli++
+    else
+        error "Unsupported CSG input type:" + geom.type
+    CSG.fromPolygons polys
+
+ttvv0 = new THREE.Vector3()
+tmpm3 = new THREE.Matrix3()
+
+# 00000000  00000000    0000000   00     00  00     00  00000000   0000000  000   000  
+# 000       000   000  000   000  000   000  000   000  000       000       000   000  
+# 000000    0000000    000   000  000000000  000000000  0000000   0000000   000000000  
+# 000       000   000  000   000  000 0 000  000 0 000  000            000  000   000  
+# 000       000   000   0000000   000   000  000   000  00000000  0000000   000   000  
+
+CSG.fromMesh = (mesh,objectIndex) ->
+
+    csg = CSG.fromGeometry mesh.geometry, objectIndex
+    tmpm3.getNormalMatrix mesh.matrix
+
+    for p in csg.polygons
+        for v in p.vertices
+            v.pos.copy ttvv0.copy(v.pos).applyMatrix4 mesh.matrix
+            v.normal.copy ttvv0.copy(v.normal).applyMatrix3 tmpm3
+    return csg
+
+nbuf3 = (ct) ->
+    top: 0
+    array: new Float32Array ct
+    write: (v) ->
+        @array[@top++]=v.x
+        @array[@top++]=v.y
+        @array[@top++]=v.z
+        return
+
+nbuf2 = (ct) ->
+    top: 0
+    array: new Float32Array ct
+    write: (v) ->
+        @array[@top++]=v.x
+        @array[@top++]=v.y
+        return
+
+# 000000000   0000000    0000000   00000000   0000000   00     00  
+#    000     000   000  000        000       000   000  000   000  
+#    000     000   000  000  0000  0000000   000   000  000000000  
+#    000     000   000  000   000  000       000   000  000 0 000  
+#    000      0000000    0000000   00000000   0000000   000   000  
+
+CSG.toGeometry = (csg) ->
+    
+    ps = csg.polygons
+
+    triCount = 0
+    ps.forEach (p) -> triCount += p.vertices.length - 2
+    geom = new THREE.BufferGeometry()
+
+    vertices = nbuf3 triCount * 3 * 3
+    normals = nbuf3 triCount * 3 * 3
+    colors = undefined
+    uvs = undefined
+    grps = []
+    ps.forEach (p) ->
+        pvs = p.vertices
+        pvlen = pvs.length
+        if p.shared
+            grps[p.shared] ?= []
+        if pvlen
+            if pvs[0].color
+                colors ?= nbuf3 triCount*3*3
+            if pvs[0].uv
+                uvs ?= nbuf2 triCount * 2 * 3
+        for j in 3..pvlen
+            if p.shared
+                grps[p.shared].push vertices.top/3, (vertices.top/3)+1, (vertices.top/3)+2
+            vertices.write pvs[0].pos
+            vertices.write pvs[j-2].pos
+            vertices.write pvs[j-1].pos
+            normals.write pvs[0].normal
+            normals.write pvs[j-2].normal
+            normals.write pvs[j-1].normal
+            if uvs and pvs[0].uv 
+                uvs.write pvs[0].uv
+                uvs.write pvs[j-2].uv
+                uvs.write pvs[j-1].uv
+            if colors 
+                colors.write pvs[0].color
+                colors.write pvs[j-2].color
+                colors.write pvs[j-1].color
+
+    geom.setAttribute 'position' new THREE.BufferAttribute vertices.array, 3
+    geom.setAttribute 'normal'   new THREE.BufferAttribute normals.array, 3
+    
+    if uvs    ➜ geom.setAttribute 'uv'    new THREE.BufferAttribute uvs.array, 2
+    if colors ➜ geom.setAttribute 'color' new THREE.BufferAttribute colors.array, 3
+        
+    if grps.length
+        index = []
+        gbase=0
+        for gi in 0...grps.length
+            geom.addGroup gbase,grps[gi].length, gi
+            gbase += grps[gi].length
+            index = index.concat grps[gi]
+        geom.setIndex index
+        
+    geom
+
+# 000000000   0000000   00     00  00000000   0000000  000   000  
+#    000     000   000  000   000  000       000       000   000  
+#    000     000   000  000000000  0000000   0000000   000000000  
+#    000     000   000  000 0 000  000            000  000   000  
+#    000      0000000   000   000  00000000  0000000   000   000  
+
+CSG.toMesh = (csg, toMatrix, toMaterial) ->
+    
+    geom = CSG.toGeometry csg
+    inv = new THREE.Matrix4().copy(toMatrix).invert()
+    geom.applyMatrix4 inv
+    geom.computeBoundingSphere()
+    geom.computeBoundingBox()
+    m = new THREE.Mesh geom, toMaterial
+    m.matrix.copy toMatrix
+    m.matrix.decompose m.position, m.quaternion, m.scale
+    m.rotation.setFromQuaternion m.quaternion
+    m.updateMatrixWorld()
+    m.castShadow = m.receiveShadow = true
+    m
+
+module.exports = CSG
+
