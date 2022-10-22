@@ -439,10 +439,8 @@ class RTS
         
         @fps.draw()
         
-        return if @paused
-
         if prefs.get 'info'
-            @info = new Info if not @info
+            @info ?= new Info
             @info.draw()
         else if @info?
             @info.del()

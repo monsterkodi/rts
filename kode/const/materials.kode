@@ -19,15 +19,23 @@ Materials =
         start:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5
         curve:          new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     compass:
-        head:           new THREE.MeshStandardMaterial color:Color.compass.head,       metalness: 0.5, roughness: 0.5
-        center:         new THREE.MeshStandardMaterial color:Color.compass.center,     metalness: 0.5, roughness: 0.5
-        wheel:          new THREE.MeshStandardMaterial color:0x111111,                 metalness: 0.8, roughness: 0.45, dithering:true
+        head:           new THREE.MeshStandardMaterial color:Color.compass.head,   metalness: 0.5, roughness: 0.5
+        wheel:          new THREE.MeshStandardMaterial color:0x111111,             metalness: 0.8, roughness: 0.45, dithering:true
+        dot0:           new THREE.MeshStandardMaterial color:Color.compass.center, metalness: 0.5, roughness: 0.5  
+        dot1:           new THREE.MeshStandardMaterial color:Color.compass.head,   metalness: 0.5, roughness: 0.5  
+        dot2:           new THREE.MeshStandardMaterial color:Color.compass.center, metalness: 0.5, roughness: 0.5  
+        dot3:           new THREE.MeshStandardMaterial color:Color.compass.head,   metalness: 0.5, roughness: 0.5  
+        dot4:           new THREE.MeshStandardMaterial color:Color.compass.center, metalness: 0.5, roughness: 0.5  
+        dot5:           new THREE.MeshStandardMaterial color:Color.compass.head,   metalness: 0.5, roughness: 0.5  
+        dot6:           new THREE.MeshStandardMaterial color:Color.compass.center, metalness: 0.5, roughness: 0.5  
+        dot7:           new THREE.MeshStandardMaterial color:Color.compass.head,   metalness: 0.5, roughness: 0.5  
     train:
         window:         new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5, roughness: 0.2 
         body:           new THREE.MeshStandardMaterial color:0xffff00, metalness: 0.2, roughness: 0.4 
         piston:         new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1, roughness: 0.8 
         light:          new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1, roughness: 0.8
         cargo:          new THREE.MeshStandardMaterial color:0x333333, metalness: 0.2, roughness: 0.4 
+    track:
         rail:           new THREE.MeshStandardMaterial color:Color.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     node:
         center:         new THREE.MeshStandardMaterial color:Color.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
@@ -44,9 +52,10 @@ Materials =
     setWire: (wire) ->
         
         prefs.set 'wire' wire
-        for k,m of Materials.train
-            m.wireframe = wire
-
+        for t in ['node' 'ctrl' 'compass' 'train' 'track']
+            for k,m of Materials[t]
+                m.wireframe = wire
+        
     getWire: -> prefs.get 'wire'
     toggleWire: -> Materials.setWire not Materials.getWire()
 
@@ -54,7 +63,6 @@ Materials =
         
         prefs.set 'flat' flat
         for k,m of Materials.train
-            continue if k == 'rail'
             m.flatShading = flat
             m.needsUpdate = true
             

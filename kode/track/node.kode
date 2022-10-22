@@ -75,7 +75,13 @@ function Node
         
         @rotate 0
         
-    del: ->
+    del: =>
+        
+        log 'delNode' @name
+        post.emit 'delNode' @
+        
+        for track in @allTracks()
+            track.del()
         
         world.hideCompass @
         world.removeObject @group
@@ -100,11 +106,17 @@ function Node
             
     onEnterIn:     => @inMesh.material  = Materials.node.highlightIn
     onLeaveIn:     => @inMesh.material  = Materials.node.in
-    onEnterCenter: => @center.material  = Materials.ctrl.highlight
-    onLeaveCenter: => @center.material  = Materials.node.center
     onEnterOut:    => @outMesh.material = Materials.node.highlightOut
     onLeaveOut:    => @outMesh.material = Materials.node.out
     
+    onEnterCenter: => 
+        @center.material  = Materials.ctrl.highlight
+        post.on 'delete' @del
+        
+    onLeaveCenter: => 
+        @center.material  = Materials.node.center
+        post.removeListener 'delete' @del
+        
     onClickInOut: (ray, hit) => 
 
         return if Node.clickMode
@@ -210,8 +222,10 @@ function Node
                     if n2 = hit.mesh.node
                         log "connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
                         t2 = isIn ? n2.inTracks : n2.outTracks
-                        @dragTrack.node[1].del()
+                        on2 = @dragTrack.node[1]
+                        on2.removeTrack @dragTrack
                         @dragTrack.node[1] = n2
+                        on2.del()
                         t2.push @dragTrack
                         ctrl = @dragTrack.ctrls[-1]
                         ctrl.curve.v3.copy n2.getPos()
@@ -349,11 +363,13 @@ function Node
     #    000     000   000  000   000  000       000  000   
     #    000     000   000  000   000   0000000  000   000  
     
+    allTracks: -> @inTracks.concat @outTracks
+    
     removeTrack: (track) ->
         
         tracks = @siblingTracks track
-        tracks.splice tracks.indexOf(track), 1
-        track.del()
+        if (i = tracks.indexOf(track)) >= 0
+            tracks.splice i, 1
         
     siblingTracks: (track) ->
         

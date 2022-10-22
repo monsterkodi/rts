@@ -89,12 +89,6 @@ window.onresize = (event) ->
 window.onkeydown = (event) ->
     
     switch keyinfo.forEvent(event).key
-        # 'w' 'up'    ➜ rts.camera.moveForward()
-        # 's' 'down'  ➜ rts.camera.moveBackward()
-        # 'a' 'left'  ➜ rts.camera.moveLeft()
-        # 'd' 'right' ➜ rts.camera.moveRight()
-        # 'e'         ➜ rts.camera.moveUp()
-        # 'q'         ➜ rts.camera.moveDown()
         'w' 'up'    ➜ rts.camera.startMoveForward()
         's' 'down'  ➜ rts.camera.startMoveBackward()
         'a' 'left'  ➜ rts.camera.startMoveLeft()
@@ -105,9 +99,12 @@ window.onkeydown = (event) ->
         'c'         ➜ rts.camera.startPivotRight()
         'r'         ➜ rts.camera.startPivotUp()
         'v'         ➜ rts.camera.startPivotDown()
-        'esc'       ➜ true
-        'f'         ➜ Materials.toggleFlat()
-        'i'         ➜ prefs.set 'info'  not prefs.get 'info'
+        'esc'       ➜ post.emit 'cancel'
+        'g'         ➜ post.emit 'toggle' 'grid'
+        'f'         ➜ post.emit 'toggle' 'flat'
+        'm'         ➜ post.emit 'toggle' 'wire'
+        'i'         ➜ post.emit 'toggle' 'info'
+        'backspace' 'delete' ➜ post.emit 'delete'
         '.'         ➜ prefs.set 'debug' not prefs.get 'debug'; if prefs.get 'debug' then rts.debug.show() else rts.debug.hide()
         'space'     ➜ rts.togglePause()
         '='         ➜ world.incrSpeed(); world.incrSpeed()

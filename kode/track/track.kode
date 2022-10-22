@@ -36,16 +36,23 @@ function Track
         
     del: ->
         
-        world.removePickable @mesh
-        world.removeObject @mesh
-        for ctrl in @ctrls
-            ctrl.del()
-        @mesh?.removeFromParent()
-        delete @curve
-        delete @node
-        delete @ctrls
-        delete @mesh
-        delete @rail
+        log 'del' @name
+        if @mesh
+            post.emit 'delTrack' @
+            
+            @node[0]?.removeTrack @
+            @node[1]?.removeTrack @
+            
+            world.removePickable @mesh
+            world.removeObject @mesh
+            for ctrl in @ctrls
+                ctrl.del()
+            @mesh?.removeFromParent()
+            delete @curve
+            delete @node
+            delete @ctrls
+            delete @mesh
+            delete @rail
         
     ctrlMoved: =>
         
@@ -86,7 +93,7 @@ function Track
         
     createMesh: ->    
     
-        @mesh = new Mesh @rail, Materials.train.rail
+        @mesh = new Mesh @rail, Materials.track.rail
         @mesh.name = @name
         @mesh.castShadow = true
         @mesh.receiveShadow = true

@@ -8,39 +8,76 @@
 
 function Path
 
-    @: ->
+    @: (@train) ->
         
+        @name   = @train.name + '.path'
+        log '+Path' @name
         @delta  = 0
         @tracks = []
         @nodes  = []
         @revers = []
         
-    addTrackNode: (track, node) -> 
-        @tracks.push track
+        post.on 'delTrack' @onDelTrack
+        post.on 'delNode'  @onDelNode
+        
+    del: ->
+        log '-Path' @name
+        @train.path = null
+        
+    onDelTrack: (track) =>
+        
+        while (i = @tracks.indexOf track) >= 0
+            @tracks.splice i, 1
+            @revers.splice i, 1
+            
+        log 'deltrack' @name, track.name, @tracks.length, @revers.length, @nodes.length
+        
+        if empty @tracks
+            @del()
+            
+    onDelNode: (node) =>
+        
+        while (i = @nodes.indexOf node) >= 0
+            @nodes.splice i, 1
+            
+        log 'delnode' @name, node.name, @tracks.length, @revers.length, @nodes.length
+        
+    addTrackNode: (track, node) ->
+        
         @nodes.push node
+        @tracks.push track
         @revers.push track.node[0] == node
                            
     getLength: -> 
         cd = 0
         for ti in 0...@tracks.length
-            cd += @tracks[ti].curve.getLength()
+            if @tracks[ti].curve
+                cd += @tracks[ti].curve.getLength()
+            else
+                log @name, ti, @tracks[ti]
         cd
                 
     deltaAtIndex: (index) ->
         index = @normIndex index
         cd = 0
         for ti in 0...index
-            cd += @tracks[ti].curve.getLength()
+            if @tracks[ti].curve
+                cd += @tracks[ti].curve.getLength()
+            else
+                log @name, ti, @tracks[ti]
         cd
             
     indexAtDelta: (d) ->
         nd = @normDelta d
         cd = 0
         for t,i in @tracks
-            cd += t.curve.getLength()
+            if t.curve
+                cd += t.curve.getLength()
+            else
+                log @name, i, t
             if cd >= nd
                 return i
-        log 'dafuk?' d, nd, cd
+        log 'dafuk?' @name, d, nd, cd
         
     nodeAtDelta:  (d) -> @nodes[@indexAtDelta d]
     curveAtDelta: (d) -> @tracks[@indexAtDelta d].curve

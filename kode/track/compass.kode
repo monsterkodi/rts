@@ -34,8 +34,7 @@ function Compass
             geom.rotateX Math.PI/2
             geom.translate 0 1.1 0
             geom.rotateZ i * Math.PI/4
-            dot = new Mesh geom, Materials.compass.center.clone()
-            dot.material.color = Color.dot[i]
+            dot = new Mesh geom, Materials.compass['dot' + i]
             dot.onDrag  = @onRotate
             dot.handler = @
             dot.name = "compass.dot#{i}"

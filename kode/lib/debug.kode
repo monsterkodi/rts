@@ -18,13 +18,14 @@ class Debug
 
         @worldSpeed = @value text:'speed' value: world.speed.toFixed(1), reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         @brightness = @value text:'light' value: rts.getBrightness().toFixed(1), reset:rts.resetBrightness, incr:rts.incrBrightness, decr:rts.decrBrightness
+        @toggles    = {}
         
         setInfo = (v) -> prefs.set 'info' v
-        getInfo = -> prefs.get 'info'
+        getInfo =     -> prefs.get 'info'
         
         @toggle text:'info'   set: setInfo, get: getInfo
-        @toggle text:'wire'   parent:@mats, set: Materials.setWire, get: Materials.getWire
-        @toggle text:'flat'   parent:@mats, set: Materials.setFlat, get: Materials.getFlat
+        @toggle text:'wire'                 parent:@mats, set: Materials.setWire, get: Materials.getWire
+        @toggle text:'flat'                 parent:@mats, set: Materials.setFlat, get: Materials.getFlat
         @toggle text:'axes'   pref:'axes'   parent:@help, obj: rts.axesHelper,         key:'visible'
         @toggle text:'arrow'  pref:'arrow'  parent:@help, obj: rts.arrowHelper,        key:'visible'
         @toggle text:'center' pref:'center' parent:@help, obj: rts.centerHelper,       key:'visible'
@@ -37,6 +38,7 @@ class Debug
         
         post.on 'worldSpeed' @updateWorldSpeed
         post.on 'brightness' @updateBrightness
+        post.on 'toggle'     @doToggle
 
     show: => @elem.style.display = 'block'
     hide: => @elem.style.display = 'none'
@@ -79,28 +81,32 @@ class Debug
         box = elem class:'box'   children: [lbl, dec, val, inc], parent:@elem
         
     button: (cfg) -> elem class:'btn', text:cfg.text, click:cfg.cb, parent:cfg.parent ? @elem
+        
+    @tglBtn: (btn, cfg) ->
+        
+        if cfg.get is func and cfg.set is func
+            cfg.set not cfg.get()
+        else
+            cfg.obj[cfg.key] = not cfg.obj[cfg.key]
+
+        if cfg.get is func
+            val = cfg.get()
+        else
+            val = cfg.obj[cfg.key]
+            
+        if cfg.pref
+            prefs.set cfg.pref, val
+            
+        btn.classList[val ? 'add' : 'remove'] 'on'
+            
+        cfg.cb? val
     
     toggle: (cfg) ->
         
         tgl = (cfg) -> (event) -> 
             
-            if cfg.get is func and cfg.set is func
-                cfg.set not cfg.get()
-            else
-                cfg.obj[cfg.key] = not cfg.obj[cfg.key]
-
-            if cfg.get is func
-                val = cfg.get()
-            else
-                val = cfg.obj[cfg.key]
-                
-            if cfg.pref
-                prefs.set cfg.pref, val
-                
-            event.target.classList[val ? 'add' : 'remove'] 'on'
-                
-            cfg.cb? val
-            
+            Debug.tglBtn btn, cfg
+                                
         btn = elem class:'btn' text:cfg.text, click:tgl(cfg), parent:cfg.parent ? @elem
         
         if cfg.get is func
@@ -117,7 +123,17 @@ class Debug
             
         if val
             btn.classList.add 'on'
+            
+        btn.cfg = cfg
+        @toggles[cfg.text] = btn
         btn
+        
+    doToggle: (name) =>  
+    
+        t = @toggles[name]
+        Debug.tglBtn t, t.cfg
+        # t.cfg.obj[t.cfg.key] = not t.cfg.obj[t.cfg.key]
+        # t.classList[t.cfg.obj[t.cfg.key] ? 'add' : 'remove'] 'on'
         
     clampZero: (v,d,m) ->
         v += d
