@@ -7,7 +7,7 @@
 ###
 
 { CSG } = require '../../kode/lib/csg'
-require "../../three/examples/js/utils/BufferGeometryUtils"
+require "../../kode/lib/BufferGeometryUtils"
 
 subtract  = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
 intersect = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).intersect CSG.fromGeometry b
