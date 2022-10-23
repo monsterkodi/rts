@@ -24,6 +24,7 @@ window.last         = last
 window.elem         = elem
 
 window.THREE        = require 'three'
+
 expose = """
     Ray
     Mesh
@@ -38,11 +39,14 @@ expose = """
     CylinderGeometry
     QuadraticBezierCurve3
     CubicBezierCurve3
-    BufferAttribute       
-    BufferGeometry       
     """
+    
 for e in expose.split '\n'
+    # log e, THREE[e]
     window[e] = THREE[e]
+    
+window.BufferGeometry  = THREE.BufferGeometry   # weird that THREE[e] doens't work 
+window.BufferAttribute = THREE.BufferAttribute  # weird that THREE[e] doens't work 
     
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
@@ -148,7 +152,7 @@ class RTS
         @axesHelper.material.depthTest = false
         @axesHelper.material.depthFunc = THREE.NeverDepth
         @scene.add @axesHelper
-                
+                        
         @arrowHelper = new THREE.ArrowHelper vec(0 0 1), @camera.center, 1, 0x8888ff
         @arrowHelper.visible = false
         @scene.add @arrowHelper

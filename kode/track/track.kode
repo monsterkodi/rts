@@ -36,8 +36,8 @@ function Track
         
     del: ->
         
-        log 'del' @name
         if @mesh
+            log 'del' @name
             post.emit 'delTrack' @
             
             @node[0]?.removeTrack @

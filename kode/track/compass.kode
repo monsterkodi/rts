@@ -28,6 +28,8 @@ function Compass
         @head.noHitTest = true
         @head.name = 'compass.head'
         @wheel.add @head
+        
+        post.on 'delete' @onDelete
 
         for i in 0...8
             geom = new CylinderGeometry 0.33 0.33 0.71*1.2 24
@@ -40,6 +42,8 @@ function Compass
             dot.name = "compass.dot#{i}"
             @dots.push dot
             @group.add dot
+            
+    onDelete: => @object?.del()
                     
     onRotate: (ray, hit, downRay, lastRay) => 
         

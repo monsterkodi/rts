@@ -5,7 +5,7 @@
 000   000  000       000   000  000 0 000  000          000     000   000     000   
  0000000   00000000   0000000   000   000  00000000     000     000   000     000   
 ###
-
+log 'geometry' window
 CSG       = require "../lib/csg"
 geomMerge = require "../lib/merge"
 
@@ -35,9 +35,9 @@ class Geometry
     # 000   000  000   000   000 000   
     # 0000000     0000000   000   000  
     
-    @box: (size=1, x=0, y=0, z=0) ->
+    @box: (w=1, h=1, d=1, x=0, y=0, z=0) ->
         
-        geom = new BoxGeometry size, size, size
+        geom = new BoxGeometry w, h, d
         geom.translate x, y, z
         geom
         
@@ -101,6 +101,136 @@ class Geometry
         
         pill.rotateX Math.PI/2
         pill
+        
+    #  0000000   0000000   00000000   000   000  00000000  00000000   0000000     0000000   000   000  
+    # 000       000   000  000   000  0000  000  000       000   000  000   000  000   000   000 000   
+    # 000       000   000  0000000    000 0 000  0000000   0000000    0000000    000   000    00000    
+    # 000       000   000  000   000  000  0000  000       000   000  000   000  000   000   000 000   
+    #  0000000   0000000   000   000  000   000  00000000  000   000  0000000     0000000   000   000  
+    
+    @quad: (cfg) ->
+        
+        sz = cfg.size ? vec(cfg.size) : vec 1 1
+
+        normal = cfg.normal ? Vector.unitZ
+
+        geom = new PlaneGeometry sz.x, sz.y
+        geom.applyQuaternion Quaternion.unitVectors Vector.unitZ, normal
+
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+            
+        geom
+        
+    #  0000000  000   000  000       0000000  000      000   0000000  00000000  
+    # 000        000 000   000      000       000      000  000       000       
+    # 000         00000    000      0000000   000      000  000       0000000   
+    # 000          000     000           000  000      000  000       000       
+    #  0000000     000     0000000  0000000   0000000  000   0000000  00000000  
+    
+    @cylslice: (cfg) ->
+        
+        dir    = cfg.dir ? Vector.unitZ
+        start  = cfg.start ? Vector.unitX
+        radius = cfg.radius ? 1
+        length = cfg.length ? 1
+        sgmt   = cfg.sgmt ? 8
+        
+        geom = new CylinderGeometry radius, radius, length, sgmt, 1, true, 0, Math.PI/2
+        dirq = Quaternion.unitVectors Vector.unitY, dir
+        geom.applyQuaternion dirq
+        geom.applyQuaternion Quaternion.unitVectors Vector.unitX.clone().applyQuaternion(dirq), start
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+            
+        geom
+        
+    #  0000000   0000000   00000000   000   000  00000000  00000000   
+    # 000       000   000  000   000  0000  000  000       000   000  
+    # 000       000   000  0000000    000 0 000  0000000   0000000    
+    # 000       000   000  000   000  000  0000  000       000   000  
+    #  0000000   0000000   000   000  000   000  00000000  000   000  
+    
+    @corner: (cfg) ->
+        
+        rx  = deg2rad cfg.rx ? 0
+        ry  = deg2rad cfg.ry ? 0
+        rz  = deg2rad cfg.rz ? 0
+        radius = cfg.radius ? 1
+        sgmt   = cfg.sgmt ? 8
+        
+        geom = new SphereGeometry radius, sgmt, sgmt, 0, Math.PI/2, 0, Math.PI/2
+        geom.rotateX Math.PI/2
+        geom.rotateZ Math.PI
+
+        matrix = new THREE.Matrix4
+        matrix.makeRotationFromEuler new THREE.Euler rx, ry, rz
+        geom.applyMatrix4 matrix
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+            
+        geom
+        
+    # 00000000    0000000   000   000  000   000  0000000    00000000  0000000    0000000     0000000   000   000  
+    # 000   000  000   000  000   000  0000  000  000   000  000       000   000  000   000  000   000   000 000   
+    # 0000000    000   000  000   000  000 0 000  000   000  0000000   000   000  0000000    000   000    00000    
+    # 000   000  000   000  000   000  000  0000  000   000  000       000   000  000   000  000   000   000 000   
+    # 000   000   0000000    0000000   000   000  0000000    00000000  0000000    0000000     0000000   000   000  
+    
+    @roundedBox: (cfg) ->
+
+        cr = cfg.radius ? 0.2
+        sz = cfg.size ? vec(cfg.size) : vec 1 1 1
+        
+        rightside = @quad size:[sz.z-cr*2, sz.y-cr*2], normal:Vector.unitX,  pos:[ sz.x/2, 0, 0]
+        leftside  = @quad size:[sz.z-cr*2, sz.y-cr*2], normal:Vector.minusX, pos:[-sz.x/2, 0, 0]
+        backside  = @quad size:[sz.x-cr*2, sz.z-cr*2], normal:Vector.minusY, pos:[0, -sz.y/2, 0]
+        frontside = @quad size:[sz.x-cr*2, sz.z-cr*2], normal:Vector.unitY,  pos:[0,  sz.y/2, 0]
+        topside   = @quad size:[sz.x-cr*2, sz.y-cr*2], normal:Vector.unitZ,  pos:[0, 0,  sz.z/2]
+        botside   = @quad size:[sz.x-cr*2, sz.y-cr*2], normal:Vector.minusZ, pos:[0, 0, -sz.z/2]
+        sides     = merge topside, rightside, backside, botside, leftside, frontside
+        
+        botfront   = @cylslice radius:cr, dir:Vector.unitX,  start:Vector.minusZ, length:sz.x-cr*2, pos:[0, -sz.y/2+cr, -sz.z/2+cr]
+        botback    = @cylslice radius:cr, dir:Vector.minusX, start:Vector.minusZ, length:sz.x-cr*2, pos:[0,  sz.y/2-cr, -sz.z/2+cr]
+        botleft    = @cylslice radius:cr, dir:Vector.minusY, start:Vector.minusZ, length:sz.y-cr*2, pos:[-sz.x/2+cr, 0, -sz.z/2+cr]
+        botright   = @cylslice radius:cr, dir:Vector.unitY,  start:Vector.minusZ, length:sz.y-cr*2, pos:[ sz.x/2-cr, 0, -sz.z/2+cr]
+                               
+        frontleft  = @cylslice radius:cr, dir:Vector.unitZ,  start:Vector.minusY, length:sz.z-cr*2, pos:[-sz.x/2+cr, -sz.y/2+cr, 0]
+        backleft   = @cylslice radius:cr, dir:Vector.minusZ, start:Vector.unitY,  length:sz.z-cr*2, pos:[-sz.x/2+cr,  sz.y/2-cr, 0]
+        frontright = @cylslice radius:cr, dir:Vector.unitZ,  start:Vector.unitX,  length:sz.z-cr*2, pos:[ sz.x/2-cr, -sz.y/2+cr, 0]
+        backright  = @cylslice radius:cr, dir:Vector.minusZ, start:Vector.unitX,  length:sz.z-cr*2, pos:[ sz.x/2-cr,  sz.y/2-cr, 0]
+                               
+        topfront   = @cylslice radius:cr, dir:Vector.minusX, start:Vector.unitZ,  length:sz.x-cr*2, pos:[0, -sz.y/2+cr, sz.z/2-cr]
+        topback    = @cylslice radius:cr, dir:Vector.unitX,  start:Vector.unitZ,  length:sz.x-cr*2, pos:[0,  sz.y/2-cr, sz.z/2-cr]
+        topleft    = @cylslice radius:cr, dir:Vector.unitY,  start:Vector.unitZ,  length:sz.y-cr*2, pos:[-sz.x/2+cr, 0, sz.z/2-cr]
+        topright   = @cylslice radius:cr, dir:Vector.minusY, start:Vector.unitZ,  length:sz.y-cr*2, pos:[ sz.x/2-cr, 0, sz.z/2-cr]
+        
+        rft = @corner radius:cr, rx:0, ry:0, rz: 0, pos:[sz.x/2-cr,  sz.y/2-cr, sz.z/2-cr]
+        lft = @corner radius:cr, rx:0, ry:0, rz:90, pos:[-sz.x/2+cr, sz.y/2-cr, sz.z/2-cr]
+
+        rfb = @corner radius:cr, rx:0, ry:180, rz:90, pos:[sz.x/2-cr,  sz.y/2-cr, -sz.z/2+cr]
+        lfb = @corner radius:cr, rx:0, ry:180, rz:0, pos:[-sz.x/2+cr, sz.y/2-cr, -sz.z/2+cr]
+
+        rbt = @corner radius:cr, rx:0, ry:0, rz:-90, pos:[sz.x/2-cr,  -sz.y/2+cr, sz.z/2-cr]
+        lbt = @corner radius:cr, rx:0, ry:0, rz:180, pos:[-sz.x/2+cr, -sz.y/2+cr, sz.z/2-cr]
+
+        rbb = @corner radius:cr, rx:0, ry:180, rz:180, pos:[sz.x/2-cr,  -sz.y/2+cr, -sz.z/2+cr]
+        lbb = @corner radius:cr, rx:0, ry:180, rz:-90, pos:[-sz.x/2+cr, -sz.y/2+cr, -sz.z/2+cr]
+        
+        corns = merge rft, lft, rbt, lbt, rfb, lfb, rbb, lbb 
+        frame = merge botfront, botback, botleft, botright, topfront, topback, topleft, topright, frontright, backright, frontleft, backleft
+        box = merge frame, corns#, sides
+        if cfg.pos
+            p = vec cfg.pos
+            box.translate p.x, p.y, p.z
+        box.computeVertexNormals()
+        box.computeBoundingSphere()
+        box
         
     #  0000000   0000000   00000000   000   000  00000000  00000000   0000000     0000000   000   000  
     # 000       000   000  000   000  0000  000  000       000   000  000   000  000   000   000 000   

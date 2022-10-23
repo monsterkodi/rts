@@ -1,0 +1,38 @@
+###
+ 0000000  000000000   0000000   000000000  000   0000000   000   000
+000          000     000   000     000     000  000   000  0000  000
+0000000      000     000000000     000     000  000   000  000 0 000
+     000     000     000   000     000     000  000   000  000  0000
+0000000      000     000   000     000     000   0000000   000   000
+###
+
+function Station
+
+    @numStations: 0
+
+    @: (@cfg) ->
+        
+        Station.numStations++
+        @name  = @cfg.name ? "S" + Station.numStations
+        @nodes = []
+        @group = new Group
+        # @group.name = @name
+        if @cfg.point ➜ @group.position.copy @cfg.point 
+        # log @cfg, @group.position
+        world.addObject @group
+        world.addPickable @group
+        
+    del: ->
+        
+        world.removeObject @group
+        world.removePickable @group
+        
+    addNode: (node) ->
+        
+        @nodes.push node
+        
+    update: (delta, timeSum) ->
+        
+        advance = delta * @speed
+                                
+module.exports = Station

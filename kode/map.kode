@@ -65,5 +65,7 @@ class Map extends World
         train.path.addTrackNode t1, n2
         train.path.addTrackNode t2, n1
         train.path.addTrackNode t3, n3
+        
+        central = @addCentral [0 0 0]
                 
 module.exports = Map

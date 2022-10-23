@@ -77,16 +77,20 @@ function Node
         
     del: =>
         
-        log 'delNode' @name
-        post.emit 'delNode' @
-        
-        for track in @allTracks()
-            track.del()
-        
-        world.hideCompass @
-        world.removeObject @group
-        world.removePickable @group
-        delete @group
+        if @group
+            
+            log 'delNode' @name
+            
+            world.hideCompass @
+            
+            post.emit 'delNode' @
+            
+            for track in @allTracks()
+                track.del()
+            
+            world.removeObject @group
+            world.removePickable @group
+            delete @group
         
     onDoubleClickCenter: =>
         

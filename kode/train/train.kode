@@ -26,9 +26,9 @@ function Train
     addPreview: ->
         
         @preview = @cars[0].mesh.clone()
-        @preview.material = Materials.transparent
+        @preview.material = Materials.misc.transparent
         for c in @preview.children
-            c.material = Materials.transparent
+            c.material = Materials.misc.transparent
         world.scene.add @preview
         
     block:   -> @speed = 0

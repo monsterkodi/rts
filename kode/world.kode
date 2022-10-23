@@ -15,6 +15,7 @@ Compass   = require './track/compass'
 Construct = require './construct'
 Convert   = require './convert'
 Traffic   = require './traffic'
+Central   = require './station/central'
 
 function World extends Convert
     
@@ -268,6 +269,10 @@ function World extends Convert
         track.node[0] = n1
         track.node[1] = n2
         track
+        
+    addCentral: (point) ->
+        
+        central = new Central vec(point), 'central'
         
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       

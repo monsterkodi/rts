@@ -7,10 +7,10 @@
 ###
 
 Materials = 
-    transparent:        new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.1
+    misc:
+        transparent:    new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.1
+        flat:           new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.5, roughness: 0.7, flatShading:true, dithering:true
     wireframe:          new THREE.MeshBasicMaterial    color:0xffffff, wireframe: true
-    white:              new THREE.MeshStandardMaterial color:0xffffff    
-    highlight:          new THREE.MeshLambertMaterial  color:0xffffff, emissive:0xffffff, side:THREE.BackSide, depthWrite:true, transparent:true, opacity:0.2
     floor:              new THREE.MeshStandardMaterial color:0x222222, dithering:true
     shadow:             new THREE.ShadowMaterial       opacity: 0.2, depthWrite:false
     ctrl:
@@ -35,6 +35,8 @@ Materials =
         piston:         new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1, roughness: 0.8 
         light:          new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1, roughness: 0.8
         cargo:          new THREE.MeshStandardMaterial color:0x333333, metalness: 0.2, roughness: 0.4 
+    station:
+        central:        new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.2, roughness: 0.4 
     track:
         rail:           new THREE.MeshStandardMaterial color:Color.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     node:
@@ -52,7 +54,7 @@ Materials =
     setWire: (wire) ->
         
         prefs.set 'wire' wire
-        for t in ['node' 'ctrl' 'compass' 'train' 'track']
+        for t in ['node' 'ctrl' 'compass' 'train' 'track' 'station' 'misc']
             for k,m of Materials[t]
                 m.wireframe = wire
         

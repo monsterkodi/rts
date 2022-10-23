@@ -1,0 +1,21 @@
+###
+ 0000000  00000000  000   000  000000000  00000000    0000000   000    
+000       000       0000  000     000     000   000  000   000  000    
+000       0000000   000 0 000     000     0000000    000000000  000    
+000       000       000  0000     000     000   000  000   000  000    
+ 0000000  00000000  000   000     000     000   000  000   000  0000000
+###
+
+Station = require './station'
+
+function Central extends Station
+
+    @: (point) ->
+        
+        super {point, name:'Central'}
+        
+        mesh = world.construct.meshes.central.clone()
+        mesh.name = @name
+        @group.add mesh
+
+module.exports = Central
