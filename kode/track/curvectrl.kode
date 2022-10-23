@@ -57,8 +57,7 @@ function CurveCtrl
             mesh.onClick = @onCenterClick
             mesh.name = 'curveStart'
             mesh.handler = @
-            mesh.castShadow = true
-            mesh.receiveShadow = true
+            mesh.setShadow()
             
             @meshCurveStart = mesh
             world.addPickable @meshCurveStart

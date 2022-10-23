@@ -16,10 +16,8 @@ function Station
         @name  = @cfg.name ? "S" + Station.numStations
         @nodes = []
         @group = new Group
-        # @group.name = @name
         if @cfg.point ➜ @group.position.copy @cfg.point 
-        # log @cfg, @group.position
-        world.addObject @group
+        world.addObject   @group
         world.addPickable @group
         
     del: ->

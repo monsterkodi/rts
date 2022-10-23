@@ -1,0 +1,67 @@
+###
+ 0000000   00000000   00     00
+000   000  000   000  000   000
+000000000  0000000    000000000
+000   000  000   000  000 0 000
+000   000  000   000  000   000
+###
+
+CurveHelper = require '../lib/curvehelper'
+
+function Arm
+
+    @: ->
+        
+        base    = Geom.halfsphere                    radius:1   pos:[0 0 5.1]
+        elbow   = Geom.sphere                        radius:0.75 pos:[-3 0 8]
+        wrist   = Geom.halfsphere                    radius:0.6 pos:[-6 0 5.3]
+        bone1   = Geom.pill                          radius:0.3 pos:[-1.5 0 6.6], length:3 dir:vec(-2,0,2).normalize()
+        bone2   = Geom.pill                          radius:0.3 pos:[-4.5 0 6.6], length:3 dir:vec(-2,0,-2).normalize()
+        
+        hand    = Geom.roundedFrame   size:[2.8 2.8 2.8] radius:0.4 pos:[0 0 0]
+        handtop = Geom.quad           size:[2.2 2.2] normal:Vector.unitZ,  pos:[0 0 1.3]
+        palm    = Geom.quad           size:[2.2 2.2] normal:Vector.minusZ, pos:[0 0 1.1]
+
+        geom = Geom.merge hand, handtop, palm
+        @handMesh = new Mesh geom, Materials.station.central
+        @handMesh.setShadow()
+        
+        geom = Geom.merge base, elbow, wrist, bone1, bone2
+        @mesh = new Mesh geom, Materials.station.central
+        @mesh.setShadow()
+        @mesh.add @handMesh
+        @mesh.name = 'arm'
+        
+        @curveHelper = new CurveHelper
+        
+        @testAnimation()
+    
+    testAnimation: ->
+        
+        @startAnimation 
+            vec(-6 0 2.5), vec(-6 0 5), vec(-6 -1 7), vec(-5 -5 7), vec(0 -6 7),
+            vec(5 -5 7), vec(6 -1 7), vec(6 0 7), vec(6 0 5), vec(6 0 2.5),
+            vec(6 0 5),  vec(6 0 7), vec(6 -1 7), vec(5 -5 7), vec(0 -6 7), vec(-5 -5 7), vec(-6 -1 7), vec(-6 0 5), vec(-6 0 2.5)
+        
+    startAnimation: ->
+        
+        @animTime = 0
+        @animDuration = 10
+        @handCurvePath = new CurvePath
+        
+        @handCurvePath.add new THREE.CatmullRomCurve3 arguments
+            
+        @curveHelper.setCurve @handCurvePath
+        world.addAnimation @animate
+        
+    animate: (delta) =>
+        
+        @animTime += delta
+        if (animFactor = @animTime/@animDuration) <= 1
+            p = @handCurvePath.getPointAt animFactor
+            @handMesh.position.copy p
+            world.addAnimation @animate
+        else
+            @testAnimation()
+
+module.exports = Arm

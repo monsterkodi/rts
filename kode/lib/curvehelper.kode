@@ -1,0 +1,30 @@
+###
+ 0000000  000   000  00000000   000   000  00000000  000   000  00000000  000      00000000   00000000  00000000 
+000       000   000  000   000  000   000  000       000   000  000       000      000   000  000       000   000
+000       000   000  0000000     000 000   0000000   000000000  0000000   000      00000000   0000000   0000000  
+000       000   000  000   000     000     000       000   000  000       000      000        000       000   000
+ 0000000   0000000   000   000      0      00000000  000   000  00000000  0000000  000        00000000  000   000
+###
+
+function CurveHelper
+
+    @: ->
+        
+        geom = Geom.box size:0.1
+        @pointMeshes = new THREE.InstancedMesh geom, Materials.wireframe, 100
+        world.scene.add @pointMeshes
+        
+    setCurve: (curve) ->
+        
+        num = 50
+        mat = new THREE.Matrix4
+        for index in 0..num
+            f = index/num
+            p = curve.getPointAt f
+            mat.setPosition p
+            @pointMeshes.setMatrixAt index, mat
+        
+        @pointMeshes.count = num+1
+        @pointMeshes.instanceMatrix.needsUpdate = true
+        
+module.exports = CurveHelper

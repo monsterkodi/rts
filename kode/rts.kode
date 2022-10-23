@@ -36,6 +36,7 @@ expose = """
     BoxGeometry
     PlaneGeometry
     SphereGeometry
+    CircleGeometry
     CylinderGeometry
     QuadraticBezierCurve3
     CubicBezierCurve3
@@ -44,6 +45,10 @@ expose = """
 for e in expose.split '\n'
     # log e, THREE[e]
     window[e] = THREE[e]
+    
+setShadow = -> @castShadow = @receiveShadow = true
+setShadow.bind window.Mesh
+window.Mesh.prototype.setShadow = setShadow
     
 window.BufferGeometry  = THREE.BufferGeometry   # weird that THREE[e] doens't work 
 window.BufferAttribute = THREE.BufferAttribute  # weird that THREE[e] doens't work 
@@ -227,6 +232,11 @@ class RTS
         
         @animations.push func
         
+    deanimate: (func) ->
+        
+        if (index = @animations.indexOf func) >= 0
+            @animations.splice index, 1
+        
     animateWorld: (func) ->
         
         @worldAnimations.push func
@@ -251,7 +261,7 @@ class RTS
         @menu.animate delta
          
         if not @paused
-            
+                    
             world.animate delta
             
             angle = -delta*0.5*world.speed

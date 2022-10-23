@@ -24,19 +24,39 @@ class Construct
         ●▸ init
         @initEngine()
         @initBoxcar()
-        @initCentral()
+        
+        @meshes.station = {}
+        @initArmbase()
+        @initDocking()
         ●▪ init
         
-    #  0000000  00000000  000   000  000000000  00000000    0000000   000      
-    # 000       000       0000  000     000     000   000  000   000  000      
-    # 000       0000000   000 0 000     000     0000000    000000000  000      
-    # 000       000       000  0000     000     000   000  000   000  000      
-    #  0000000  00000000  000   000     000     000   000  000   000  0000000  
+    #  0000000  000000000   0000000   000000000  000   0000000   000   000  
+    # 000          000     000   000     000     000  000   000  0000  000  
+    # 0000000      000     000000000     000     000  000   000  000 0 000  
+    #      000     000     000   000     000     000  000   000  000  0000  
+    # 0000000      000     000   000     000     000   0000000   000   000  
     
-    initCentral: ->
+    initArmbase: ->
+        
+        frame  = Geom.roundedBox      size:[6 6 6]  radius:0.8 pos:[0 0 2.5]
+        sides  = Geom.roundedBoxSides size:[6 6 6]  radius:0.8 pos:[0 0 2.5]
 
-        geom = Geom.roundedBox size:[7 7 7] radius:1 pos:[0 0 2]
-        @meshes.central = new Mesh geom, Materials.misc.flat
+        frameMesh = new Mesh frame, Materials.station.central
+        frameMesh.setShadow()
+        
+        sideMesh = new Mesh sides, Materials.station.side
+        sideMesh.setShadow()
+        
+        frameMesh.add sideMesh
+        
+        @meshes.station.armbase = frameMesh
+        
+    initDocking: ->
+
+        geom = Geom.roundedFrame    size:[6 6 6]  radius:0.8 pos:[0 0 2.5]
+        
+        @meshes.station.docking = new Mesh geom, Materials.station.central
+        @meshes.station.docking.setShadow()
     
     # 00000000  000   000   0000000   000  000   000  00000000  
     # 000       0000  000  000        000  0000  000  000       
@@ -48,7 +68,7 @@ class Construct
              
         seg = 16
   
-        pill = Geom.pill 2 1 16
+        pill = Geom.pill length:2 radius:1 sgmt:16
         
         cutm = new BoxGeometry 3 1 1
         cutm.translate 0 -0.5 0
@@ -75,8 +95,7 @@ class Construct
         geom.translate 0 offset, 0
         
         @meshes.engine = new Mesh geom, Materials.train.body
-        @meshes.engine.receiveShadow = true
-        @meshes.engine.castShadow = true
+        @meshes.engine.setShadow()
         
         geom = Geom.intersect body, wind
         geom.translate 0 offset, 0
@@ -118,7 +137,7 @@ class Construct
              
         seg = 16
   
-        pill = Geom.pill 2 1 16
+        pill = Geom.pill length:2 radius:1 sgmt:16
         
         cutm = new BoxGeometry 3 1 1
         cutm.translate 0 -0.5 0
@@ -144,14 +163,12 @@ class Construct
         geom.translate 0 offset, 0
         
         @meshes.boxcar = new Mesh geom, Materials.train.body
-        @meshes.boxcar.receiveShadow = true
-        @meshes.boxcar.castShadow = true
+        @meshes.boxcar.setShadow()
         
         box = new BoxGeometry 2 2 2 
         box.translate 0 offset+0.9 0
         boxMesh = new Mesh box, Materials.train.cargo
-        boxMesh.receiveShadow = true
-        boxMesh.castShadow = true
+        boxMesh.setShadow()
             
         @meshes.boxcar.add boxMesh
         

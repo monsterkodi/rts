@@ -12,8 +12,8 @@ class Map extends World
         
     create: -> 
     
-        # @addObject new Mesh Geom.test(), Materials.ctrl.start
-        # @addObject new Mesh Geom.test(), Materials.wireframe
+        # @addObject new Mesh Geom.roundedFrame({}), Materials.ctrl.start
+        # @addObject new Mesh Geom.roundedFrame({}), Materials.wireframe
         @trainTest()
 
     # 000000000  00000000    0000000   000  000   000   0000000  
@@ -24,9 +24,9 @@ class Map extends World
     
     trainTest: ->
         
-        n1 = @addNode [ 20 0 0] 'n1'
-        n2 = @addNode [-20 0 0] 'n2'
-        n3 = @addNode [  0 0 0] 'n3' 
+        n1 = @addNode [ 14 0 0] 'n1'
+        n2 = @addNode [-26 0 0] 'n2'
+        n3 = @addNode [ -6 0 0] 'n3' 
         
         n2.rotate 180
         n3.rotate 180

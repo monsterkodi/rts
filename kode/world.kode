@@ -22,6 +22,7 @@ function World extends Convert
     @: (@scene) ->
                 
         @trains = []
+        @animations = []
         
         window.world = @
         
@@ -38,6 +39,34 @@ function World extends Convert
         @addFloor()
         @setSpeed prefs.get 'speed' 1
                 
+    #  0000000   000   000  000  00     00   0000000   000000000  00000000  
+    # 000   000  0000  000  000  000   000  000   000     000     000       
+    # 000000000  000 0 000  000  000000000  000000000     000     0000000   
+    # 000   000  000  0000  000  000 0 000  000   000     000     000       
+    # 000   000  000   000  000  000   000  000   000     000     00000000  
+    
+    addAnimation: (func) ->
+        
+        @animations.push func
+        
+    removeAnimation: (func) ->
+        
+        if (index = @animations.indexOf func) >= 0
+            @animations.splice index, 1
+            
+    animate: (delta) ->
+
+        scaledDelta = delta * @speed
+        @timeSum += scaledDelta
+        
+        oldAnimations = @animations.clone()
+        @animations = []
+        for animation in oldAnimations
+            animation scaledDelta
+        
+        @simulate scaledDelta
+        post.emit 'tick'
+        
     #  0000000   0000000   00     00  00000000    0000000    0000000   0000000  
     # 000       000   000  000   000  000   000  000   000  000       000       
     # 000       000   000  000000000  00000000   000000000  0000000   0000000   
@@ -105,7 +134,7 @@ function World extends Convert
     #      000  000        000       000       000   000  
     # 0000000   000        00000000  00000000  0000000    
     
-    setSpeed: (speedIndex) -> 
+    setSpeed: (speedIndex) ->
         
         @speedIndex = clamp 0, config.world.speed.length-1, speedIndex
         @speed = config.world.speed[@speedIndex]
@@ -116,20 +145,6 @@ function World extends Convert
     resetSpeed: -> @setSpeed 2
     incrSpeed:  -> @setSpeed @speedIndex + 1
     decrSpeed:  -> @setSpeed @speedIndex - 1
-        
-    #  0000000   000   000  000  00     00   0000000   000000000  00000000  
-    # 000   000  0000  000  000  000   000  000   000     000     000       
-    # 000000000  000 0 000  000  000000000  000000000     000     0000000   
-    # 000   000  000  0000  000  000 0 000  000   000     000     000       
-    # 000   000  000   000  000  000   000  000   000     000     00000000  
-    
-    animate: (delta) ->
-
-        scaledDelta = delta * @speed
-        
-        @timeSum += scaledDelta
-        @simulate scaledDelta
-        post.emit 'tick'
         
     #  0000000  000  00     00  000   000  000       0000000   000000000  00000000  
     # 000       000  000   000  000   000  000      000   000     000     000       

@@ -47,7 +47,7 @@ class DialButton extends CanvasButton
         
         @dots = []
         for i in [-6..6]
-            geom = Geom.sphere 0.3
+            geom = Geom.sphere radius:0.3
             geom.rotateX deg2rad 90
             p = vec(0,4,0).rotate vec(0,0,1), -i*22.5
             mesh = new Mesh geom, Materials.menu.inactive

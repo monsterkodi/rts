@@ -5,25 +5,20 @@
 000   000  000       000   000  000 0 000  000          000     000   000     000   
  0000000   00000000   0000000   000   000  00000000     000     000   000     000   
 ###
-log 'geometry' window
+
 CSG       = require "../lib/csg"
 geomMerge = require "../lib/merge"
 
-subtract  = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
-intersect = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).intersect CSG.fromGeometry b
-union     = (a,b) -> CSG.toGeometry CSG.fromGeometry(a).union     CSG.fromGeometry b
-merge     = -> 
-    if arguments.length == 1 and arguments[0] is Array
-        geomMerge arguments[0]
-    else
-        geomMerge.apply null, [arguments]
-
 class Geometry
     
-    @merge:     merge
-    @union:     union
-    @subtract:  subtract
-    @intersect: intersect
+    @union:     (a,b) -> CSG.toGeometry CSG.fromGeometry(a).union     CSG.fromGeometry b
+    @subtract:  (a,b) -> CSG.toGeometry CSG.fromGeometry(a).subtract  CSG.fromGeometry b
+    @intersect: (a,b) -> CSG.toGeometry CSG.fromGeometry(a).intersect CSG.fromGeometry b
+    @merge: ->
+        if arguments.length == 1 and arguments[0] is Array
+            geomMerge arguments[0]
+        else
+            geomMerge.apply null, [arguments]
     
     @test: ->
         
@@ -35,10 +30,27 @@ class Geometry
     # 000   000  000   000   000 000   
     # 0000000     0000000   000   000  
     
-    @box: (w=1, h=1, d=1, x=0, y=0, z=0) ->
+    @box: (cfg) ->
+        
+        if cfg.size?
+            if cfg.size is num
+                w = h = d = cfg.size
+            else
+                s = vec cfg.size
+                w = s.x
+                d = s.y
+                h = s.z
+        else
+            w = cfg.width  ? 1
+            h = cfg.height ? 1
+            d = cfg.depth  ? 1
         
         geom = new BoxGeometry w, h, d
-        geom.translate x, y, z
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+        
         geom
         
     #  0000000  00000000   000   000  00000000  00000000   00000000  
@@ -47,10 +59,33 @@ class Geometry
     #      000  000        000   000  000       000   000  000       
     # 0000000   000        000   000  00000000  000   000  00000000  
     
-    @sphere: (size=1, sgmt=16, x=0, y=0, z=0) ->
+    @sphere: (cfg) ->
+
+        radius = cfg.radius ? 1
+        sgmt   = cfg.sgmt ? 16
         
-        geom = new SphereGeometry size, sgmt, sgmt
-        geom.translate x, y, z
+        geom = new SphereGeometry radius, sgmt, sgmt
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+            
+        geom
+        
+    @halfsphere: (cfg) ->
+
+        radius = cfg.radius ? 1
+        sgmt   = cfg.sgmt ? 16
+        
+        geom = new SphereGeometry radius, sgmt, sgmt, 0, 2*Math.PI/2, 0, Math.PI
+
+        if cfg.dir
+            geom.applyQuaternion Quaternion.unitVectors Vector.unitZ, cfg.dir
+
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+            
         geom
         
     #  0000000  000   000  000      000  000   000  0000000    00000000  00000000   
@@ -85,11 +120,11 @@ class Geometry
     # 000        000  000      000      
     # 000        000  0000000  0000000  
     
-    @pill: (length, radius, segmts) ->
+    @pill: (cfg) ->
 
-        l = length ? 1
-        r = radius ? 0.5
-        s = segmts ? 8
+        l = cfg.length ? 1
+        r = cfg.radius ? 0.5
+        s = cfg.sgmt ? 8
         
         top = new SphereGeometry r, s, s/2, 0, 2*Math.PI, 0, Math.PI/2
         top.translate 0 l/2 0
@@ -97,16 +132,24 @@ class Geometry
         bot = new SphereGeometry r, s, s/2, 0, 2*Math.PI, Math.PI/2, Math.PI/2
         bot.translate 0 -l/2 0
         
-        pill = @merge top, mid, bot
+        geom = @merge top, mid, bot
         
-        pill.rotateX Math.PI/2
-        pill
+        geom.rotateX Math.PI/2
         
-    #  0000000   0000000   00000000   000   000  00000000  00000000   0000000     0000000   000   000  
-    # 000       000   000  000   000  0000  000  000       000   000  000   000  000   000   000 000   
-    # 000       000   000  0000000    000 0 000  0000000   0000000    0000000    000   000    00000    
-    # 000       000   000  000   000  000  0000  000       000   000  000   000  000   000   000 000   
-    #  0000000   0000000   000   000  000   000  00000000  000   000  0000000     0000000   000   000  
+        if cfg.dir
+            geom.applyQuaternion Quaternion.unitVectors Vector.unitZ, cfg.dir
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+        
+        geom
+        
+    #  0000000   000   000   0000000   0000000    
+    # 000   000  000   000  000   000  000   000  
+    # 000 00 00  000   000  000000000  000   000  
+    # 000 0000   000   000  000   000  000   000  
+    #  00000 00   0000000   000   000  0000000    
     
     @quad: (cfg) ->
         
@@ -117,31 +160,6 @@ class Geometry
         geom = new PlaneGeometry sz.x, sz.y
         geom.applyQuaternion Quaternion.unitVectors Vector.unitZ, normal
 
-        if cfg.pos
-            p = vec cfg.pos
-            geom.translate p.x, p.y, p.z
-            
-        geom
-        
-    #  0000000  000   000  000       0000000  000      000   0000000  00000000  
-    # 000        000 000   000      000       000      000  000       000       
-    # 000         00000    000      0000000   000      000  000       0000000   
-    # 000          000     000           000  000      000  000       000       
-    #  0000000     000     0000000  0000000   0000000  000   0000000  00000000  
-    
-    @cylslice: (cfg) ->
-        
-        dir    = cfg.dir ? Vector.unitZ
-        start  = cfg.start ? Vector.unitX
-        radius = cfg.radius ? 1
-        length = cfg.length ? 1
-        sgmt   = cfg.sgmt ? 8
-        
-        geom = new CylinderGeometry radius, radius, length, sgmt, 1, true, 0, Math.PI/2
-        dirq = Quaternion.unitVectors Vector.unitY, dir
-        geom.applyQuaternion dirq
-        geom.applyQuaternion Quaternion.unitVectors Vector.unitX.clone().applyQuaternion(dirq), start
-        
         if cfg.pos
             p = vec cfg.pos
             geom.translate p.x, p.y, p.z
@@ -175,7 +193,90 @@ class Geometry
             geom.translate p.x, p.y, p.z
             
         geom
+                
+    # 00000000   000  00000000   0000000   0000000   00000000   
+    # 000   000  000  000       000       000   000  000   000  
+    # 00000000   000  0000000   000       000000000  00000000   
+    # 000        000  000       000       000   000  000        
+    # 000        000  00000000   0000000  000   000  000        
+    
+    @piecap: (cfg) ->
         
+        rx  = deg2rad cfg.rx ? 0
+        ry  = deg2rad cfg.ry ? 0
+        rz  = deg2rad cfg.rz ? 0
+        radius = cfg.radius ? 1
+        sgmt   = cfg.sgmt ? 8
+        
+        geom = new CircleGeometry radius, sgmt, 0, Math.PI/2
+
+        matrix = new THREE.Matrix4
+        matrix.makeRotationFromEuler new THREE.Euler rx, ry, rz
+        geom.applyMatrix4 matrix
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+            
+        geom
+        
+    #  0000000  000   000  000       0000000  000      000   0000000  00000000  
+    # 000        000 000   000      000       000      000  000       000       
+    # 000         00000    000      0000000   000      000  000       0000000   
+    # 000          000     000           000  000      000  000       000       
+    #  0000000     000     0000000  0000000   0000000  000   0000000  00000000  
+    
+    @cylslice: (cfg) ->
+        
+        dir    = cfg.dir   ? Vector.unitZ
+        start  = cfg.start ? Vector.unitX
+        radius = cfg.radius ? 0.5
+        length = cfg.length ? 1
+        sgmt   = cfg.sgmt ? 8
+        
+        geom = new CylinderGeometry radius, radius, length, sgmt, 1, true, 0, Math.PI/2
+        dirq = Quaternion.unitVectors Vector.unitY, dir
+        geom.applyQuaternion dirq
+        geom.applyQuaternion Quaternion.unitVectors Vector.unitX.clone().applyQuaternion(dirq), start
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+            
+        geom
+        
+    # 00000000   000  00000000  
+    # 000   000  000  000       
+    # 00000000   000  0000000   
+    # 000        000  000       
+    # 000        000  00000000  
+    
+    @pie: (cfg) ->
+        
+        dir    = cfg.dir   ? Vector.unitX
+        start  = cfg.start ? Vector.unitY
+        radius = cfg.radius ? 0.5
+        length = cfg.length ? 1
+        sgmt   = cfg.sgmt ? 8
+                
+        side1 = @quad size:[length, radius], normal:Vector.minusY, pos:[0 0 radius/2]
+        side2 = @quad size:[length, radius], normal:Vector.minusZ, pos:[0 radius/2 0]
+        
+        cylnd = new CylinderGeometry radius, radius, length, sgmt, 1, true, 0, Math.PI/2
+        cylnd.rotateZ deg2rad 90
+        
+        geom = @merge side1, side2, cylnd
+               
+        matrix = new THREE.Matrix4
+        matrix.makeBasis dir, start, dir.crossed start
+        geom.applyMatrix4 matrix
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+            
+        geom
+                
     # 00000000    0000000   000   000  000   000  0000000    00000000  0000000    0000000     0000000   000   000  
     # 000   000  000   000  000   000  0000  000  000   000  000       000   000  000   000  000   000   000 000   
     # 0000000    000   000  000   000  000 0 000  000   000  0000000   000   000  0000000    000   000    00000    
@@ -187,33 +288,63 @@ class Geometry
         cr = cfg.radius ? 0.2
         sz = cfg.size ? vec(cfg.size) : vec 1 1 1
         
-        rightside = @quad size:[sz.z-cr*2, sz.y-cr*2], normal:Vector.unitX,  pos:[ sz.x/2, 0, 0]
-        leftside  = @quad size:[sz.z-cr*2, sz.y-cr*2], normal:Vector.minusX, pos:[-sz.x/2, 0, 0]
-        backside  = @quad size:[sz.x-cr*2, sz.z-cr*2], normal:Vector.minusY, pos:[0, -sz.y/2, 0]
-        frontside = @quad size:[sz.x-cr*2, sz.z-cr*2], normal:Vector.unitY,  pos:[0,  sz.y/2, 0]
-        topside   = @quad size:[sz.x-cr*2, sz.y-cr*2], normal:Vector.unitZ,  pos:[0, 0,  sz.z/2]
-        botside   = @quad size:[sz.x-cr*2, sz.y-cr*2], normal:Vector.minusZ, pos:[0, 0, -sz.z/2]
-        sides     = merge topside, rightside, backside, botside, leftside, frontside
+        frame = @roundedFrame cfg
         
-        botfront   = @cylslice radius:cr, dir:Vector.unitX,  start:Vector.minusZ, length:sz.x-cr*2, pos:[0, -sz.y/2+cr, -sz.z/2+cr]
-        botback    = @cylslice radius:cr, dir:Vector.minusX, start:Vector.minusZ, length:sz.x-cr*2, pos:[0,  sz.y/2-cr, -sz.z/2+cr]
-        botleft    = @cylslice radius:cr, dir:Vector.minusY, start:Vector.minusZ, length:sz.y-cr*2, pos:[-sz.x/2+cr, 0, -sz.z/2+cr]
-        botright   = @cylslice radius:cr, dir:Vector.unitY,  start:Vector.minusZ, length:sz.y-cr*2, pos:[ sz.x/2-cr, 0, -sz.z/2+cr]
-                               
-        frontleft  = @cylslice radius:cr, dir:Vector.unitZ,  start:Vector.minusY, length:sz.z-cr*2, pos:[-sz.x/2+cr, -sz.y/2+cr, 0]
-        backleft   = @cylslice radius:cr, dir:Vector.minusZ, start:Vector.unitY,  length:sz.z-cr*2, pos:[-sz.x/2+cr,  sz.y/2-cr, 0]
-        frontright = @cylslice radius:cr, dir:Vector.unitZ,  start:Vector.unitX,  length:sz.z-cr*2, pos:[ sz.x/2-cr, -sz.y/2+cr, 0]
-        backright  = @cylslice radius:cr, dir:Vector.minusZ, start:Vector.unitX,  length:sz.z-cr*2, pos:[ sz.x/2-cr,  sz.y/2-cr, 0]
-                               
-        topfront   = @cylslice radius:cr, dir:Vector.minusX, start:Vector.unitZ,  length:sz.x-cr*2, pos:[0, -sz.y/2+cr, sz.z/2-cr]
-        topback    = @cylslice radius:cr, dir:Vector.unitX,  start:Vector.unitZ,  length:sz.x-cr*2, pos:[0,  sz.y/2-cr, sz.z/2-cr]
-        topleft    = @cylslice radius:cr, dir:Vector.unitY,  start:Vector.unitZ,  length:sz.y-cr*2, pos:[-sz.x/2+cr, 0, sz.z/2-cr]
-        topright   = @cylslice radius:cr, dir:Vector.minusY, start:Vector.unitZ,  length:sz.y-cr*2, pos:[ sz.x/2-cr, 0, sz.z/2-cr]
+        fb   = @pie radius:cr, dir:Vector.unitX,  start:Vector.minusZ, length:sz.x-cr*2, pos:[0,  sz.y/2-cr, -sz.z/2+cr]
+        bb   = @pie radius:cr, dir:Vector.minusX, start:Vector.minusZ, length:sz.x-cr*2, pos:[0, -sz.y/2+cr, -sz.z/2+cr]
+        
+        botfr = @merge fb, bb
+
+        if cfg.pos
+            p = vec cfg.pos
+            botfr.translate p.x, p.y, p.z
+        
+        geom = @merge frame, botfr
+        
+    @roundedBoxSides: (cfg) ->
+
+        cr = cfg.radius ? 0.2
+        sz = cfg.size ? vec(cfg.size) : vec 1 1 1
+        
+        rs = @quad size:[sz.z-cr*2, sz.y-cr*2], normal:Vector.unitX,  pos:[ sz.x/2-cr/2, 0, 0]
+        ls = @quad size:[sz.z-cr*2, sz.y-cr*2], normal:Vector.minusX, pos:[-sz.x/2+cr/2, 0, 0]
+        fs = @quad size:[sz.x-cr*2, sz.z-cr*2], normal:Vector.unitY,  pos:[0,  sz.y/2-cr/2, 0]
+        bs = @quad size:[sz.x-cr*2, sz.z-cr*2], normal:Vector.minusY, pos:[0, -sz.y/2+cr/2, 0]
+        ds = @quad size:[sz.x-cr*2, sz.y-cr*2], normal:Vector.minusZ, pos:[0, 0, -sz.z/2+cr/2]
+        us = @quad size:[sz.x-cr*2, sz.y-cr*2], normal:Vector.unitZ,  pos:[0, 0,  sz.z/2-cr/2]
+
+        geom = @merge rs, ls, fs, bs, ds, us
+        
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+        
+        geom
+        
+    @roundedFrame: (cfg) ->        
+
+        cr = cfg.radius ? 0.2
+        sz = cfg.size ? vec(cfg.size) : vec 1 1 1
+
+        ft   = @pie radius:cr, dir:Vector.minusX, start:Vector.unitZ,  length:sz.x-cr*2, pos:[0, sz.y/2-cr, sz.z/2-cr]
+        bt   = @pie radius:cr, dir:Vector.unitX,  start:Vector.unitZ,  length:sz.x-cr*2, pos:[0, -sz.y/2+cr, sz.z/2-cr]
+        lt   = @pie radius:cr, dir:Vector.minusY, start:Vector.unitZ,  length:sz.y-cr*2, pos:[-sz.x/2+cr, 0, sz.z/2-cr]
+        rt   = @pie radius:cr, dir:Vector.unitY,  start:Vector.unitZ,  length:sz.y-cr*2, pos:[ sz.x/2-cr, 0, sz.z/2-cr]
+                                       
+        lfm  = @pie radius:cr, dir:Vector.unitZ,  start:Vector.unitY,  length:sz.z-cr*2, pos:[-sz.x/2+cr,  sz.y/2-cr, 0]
+        lbm  = @pie radius:cr, dir:Vector.minusZ, start:Vector.minusY, length:sz.z-cr*2, pos:[-sz.x/2+cr, -sz.y/2+cr, 0]
+        rfm  = @pie radius:cr, dir:Vector.unitZ,  start:Vector.unitX,  length:sz.z-cr*2, pos:[ sz.x/2-cr,  sz.y/2-cr, 0]
+        rbm  = @pie radius:cr, dir:Vector.minusZ, start:Vector.unitX,  length:sz.z-cr*2, pos:[ sz.x/2-cr, -sz.y/2+cr, 0]
+        
+        # fb   = @pie radius:cr, dir:Vector.unitX,  start:Vector.minusZ, length:sz.x-cr*2, pos:[0,  sz.y/2-cr, -sz.z/2+cr]
+        # bb   = @pie radius:cr, dir:Vector.minusX, start:Vector.minusZ, length:sz.x-cr*2, pos:[0, -sz.y/2+cr, -sz.z/2+cr]
+        lb   = @pie radius:cr, dir:Vector.unitY,  start:Vector.minusZ, length:sz.y-cr*2, pos:[-sz.x/2+cr, 0, -sz.z/2+cr]
+        rb   = @pie radius:cr, dir:Vector.minusY, start:Vector.minusZ, length:sz.y-cr*2, pos:[ sz.x/2-cr, 0, -sz.z/2+cr]
         
         rft = @corner radius:cr, rx:0, ry:0, rz: 0, pos:[sz.x/2-cr,  sz.y/2-cr, sz.z/2-cr]
         lft = @corner radius:cr, rx:0, ry:0, rz:90, pos:[-sz.x/2+cr, sz.y/2-cr, sz.z/2-cr]
 
-        rfb = @corner radius:cr, rx:0, ry:180, rz:90, pos:[sz.x/2-cr,  sz.y/2-cr, -sz.z/2+cr]
+        rfb = @corner radius:cr, rx:0, ry:180, rz:90, pos:[sz.x/2-cr, sz.y/2-cr, -sz.z/2+cr]
         lfb = @corner radius:cr, rx:0, ry:180, rz:0, pos:[-sz.x/2+cr, sz.y/2-cr, -sz.z/2+cr]
 
         rbt = @corner radius:cr, rx:0, ry:0, rz:-90, pos:[sz.x/2-cr,  -sz.y/2+cr, sz.z/2-cr]
@@ -222,14 +353,20 @@ class Geometry
         rbb = @corner radius:cr, rx:0, ry:180, rz:180, pos:[sz.x/2-cr,  -sz.y/2+cr, -sz.z/2+cr]
         lbb = @corner radius:cr, rx:0, ry:180, rz:-90, pos:[-sz.x/2+cr, -sz.y/2+cr, -sz.z/2+cr]
         
-        corns = merge rft, lft, rbt, lbt, rfb, lfb, rbb, lbb 
-        frame = merge botfront, botback, botleft, botright, topfront, topback, topleft, topright, frontright, backright, frontleft, backleft
-        box = merge frame, corns#, sides
+        lfc = @piecap radius:cr, segs:8, pos:[-sz.x/2+cr,  sz.y/2-cr, -sz.z/2+cr], ry:90
+        rfc = @piecap radius:cr, segs:8, pos:[ sz.x/2-cr,  sz.y/2-cr, -sz.z/2+cr], rz:90 ry:-90
+        lbc = @piecap radius:cr, segs:8, pos:[-sz.x/2+cr, -sz.y/2+cr, -sz.z/2+cr], rz:-90 ry:90
+        rbc = @piecap radius:cr, segs:8, pos:[ sz.x/2-cr, -sz.y/2+cr, -sz.z/2+cr], rz:180 ry:-90
+        
+        corns = @merge rft, lft, rbt, lbt, rfb, lfb, rbb, lbb 
+        frame = @merge ft, bt, lt, rt, lfm, lbm, rfm, rbm, lb, rb
+        caps  = @merge lfc, rfc, lbc, rbc
+        box   = @merge frame, corns, caps
+        
         if cfg.pos
             p = vec cfg.pos
             box.translate p.x, p.y, p.z
-        box.computeVertexNormals()
-        box.computeBoundingSphere()
+            
         box
         
     #  0000000   0000000   00000000   000   000  00000000  00000000   0000000     0000000   000   000  
@@ -301,7 +438,7 @@ class Geometry
         bottomside.copy topside
         bottomside.rotateX deg2rad -180
                 
-        cube = merge topside, rightside, backside, bottomside, leftside, frontside
+        cube = @merge topside, rightside, backside, bottomside, leftside, frontside
         cube.translate x, y, z
         cube.computeVertexNormals()
         cube.computeBoundingSphere()

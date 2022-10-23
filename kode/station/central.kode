@@ -7,6 +7,7 @@
 ###
 
 Station = require './station'
+Arm = require './arm'
 
 function Central extends Station
 
@@ -14,8 +15,14 @@ function Central extends Station
         
         super {point, name:'Central'}
         
-        mesh = world.construct.meshes.central.clone()
-        mesh.name = @name
-        @group.add mesh
+        @armbase = world.construct.meshes.station.armbase.clone()
+        @group.add @armbase
+        
+        @docking = world.construct.meshes.station.docking.clone()
+        @docking.position.x = -6
+        @group.add @docking
+        
+        @arm = new Arm
+        @group.add @arm.mesh
 
 module.exports = Central
