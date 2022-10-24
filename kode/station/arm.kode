@@ -13,23 +13,28 @@ function Arm
     @: ->
         
         base    = Geom.halfsphere                    radius:1   pos:[0 0 5.1]
-        elbow   = Geom.sphere                        radius:0.75 pos:[-3 0 8]
-        wrist   = Geom.halfsphere                    radius:0.6 pos:[-6 0 5.3]
         bone1   = Geom.pill                          radius:0.3 pos:[-1.5 0 6.6], length:3 dir:vec(-2,0,2).normalize()
         bone2   = Geom.pill                          radius:0.3 pos:[-4.5 0 6.6], length:3 dir:vec(-2,0,-2).normalize()
         
         hand    = Geom.roundedFrame   size:[2.8 2.8 2.8] radius:0.4 pos:[0 0 0]
+        wrist   = Geom.halfsphere                    radius:0.6 pos:[0 0 1.3]
         handtop = Geom.quad           size:[2.2 2.2] normal:Vector.unitZ,  pos:[0 0 1.3]
         palm    = Geom.quad           size:[2.2 2.2] normal:Vector.minusZ, pos:[0 0 1.1]
-
-        geom = Geom.merge hand, handtop, palm
+        
+        geom    = Geom.merge hand, handtop, palm, wrist
         @handMesh = new Mesh geom, Materials.station.central
         @handMesh.setShadow()
+
+        elbow   = Geom.sphere                        radius:0.7
+        @elbowMesh = new Mesh elbow, Materials.station.central
+        @elbowMesh.position.copy vec 0 0 8.1
+        @elbowMesh.setShadow()
         
-        geom = Geom.merge base, elbow, wrist, bone1, bone2
+        geom = Geom.merge base, bone1, bone2
         @mesh = new Mesh geom, Materials.station.central
         @mesh.setShadow()
         @mesh.add @handMesh
+        @mesh.add @elbowMesh
         @mesh.name = 'arm'
         
         @curveHelper = new CurveHelper
@@ -39,14 +44,15 @@ function Arm
     testAnimation: ->
         
         @startAnimation 
-            vec(-6 0 2.5), vec(-6 0 5), vec(-6 -1 7), vec(-5 -5 7), vec(0 -6 7),
-            vec(5 -5 7), vec(6 -1 7), vec(6 0 7), vec(6 0 5), vec(6 0 2.5),
-            vec(6 0 5),  vec(6 0 7), vec(6 -1 7), vec(5 -5 7), vec(0 -6 7), vec(-5 -5 7), vec(-6 -1 7), vec(-6 0 5), vec(-6 0 2.5)
+            vec(-6 0 2.5), vec(-6 0 5),  vec(-6 0 7), vec(-4 -4 7), vec(0 -5.5 7),
+            vec(4 -4 7),   vec(6 -1 7),  vec(6 0 7),   vec(6 0 5),   vec(6 0 2.5),
+            vec(6 0 5),    vec(6 0 7),   vec(6 -1 7),  vec(4 -4 7),  vec(0 -5.5 7), 
+            vec(-4 -4 7),  vec(-6 -1 7), vec(-6 0 5),  vec(-6 0 2.5)
         
     startAnimation: ->
         
         @animTime = 0
-        @animDuration = 10
+        @animDuration = 20
         @handCurvePath = new CurvePath
         
         @handCurvePath.add new THREE.CatmullRomCurve3 arguments
@@ -58,8 +64,35 @@ function Arm
         
         @animTime += delta
         if (animFactor = @animTime/@animDuration) <= 1
+            
             p = @handCurvePath.getPointAt animFactor
             @handMesh.position.copy p
+            
+            c2h = vec(p).minus(@mesh.position)
+            c2h.z = 0
+            dx = c2h.normalize()
+            dz = Vector.unitZ
+            dy = vec(dz).cross dx
+            @handMesh.quaternion.setFromRotationMatrix (new Matrix4).makeBasis dx, dy, dz
+
+            handPos = vec()
+            basePos = vec()
+            @handMesh.getWorldPosition handPos
+            wristPos = handPos.clone()
+            wristPos.z += 1.3
+            @mesh.getWorldPosition basePos
+            basePos.z += 5
+            o = Vector.midPoint basePos, wristPos
+            d = basePos.to(wristPos).normalize()
+            r = d.crossed Vector.unitZ
+            u = r.crossed d
+            ray = new Ray o, u
+            baseSphere = new Sphere basePos, 4.5
+            elbowPos = vec()
+            if ray.intersectSphere baseSphere, elbowPos
+                log elbowPos
+                @elbowMesh.position.copy elbowPos
+            
             world.addAnimation @animate
         else
             @testAnimation()

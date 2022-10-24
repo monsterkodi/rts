@@ -20,7 +20,7 @@ function Central extends Station
         
         @docking = world.construct.meshes.station.docking.clone()
         @docking.position.x = -6
-        @group.add @docking
+        # @group.add @docking
         
         @arm = new Arm
         @group.add @arm.mesh

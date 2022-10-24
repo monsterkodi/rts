@@ -31,6 +31,8 @@ expose = """
     Line3
     Group
     Plane
+    Matrix3
+    Matrix4
     Sphere
     CurvePath
     BoxGeometry
