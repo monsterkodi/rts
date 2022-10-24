@@ -41,15 +41,15 @@ class Construct
         frame  = Geom.roundedBox      size:[6 6 6]  radius:0.8 pos:[0 0 2.5]
         sides  = Geom.roundedBoxSides size:[6 6 6]  radius:0.8 pos:[0 0 2.5]
 
-        frameMesh = new Mesh frame, Materials.station.central
-        frameMesh.setShadow()
+        baseMesh = new Mesh frame, Materials.station.central
+        baseMesh.setShadow()
         
         sideMesh = new Mesh sides, Materials.station.side
         sideMesh.setShadow()
         
-        frameMesh.add sideMesh
+        baseMesh.add sideMesh
         
-        @meshes.station.armbase = frameMesh
+        @meshes.station.armbase = baseMesh
         
     initDocking: ->
 

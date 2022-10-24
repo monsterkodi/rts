@@ -48,6 +48,16 @@ for e in expose.split '\n'
     # log e, THREE[e]
     window[e] = THREE[e]
     
+require 'three/examples/js/shaders/CopyShader'
+require 'three/examples/js/shaders/LuminosityHighPassShader'
+require 'three/examples/js/postprocessing/Pass'
+require 'three/examples/js/postprocessing/ShaderPass'
+require 'three/examples/js/postprocessing/EffectComposer'
+require 'three/examples/js/postprocessing/RenderPass'
+require 'three/examples/js/postprocessing/UnrealBloomPass'
+
+{ EffectComposer, RenderPass, UnrealBloomPass } = THREE
+
 setShadow = -> @castShadow = @receiveShadow = true
 setShadow.bind window.Mesh
 window.Mesh.prototype.setShadow = setShadow
@@ -90,22 +100,32 @@ class RTS
         @animations = []
         @worldAnimations = []
         
-        @renderer = new THREE.WebGLRenderer antialias: true
+        @renderer = new THREE.WebGLRenderer antialias:true
         @renderer.setPixelRatio window.devicePixelRatio
-
+        
         @renderer.setClearColor Color.menu.background     
-        @renderer.setSize @view.clientWidth, @view.clientHeight
+        @renderer.setSize @view.clientWidth*window.devicePixelRatio, @view.clientHeight*window.devicePixelRatio
         @renderer.shadowMap.enabled = true
         @renderer.shadowMap.type = THREE.PCFSoftShadowMap
         
-        # log @renderer.capabilities
+        @composer = new EffectComposer @renderer
+        
+        canvas = @renderer.domElement
         
         @view.appendChild @renderer.domElement
         
         @camera = new Camera view:@view
-                
         @scene = new THREE.Scene()
-                
+                      
+        @composer.addPass new RenderPass @scene, @camera 
+        
+        resolution = new THREE.Vector2 @view.clientWidth*window.devicePixelRatio, @view.clientHeight*window.devicePixelRatio
+        strength   = 1
+        radius     = 0.3
+        threshold  = 0.8
+        bloomPass  = new UnrealBloomPass resolution, strength, radius, threshold
+        @composer.addPass bloomPass
+        
         @lightIntensityAmbient = 0.2
         @lightIntensityPlayer  = 0.2
         @lightIntensityShadow  = 0.5
@@ -452,6 +472,7 @@ class RTS
 
         @lightPlayer.position.copy @camera.position
         @renderer.render world.scene, @camera
+        @composer.render()
         
         @fps.draw()
         
@@ -470,9 +491,14 @@ class RTS
     
     resized: (w,h) ->
         
+        @renderer.setSize w * window.devicePixelRatio, h * window.devicePixelRatio
+        
         @camera.aspect = w/h
-        @camera.size = vec w,h
+        @camera.size.set w * window.devicePixelRatio, h * window.devicePixelRatio
         @camera.updateProjectionMatrix()
-        @renderer.setSize w,h
+        
+        
+        canvas = @renderer.domElement
+        log w, h, canvas.width, canvas.height
         
 module.exports = RTS

@@ -12,42 +12,67 @@ function Arm
 
     @: ->
         
-        base    = Geom.halfsphere                    radius:1   pos:[0 0 5.1]
-        bone1   = Geom.pill                          radius:0.3 pos:[-1.5 0 6.6], length:3 dir:vec(-2,0,2).normalize()
-        bone2   = Geom.pill                          radius:0.3 pos:[-4.5 0 6.6], length:3 dir:vec(-2,0,-2).normalize()
+        base    = Geom.halfsphere     radius:1   
+        bone1   = Geom.pill           radius:0.3 length:3
+        bone2   = Geom.pill           radius:0.3 length:3
         
-        hand    = Geom.roundedFrame   size:[2.8 2.8 2.8] radius:0.4 pos:[0 0 0]
-        wrist   = Geom.halfsphere                    radius:0.6 pos:[0 0 1.3]
-        handtop = Geom.quad           size:[2.2 2.2] normal:Vector.unitZ,  pos:[0 0 1.3]
-        palm    = Geom.quad           size:[2.2 2.2] normal:Vector.minusZ, pos:[0 0 1.1]
+        elbow   = Geom.sphere         radius:0.7
+        wrist   = Geom.halfsphere     radius:0.6 
         
-        geom    = Geom.merge hand, handtop, palm, wrist
+        hand    = Geom.roundedFrame   size:[2.8 2.8 2.8] radius:0.4 pos:[0 0 -1.3]
+        handtop = Geom.quad           size:[2.2 2.2] normal:Vector.unitZ  
+        palm    = Geom.quad           size:[2.2 2.2] normal:Vector.minusZ 
+        
+        @group = new Group
+        
+        @baseMesh = new Mesh base, Materials.station.central
+        @baseMesh.setShadow()
+        @baseMesh.name = 'arm'
+        @group.add @baseMesh
+        
+        @bone = []
+        @bone[0] = new Mesh bone1, Materials.station.central
+        @bone[0].setShadow()
+        @group.add @bone[0]
+
+        @bone[1] = new Mesh bone2, Materials.station.central
+        @bone[1].setShadow()
+        @group.add @bone[1]
+        
+        @wristMesh = new Mesh wrist, Materials.station.central
+        @wristMesh.setShadow()
+        @group.add @wristMesh
+        
+        piston = Geom.cylinder height:0.6 radius: 0.3
+        piston.translate 0 0 0.4
+        # piston.rotateX deg2rad 90
+        @wristPiston = new Mesh piston, Materials.train.piston
+        @wristMesh.add @wristPiston
+        
+        geom = Geom.merge hand, handtop, palm
         @handMesh = new Mesh geom, Materials.station.central
         @handMesh.setShadow()
+        @group.add @handMesh
 
-        elbow   = Geom.sphere                        radius:0.7
         @elbowMesh = new Mesh elbow, Materials.station.central
-        @elbowMesh.position.copy vec 0 0 8.1
         @elbowMesh.setShadow()
+        @group.add @elbowMesh
         
-        geom = Geom.merge base, bone1, bone2
-        @mesh = new Mesh geom, Materials.station.central
-        @mesh.setShadow()
-        @mesh.add @handMesh
-        @mesh.add @elbowMesh
-        @mesh.name = 'arm'
+        piston = Geom.cylinder height:1.6 radius: 0.4
+        piston.rotateX deg2rad 90
+        @elbowPiston = new Mesh piston, Materials.train.piston
+        @elbowMesh.add @elbowPiston
         
         @curveHelper = new CurveHelper
+        # @group.add @curveHelper.group
         
         @testAnimation()
     
     testAnimation: ->
         
         @startAnimation 
-            vec(-6 0 2.5), vec(-6 0 5),  vec(-6 0 7), vec(-4 -4 7), vec(0 -5.5 7),
-            vec(4 -4 7),   vec(6 -1 7),  vec(6 0 7),   vec(6 0 5),   vec(6 0 2.5),
-            vec(6 0 5),    vec(6 0 7),   vec(6 -1 7),  vec(4 -4 7),  vec(0 -5.5 7), 
-            vec(-4 -4 7),  vec(-6 -1 7), vec(-6 0 5),  vec(-6 0 2.5)
+            vec(-6 0 -2), vec(-6 0 1), vec(-6 0 3), vec(-6 -1 3.5), vec(-4 -4 3), vec(0 -5.5 2.5), vec( 4 -4 3), vec( 6 -1 3.5),  vec( 6 0 3), vec( 6 0 1),   
+            vec( 6 0 -2),  vec(6 0 1), vec( 6 0 3), vec( 6 -1 3.5), vec( 4 -4 3), vec(0 -5.5 2.5), vec(-4 -4 3), vec(-6 -1 3.5),  vec(-6 0 3), vec(-6 0 1), vec(-6 0 -2)
         
     startAnimation: ->
         
@@ -65,23 +90,26 @@ function Arm
         @animTime += delta
         if (animFactor = @animTime/@animDuration) <= 1
             
-            p = @handCurvePath.getPointAt animFactor
-            @handMesh.position.copy p
+            basePos = vec @baseMesh.position
+            wristPos = vec @handCurvePath.getPointAt animFactor
+            @handMesh.position.copy wristPos
+            @wristMesh.position.copy wristPos
             
-            c2h = vec(p).minus(@mesh.position)
+            c2h = vec(wristPos).minus basePos
             c2h.z = 0
             dx = c2h.normalize()
             dz = Vector.unitZ
             dy = vec(dz).cross dx
             @handMesh.quaternion.setFromRotationMatrix (new Matrix4).makeBasis dx, dy, dz
+            @wristMesh.quaternion.copy @handMesh.quaternion
+            
+            dx = c2h.normalize()
+            dz = Vector.unitZ
+            dy = dz.crossed dx
+            dx = dy.crossed dz
+            @baseMesh.quaternion.setFromRotationMatrix (new Matrix4).makeBasis dx, dy, dz
+            @elbowMesh.quaternion.copy @baseMesh.quaternion
 
-            handPos = vec()
-            basePos = vec()
-            @handMesh.getWorldPosition handPos
-            wristPos = handPos.clone()
-            wristPos.z += 1.3
-            @mesh.getWorldPosition basePos
-            basePos.z += 5
             o = Vector.midPoint basePos, wristPos
             d = basePos.to(wristPos).normalize()
             r = d.crossed Vector.unitZ
@@ -90,9 +118,19 @@ function Arm
             baseSphere = new Sphere basePos, 4.5
             elbowPos = vec()
             if ray.intersectSphere baseSphere, elbowPos
-                log elbowPos
-                @elbowMesh.position.copy elbowPos
+                @elbowMesh.position.copy elbowPos.minus basePos
+                
+                @bone[0].position.copy Vector.midPoint(elbowPos, basePos).sub basePos
+                @bone[0].quaternion.copy Quaternion.unitVectors Vector.unitZ, elbowPos.to(basePos).normalize()
+                
+                @bone[1].position.copy Vector.midPoint(elbowPos, wristPos).sub basePos
+                @bone[1].quaternion.copy Quaternion.unitVectors Vector.unitZ, elbowPos.to(wristPos).normalize()
             
+            c = 0.5+0.5*Math.sin 3*@animTime
+            col = @baseMesh.material.color
+            @elbowPiston.material.emissive.setRGB col.r*c, col.g*c, col.b*c
+            @wristPiston.material.emissive.copy @elbowPiston.material.emissive
+                
             world.addAnimation @animate
         else
             @testAnimation()

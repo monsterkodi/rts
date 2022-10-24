@@ -6,8 +6,9 @@ author          monsterkodi
 license         Unlicense
 dependencies
                 kxk     ../kxk
-                three   ^0.145.0
+                oimo    ^1.0.9
+                three   ./three
 devDependencies
-                electron-builder  ^23.6.0
                 electron        ^21.1.0
+                electron-builder  ^23.6.0
                 electron-packager  ^16.0.0

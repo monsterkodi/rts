@@ -2,11 +2,6 @@ name          three
 version       0.145.0
 description   JavaScript 3D library
 main          ./build/three.cjs
-exports
-              [object Object]
-              ./examples/fonts/*  ./examples/fonts/*
-              ./examples/js/*  ./examples/js/*
-              ./src/*         ./src/*
 repository
               type  git
               url   https://github.com/mrdoob/three.js

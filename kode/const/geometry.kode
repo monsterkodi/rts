@@ -94,11 +94,19 @@ class Geometry
     # 000          000     000      000  000  0000  000   000  000       000   000  
     #  0000000     000     0000000  000  000   000  0000000    00000000  000   000  
     
-    @cylinder: (height=1, radius=0.5, sgmt=24, x=0, y=0, z=0) ->
+    @cylinder: (cfg) ->
+        
+        height = cfg.height ? 1 
+        radius = cfg.radius ? 0.5 
+        sgmt   = cfg.sgmt ? 24
         
         geom = new CylinderGeometry radius, radius, height, sgmt
         geom.rotateX Math.PI/2
-        geom.translate x, y, z
+
+        if cfg.pos
+            p = vec cfg.pos
+            geom.translate p.x, p.y, p.z
+        
         geom
         
     #  0000000  000   000  000      000  000   000  0000000     0000000   000   000  000   000  000000000  

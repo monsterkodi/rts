@@ -15,14 +15,15 @@ function Central extends Station
         
         super {point, name:'Central'}
         
-        @armbase = world.construct.meshes.station.armbase.clone()
-        @group.add @armbase
+        @base = world.construct.meshes.station.armbase.clone()
+        @group.add @base
         
         @docking = world.construct.meshes.station.docking.clone()
         @docking.position.x = -6
-        # @group.add @docking
+        @group.add @docking
         
         @arm = new Arm
-        @group.add @arm.mesh
+        @arm.group.position.z = 5.1
+        @group.add @arm.group
 
 module.exports = Central

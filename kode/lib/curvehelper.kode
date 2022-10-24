@@ -10,20 +10,31 @@ function CurveHelper
 
     @: ->
         
+        @group = new Group
         geom = Geom.box size:0.1
         @pointMeshes = new THREE.InstancedMesh geom, Materials.wireframe, 100
-        world.scene.add @pointMeshes
+        @group.add @pointMeshes
+        
+        geom = Geom.box size:0.2
+        @ctrlMeshes = new THREE.InstancedMesh geom, Materials.wireframe.clone(), 10
+        @ctrlMeshes.material.color.copy new THREE.Color 0xff0000
+        @group.add @ctrlMeshes
         
     setCurve: (curve) ->
-        
-        num = 50
+
+        num = 100
         mat = new THREE.Matrix4
-        for index in 0..num
+        for index in 0...num
             f = index/num
             p = curve.getPointAt f
             mat.setPosition p
             @pointMeshes.setMatrixAt index, mat
-        
+            
+        for cp, index in curve.curves[0].points
+            mat.setPosition cp
+            @ctrlMeshes.setMatrixAt index, mat
+            
+        @ctrlMeshes.count = curve.curves[0].points.length
         @pointMeshes.count = num+1
         @pointMeshes.instanceMatrix.needsUpdate = true
         

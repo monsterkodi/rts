@@ -16,16 +16,18 @@ Construct = require './construct'
 Convert   = require './convert'
 Traffic   = require './traffic'
 Central   = require './station/central'
+Physics   = require './physics/physics'
 
 function World extends Convert
     
     @: (@scene) ->
                 
+        window.world = @
+        
         @trains = []
         @animations = []
         
-        window.world = @
-        
+        @physics = new Physics
         @traffic = new Traffic
         
         @timeSum = 0
@@ -154,6 +156,7 @@ function World extends Convert
     
     simulate: (scaledDelta) ->
         
+        @physics.simulate scaledDelta, @timeSum
         @traffic.simulate scaledDelta, @timeSum
         
         for train in @trains

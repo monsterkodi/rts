@@ -51,7 +51,7 @@ function CurveCtrl
             @group.add @meshPrevCtrlRod
             
         if not @isFirst
-            geom = Geom.cylinder 0.71 0.7 32
+            geom = Geom.cylinder heigt:0.71 radius:0.7 smnt:32
             mesh = new Mesh geom, Materials.ctrl.curve
             mesh.onDrag = @onDrag 
             mesh.onClick = @onCenterClick
