@@ -21,11 +21,5 @@ class Car
         
         path.moveMesh @mesh, delta
         
-        # path.getPoint @mesh.position, delta
-        # path.getTangent Vector.tmp, delta
-        # Vector.tmp.add @mesh.position 
-        # @mesh.up.set 0 0 1
-        # @mesh.lookAt Vector.tmp
-        
 module.exports = Car
     

@@ -14,28 +14,21 @@ function Physics
 
         @world = new OIMO.World
             timestep:   1/60  
-            iterations: 8  
-            broadphase: 2  # 1 brute force, 2 sweep and prune, 3 volume tree
-            worldscale: 1  # scale full world 
-            # random:     true
-            # info:       true    
             gravity:   [0,0,-9.8] 
         
         @body = @world.add 
-            type:        'sphere'  # type of shape : sphere, box, cylinder 
-            size:        [1,1,1]   # size of shape
-            pos:         [0,0,50]   
-            move:        true      # dynamic or statique
+            type:        'sphere'  
+            size:        [0.5 0.5 0.5]   
+            pos:         [0,0,50]  
+            move:        true      
             kinematic:   true
             density:     1
-            restitution: 1
-            friction:    0.01
-            # belongsTo: 1 # The bits of the collision groups to which the shape belongs.
-            # collidesWith: 0xffffffff # The bits of the collision groups with which the shape collides.
+            restitution: 0.1
+            friction:    0.1
         
         @addChain()
             
-        geom  = Geom.sphere size:1
+        geom  = Geom.sphere radius:0.25 sgmt:8
         @mesh = new Mesh geom, Materials.wireframe
         world.addObject @mesh
         
@@ -49,8 +42,8 @@ function Physics
         
     simulate: (scaledDelta, timeSum) ->
         
-        @body.position.copy rts.centerHelper.position
-        @body.position.z = Math.max 0.5 @body.position.z
+        @body.position.copy vec(@body.position).lerp rts.centerHelper.position, 0.2
+        @body.position.z = Math.max 0 @body.position.z
         
         @world.step()
         @postLoop()
@@ -67,43 +60,34 @@ function Physics
         
     addChain: ->
 
-        # spring = [1000, 100]
         p = @body.position
         
         @boxes = []
     
-        for i in 0...20
+        for i in 0...2
     
-            b = @world.add type:'box' size:[1, 1, 1], pos:[p.x, p.y, p.z-1.5-i*2], move:true density:5 restitution:1
-            b.mesh = new Mesh Geom.box(size:0.5), Materials.wireframe
+            b = @world.add type:'sphere' size:[0.5, 0.5, 0.5], pos:[p.x, p.y, p.z-i*0.5], density:0.5 restitution:1 move:true
+            b.mesh = new Mesh Geom.sphere(radius:0.25 sgmt:8), Materials.wireframe
             world.addObject b.mesh
             @boxes.push b 
     
             if i == 0
-                @world.add 
+                @world.add
                     type:  'jointBall'
                     body1: @body
                     body2: b.name
-                    pos1:  [0, 0, -2.1]
-                    pos2:  [0, 0,  1.5]
+                    pos1:  [0, 0, -0.5]
+                    pos2:  [0, 0,  0.5]
                     axe1:  [0, 0, -1]
                     axe2:  [0, 0,  1] 
-                    collision:true
-                    # spring:spring 
-                    # min:0 
-                    # max:1
-            # else 
-                # @world.add 
-                    # type:'jointHinge'
-                    # body1:b.name-1
-                    # body2:b.name
-                    # pos1:[p.x, p.y, p.z-0.5-i*2]
-                    # pos2:[p.x, p.y, p.z-1.5-i*2] 
-                    # axe1:[0,0,-1]
-                    # axe2:[0,0,-1],
-                    # collision:false 
-                    # spring:spring 
-                    # min:0 
-                    # max:2
+            else 
+                @world.add 
+                    type:'jointBall'
+                    body1: b.name-1
+                    body2: b.name
+                    pos1:  [0, 0, -0.5]
+                    pos2:  [0, 0,  0.5]
+                    axe1:  [0, 0, -1]
+                    axe2:  [0, 0,  1] 
 
 module.exports = Physics

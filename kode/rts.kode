@@ -100,7 +100,7 @@ class RTS
         @animations = []
         @worldAnimations = []
         
-        @renderer = new THREE.WebGLRenderer antialias:false
+        @renderer = new THREE.WebGLRenderer antialias:true
         @renderer.setPixelRatio window.devicePixelRatio
         
         @renderer.setClearColor Color.menu.background     
@@ -124,9 +124,9 @@ class RTS
         @composer.addPass new RenderPass @scene, @camera 
         
         resolution = new THREE.Vector2 @view.clientWidth*window.devicePixelRatio, @view.clientHeight*window.devicePixelRatio
-        strength   = 2
-        radius     = 0.1
+        strength   = 0.8
         threshold  = 0.8
+        radius     = 0
         bloomPass  = new UnrealBloomPass resolution, strength, radius, threshold
         @composer.addPass bloomPass
         

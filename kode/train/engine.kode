@@ -15,21 +15,34 @@ class Engine extends Car
         super color
         
         @mesh.children[1].material = @mesh.children[1].material.clone()
-        @mesh.children[2].material = @mesh.children[2].material.clone()
-        @mesh.children[2].material.emissive.copy color
+        # @mesh.children[2].material = @mesh.children[2].material.clone()
+        # @mesh.children[2].material.emissive.copy color
 
-        @mesh.children[3].material = @mesh.children[3].material.clone()
-        @mesh.children[3].material.emissive.copy color
+        # @mesh.children[3].material = @mesh.children[3].material.clone()
+        # @mesh.children[3].material.emissive.copy color
         
-        @mesh.name = 'engine'
+    setColorByName: (@colorName) ->
+        
+        @setColor Color.train[@colorName]
+        
+        @mesh.children[2].material = @mesh.children[2].material.clone() # piston
+        @mesh.children[2].material.emissive.copy Color.piston[@colorName]
+
+        @mesh.children[3].material = @mesh.children[3].material.clone() # lights
+        @mesh.children[3].material.emissive.copy Color.piston[@colorName]
         
     update: (delta, timeSum, train) ->
         
         x = 0.2*Math.sin 2*timeSum*train.speed
         @mesh.children[1].scale.set 1.2+x, 1 1
         
-        c = 0.5+0.5*Math.sin 2*timeSum*train.speed
-        col = @mesh.material.color
-        @mesh.children[1].material.emissive.setRGB col.r*c, col.g*c, col.b*c
+        sin = Math.sin 2*timeSum*train.speed
+        if sin > 0
+            c = 0.5+sin
+        else
+            c = 0.5+0.5*sin
+        # col = @mesh.material.color
+        col = Color.piston[@colorName]
+        @mesh.children[1].material.emissive.setRGB col.r*2*c, col.g*c, col.b*c
         
 module.exports = Engine

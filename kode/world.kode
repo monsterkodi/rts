@@ -64,7 +64,7 @@ function World extends Convert
         oldAnimations = @animations.clone()
         @animations = []
         for animation in oldAnimations
-            animation scaledDelta
+            animation scaledDelta, @timeSum
         
         @simulate scaledDelta
         post.emit 'tick'
@@ -203,6 +203,7 @@ function World extends Convert
         
         @addEngine train
         
+        train.setColorByName name
         train
 
     addEngine: (train) ->
@@ -224,6 +225,7 @@ function World extends Convert
             @scene.add boxcar.mesh
             @pickables.push boxcar.mesh
             
+            boxcar.setColorByName train.name
             train.addCar boxcar
             
     # 000000000  00000000    0000000    0000000  000   000  

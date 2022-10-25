@@ -15,8 +15,8 @@ class Camera extends PerspectiveCamera
 
     @: (opt) ->
         
-        width  = opt.view.clientWidth  #*  window.devicePixelRatio
-        height = opt.view.clientHeight #*  window.devicePixelRatio
+        width  = opt.view.clientWidth 
+        height = opt.view.clientHeight
         
         super 70, width/height, 1, 10000 # fov, aspect, near, far
         

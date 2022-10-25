@@ -23,6 +23,11 @@ function Train
         for car in @cars
             car.setColor color
             
+    setColorByName: (name) ->
+        
+        for car in @cars
+            car.setColorByName name
+            
     addPreview: ->
         
         @preview = @cars[0].mesh.clone()

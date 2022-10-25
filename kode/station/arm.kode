@@ -85,7 +85,7 @@ function Arm
         @curveHelper.setCurve @handCurvePath
         world.addAnimation @animate
         
-    animate: (delta) =>
+    animate: (delta, timeSum) =>
         
         @animTime += delta
         if (animFactor = @animTime/@animDuration) <= 1
@@ -126,7 +126,7 @@ function Arm
                 @bone[1].position.copy Vector.midPoint(elbowPos, wristPos).sub basePos
                 @bone[1].quaternion.copy Quaternion.unitVectors Vector.unitZ, elbowPos.to(wristPos).normalize()
             
-            c = 0.5+0.5*Math.sin 3*@animTime
+            c = clamp 0 1 Math.sin timeSum
             col = @baseMesh.material.color
             @elbowPiston.material.emissive.setRGB col.r*c, col.g*c, col.b*c
             @wristPiston.material.emissive.copy @elbowPiston.material.emissive
