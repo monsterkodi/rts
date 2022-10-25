@@ -1,8 +1,6 @@
 
 ![screenshot](img/rts.png)
-![screenshot](img/rts03.png)
 ![screenshot](img/rts04.png)
-![screenshot](img/rts05.png)
 ![screenshot](img/rts06.png)
 
 - track creation
