@@ -100,7 +100,7 @@ class RTS
         @animations = []
         @worldAnimations = []
         
-        @renderer = new THREE.WebGLRenderer antialias:true
+        @renderer = new THREE.WebGLRenderer antialias:false
         @renderer.setPixelRatio window.devicePixelRatio
         
         @renderer.setClearColor Color.menu.background     
@@ -112,6 +112,10 @@ class RTS
         
         canvas = @renderer.domElement
         
+        s3d = 1/window.devicePixelRatio
+        t3d = parseInt (window.devicePixelRatio-1)*50
+        canvas.style.transform = "scale3d(#{s3d}, #{s3d}, 1) translate3d(-#{t3d}%, -#{t3d}%, 0px)"
+        
         @view.appendChild @renderer.domElement
         
         @camera = new Camera view:@view
@@ -120,8 +124,8 @@ class RTS
         @composer.addPass new RenderPass @scene, @camera 
         
         resolution = new THREE.Vector2 @view.clientWidth*window.devicePixelRatio, @view.clientHeight*window.devicePixelRatio
-        strength   = 1
-        radius     = 0.3
+        strength   = 2
+        radius     = 0.1
         threshold  = 0.8
         bloomPass  = new UnrealBloomPass resolution, strength, radius, threshold
         @composer.addPass bloomPass
