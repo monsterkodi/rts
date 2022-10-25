@@ -40,8 +40,6 @@ function Path
         while (i = @nodes.indexOf node) >= 0
             @nodes.splice i, 1
             
-        log 'delnode' @name, node.name, @tracks.length, @revers.length, @nodes.length
-        
     addTrackNode: (track, node) ->
         
         @nodes.push node

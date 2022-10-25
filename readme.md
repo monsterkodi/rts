@@ -1,7 +1,8 @@
 
 ![screenshot](img/rts.png)
-![screenshot](img/rts04.png)
 ![screenshot](img/rts06.png)
+![screenshot](img/rts07.png)
+![screenshot](img/rts08.png)
 
 - track creation
     - covert middle nodes to ctrls

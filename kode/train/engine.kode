@@ -23,13 +23,13 @@ class Engine extends Car
         
     setColorByName: (@colorName) ->
         
-        @setColor Color.train[@colorName]
+        @setColor Colors.train[@colorName]
         
         @mesh.children[2].material = @mesh.children[2].material.clone() # piston
-        @mesh.children[2].material.emissive.copy Color.piston[@colorName]
+        @mesh.children[2].material.emissive.copy Colors.piston[@colorName]
 
         @mesh.children[3].material = @mesh.children[3].material.clone() # lights
-        @mesh.children[3].material.emissive.copy Color.piston[@colorName]
+        @mesh.children[3].material.emissive.copy Colors.piston[@colorName]
         
     update: (delta, timeSum, train) ->
         
@@ -41,7 +41,9 @@ class Engine extends Car
             c = 0.5+sin
         else
             c = 0.5+0.5*sin
-        col = Color.piston[@colorName]
-        @mesh.children[1].material.emissive.setRGB col.r*c, col.g*c, col.b*c
+            
+        if @colorName
+            col = Colors.piston[@colorName]
+            @mesh.children[1].material.emissive.setRGB col.r*c, col.g*c, col.b*c
         
 module.exports = Engine

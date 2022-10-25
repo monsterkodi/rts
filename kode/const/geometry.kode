@@ -329,6 +329,12 @@ class Geometry
         
         geom
         
+    # 00000000    0000000   000   000  000   000  0000000    00000000  0000000    00000000  00000000    0000000   00     00  00000000  
+    # 000   000  000   000  000   000  0000  000  000   000  000       000   000  000       000   000  000   000  000   000  000       
+    # 0000000    000   000  000   000  000 0 000  000   000  0000000   000   000  000000    0000000    000000000  000000000  0000000   
+    # 000   000  000   000  000   000  000  0000  000   000  000       000   000  000       000   000  000   000  000 0 000  000       
+    # 000   000   0000000    0000000   000   000  0000000    00000000  0000000    000       000   000  000   000  000   000  00000000  
+    
     @roundedFrame: (cfg) ->        
 
         cr = cfg.radius ? 0.2
@@ -376,6 +382,43 @@ class Geometry
             box.translate p.x, p.y, p.z
             
         box
+        
+    # 00000000    0000000   000   000  000   000  0000000    00000000  0000000    0000000     0000000    0000000  00000000  
+    # 000   000  000   000  000   000  0000  000  000   000  000       000   000  000   000  000   000  000       000       
+    # 0000000    000   000  000   000  000 0 000  000   000  0000000   000   000  0000000    000000000  0000000   0000000   
+    # 000   000  000   000  000   000  000  0000  000   000  000       000   000  000   000  000   000       000  000       
+    # 000   000   0000000    0000000   000   000  0000000    00000000  0000000    0000000    000   000  0000000   00000000  
+    
+    @roundedBase: (cfg) ->        
+
+        cr = cfg.radius ? 0.2
+        sz = cfg.size ? vec(cfg.size) : vec 1 1 cr
+
+        lb   = @pie radius:cr, dir:Vector.unitY,  start:Vector.minusZ, length:sz.y-cr*2, pos:[-sz.x/2+cr, 0, -sz.z/2+cr]
+        rb   = @pie radius:cr, dir:Vector.minusY, start:Vector.minusZ, length:sz.y-cr*2, pos:[ sz.x/2-cr, 0, -sz.z/2+cr]
+        fb   = @pie radius:cr, dir:Vector.unitX,  start:Vector.minusZ, length:sz.x-cr*2, pos:[0,  sz.y/2-cr, -sz.z/2+cr]
+        bb   = @pie radius:cr, dir:Vector.minusX, start:Vector.minusZ, length:sz.x-cr*2, pos:[0, -sz.y/2+cr, -sz.z/2+cr]
+        
+        rfb = @corner radius:cr, rx:0, ry:180, rz:90, pos:[sz.x/2-cr, sz.y/2-cr, -sz.z/2+cr]
+        lfb = @corner radius:cr, rx:0, ry:180, rz:0, pos:[-sz.x/2+cr, sz.y/2-cr, -sz.z/2+cr]
+        rbb = @corner radius:cr, rx:0, ry:180, rz:180, pos:[sz.x/2-cr,  -sz.y/2+cr, -sz.z/2+cr]
+        lbb = @corner radius:cr, rx:0, ry:180, rz:-90, pos:[-sz.x/2+cr, -sz.y/2+cr, -sz.z/2+cr]
+        
+        rfc = @piecap radius:cr, segs:8, pos:[ sz.x/2-cr,  sz.y/2-cr, -sz.z/2+cr]
+        lfc = @piecap radius:cr, segs:8, pos:[-sz.x/2+cr,  sz.y/2-cr, -sz.z/2+cr], rz:90
+        lbc = @piecap radius:cr, segs:8, pos:[-sz.x/2+cr, -sz.y/2+cr, -sz.z/2+cr], rz:180
+        rbc = @piecap radius:cr, segs:8, pos:[ sz.x/2-cr, -sz.y/2+cr, -sz.z/2+cr], rz:-90
+        
+        corns = @merge rfb, lfb, rbb, lbb
+        frame = @merge lb, rb, fb, bb
+        caps  = @merge lfc, rfc, lbc, rbc
+        base  = @merge frame, corns, caps
+        
+        if cfg.pos
+            p = vec cfg.pos
+            base.translate p.x, p.y, p.z
+            
+        base
         
     #  0000000   0000000   00000000   000   000  00000000  00000000   0000000     0000000   000   000  
     # 000       000   000  000   000  0000  000  000       000   000  000   000  000   000   000 000   

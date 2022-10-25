@@ -7,7 +7,8 @@
 ###
 
 Station = require './station'
-Arm = require './arm'
+Storage = require './storage'
+Arm     = require './arm'
 
 function Central extends Station
 
@@ -25,5 +26,12 @@ function Central extends Station
         @arm = new Arm
         @arm.group.position.z = 5.1
         @group.add @arm.group
+        
+        @storage = new Storage @
+        @storage.group.position.x = 6
+        @group.add @storage.group
 
+        @nodes = []
+        @nodes.push world.addNode point.plus(@docking.position), @name + '.node', true
+        
 module.exports = Central

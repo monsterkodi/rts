@@ -37,7 +37,6 @@ function Track
     del: ->
         
         if @mesh
-            log 'del' @name
             post.emit 'delTrack' @
             
             @node[0]?.removeTrack @
@@ -53,7 +52,32 @@ function Track
             delete @ctrls
             delete @mesh
             delete @rail
+            
+    # 00     00   0000000   000   000   0000000  00000000    
+    # 000   000  000   000  000   000  000       000         
+    # 000000000  000   000  000   000  0000000   0000000     
+    # 000 0 000  000   000  000   000       000  000         
+    # 000   000   0000000    0000000   0000000   00000000    
+            
+    onEnter: -> 
         
+        world.cursorTrack = @
+        
+    onLeave: -> 
+        
+        if world.cursorTrack == @
+            delete world.cursorTrack
+            
+    onDoubleClick: ->
+        
+        log 'split track!'
+        
+    # 00     00   0000000   000   000  00000000  0000000    
+    # 000   000  000   000  000   000  000       000   000  
+    # 000000000  000   000   000 000   0000000   000   000  
+    # 000 0 000  000   000     000     000       000   000  
+    # 000   000   0000000       0      00000000  0000000    
+    
     ctrlMoved: =>
         
         @curve.updateArcLengths()
@@ -83,6 +107,12 @@ function Track
         @curve.updateArcLengths()
         @createRail()
         
+    # 00000000    0000000   000  000      
+    # 000   000  000   000  000  000      
+    # 0000000    000000000  000  000      
+    # 000   000  000   000  000  000      
+    # 000   000  000   000  000  0000000  
+    
     createRail: ->
         
         @rail = new Rail @curve, 100
@@ -95,17 +125,12 @@ function Track
     
         @mesh = new Mesh @rail, Materials.track.rail
         @mesh.name = @name
-        @mesh.castShadow = true
-        @mesh.receiveShadow = true
+        @mesh.setShadow()
         @mesh.handler = @
         
         world.addObject @mesh
         world.addPickable @mesh
-        
-    onDoubleClick: ->
-        
-        log 'split track!'
-        
+                
     nodeOpposite: (node) ->
         
         if      

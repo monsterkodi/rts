@@ -13,8 +13,8 @@ function Station
     @: (@cfg) ->
         
         Station.numStations++
-        @name  = @cfg.name ? "S" + Station.numStations
-        @nodes = []
+        @name  = (@cfg.name ? "S") + Station.numStations
+        
         @group = new Group
         if @cfg.point ➜ @group.position.copy @cfg.point 
         world.addObject   @group
@@ -24,11 +24,7 @@ function Station
         
         world.removeObject @group
         world.removePickable @group
-        
-    addNode: (node) ->
-        
-        @nodes.push node
-        
+                
     update: (delta, timeSum) ->
         
         advance = delta * @speed

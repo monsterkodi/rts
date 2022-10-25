@@ -93,7 +93,7 @@ function Compass
         if hit.name.startsWith 'compass.dot'
             dot = @dots[parseInt hit.name[-1]]
             dot.scale.set 1 1 1
-            dot.material.emissive.copy Color.black
+            dot.material.emissive.copy Colors.black
     
     onMouseDown: (ray, hit) => 
 
@@ -123,6 +123,6 @@ function Compass
 
         for dot in @dots
             dot.scale.set 1 1 1
-            dot.material.emissive.copy Color.black
+            dot.material.emissive.copy Colors.black
                         
 module.exports = Compass

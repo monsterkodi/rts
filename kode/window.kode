@@ -104,6 +104,7 @@ window.onkeydown = (event) ->
         'f'         ➜ post.emit 'toggle' 'flat'
         'm'         ➜ post.emit 'toggle' 'wire'
         'i'         ➜ post.emit 'toggle' 'info'
+        't'         ➜ post.emit 'addTrain'
         'backspace' 'delete' ➜ post.emit 'delete'
         '.'         ➜ prefs.set 'debug' not prefs.get 'debug'; if prefs.get 'debug' then rts.debug.show() else rts.debug.hide()
         'space'     ➜ rts.togglePause()

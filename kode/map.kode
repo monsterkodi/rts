@@ -14,7 +14,36 @@ class Map extends World
     
         # @addObject new Mesh Geom.roundedFrame({}), Materials.ctrl.start
         # @addObject new Mesh Geom.roundedFrame({}), Materials.wireframe
-        @trainTest()
+        # @trainTest()
+        @stationTest()
+        
+    stationTest: ->
+
+        for y in 0..0
+            @addCentral [  0 y*6 0]
+            @addCentral [ 18 y*6 0]
+            @addCentral [-18 y*6 0]
+        
+    #  0000000  000000000   0000000   000000000  000   0000000   000   000  
+    # 000          000     000   000     000     000  000   000  0000  000  
+    # 0000000      000     000000000     000     000  000   000  000 0 000  
+    #      000     000     000   000     000     000  000   000  000  0000  
+    # 0000000      000     000   000     000     000   0000000   000   000  
+    
+    stationTest2: ->
+        
+        for y in -15..15
+            @addCentral [0 y*6 0]
+            @addCentral [ 18 y*6 0]
+            @addCentral [-18 y*6 0]
+            @addCentral [ 36 y*6 0]
+            @addCentral [-36 y*6 0]
+            @addCentral [ 54 y*6 0]
+            @addCentral [-54 y*6 0]
+            @addCentral [ 72 y*6 0]
+            @addCentral [-72 y*6 0]
+            @addCentral [ 90 y*6 0]
+            @addCentral [-90 y*6 0]
 
     # 000000000  00000000    0000000   000  000   000   0000000  
     #    000     000   000  000   000  000  0000  000  000       
@@ -85,7 +114,6 @@ class Map extends World
         train.path.addTrackNode t5, n3
         train.path.addTrackNode t6, n1
         train.path.addTrackNode t1, n2
-        
         
         central = @addCentral [0 0 0]
                 

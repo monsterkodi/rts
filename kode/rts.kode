@@ -67,9 +67,9 @@ window.BufferAttribute = THREE.BufferAttribute  # weird that THREE[e] doens't wo
     
 window.Vector       = require './lib/vector'
 window.Quaternion   = require './lib/quaternion'
-window.Color        = require './const/color'
-window.Geom         = require './const/geometry'
+window.Colors       = require './const/colors'
 window.Materials    = require './const/materials'
+window.Geom         = require './const/geometry'
 window.playSound    = (o,n,c) -> rts.sound.play o,n,c
    
 FPS       = require './lib/fps'
@@ -103,7 +103,7 @@ class RTS
         @renderer = new THREE.WebGLRenderer antialias:true
         @renderer.setPixelRatio window.devicePixelRatio
         
-        @renderer.setClearColor Color.menu.background     
+        @renderer.setClearColor Colors.menu.background     
         @renderer.setSize @view.clientWidth*window.devicePixelRatio, @view.clientHeight*window.devicePixelRatio
         @renderer.shadowMap.enabled = true
         @renderer.shadowMap.type = THREE.PCFSoftShadowMap
@@ -223,7 +223,7 @@ class RTS
     
     setBrightness: (@brightness) =>
         
-        c = Color.clear.clone()
+        c = Colors.clear.clone()
         c.multiplyScalar @brightness
         @renderer.setClearColor c
         @lightAmbient.intensity = @lightIntensityAmbient * @brightness

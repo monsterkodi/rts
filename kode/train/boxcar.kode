@@ -12,9 +12,9 @@ class Boxcar extends Car
         
     setColorByName: (name) ->
         
-        @setColor Color.train[name]
-        log name, Color.piston[name]
+        @setColor Colors.train[name]
+
         @mesh.children[1].material = @mesh.children[1].material.clone()
-        @mesh.children[1].material.emissive.copy Color.piston[name]
+        @mesh.children[1].material.emissive.copy Colors.piston[name]
 
 module.exports = Boxcar

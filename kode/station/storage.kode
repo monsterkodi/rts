@@ -1,0 +1,27 @@
+###
+ 0000000  000000000   0000000   00000000    0000000    0000000   00000000
+000          000     000   000  000   000  000   000  000        000     
+0000000      000     000   000  0000000    000000000  000  0000  0000000 
+     000     000     000   000  000   000  000   000  000   000  000     
+0000000      000      0000000   000   000  000   000   0000000   00000000
+###
+
+function Storage
+
+    @: (@station) ->
+
+        @name = @station.name + '.Storage'
+        
+        @group = new Group
+        @group.name = @name
+        world.addObject   @group
+        world.addPickable @group
+        
+        @frame = world.construct.meshes.station.storage.clone()
+        
+        base = Geom.quad size:[4.4 4.4] normal:Vector.unitZ  
+        
+        @group.add new Mesh base, Materials.station.side
+        @group.add @frame
+
+module.exports = Storage

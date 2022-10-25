@@ -11,11 +11,11 @@ Compass   = require './compass'
 
 function Node
 
-    @numNodes: 0
-    @clickMode: false
+    @numNodes:   0
+    @clickMode:  false
     @skipCenter: false
 
-    @: (point, @name) ->
+    @: (point, @name, @fixed) ->
         
         Node.numNodes++
         
@@ -34,11 +34,12 @@ function Node
         geom = Geom.cylinder height:0.71 radius:0.7 sgmt:32
         @center = new Mesh geom, Materials.node.center
         @center.name = 'node.center'
-        @center.onClick = @onClickCenter
-        @center.onDoubleClick = @onDoubleClickCenter
-        @center.onEnter = @onEnterCenter
-        @center.onLeave = @onLeaveCenter
-        @center.onDrag  = @onDrag
+        if not @fixed
+            @center.onClick = @onClickCenter
+            @center.onDoubleClick = @onDoubleClickCenter
+            @center.onEnter = @onEnterCenter
+            @center.onLeave = @onLeaveCenter
+            @center.onDrag  = @onDrag
         
         geom = new CylinderGeometry 0.5 0.5 1 32
         geom.translate 0 0 -2
@@ -78,8 +79,6 @@ function Node
     del: =>
         
         if @group
-            
-            log 'delNode' @name
             
             world.hideCompass @
             
@@ -141,12 +140,11 @@ function Node
         if Node.clickMode
             @moveInOutDrag ray, hit
             
-            # log 'node.onMouseMove' hit.name
-            
-            if hitName = hit?.name
-                if not hitName.startsWith(@name) and not hitName.startsWith @dragTrack.node[1].name
-                    if hitName.endsWith('.in') or hitName.endsWith('.out')
-                        log "could connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
+        if hitName = hit?.name
+            log hitName, @name
+            if not hitName.startsWith(@name) and not hitName.startsWith @dragTrack.node[1].name
+                if hitName.endsWith('.in') or hitName.endsWith('.out')
+                    log "could connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
         
     onMouseDown: (ray, hit) =>
     onMouseUp: (ray, hit) =>
@@ -218,7 +216,7 @@ function Node
         
         if hitName = hit?.name
 
-            if not hitName.startsWith(@name) and not hitName.startsWith @dragTrack.node[1].name
+            if @dragTrack and not hitName.startsWith(@name) and not hitName.startsWith @dragTrack.node[1].name
                 
                 isIn  = hitName.endsWith '.in'
                 isOut = hitName.endsWith '.out'

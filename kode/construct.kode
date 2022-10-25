@@ -28,6 +28,7 @@ class Construct
         @meshes.station = {}
         @initArmbase()
         @initDocking()
+        @initStorage()
         ●▪ init
         
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  
@@ -57,7 +58,14 @@ class Construct
         
         @meshes.station.docking = new Mesh geom, Materials.station.central
         @meshes.station.docking.setShadow()
-    
+
+    initStorage: ->
+
+        geom = Geom.roundedBase size:[6 6 0.8] radius:0.8 pos:[0 0 0]
+        
+        @meshes.station.storage = new Mesh geom, Materials.station.central
+        @meshes.station.storage.setShadow()
+        
     # 00000000  000   000   0000000   000  000   000  00000000  
     # 000       0000  000  000        000  0000  000  000       
     # 0000000   000 0 000  000  0000  000  000 0 000  0000000   
