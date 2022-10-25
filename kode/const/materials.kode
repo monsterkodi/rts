@@ -51,6 +51,8 @@ Materials =
         inactive:       new THREE.MeshStandardMaterial color:Color.menu.inactive,     metalness: 0.9, roughness: 0.75
         activeHigh:     new THREE.MeshStandardMaterial color:Color.menu.activeHigh,   metalness: 0.9, roughness: 0.75
         inactiveHigh:   new THREE.MeshStandardMaterial color:Color.menu.inactiveHigh, metalness: 0.9, roughness: 0.75
+    physics:
+        chain:          new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5, roughness: 0.2
 
     setWire: (wire) ->
         

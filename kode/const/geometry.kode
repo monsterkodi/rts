@@ -117,8 +117,8 @@ class Geometry
     
     @cylindonut: (height=1, outerRadius=1, innerRadius=outerRadius/2, sgmt=24) ->
         
-        geom  = @cylinder height, outerRadius, sgmt
-        inner = @cylinder height, innerRadius, sgmt
+        geom  = @cylinder height:height, radius:outerRadius, sgmt:sgmt
+        inner = @cylinder height:height, radius:innerRadius, sgmt:sgmt
         geom  = @subtract geom, inner
         geom
         

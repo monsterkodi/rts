@@ -41,8 +41,7 @@ class Engine extends Car
             c = 0.5+sin
         else
             c = 0.5+0.5*sin
-        # col = @mesh.material.color
         col = Color.piston[@colorName]
-        @mesh.children[1].material.emissive.setRGB col.r*2*c, col.g*c, col.b*c
+        @mesh.children[1].material.emissive.setRGB col.r*c, col.g*c, col.b*c
         
 module.exports = Engine

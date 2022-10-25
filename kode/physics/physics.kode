@@ -29,7 +29,7 @@ function Physics
         @addChain()
             
         geom  = Geom.sphere radius:0.25 sgmt:8
-        @mesh = new Mesh geom, Materials.wireframe
+        @mesh = new Mesh geom, Materials.physics.chain
         world.addObject @mesh
         
         ground = @world.add 
@@ -64,10 +64,10 @@ function Physics
         
         @boxes = []
     
-        for i in 0...2
+        for i in 0...4
     
             b = @world.add type:'sphere' size:[0.5, 0.5, 0.5], pos:[p.x, p.y, p.z-i*0.5], density:0.5 restitution:1 move:true
-            b.mesh = new Mesh Geom.sphere(radius:0.25 sgmt:8), Materials.wireframe
+            b.mesh = new Mesh Geom.sphere(radius:0.25 sgmt:8), Materials.physics.chain
             world.addObject b.mesh
             @boxes.push b 
     

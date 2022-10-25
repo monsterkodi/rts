@@ -34,19 +34,19 @@ Color =
         in:             color 0x666666
          
     train:
-        yellow:         color  0xffff00
-        orange:         color  0xff8800
         red:            color  0xff0000
         green:          color  0x008800
+        yellow:         color  0xffff00
         blue:           color  0x8888ff
+        black:          color  0x111111
         white:          color  0xffffff
 
     piston:
+        red:            color  0xffff00
+        green:          color  0xffff00
         yellow:         color  0xffff00
-        orange:         color  0xff8800
-        red:            color  0xff8888
-        green:          color  0x88ff88
         blue:           color  0x8888ff
+        black:          color  0xffffff
         white:          color  0xffffff
         
     track:
