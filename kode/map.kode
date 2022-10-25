@@ -68,7 +68,6 @@ class Map extends World
         t6 = @connectNodes n3, n1, 't6'
                
         train = @addTrain 1 'red'
-        @addBoxcar train
         train.path.addTrackNode t1, n2
         train.path.addTrackNode t2, n1
         train.path.addTrackNode t1, n2
@@ -79,12 +78,12 @@ class Map extends World
         train.path.addTrackNode t6, n1
 
         train = @addTrain 1 'yellow'
-        @addBoxcar train, 4
+        @addBoxcar train, 2
         train.path.addTrackNode t2, n1
         train.path.addTrackNode t1, n2
 
         train = @addTrain 1 'blue'
-        @addBoxcar train, 2
+        @addBoxcar train
         train.path.addTrackNode t4, n2
         train.path.addTrackNode t5, n3
         train.path.addTrackNode t6, n1
@@ -93,12 +92,10 @@ class Map extends World
         train.path.addTrackNode t3, n3
         
         train = @addTrain 1 'green'
-        @addBoxcar train
         train.path.addTrackNode t1, n2
         train.path.addTrackNode t2, n1
 
         train = @addTrain 1 'black'
-        @addBoxcar train
         train.path.addTrackNode t3, n3
         train.path.addTrackNode t4, n2
         train.path.addTrackNode t5, n3
@@ -107,7 +104,6 @@ class Map extends World
         train.path.addTrackNode t2, n1
 
         train = @addTrain 1 'white'
-        @addBoxcar train
         train.path.addTrackNode t2, n1
         train.path.addTrackNode t3, n3
         train.path.addTrackNode t4, n2

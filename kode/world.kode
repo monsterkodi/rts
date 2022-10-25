@@ -202,37 +202,30 @@ function World extends Convert
     
     addTrain: (speed = 1, name='train') ->
 
-        train = new Train speed:speed, name:name
+        train = new Train {speed, name}
+        @addEngine train
+        @addBoxcar train
             
         @traffic.addTrain train
         @trains.push train
-        
-        @addEngine train
         
         train.setColorByName name if name in Object.keys Colors.train
         train
 
     addEngine: (train) ->
-        
-        engine = new Engine @construct.meshes.engine.clone()
-            
+                    
+        engine = train.addCar new Engine train
         @scene.add engine.mesh
         @pickables.push engine.mesh
-        
-        train.addCar engine
-        
         engine
         
     addBoxcar: (train, num=1) ->
         
         for n in 0...num
-            boxcar = new Boxcar @construct.meshes.boxcar.clone()
-                
+            boxcar = train.addCar new Boxcar train
             @scene.add boxcar.mesh
             @pickables.push boxcar.mesh
-            
-            boxcar.setColorByName train.name
-            train.addCar boxcar
+            boxcar.setColorByName train.name if train.name in Object.keys Colors.train
             
     # 000000000  00000000    0000000    0000000  000   000  
     #    000     000   000  000   000  000       000  000   

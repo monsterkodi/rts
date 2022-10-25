@@ -3,6 +3,10 @@ Car = require './car'
 
 class Boxcar extends Car
 
+    @: (@train) ->
+        
+        super world.construct.meshes.boxcar.clone()
+    
     setColor: (color) ->
         
         super color

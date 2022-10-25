@@ -8,7 +8,7 @@ function Train
     @: (@cfg) ->
         
         Train.numTrains++
-        @name     = @cfg.name ? "T" + Train.numTrains
+        @name     = (@cfg.name ? "T") + Train.numTrains
         @path     = new Path @
         @speed    = @cfg.speed ? 1
         @topSpeed = @speed
@@ -17,6 +17,8 @@ function Train
     addCar: (car) ->
         
         @cars.push car
+        car.mesh.name = @name + ".car#{@cars.length-1}"
+        car
         
     setColor: (color) ->
         

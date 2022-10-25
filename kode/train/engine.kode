@@ -9,6 +9,10 @@
 Car = require './car'
 
 class Engine extends Car
+    
+    @: (@train) ->
+        
+        super world.construct.meshes.engine.clone()
 
     setColor: (color) ->
         

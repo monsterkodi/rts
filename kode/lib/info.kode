@@ -42,10 +42,10 @@ class Info
             add "   delta  #{train.path.delta.toFixed 1}"
             add "   tail   #{train.tailDelta().toFixed 1}"
             add "   length #{train.path.getLength().toFixed 1}"
-            add "   prev   #{train.path.prevDistance().toFixed 1}"
+            # add "   prev   #{train.path.prevDistance().toFixed 1}"
             add "   next   #{train.path.nextDistance().toFixed 1}"
             add "   prev tail #{train.path.prevDistance(train.tailDelta()).toFixed 1}"
-            add "   next tail #{train.path.nextDistance(train.tailDelta()).toFixed 1}"
+            # add "   next tail #{train.path.nextDistance(train.tailDelta()).toFixed 1}"
             
         pi = add "oimo" 
         pi.innerHTML = world.physics.world.getInfo()
