@@ -15,8 +15,9 @@ Compass   = require './track/compass'
 Construct = require './construct'
 Convert   = require './convert'
 Traffic   = require './traffic'
-Central   = require './station/central'
 Physics   = require './physics/physics'
+CentralStation = require './station/centralstation'
+MiningStation  = require './station/miningstation'
 
 function World extends Convert
     
@@ -288,9 +289,19 @@ function World extends Convert
         track.node[1] = n2
         track
         
-    addCentral: (point) ->
+    #  0000000  000000000   0000000   000000000  000   0000000   000   000  
+    # 000          000     000   000     000     000  000   000  0000  000  
+    # 0000000      000     000000000     000     000  000   000  000 0 000  
+    #      000     000     000   000     000     000  000   000  000  0000  
+    # 0000000      000     000   000     000     000   0000000   000   000  
+    
+    addCentralStation: (point) ->
         
-        central = new Central vec(point), 'central'
+        station = new CentralStation vec point
+
+    addMiningStation: (point, resource) ->
+        
+        station = new MiningStation vec(point), resource
         
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       

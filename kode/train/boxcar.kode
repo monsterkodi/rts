@@ -7,6 +7,10 @@ class Boxcar extends Car
         
         super world.construct.meshes.boxcar.clone()
     
+    addCargo: (cargo) ->
+        
+        @mesh.add cargo.mesh
+        
     setColor: (color) ->
         
         super color

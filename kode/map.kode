@@ -19,10 +19,11 @@ class Map extends World
         
     stationTest: ->
 
-        for y in 0..0
-            @addCentral [  0 y*6 0]
-            @addCentral [ 18 y*6 0]
-            @addCentral [-18 y*6 0]
+        @addCentralStation [  0 0 0]
+        @addMiningStation  [ 18 0 0], 'blood'
+        @addMiningStation  [-18 0 0], 'stone'
+        @addMiningStation  [ 36 0 0], 'water'
+        @addMiningStation  [-36 0 0], 'chalk'
         
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  
     # 000          000     000   000     000     000  000   000  0000  000  
@@ -32,18 +33,19 @@ class Map extends World
     
     stationTest2: ->
         
+        @addCentralStation [0 0 0]
         for y in -15..15
-            @addCentral [0 y*6 0]
-            @addCentral [ 18 y*6 0]
-            @addCentral [-18 y*6 0]
-            @addCentral [ 36 y*6 0]
-            @addCentral [-36 y*6 0]
-            @addCentral [ 54 y*6 0]
-            @addCentral [-54 y*6 0]
-            @addCentral [ 72 y*6 0]
-            @addCentral [-72 y*6 0]
-            @addCentral [ 90 y*6 0]
-            @addCentral [-90 y*6 0]
+            @addMiningStation [  0 y*6 0], 'gold' if y != 0
+            @addMiningStation [ 18 y*6 0], 'silver'
+            @addMiningStation [-18 y*6 0], 'gold'
+            @addMiningStation [ 36 y*6 0], 'steel'
+            @addMiningStation [-36 y*6 0], 'chalk'
+            @addMiningStation [ 54 y*6 0], 'gold'
+            @addMiningStation [-54 y*6 0], 'silver'
+            @addMiningStation [ 72 y*6 0], 'gold'
+            @addMiningStation [-72 y*6 0], 'steel'
+            @addMiningStation [ 90 y*6 0], 'gold'
+            @addMiningStation [-90 y*6 0], 'silver'
 
     # 000000000  00000000    0000000   000  000   000   0000000  
     #    000     000   000  000   000  000  0000  000  000       

@@ -1,0 +1,24 @@
+###
+00     00  000  000   000  000  000   000   0000000    0000000  000000000   0000000   000000000  000   0000000   000   000
+000   000  000  0000  000  000  0000  000  000        000          000     000   000     000     000  000   000  0000  000
+000000000  000  000 0 000  000  000 0 000  000  0000  0000000      000     000000000     000     000  000   000  000 0 000
+000 0 000  000  000  0000  000  000  0000  000   000       000     000     000   000     000     000  000   000  000  0000
+000   000  000  000   000  000  000   000   0000000   0000000      000     000   000     000     000   0000000   000   000
+###
+
+CargoStation = require './cargostation'
+
+function MiningStation extends CargoStation
+
+    @numMining: 0
+
+    @: (point, @resource) ->
+        
+        MiningStation.numMining++
+        
+        super {point, name:"Mining#{MiningStation.numMining}(#{@resource})"}
+        
+        @base.children[0].material = Materials.mining[@resource]
+        @storage.group.children[0].material = Materials.mining[@resource]
+                
+module.exports = MiningStation

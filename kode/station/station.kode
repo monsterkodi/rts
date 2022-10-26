@@ -8,13 +8,10 @@
 
 function Station
 
-    @numStations: 0
-
     @: (@cfg) ->
         
-        Station.numStations++
-        @name  = (@cfg.name ? "S") + Station.numStations
-        
+        log 'new station' @cfg
+        @name  = @cfg.name ? "Station?"
         @group = new Group
         if @cfg.point ➜ @group.position.copy @cfg.point 
         world.addObject   @group
@@ -22,7 +19,7 @@ function Station
         
     del: ->
         
-        world.removeObject @group
+        world.removeObject   @group
         world.removePickable @group
                 
     update: (delta, timeSum) ->
