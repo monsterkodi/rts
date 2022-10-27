@@ -55,7 +55,8 @@ require 'three/examples/js/postprocessing/ShaderPass'
 require 'three/examples/js/postprocessing/EffectComposer'
 require 'three/examples/js/postprocessing/RenderPass'
 require 'three/examples/js/postprocessing/UnrealBloomPass'
-
+{ Text } = require 'troika-three-text'
+window.Text = Text
 { EffectComposer, RenderPass, UnrealBloomPass } = THREE
 
 setShadow = -> @castShadow = @receiveShadow = true

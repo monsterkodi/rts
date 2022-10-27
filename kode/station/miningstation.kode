@@ -16,7 +16,7 @@ function MiningStation extends CargoStation
         
         MiningStation.numMining++
         
-        super {point, name:"Mining#{MiningStation.numMining}(#{@resource})"}
+        super {point, name:"M#{@resource[0]}#{MiningStation.numMining}"}
         
         @base.children[0].material = Materials.mining[@resource]
         @storage.group.children[0].material = Materials.mining[@resource]

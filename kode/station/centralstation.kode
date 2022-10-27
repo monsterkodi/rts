@@ -12,6 +12,6 @@ function CentralStation extends CargoStation
 
     @: (point) ->
         
-        super {point, name:'CentralStation'}
+        super {point, name:'C'}
                 
 module.exports = CentralStation

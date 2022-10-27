@@ -58,17 +58,21 @@ function Traffic
     
     allowTrainAdvance: (train, advance) ->
         
-        if train.isOneWay() and not train.path.isLoop
+        if not train.path.isLoop
             halfEngineLength = 1.9
             maxAdvance = train.path.getLength()-train.path.delta-halfEngineLength
             if advance > maxAdvance < 0.0001
                 if @extendTrainPath train
-                    log 'path extended'
+                    # log 'path extended'
                     return @allowTrainAdvance train, advance
                 else
-                    log 'stopped at end'
-                    return maxAdvance
-            log maxAdvance, advance, train.isOneWay(), train.path.isLoop
+                    if train.isOneWay()
+                        log train.name, 'stopped at path end'
+                        return maxAdvance
+                    else
+                        train.reverse()
+                        return @allowTrainAdvance train, advance
+            # log maxAdvance, advance, train.isOneWay(), train.path.isLoop
             advance = Math.min maxAdvance, advance
             
         delta = train.path.delta+advance
@@ -92,6 +96,7 @@ function Traffic
         nn = train.path.nextNode()
         ot = nn.oppositeTracks train.path.currentTrack()
         if ot.length 
+            # log nn.name, ot
             train.path.addTrackNode ot[0], ot[0].nodeOpposite nn
             return ot[0]
 

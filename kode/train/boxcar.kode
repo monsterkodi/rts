@@ -15,14 +15,14 @@ class Boxcar extends Car
         
         super color
         
-        @mesh.children[1].material = @mesh.children[1].material.clone()
-        @mesh.children[1].material.emissive.copy color
+        @mesh.children[0].material = @mesh.children[0].material.clone()
+        @mesh.children[0].material.emissive.copy color
         
     setColorByName: (name) ->
         
         @setColor Colors.train[name]
 
-        @mesh.children[1].material = @mesh.children[1].material.clone()
-        @mesh.children[1].material.emissive.copy Colors.piston[name]
+        @mesh.children[0].material = @mesh.children[0].material.clone()
+        @mesh.children[0].material.emissive.copy Colors.piston[name]
 
 module.exports = Boxcar

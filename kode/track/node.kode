@@ -33,7 +33,7 @@ function Node
         
         geom = Geom.cylinder height:0.71 radius:0.7 sgmt:32
         @center = new Mesh geom, Materials.node.center
-        @center.name = 'node.center'
+        @center.name = @name + '.center'
         if not @fixed
             @center.onClick = @onClickCenter
             @center.onDoubleClick = @onDoubleClickCenter
@@ -70,6 +70,12 @@ function Node
         @group.add @center
         @group.add @inMesh
         @group.add @outMesh
+
+        label = world.addLabel text:@name, size:0.5 mono:true
+        label.position.z = 0.5
+        label.color = 0xffffff
+        label.name = @name + '.label'
+        @center.add label
         
         world.addPickable @group
         world.addObject   @group
@@ -322,6 +328,12 @@ function Node
             @nodeBox.material = @train.cars[0].mesh.material
             for block in @blocks
                 block.material = @nodeBox.material
+                
+            @inMesh.scale.set 1 1 0.72
+            @outMesh.scale.set 1 1 0.72
+        else
+            @inMesh.scale.set 1 1 1
+            @outMesh.scale.set 1 1 1
         
     # 0000000    000       0000000    0000000  000   000  
     # 000   000  000      000   000  000       000  000   
@@ -343,11 +355,11 @@ function Node
         mesh.lookAt Vector.tmp
         world.addObject mesh
         @blocks.push mesh
-        
+                
     unblock: ->
         
         @setTrain null
-        
+                
         for t in @blockedTrains
             t.unblock()            
         

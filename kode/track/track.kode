@@ -116,10 +116,17 @@ function Track
     createRail: ->
         
         @rail = new Rail @curve, 100
+                
         if @mesh
             @mesh.geometry = @rail
         else
             @createMesh()                
+            
+        @curve.getPointAt 0.5, @label.position
+        @label.position.z = 0.36
+        
+        @curve.getTangentAt 0.5, Vector.tmp
+        @label.quaternion.copy Quaternion.unitVectors Vector.unitY, Vector.tmp
         
     createMesh: ->    
     
@@ -127,6 +134,9 @@ function Track
         @mesh.name = @name
         @mesh.setShadow()
         @mesh.handler = @
+        
+        @label = world.addLabel text:@name, size:0.5, mono:true
+        @mesh.add @label
         
         world.addObject @mesh
         world.addPickable @mesh

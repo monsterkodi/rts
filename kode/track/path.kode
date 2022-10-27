@@ -20,6 +20,29 @@ function Path
         post.on 'delTrack' @onDelTrack
         post.on 'delNode'  @onDelNode
         
+    toString: ->
+        s = @name + ' ' + @isLoop ? 'loop' : ''
+        s += '\n'
+        for i in 0...@tracks.length
+            s += @tracks[i].name
+            s += ' '
+            if @revers[i]
+                s += @tracks[i].node[1].name + ' ◂ ' + @tracks[i].node[0].name
+            else
+                s += @tracks[i].node[0].name + ' ▸ ' + @tracks[i].node[1].name
+            # s += @nodes[i].name
+            s += '\n'
+        s
+            
+    reverse: ->
+        
+        @tracks.reverse()
+        @revers.reverse()
+        @revers = @revers.map (r) -> not r
+        @nodes.reverse()
+        @nodes.shift()
+        @nodes.push @tracks[-1].node[@revers[-1] ? 0 : 1]
+        
     del: ->
         log '-Path' @name
         @train.path = null
@@ -28,7 +51,9 @@ function Path
        
         ts = @tracks[0]
         te = @tracks[-1]
-        @isLoop = ts.node[0] == te.node[1]
+        ns = ts.node[@revers[0] ? 1 : 0] 
+        ne = te.node[@revers[-1] ? 0 : 1] 
+        @isLoop = ns == ne
         
     onDelTrack: (track) =>
         
@@ -136,7 +161,7 @@ function Path
         
         @getPoint mesh.position, offset
         @getTangent Vector.tmp, offset
-        Vector.tmp.add mesh.position 
+        Vector.tmp.add mesh.position
         mesh.up.set 0 0 1
         mesh.lookAt Vector.tmp
         

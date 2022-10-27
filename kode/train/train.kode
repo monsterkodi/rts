@@ -16,6 +16,20 @@ function Train
         @cars     = []
         
     isOneWay: -> return not (@cars[-1] instanceof Engine)
+    
+    reverse: ->
+        
+        if not @isOneWay()
+        
+            @path.delta = @path.getLength() - @tailDelta()
+            @path.reverse()
+            head = @cars.shift()
+            tail = @cars.pop()
+            @cars.unshift tail
+            @cars.push head
+            
+        else
+            warn 'cant reverse oneWay train!'
         
     addCar: (car) ->
         

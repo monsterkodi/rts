@@ -26,6 +26,7 @@ class Debug
         @toggle text:'info'   set: setInfo, get: getInfo
         @toggle text:'wire'                 parent:@mats, set: Materials.setWire, get: Materials.getWire
         @toggle text:'flat'                 parent:@mats, set: Materials.setFlat, get: Materials.getFlat
+        @toggle text:'lable'  pref:'lable' parent:@mats,  set: world.setLabels,   get: world.getLabels
         @toggle text:'axes'   pref:'axes'   parent:@help, obj: rts.axesHelper,         key:'visible'
         @toggle text:'arrow'  pref:'arrow'  parent:@help, obj: rts.arrowHelper,        key:'visible'
         @toggle text:'center' pref:'center' parent:@help, obj: rts.centerHelper,       key:'visible'
@@ -36,9 +37,9 @@ class Debug
                 
         document.body.appendChild @elem
         
-        post.on 'worldSpeed' @updateWorldSpeed
-        post.on 'brightness' @updateBrightness
-        post.on 'toggle'     @doToggle
+        post.on 'worldSpeed'   @updateWorldSpeed
+        post.on 'brightness'   @updateBrightness
+        post.on 'toggle'       @doToggle
 
     show: => @elem.style.display = 'block'
     hide: => @elem.style.display = 'none'
@@ -132,8 +133,6 @@ class Debug
     
         t = @toggles[name]
         Debug.tglBtn t, t.cfg
-        # t.cfg.obj[t.cfg.key] = not t.cfg.obj[t.cfg.key]
-        # t.classList[t.cfg.obj[t.cfg.key] ? 'add' : 'remove'] 'on'
         
     clampZero: (v,d,m) ->
         v += d

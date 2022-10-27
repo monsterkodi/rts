@@ -5,9 +5,10 @@ main            js/main.js
 author          monsterkodi
 license         Unlicense
 dependencies
-                kxk     ../kxk
-                oimo    ^1.0.9
-                three   ./three
+                kxk             ../kxk
+                oimo            ^1.0.9
+                three           ./three
+                troika-three-text  ^0.46.4
 devDependencies
                 electron        ^21.1.0
                 electron-builder  ^23.6.0

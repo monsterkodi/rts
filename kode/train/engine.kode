@@ -13,6 +13,13 @@ class Engine extends Car
     @: (@train) ->
         
         super world.construct.meshes.engine.clone()
+        
+        label = world.addLabel text:@train.name, size:0.5 mono:true
+        label.position.z = 2.0
+        label.position.y = 0.9
+        label.color = 0xffffff
+        label.name = @train.name + '.label'
+        @mesh.add label
 
     setColor: (color) ->
         
@@ -35,7 +42,20 @@ class Engine extends Car
         @mesh.children[3].material = @mesh.children[3].material.clone() # lights
         @mesh.children[3].material.emissive.copy Colors.piston[@colorName]
         
+    isRearEngine: ->
+        
+        @ == @train.cars[-1]
+        
+    moveToPathDelta: (path, delta) ->
+        
+        super path, delta
+        
+        if @isRearEngine()
+            @mesh.rotateY deg2rad 180
+        
     update: (delta, timeSum, train) ->
+        
+        return if @isRearEngine()
         
         x = 0.2*Math.sin 2*timeSum*train.speed
         @mesh.children[1].scale.set 1.2+x, 1 1

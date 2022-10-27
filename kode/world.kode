@@ -6,16 +6,16 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-Node      = require './track/node'
-Track     = require './track/track'
-Train     = require './train/train'
-Engine    = require './train/engine'
-Boxcar    = require './train/boxcar'
-Compass   = require './track/compass'
-Construct = require './construct'
-Convert   = require './convert'
-Traffic   = require './traffic'
-Physics   = require './physics/physics'
+Node           = require './track/node'
+Track          = require './track/track'
+Train          = require './train/train'
+Engine         = require './train/engine'
+Boxcar         = require './train/boxcar'
+Compass        = require './track/compass'
+Construct      = require './construct'
+Convert        = require './convert'
+Traffic        = require './traffic'
+Physics        = require './physics/physics'
 CentralStation = require './station/centralstation'
 MiningStation  = require './station/miningstation'
 
@@ -25,8 +25,8 @@ function World extends Convert
                 
         window.world = @
         
-        @trains = []
         @animations = []
+        @labels  = []
         
         @physics = new Physics
         @traffic = new Traffic
@@ -42,7 +42,38 @@ function World extends Convert
         post.on 'addTrain' @onAddTrain
         
         @addFloor()
+           
+        label = @addLabel text:'▴➜▪➜●' mono:true position:[0 -2.61 1.2], color:0xffffff, scale:1.4
+        label.rotateX deg2rad 90
+        @scene.add label
+        
+        @setLabels prefs.get 'labels'
+        
         @setSpeed prefs.get 'speed' 1
+        
+    addLabel: (cfg) ->
+        
+        label = new Text()
+        label.text = cfg.text
+        label.fontSize = cfg.size ? 1
+        label.font = '../pug/' + (cfg.mono ? 'Meslo.woff' : 'Bahnschrift.woff')
+        label.position.copy vec cfg.position ? 0
+        label.color = cfg.color ? 0x9966FF
+        label.anchorX = 'center'
+        label.anchorY = 'middle'
+        label.noHitTest = true
+        label.depthOffset = -0.1
+        label.visible = @getLabels()
+        label.sync()
+        @labels.push label
+        label
+        
+    toggleLabels: => @setLabels not @getLabels()
+    getLabels: => prefs.get 'labels'
+    setLabels: (on=true) =>
+        prefs.set 'labels' on
+        for label in @labels
+            label.visible = on
                 
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -162,7 +193,7 @@ function World extends Convert
         @physics.simulate scaledDelta, @timeSum
         @traffic.simulate scaledDelta, @timeSum
         
-        for train in @trains
+        for train in @traffic.trains
             train.update scaledDelta, @timeSum            
         
     # 00000000  000       0000000    0000000   00000000   
@@ -202,16 +233,19 @@ function World extends Convert
             train.path.delta = train.path.getLength()/2
             # train.path.addTrackNode @cursorTrack, @cursorTrack.node[0]
     
-    addTrain: (speed = 1, name='train') ->
+    addTrain: (speed=1, name='T') ->
 
         train = new Train {speed, name}
         @addEngine train
         @addBoxcar train
+        @addEngine train
             
         @traffic.addTrain train
-        @trains.push train
         
-        train.setColorByName name if name in Object.keys Colors.train
+        colorName = 'white'
+        colorName = name if name in Object.keys Colors.train
+        train.setColorByName colorName
+        
         train
 
     addEngine: (train) ->
