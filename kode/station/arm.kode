@@ -45,12 +45,13 @@ function Arm
         
         piston = Geom.cylinder height:0.6 radius: 0.3
         piston.translate 0 0 0.4
-        @wristPiston = new Mesh piston, Materials.train.piston
+        @wristPiston = new Mesh piston, Materials.train.piston.clone()
         @wristMesh.add @wristPiston
         
-        geom = Geom.merge hand, palm#, handtop
+        geom = Geom.merge hand, palm
         @handMesh = new Mesh geom, Materials.station.central
         @handMesh.setShadow()
+        
         @handMesh.add new Mesh handtop, Materials.station.side
         @group.add @handMesh
 
@@ -60,7 +61,7 @@ function Arm
         
         piston = Geom.cylinder height:1.6 radius: 0.4
         piston.rotateX deg2rad 90
-        @elbowPiston = new Mesh piston, Materials.train.piston
+        @elbowPiston = new Mesh piston, Materials.train.piston.clone()
         @elbowMesh.add @elbowPiston
         
         @curveHelper = new CurveHelper
@@ -127,7 +128,10 @@ function Arm
                 @bone[1].quaternion.copy Quaternion.unitVectors Vector.unitZ, elbowPos.to(wristPos).normalize()
             
             c = clamp 0 1 Math.sin timeSum
-            col = @baseMesh.material.color
+            # col = @baseMesh.material.color
+            col = @handMesh.children[0].material.color
+            @elbowPiston.material.color.copy col
+            @wristPiston.material.color.copy col
             @elbowPiston.material.emissive.setRGB col.r*c, col.g*c, col.b*c
             @wristPiston.material.emissive.copy @elbowPiston.material.emissive
                 

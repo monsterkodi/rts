@@ -24,16 +24,24 @@ function Path
         log '-Path' @name
         @train.path = null
         
+    updateLoop: ->
+       
+        ts = @tracks[0]
+        te = @tracks[-1]
+        @isLoop = ts.node[0] == te.node[1]
+        
     onDelTrack: (track) =>
         
         while (i = @tracks.indexOf track) >= 0
             @tracks.splice i, 1
             @revers.splice i, 1
             
-        log 'deltrack' @name, track.name, @tracks.length, @revers.length, @nodes.length
+        # log 'deltrack' @name, track.name, @tracks.length, @revers.length, @nodes.length
         
         if empty @tracks
             @del()
+        else
+            @updateLoop()
             
     onDelNode: (node) =>
         
@@ -45,8 +53,11 @@ function Path
         @nodes.push node
         @tracks.push track
         @revers.push track.node[0] == node
+        
+        @updateLoop()
                            
     getLength: -> 
+        
         cd = 0
         for ti in 0...@tracks.length
             if @tracks[ti].curve

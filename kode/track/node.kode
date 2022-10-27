@@ -141,7 +141,7 @@ function Node
             @moveInOutDrag ray, hit
             
         if hitName = hit?.name
-            log hitName, @name
+            # log hitName, @name
             if not hitName.startsWith(@name) and not hitName.startsWith @dragTrack.node[1].name
                 if hitName.endsWith('.in') or hitName.endsWith('.out')
                     log "could connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
@@ -378,6 +378,12 @@ function Node
         if 
             track in @inTracks  ➜ @inTracks
             track in @outTracks ➜ @outTracks
-                                ➜ log 'no siblingTrack' 
+                                ➜ log 'no siblingTracks' 
+                                
+    oppositeTracks: (track) ->
+        if 
+            track in @inTracks  ➜ @outTracks
+            track in @outTracks ➜ @inTracks
+                                ➜ log 'no oppositeTracks' 
         
 module.exports = Node

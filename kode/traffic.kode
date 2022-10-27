@@ -50,10 +50,31 @@ function Traffic
                     if n.train == train
                         n.unblock()
                                     
+    #  0000000   0000000    000   000   0000000   000   000   0000000  00000000  
+    # 000   000  000   000  000   000  000   000  0000  000  000       000       
+    # 000000000  000   000   000 000   000000000  000 0 000  000       0000000   
+    # 000   000  000   000     000     000   000  000  0000  000       000       
+    # 000   000  0000000        0      000   000  000   000   0000000  00000000  
+    
     allowTrainAdvance: (train, advance) ->
         
+        if train.isOneWay() and not train.path.isLoop
+            halfEngineLength = 1.9
+            maxAdvance = train.path.getLength()-train.path.delta-halfEngineLength
+            if advance > maxAdvance < 0.0001
+                if @extendTrainPath train
+                    log 'path extended'
+                    return @allowTrainAdvance train, advance
+                else
+                    log 'stopped at end'
+                    return maxAdvance
+            log maxAdvance, advance, train.isOneWay(), train.path.isLoop
+            advance = Math.min maxAdvance, advance
+            
         delta = train.path.delta+advance
+        
         track = train.path.trackAtDelta delta
+        
         for other in @trains
             continue if other == train
             if other.tailTrack() == track
@@ -65,5 +86,13 @@ function Traffic
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
                     return 0
         advance
+        
+    extendTrainPath: (train) ->
+        
+        nn = train.path.nextNode()
+        ot = nn.oppositeTracks train.path.currentTrack()
+        if ot.length 
+            train.path.addTrackNode ot[0], ot[0].nodeOpposite nn
+            return ot[0]
 
 module.exports = Traffic

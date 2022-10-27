@@ -23,7 +23,7 @@ class Map extends World
         @addMiningStation  [ 18 0 0], 'blood'
         @addMiningStation  [-18 0 0], 'stone'
         @addMiningStation  [ 36 0 0], 'water'
-        @addMiningStation  [-36 0 0], 'chalk'
+        # @addMiningStation  [-36 0 0], 'chalk'
         
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  
     # 000          000     000   000     000     000  000   000  0000  000  

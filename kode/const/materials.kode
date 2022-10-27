@@ -46,11 +46,11 @@ Materials =
     track:
         rail:           new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     node:
-        center:         new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
+        center:         new THREE.MeshStandardMaterial color:Colors.track,    metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
         out:            new THREE.MeshStandardMaterial color:Colors.node.out, metalness: 0.5, roughness: 0.5
         in:             new THREE.MeshStandardMaterial color:Colors.node.in,  metalness: 0.5, roughness: 0.5
         highlightIn:    new THREE.MeshStandardMaterial color:Colors.node.in,  metalness: 0.5, roughness: 0.5,  emissive: Colors.node.in
-        highlightOut:   new THREE.MeshStandardMaterial color:Colors.node.out,  metalness: 0.5, roughness: 0.5, emissive: Colors.node.out
+        highlightOut:   new THREE.MeshStandardMaterial color:Colors.node.out, metalness: 0.5, roughness: 0.5, emissive: Colors.node.out
     menu:
         active:         new THREE.MeshStandardMaterial color:Colors.menu.active,       metalness: 0.2, roughness: 0.5, emissive: Colors.menu.active
         inactive:       new THREE.MeshStandardMaterial color:Colors.menu.inactive,     metalness: 0.9, roughness: 0.75

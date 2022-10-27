@@ -199,7 +199,8 @@ function World extends Convert
         if @cursorTrack and @cursorTrack.node[0] and @cursorTrack.node[1]
             train = @addTrain()
             train.path.addTrackNode @cursorTrack, @cursorTrack.node[1]
-            train.path.addTrackNode @cursorTrack, @cursorTrack.node[0]
+            train.path.delta = train.path.getLength()/2
+            # train.path.addTrackNode @cursorTrack, @cursorTrack.node[0]
     
     addTrain: (speed = 1, name='train') ->
 
