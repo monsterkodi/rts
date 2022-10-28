@@ -13,5 +13,9 @@ function CentralStation extends CargoStation
     @: (point) ->
         
         super {point, name:'C'}
-                
+        
+        label = world.addLabel text:'▴➜▪➜●' mono:true position:[0 -2.61 1.2], color:0xffffff, scale:1.4
+        label.rotateX deg2rad 90
+        @group.add label
+                        
 module.exports = CentralStation

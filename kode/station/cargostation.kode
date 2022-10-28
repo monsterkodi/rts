@@ -31,7 +31,6 @@ function CargoStation extends Station
         @storage.group.position.x = 6
         @group.add @storage.group
 
-        @nodes = []
-        @nodes.push world.addNode @cfg.point.plus(@docking.position), 'n'+@name, true
+        @node = world.addNode @cfg.point.plus(@docking.position), 'n'+@name, true
 
 module.exports = CargoStation

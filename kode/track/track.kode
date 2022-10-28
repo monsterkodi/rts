@@ -34,6 +34,7 @@ function Track
                     
         @createRail()     
         
+        @mesh.track  = @
         @mesh.toSave = @toSave
         @mesh.toSave.key = 'tracks'
         

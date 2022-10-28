@@ -10,16 +10,19 @@ CargoStation = require './cargostation'
 
 function MiningStation extends CargoStation
 
-    @numMining: 0
-
-    @: (point, @resource) ->
+    @: (point, resource) ->
         
-        MiningStation.numMining++
-        
-        super {point, name:"M#{@resource[0]}#{MiningStation.numMining}"}
+        @resource = resource
+        super {point, name:"M#{@resource[0]}"}
         
         @base.children[0].material = Materials.mining[@resource]
         @storage.group.children[0].material = Materials.mining[@resource]
         @arm.group.children[4].children[0].material = Materials.mining[@resource]
+        
+    toSave: ->
+        
+        s = super()
+        s.resource = @resource
+        s
                 
 module.exports = MiningStation

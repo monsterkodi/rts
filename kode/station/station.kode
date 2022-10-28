@@ -8,14 +8,29 @@
 
 function Station
 
+    @numStation: 0
+
     @: (@cfg) ->
         
-        log 'new station' @cfg
-        @name  = @cfg.name ? "Station?"
+        Station.numStation++
+
+        @name  = (@cfg.name ? "S") + Station.numStation
         @group = new Group
         if @cfg.point ➜ @group.position.copy @cfg.point 
+
+        @group.station    = @
+        @group.name       = @name
+        @group.toSave     = @toSave
+        @group.toSave.key = 'stations'
+
         world.addObject   @group
         world.addPickable @group
+        
+    toSave: =>
+        
+        name: @name
+        pos:  @group.position
+        node: @node.name
         
     del: ->
         

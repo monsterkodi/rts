@@ -13,8 +13,9 @@ Engine         = require '../train/engine'
 Boxcar         = require '../train/boxcar'
 Compass        = require '../track/compass'
 Physics        = require '../physics/physics'
-CentralStation = require '../station/centralstation'
+Station        = require '../station/station'
 MiningStation  = require '../station/miningstation'
+CentralStation = require '../station/centralstation'
 Construct      = require './construct'
 Convert        = require './convert'
 Traffic        = require './traffic'
@@ -44,11 +45,7 @@ function World extends Convert
         post.on 'addTrain' @onAddTrain
         
         @addFloor()
-           
-        label = @addLabel text:'▴➜▪➜●' mono:true position:[0 -2.61 1.2], color:0xffffff, scale:1.4
-        label.rotateX deg2rad 90
-        @scene.add label
-        
+                   
         @setLabels prefs.get 'labels'
         
         @setSpeed prefs.get 'speed' 1
@@ -148,6 +145,15 @@ function World extends Convert
     #  0000000  0000000  00000000  000   000  000   000  
     
     clear: ->
+        
+        for station in @allStations()
+            station.del()
+            
+        for node in @allNodes()
+            node.del()
+            
+        for track in @allTracks()
+            track.del()
         
     #  0000000   0000000   00     00  00000000  00000000    0000000   
     # 000       000   000  000   000  000       000   000  000   000  
@@ -275,6 +281,14 @@ function World extends Convert
         
         new Node vec(point), name, fixed
         
+    allNodes:    -> @scene.children.filter((child) -> child.node    instanceof Node).map (child) -> child.node
+    allTracks:   -> @scene.children.filter((child) -> child.track   instanceof Track).map (child) -> child.track
+    allStations: -> @scene.children.filter((child) -> child.station instanceof Station).map (child) -> child.station
+    
+    nodeWithName: (name) -> 
+        for node in @allNodes()
+            return node if node.name == name
+        
     connectNodes: (n1, n2, name) -> @connectNodeTracks n1, n1.outTracks, n2, n2.inTracks, name
         
     connectNodeTracks: (n1, n1Tracks, n2, n2Tracks, name="#{n1.name} -> #{n2.name}") ->
@@ -334,11 +348,17 @@ function World extends Convert
     
     addCentralStation: (point) ->
         
-        station = new CentralStation vec point
+        new CentralStation vec(point)
 
     addMiningStation: (point, resource) ->
         
-        station = new MiningStation vec(point), resource
+        new MiningStation vec(point), resource
+        
+    addStation: (cfg) ->
+        
+        switch cfg.name[0] 
+            'M' ➜ @addMiningStation  cfg.pos, cfg.resource
+            'C' ➜ @addCentralStation cfg.pos
         
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       

@@ -13,11 +13,13 @@ function Save
     @: ->
         
         @s = Immutable
-            nodes:  {}
-            tracks: {}
+            nodes:    {}
+            tracks:   {}
+            stations: {}
             
         @scene = world.scene
-        post.on 'save' @onSave
+        post.on 'save'   @onSave
+        post.on 'reload' @onLoad
         
         log 'save:' prefs.get 'save'
         
@@ -30,22 +32,42 @@ function Save
     
     update: ->
 
-        state = {}
+        state = 
+            nodes:    {}
+            tracks:   {}
+            stations: {}
 
         childs = @scene.children.filter (child) -> child.toSave is func
         for child in childs
-            state[child.toSave.key] ?= {}
             state[child.toSave.key][child.name] = child.toSave()
         
-        log state
+        # log state
         
-        @s = @s.set 'nodes'  state.nodes
-        @s = @s.set 'tracks' state.tracks
+        @s = @s.set 'stations' state.stations
+        @s = @s.set 'nodes'    state.nodes
+        @s = @s.set 'tracks'   state.tracks
         
         save = noon.stringify @s, circular:true
         log save
         prefs.set 'save' save
         
         @
-
+        
+    onLoad: =>
+        
+        save = noon.parse prefs.get 'save'
+        log 'load:' save
+        
+        world.clear()
+        
+        for name,node of save.nodes
+            log 'mode' node
+            world.addNode node.pos, node.name
+            
+        for name,station of save.stations
+            log 'station' station
+            s = world.addStation station
+            s.node = world.nodeWithName station.node
+            s.node.fixed = true
+            
 module.exports = Save

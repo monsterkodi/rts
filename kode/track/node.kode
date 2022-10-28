@@ -89,8 +89,9 @@ function Node
     toSave: =>
         
         name: @name
-        out: @outTracks.map (tr) -> tr.name
-        in:  @inTracks.map  (tr) -> tr.name
+        out:  @outTracks.map (tr) -> tr.name
+        in:   @inTracks.map  (tr) -> tr.name
+        pos:  @group.position
         
     del: =>
         
