@@ -17,11 +17,8 @@ function Save
             tracks:   {}
             stations: {}
             
-        @scene = world.scene
         post.on 'save'   @onSave
         post.on 'reload' @onLoad
-        
-        log 'save:' prefs.get 'save'
         
     onSave: =>
         
@@ -30,6 +27,12 @@ function Save
     nodes:  -> @s.nodes.asMutable  deep:true
     tracks: -> @s.tracks.asMutable deep:true
     
+    # 000   000  00000000   0000000     0000000   000000000  00000000  
+    # 000   000  000   000  000   000  000   000     000     000       
+    # 000   000  00000000   000   000  000000000     000     0000000   
+    # 000   000  000        000   000  000   000     000     000       
+    #  0000000   000        0000000    000   000     000     00000000  
+    
     update: ->
 
         state = 
@@ -37,37 +40,59 @@ function Save
             tracks:   {}
             stations: {}
 
-        childs = @scene.children.filter (child) -> child.toSave is func
+        childs = world.scene.children.filter (child) -> child.toSave is func
         for child in childs
             state[child.toSave.key][child.name] = child.toSave()
-        
-        # log state
         
         @s = @s.set 'stations' state.stations
         @s = @s.set 'nodes'    state.nodes
         @s = @s.set 'tracks'   state.tracks
         
         save = noon.stringify @s, circular:true
-        log save
+        # log save
         prefs.set 'save' save
-        
         @
         
+    # 000       0000000    0000000   0000000    
+    # 000      000   000  000   000  000   000  
+    # 000      000   000  000000000  000   000  
+    # 000      000   000  000   000  000   000  
+    # 0000000   0000000   000   000  0000000    
+    
     onLoad: =>
         
         save = noon.parse prefs.get 'save'
-        log 'load:' save
+        log 'load:' prefs.get 'save'
         
         world.clear()
         
         for name,node of save.nodes
-            log 'mode' node
-            world.addNode node.pos, node.name
+
+            world.addNode node
             
         for name,station of save.stations
-            log 'station' station
+
             s = world.addStation station
             s.node = world.nodeWithName station.node
-            s.node.fixed = true
+            
+        for name,track of save.tracks
+
+            n1 = world.nodeWithName track.node[0]
+            n2 = world.nodeWithName track.node[1]
+            
+            ctrl = track.ctrl.map (c) -> vec c
+            t = world.addTrack n1, n2, ctrl, name
+            
+            s1 = save.nodes[n1.name]
+            if name in s1.in ? []
+                n1.inTracks.push t
+            else
+                n1.outTracks.push t
+                
+            s2 = save.nodes[n2.name]
+            if name in s2.in ? []
+                n2.inTracks.push t
+            else
+                n2.outTracks.push t
             
 module.exports = Save

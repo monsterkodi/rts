@@ -28,27 +28,23 @@ function World extends Convert
         window.world = @
         
         @animations = []
-        @labels  = []
+        @labels     = []
+        @pickables  = []
+        @timeSum    = 0
+                    
+        @save       = new Save
+        @physics    = new Physics
+        @traffic    = new Traffic
+        @construct  = new Construct
+        @compass    = new Compass
         
-        @save    = new Save
-        @physics = new Physics
-        @traffic = new Traffic
-        
-        @timeSum = 0
-        @pickables = []
-                
-        @construct = new Construct
         @construct.init()
         
-        @compass = new Compass
+        @addFloor()
+        @setLabels prefs.get 'labels'
+        @setSpeed  prefs.get 'speed' 1
         
         post.on 'addTrain' @onAddTrain
-        
-        @addFloor()
-                   
-        @setLabels prefs.get 'labels'
-        
-        @setSpeed prefs.get 'speed' 1
         
     addLabel: (cfg) ->
         
@@ -154,7 +150,7 @@ function World extends Convert
             
         for track in @allTracks()
             track.del()
-        
+                    
     #  0000000   0000000   00     00  00000000  00000000    0000000   
     # 000       000   000  000   000  000       000   000  000   000  
     # 000       000000000  000000000  0000000   0000000    000000000  
@@ -277,9 +273,7 @@ function World extends Convert
     #    000     000   000  000   000  000       000  000   
     #    000     000   000  000   000   0000000  000   000  
     
-    addNode: (point, name, fixed) ->
-        
-        new Node vec(point), name, fixed
+    addNode: (cfg) -> new Node cfg
         
     allNodes:    -> @scene.children.filter((child) -> child.node    instanceof Node).map (child) -> child.node
     allTracks:   -> @scene.children.filter((child) -> child.track   instanceof Track).map (child) -> child.track
@@ -289,9 +283,9 @@ function World extends Convert
         for node in @allNodes()
             return node if node.name == name
         
-    connectNodes: (n1, n2, name) -> @connectNodeTracks n1, n1.outTracks, n2, n2.inTracks, name
+    connectNodes: (n1, n2) -> @connectNodeTracks n1, n1.outTracks, n2, n2.inTracks
         
-    connectNodeTracks: (n1, n1Tracks, n2, n2Tracks, name="#{n1.name} -> #{n2.name}") ->
+    connectNodeTracks: (n1, n1Tracks, n2, n2Tracks) ->
         
         s = n1.getPos().distanceTo n2.getPos()
         s *= 0.5
@@ -317,11 +311,11 @@ function World extends Convert
         c3 = Vector.midPoint m, d2, f
         c4 = Vector.midPoint n2.getPos(), d2, f
         
-        t = @addTrack n1, n2, [c1, c2, m, c3, c4], name
+        t = @addTrack n1, n2, [c1, c2, m, c3, c4]
                 
         n1Tracks.push t
         n2Tracks.push t
-        
+        log n1, n2
         t
     
     addTrack: (n1, n2, ctrlPoints, name) ->
@@ -339,26 +333,26 @@ function World extends Convert
         track.node[0] = n1
         track.node[1] = n2
         track
-        
+                        
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  
     # 000          000     000   000     000     000  000   000  0000  000  
     # 0000000      000     000000000     000     000  000   000  000 0 000  
     #      000     000     000   000     000     000  000   000  000  0000  
     # 0000000      000     000   000     000     000   0000000   000   000  
     
-    addCentralStation: (point) ->
+    addCentralStation: (cfg) ->
         
-        new CentralStation vec(point)
+        new CentralStation cfg
 
-    addMiningStation: (point, resource) ->
+    addMiningStation: (cfg) ->
         
-        new MiningStation vec(point), resource
+        new MiningStation cfg
         
     addStation: (cfg) ->
         
         switch cfg.name[0] 
-            'M' ➜ @addMiningStation  cfg.pos, cfg.resource
-            'C' ➜ @addCentralStation cfg.pos
+            'M' ➜ @addMiningStation  cfg
+            'C' ➜ @addCentralStation cfg
         
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       

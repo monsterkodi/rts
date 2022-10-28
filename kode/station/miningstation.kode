@@ -7,13 +7,15 @@
 ###
 
 CargoStation = require './cargostation'
+Station = require './station'
 
 function MiningStation extends CargoStation
 
-    @: (point, resource) ->
+    @: (cfg) ->
         
-        @resource = resource
-        super {point, name:"M#{@resource[0]}"}
+        @resource = cfg.resource
+        cfg.name ?= "M#{cfg.resource[0]}#{Station.id+1}"
+        super cfg
         
         @base.children[0].material = Materials.mining[@resource]
         @storage.group.children[0].material = Materials.mining[@resource]

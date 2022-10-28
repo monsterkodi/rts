@@ -8,21 +8,25 @@
 
 function Station
 
-    @numStation: 0
+    @id: 0
 
-    @: (@cfg) ->
+    @: (cfg) ->
         
-        Station.numStation++
+        Station.id++
 
-        @name  = (@cfg.name ? "S") + Station.numStation
+        @name  = cfg.name ? ("S" + Station.id)
         @group = new Group
-        if @cfg.point ➜ @group.position.copy @cfg.point 
+        if cfg.pos ➜ @group.position.copy vec cfg.pos
 
         @group.station    = @
         @group.name       = @name
         @group.toSave     = @toSave
         @group.toSave.key = 'stations'
 
+        label = world.addLabel text:@name, mono:true position:[0 -2.61 3.2], color:0xffffff, scale:1.4
+        label.rotateX deg2rad 90
+        @group.add label
+        
         world.addObject   @group
         world.addPickable @group
         

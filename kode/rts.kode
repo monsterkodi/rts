@@ -503,8 +503,7 @@ class RTS
         @camera.size.set w * window.devicePixelRatio, h * window.devicePixelRatio
         @camera.updateProjectionMatrix()
         
-        
         canvas = @renderer.domElement
-        log w, h, canvas.width, canvas.height
+        # log w, h, canvas.width, canvas.height
         
 module.exports = RTS

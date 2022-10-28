@@ -11,13 +11,13 @@ CurveCtrl = require '../track/curvectrl'
 
 function Track
 
-    @numTracks: 0
+    @id: 0
 
     @: (points, @name) ->
         
-        Track.numTracks++
+        Track.id++
         
-        @name  = "t#{Track.numTracks}" if not @name
+        @name ?= "t#{Track.id}"
         
         @curve = new CurvePath
         @node  = []
@@ -40,9 +40,16 @@ function Track
         
     toSave: =>
         
+        ctrl = []
+        for i in 0...@curve.curves.length
+            ctrl.push @curve.curves[i].v1
+            ctrl.push @curve.curves[i].v2
+            if i < @curve.curves.length-1
+                ctrl.push @curve.curves[i].v3
+        
         name: @name
         node: @node.map (n) -> n.name
-        ctrl: @ctrls.map (c) -> c.toSave()
+        ctrl: ctrl
         
     del: ->
         

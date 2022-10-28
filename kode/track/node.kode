@@ -11,15 +11,17 @@ Compass   = require './compass'
 
 function Node
 
-    @numNodes:   0
+    @id:         0
     @clickMode:  false
     @skipCenter: false
 
-    @: (point, @name, @fixed) ->
+    @: (cfg) ->
         
-        Node.numNodes++
+        Node.id++
         
-        @name = "n#{Node.numNodes}" if not @name
+        @name  = cfg.name ? "n#{Node.id}"
+        @fixed = cfg.fixed ? false
+        pos = vec cfg.pos
         
         @inTracks      = []
         @outTracks     = []
@@ -30,7 +32,7 @@ function Node
         @group = new Group
         @group.name = @name
         @group.node = @
-        @group.position.copy point
+        @group.position.copy pos
         
         geom = Geom.cylinder height:0.71 radius:0.7 sgmt:32
         @center = new Mesh geom, Materials.node.center
@@ -88,10 +90,11 @@ function Node
         
     toSave: =>
         
-        name: @name
-        out:  @outTracks.map (tr) -> tr.name
-        in:   @inTracks.map  (tr) -> tr.name
-        pos:  @group.position
+        name:  @name
+        out:   @outTracks.map (tr) -> tr.name
+        in:    @inTracks.map  (tr) -> tr.name
+        pos:   @group.position
+        fixed: @fixed
         
     del: =>
         
