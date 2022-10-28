@@ -53,7 +53,7 @@ function Path
         te = @tracks[-1]
         ns = ts.node[@revers[0] ? 1 : 0] 
         ne = te.node[@revers[-1] ? 0 : 1] 
-        @isLoop = ns == ne
+        @isLoop = ns == ne and ts in ns.oppositeTracks(te)
         
     onDelTrack: (track) =>
         

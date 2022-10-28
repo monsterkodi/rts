@@ -9,11 +9,23 @@ function Train
     @: (@cfg) ->
         
         Train.numTrains++
-        @name     = (@cfg.name ? "T") + Train.numTrains
-        @path     = new Path @
-        @speed    = @cfg.speed ? 1
-        @topSpeed = @speed
-        @cars     = []
+        @name       = (@cfg.name ? "T") + Train.numTrains
+        @path       = new Path @
+        @speed      = @cfg.speed ? 1
+        @topSpeed   = @speed
+        @cars       = []
+        
+        # @mesh       = new Mesh Geom.sphere(radius:0.5), Materials.train.window
+        @mesh       = new Mesh Geom.cylinder(radius:0.5, height:0.2), Materials.train.window
+        @mesh.train = @
+        world.addObject @mesh
+        
+    del: ->
+        
+        for car in @cars
+            car.del()
+        @cars = []
+        world.removeObject @mesh
         
     isOneWay: -> return not (@cars[-1] instanceof Engine)
     
@@ -77,6 +89,10 @@ function Train
             car.update delta, timeSum, @
             car.moveToPathDelta @path, -4.2*index
             
+        @mesh.position.copy @cars[0].mesh.position
+        @mesh.position.z += 1.8
+        @mesh.material = @cars[0].mesh.children[1].material
+        
         if @preview
             #@path.moveMesh @preview, 8
             # log @path.delta, @path.currentIndex(), @path.nextNode().name

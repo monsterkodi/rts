@@ -140,7 +140,7 @@ function Track
         else
             @createMesh()                
             
-        @curve.getPointAt 0.5, @label.position
+        @curve.getPointAt 0.25, @label.position
         @label.position.z = 0.36
         
         @curve.getTangentAt 0.5, Vector.tmp

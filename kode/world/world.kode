@@ -142,6 +142,9 @@ function World extends Convert
     
     clear: ->
         
+        for train in @allTrains()
+            train.del()
+        
         for station in @allStations()
             station.del()
             
@@ -254,17 +257,12 @@ function World extends Convert
 
     addEngine: (train) ->
                     
-        engine = train.addCar new Engine train
-        @scene.add engine.mesh
-        @pickables.push engine.mesh
-        engine
+        train.addCar new Engine train
         
     addBoxcar: (train, num=1) ->
         
         for n in 0...num
             boxcar = train.addCar new Boxcar train
-            @scene.add boxcar.mesh
-            @pickables.push boxcar.mesh
             boxcar.setColorByName train.name if train.name in Object.keys Colors.train
             
     # 000000000  00000000    0000000    0000000  000   000  
@@ -278,6 +276,7 @@ function World extends Convert
     allNodes:    -> @scene.children.filter((child) -> child.node    instanceof Node).map (child) -> child.node
     allTracks:   -> @scene.children.filter((child) -> child.track   instanceof Track).map (child) -> child.track
     allStations: -> @scene.children.filter((child) -> child.station instanceof Station).map (child) -> child.station
+    allTrains:   -> @scene.children.filter((child) -> child.train   instanceof Train).map (child) -> child.train
     
     nodeWithName: (name) -> 
         for node in @allNodes()

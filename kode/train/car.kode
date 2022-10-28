@@ -10,6 +10,14 @@ class Car
     
     @: (@mesh) ->
         
+        world.addObject @mesh
+        world.addPickable @mesh
+        
+    del: ->
+        
+        world.removeObject @mesh
+        world.removePickable @mesh
+        
     update: (delta, timeSum) ->
     
     setColor: (color) ->

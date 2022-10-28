@@ -110,6 +110,9 @@ function Node
             
             for track in @allTracks()
                 track.del()
+                
+            for block in @blocks
+                world.removeObject block
             
             world.removeObject @group
             world.removePickable @group
