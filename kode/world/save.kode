@@ -1,0 +1,51 @@
+###
+ 0000000   0000000   000   000  00000000
+000       000   000  000   000  000     
+0000000   000000000   000 000   0000000 
+     000  000   000     000     000     
+0000000   000   000      0      00000000
+###
+
+Immutable = require 'seamless-immutable'
+
+function Save
+
+    @: ->
+        
+        @s = Immutable
+            nodes:  {}
+            tracks: {}
+            
+        @scene = world.scene
+        post.on 'save' @onSave
+        
+        log 'save:' prefs.get 'save'
+        
+    onSave: =>
+        
+        @update()
+        
+    nodes:  -> @s.nodes.asMutable  deep:true
+    tracks: -> @s.tracks.asMutable deep:true
+    
+    update: ->
+
+        state = {}
+
+        childs = @scene.children.filter (child) -> child.toSave is func
+        for child in childs
+            state[child.toSave.key] ?= {}
+            state[child.toSave.key][child.name] = child.toSave()
+        
+        log state
+        
+        @s = @s.set 'nodes'  state.nodes
+        @s = @s.set 'tracks' state.tracks
+        
+        save = noon.stringify @s, circular:true
+        log save
+        prefs.set 'save' save
+        
+        @
+
+module.exports = Save

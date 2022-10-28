@@ -29,6 +29,7 @@ expose = """
     Ray
     Mesh
     Line3
+    Color
     Group
     Plane
     Matrix3
@@ -40,6 +41,7 @@ expose = """
     SphereGeometry
     CircleGeometry
     CylinderGeometry
+    LineSegments
     QuadraticBezierCurve3
     CubicBezierCurve3
     """
@@ -73,17 +75,18 @@ window.Materials    = require './const/materials'
 window.Geom         = require './const/geometry'
 window.playSound    = (o,n,c) -> rts.sound.play o,n,c
    
-FPS       = require './lib/fps'
-Info      = require './lib/info'
-Debug     = require './lib/debug'
-Sound     = require './lib/sound'
-Config    = require './const/config'
-Menu      = require './menu/menu'
-World     = require './world'
-Map       = require './map'
-Camera    = require './lib/camera'
-Node      = require './track/node'
-CurveCtrl = require './track/curvectrl'
+FPS        = require './lib/fps'
+Info       = require './lib/info'
+Debug      = require './lib/debug'
+Sound      = require './lib/sound'
+GridHelper = require './lib/gridhelper'
+Config     = require './const/config'
+Menu       = require './menu/menu'
+World      = require './world/world'
+Map        = require './world/map'
+Camera     = require './lib/camera'
+Node       = require './track/node'
+CurveCtrl  = require './track/curvectrl'
 
 tmpMatrix = new THREE.Matrix3
 
@@ -171,10 +174,8 @@ class RTS
         if cam = prefs.get 'camera'
             world.setCamera cam
         
-        @gridHelper = new THREE.GridHelper 100, 100, 0x444444, 0x111111
-        @gridHelper.rotateX deg2rad 90
-        @gridHelper.position.set 0 0 0.1
-        @gridHelper.visible = false
+        @gridHelper = new GridHelper 100
+        @gridHelper.visible = prefs.get 'grid'
         @scene.add @gridHelper
         
         @axesHelper = new THREE.AxesHelper 10

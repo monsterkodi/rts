@@ -6,18 +6,19 @@
 00     00   0000000   000   000  0000000  0000000  
 ###
 
-Node           = require './track/node'
-Track          = require './track/track'
-Train          = require './train/train'
-Engine         = require './train/engine'
-Boxcar         = require './train/boxcar'
-Compass        = require './track/compass'
+Node           = require '../track/node'
+Track          = require '../track/track'
+Train          = require '../train/train'
+Engine         = require '../train/engine'
+Boxcar         = require '../train/boxcar'
+Compass        = require '../track/compass'
+Physics        = require '../physics/physics'
+CentralStation = require '../station/centralstation'
+MiningStation  = require '../station/miningstation'
 Construct      = require './construct'
 Convert        = require './convert'
 Traffic        = require './traffic'
-Physics        = require './physics/physics'
-CentralStation = require './station/centralstation'
-MiningStation  = require './station/miningstation'
+Save           = require './save'
 
 function World extends Convert
     
@@ -28,6 +29,7 @@ function World extends Convert
         @animations = []
         @labels  = []
         
+        @save    = new Save
         @physics = new Physics
         @traffic = new Traffic
         

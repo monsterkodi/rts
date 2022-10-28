@@ -32,7 +32,16 @@ function Track
         for index in 0...curveNum
             @ctrls.push new CurveCtrl @, index
                     
-        @createRail()        
+        @createRail()     
+        
+        @mesh.toSave = @toSave
+        @mesh.toSave.key = 'tracks'
+        
+    toSave: =>
+        
+        name: @name
+        node: @node.map (n) -> n.name
+        ctrl: @ctrls.map (c) -> c.toSave()
         
     del: ->
         

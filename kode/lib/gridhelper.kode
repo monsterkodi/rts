@@ -1,0 +1,52 @@
+###
+ 0000000   00000000   000  0000000    000   000  00000000  000      00000000   00000000  00000000 
+000        000   000  000  000   000  000   000  000       000      000   000  000       000   000
+000  0000  0000000    000  000   000  000000000  0000000   000      00000000   0000000   0000000  
+000   000  000   000  000  000   000  000   000  000       000      000        000       000   000
+ 0000000   000   000  000  0000000    000   000  00000000  0000000  000        00000000  000   000
+###
+
+class GridHelper extends LineSegments
+
+    @: (size=100) ->
+
+        c1 = new Color 0x000000
+        c2 = new Color 0x111111
+        c3 = new Color 0x222222
+        c4 = new Color 0x333333
+
+        halfSize = size / 2
+
+        vertices = []
+        colors   = []
+
+        k = -halfSize
+        j = 0
+        
+        for i in 0..size
+
+            vertices.push -halfSize, k, 0, halfSize, k, 0
+            vertices.push k, -halfSize, 0, k, halfSize, 0
+
+            color = i == halfSize ? c1 : (i % 10 == 0) ? c2 : (i % 5 == 0) ? c3 : c4 
+
+            for c in 0...4
+                color.toArray colors, j 
+                j += 3
+            
+            k++
+
+        geom = new BufferGeometry()
+        geom.setAttribute 'position' new THREE.Float32BufferAttribute vertices, 3 
+        geom.setAttribute 'color'    new THREE.Float32BufferAttribute colors, 3 
+
+        material = new THREE.LineBasicMaterial vertexColors:true toneMapped:false polygonOffset:true polygonOffsetFactor:-1.0
+        material.linewidth = 2
+        super geom, material
+
+    dispose: ->
+
+        @geometry.dispose()
+        @material.dispose()
+
+module.exports = GridHelper

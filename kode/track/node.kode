@@ -21,14 +21,15 @@ function Node
         
         @name = "n#{Node.numNodes}" if not @name
         
-        @inTracks  = []
-        @outTracks = []
+        @inTracks      = []
+        @outTracks     = []
         @blockedTrains = []
-        @blocks = []
-        @gizmo = {}
+        @blocks        = []
+        @gizmo         = {}
 
         @group = new Group
         @group.name = @name
+        @group.node = @
         @group.position.copy point
         
         geom = Geom.cylinder height:0.71 radius:0.7 sgmt:32
@@ -46,8 +47,8 @@ function Node
         geom.rotateX Math.PI/2
         
         @outMesh = new Mesh geom, Materials.node.out
-        @outMesh.name       = @name + '.out'
         @outMesh.node       = @
+        @outMesh.name       = @name + '.out'
         @outMesh.onDrag     = @onOutDrag
         @outMesh.onDragDone = @onDragDone
         @outMesh.onEnter    = @onEnterOut
@@ -59,8 +60,8 @@ function Node
         geom.rotateX Math.PI/2
         
         @inMesh = new Mesh geom, Materials.node.in
-        @inMesh.name       = @name + '.in'
         @inMesh.node       = @
+        @inMesh.name       = @name + '.in'
         @inMesh.onDrag     = @onInDrag
         @inMesh.onDragDone = @onDragDone
         @inMesh.onEnter    = @onEnterIn
@@ -81,6 +82,15 @@ function Node
         world.addObject   @group
         
         @rotate 0
+        
+        @group.toSave = @toSave
+        @group.toSave.key = 'nodes'
+        
+    toSave: =>
+        
+        name: @name
+        out: @outTracks.map (tr) -> tr.name
+        in:  @inTracks.map  (tr) -> tr.name
         
     del: =>
         
@@ -157,7 +167,6 @@ function Node
         
         @onDragDone ray, hit
         delete @clickTracks
-        # log 'onMouseUp' Node.clickMode
         post.removeListener 'mouseMove' @onMouseMove
         post.removeListener 'mouseDown' @onMouseDown
         post.removeListener 'mouseUp'   @onMouseUp
@@ -228,7 +237,7 @@ function Node
                 isOut = hitName.endsWith '.out'
                 if isIn or isOut
                     if n2 = hit.mesh.node
-                        log "connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
+                        # log "connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
                         t2 = isIn ? n2.inTracks : n2.outTracks
                         on2 = @dragTrack.node[1]
                         on2.removeTrack @dragTrack

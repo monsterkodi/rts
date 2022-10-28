@@ -88,7 +88,7 @@ window.onresize = (event) ->
 
 window.onkeydown = (event) ->
     
-    switch keyinfo.forEvent(event).key
+    switch keyinfo.comboForEvent(event)
         'w' 'up'    ➜ rts.camera.startMoveForward()
         's' 'down'  ➜ rts.camera.startMoveBackward()
         'a' 'left'  ➜ rts.camera.startMoveLeft()
@@ -106,6 +106,8 @@ window.onkeydown = (event) ->
         'i'         ➜ post.emit 'toggle' 'info'
         'l'         ➜ post.emit 'toggle' 'lable'
         't'         ➜ post.emit 'addTrain'
+        'ctrl+s'    ➜ post.emit 'save'
+        'ctrl+r'    ➜ post.emit 'reload'
         'backspace' 'delete' ➜ post.emit 'delete'
         '.'         ➜ prefs.set 'debug' not prefs.get 'debug'; if prefs.get 'debug' then rts.debug.show() else rts.debug.hide()
         'space'     ➜ rts.togglePause()
@@ -113,7 +115,8 @@ window.onkeydown = (event) ->
         '-'         ➜ world.decrSpeed(); world.decrSpeed()
         '0'         ➜ world.resetSpeed()
         # else 
-            # log 'keydown', keyinfo.forEvent event
+            # log 'keydown' keyinfo.forEvent event
+            # log 'keydown' keyinfo.comboForEvent event
     
 window.onkeyup = (event) ->
     

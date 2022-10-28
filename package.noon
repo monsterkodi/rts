@@ -7,6 +7,7 @@ license         Unlicense
 dependencies
                 kxk             ../kxk
                 oimo            ^1.0.9
+                seamless-immutable  ^7.1.4
                 three           ./three
                 troika-three-text  ^0.46.4
 devDependencies
