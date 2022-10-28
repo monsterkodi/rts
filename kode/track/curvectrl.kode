@@ -91,15 +91,6 @@ function CurveCtrl
             
         world.addObject @group
         
-    toSave: ->
-        
-        [
-            @curveStart
-            @ctrlStart 
-            @ctrlEnd   
-            @curveEnd  
-        ]
-        
     del: ->
         
         world.hideCompass @

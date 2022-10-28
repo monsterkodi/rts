@@ -39,13 +39,14 @@ function Track
         @mesh.toSave.key = 'tracks'
         
     toSave: =>
-        
+
+        fix = (p) -> x:p.x.toFixed(1), y:p.y.toFixed(1), z:p.z.toFixed(1)
         ctrl = []
         for i in 0...@curve.curves.length
-            ctrl.push @curve.curves[i].v1
-            ctrl.push @curve.curves[i].v2
+            ctrl.push fix @curve.curves[i].v1
+            ctrl.push fix @curve.curves[i].v2
             if i < @curve.curves.length-1
-                ctrl.push @curve.curves[i].v3
+                ctrl.push fix @curve.curves[i].v3
         
         name: @name
         node: @node.map (n) -> n.name

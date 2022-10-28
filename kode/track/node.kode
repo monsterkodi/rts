@@ -83,7 +83,10 @@ function Node
         world.addPickable @group
         world.addObject   @group
         
-        @rotate 0
+        if cfg.dir
+            @setDir cfg.dir
+        else
+            @rotate 0
         
         @group.toSave = @toSave
         @group.toSave.key = 'nodes'
@@ -94,6 +97,7 @@ function Node
         out:   @outTracks.map (tr) -> tr.name
         in:    @inTracks.map  (tr) -> tr.name
         pos:   @group.position
+        dir:   @getDir()
         fixed: @fixed
         
     del: =>

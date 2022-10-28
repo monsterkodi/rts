@@ -35,6 +35,11 @@ function Save
     
     update: ->
 
+        prefs.set 'save' @toNoon()
+        @
+        
+    toNoon: ->
+        
         state = 
             nodes:    {}
             tracks:   {}
@@ -48,10 +53,7 @@ function Save
         @s = @s.set 'nodes'    state.nodes
         @s = @s.set 'tracks'   state.tracks
         
-        save = noon.stringify @s, circular:true
-        # log save
-        prefs.set 'save' save
-        @
+        noon.stringify @s, circular:true
         
     # 000       0000000    0000000   0000000    
     # 000      000   000  000   000  000   000  
@@ -61,8 +63,8 @@ function Save
     
     onLoad: =>
         
-        save = noon.parse prefs.get 'save'
-        log 'load:' prefs.get 'save'
+        oldNoon = prefs.get 'save'
+        save = noon.parse oldNoon
         
         world.clear()
         
@@ -73,7 +75,6 @@ function Save
         for name,station of save.stations
 
             s = world.addStation station
-            s.node = world.nodeWithName station.node
             
         for name,track of save.tracks
 
@@ -84,15 +85,25 @@ function Save
             t = world.addTrack n1, n2, ctrl, name
             
             s1 = save.nodes[n1.name]
-            if name in s1.in ? []
+            if name in (s1.in ? [])
                 n1.inTracks.push t
-            else
+            else if name in (s1.out ? [])
                 n1.outTracks.push t
+            else
+                log 'dafuk?' s1, n1
                 
             s2 = save.nodes[n2.name]
-            if name in s2.in ? []
+            if name in (s2.in ? [])
                 n2.inTracks.push t
-            else
+            else if name in (s2.out ? [])
                 n2.outTracks.push t
+            else
+                log 'dafuk?' s2, n2
+                
+        newNoon = @toNoon()
+        if newNoon != oldNoon
+            log 'DAFUK?' 
+            log 'old:' oldNoon 
+            log 'new:' newNoon
             
 module.exports = Save
