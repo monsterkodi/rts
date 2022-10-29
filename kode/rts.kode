@@ -168,14 +168,9 @@ class RTS
         @scene.add @shadowCameraHelper
         
         @setBrightness prefs.get 'brightness' 1.0
-        
-        new Map @scene # sets window.world
-                             
-        if cam = prefs.get 'camera'
-            world.setCamera cam
-        
+                
         @gridHelper = new GridHelper 100
-        @gridHelper.visible = prefs.get 'grid'
+        @gridHelper.visible = prefs.get 'grid' false
         @scene.add @gridHelper
         
         @axesHelper = new THREE.AxesHelper 10
@@ -198,6 +193,11 @@ class RTS
         @downPos = vec()
         
         @raycaster = new THREE.Raycaster()
+
+        new Map @scene # sets window.world
+                             
+        if cam = prefs.get 'camera'
+            world.setCamera cam
 
         @debug = new Debug
         if not prefs.get 'debug' 

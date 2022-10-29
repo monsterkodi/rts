@@ -23,13 +23,13 @@ function CargoStation extends Station
         @docking.position.x = -6
         @group.add @docking
         
-        @arm = new Arm
-        @arm.group.position.z = 5.1
-        @group.add @arm.group
-        
         @storage = new Storage @
         @storage.group.position.x = 6
         @group.add @storage.group
+        
+        @arm = new Arm @
+        @arm.group.position.z = 5.1
+        @group.add @arm.group
 
         if cfg.node
             @node = world.nodeWithName cfg.node

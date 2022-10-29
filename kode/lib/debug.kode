@@ -116,6 +116,8 @@ class Debug
             val = prefs.get cfg.pref
         else
             val = cfg.obj[cfg.key]
+            
+        val = false if not val
         
         if cfg.set is func
             cfg.set val

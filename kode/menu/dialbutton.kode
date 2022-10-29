@@ -59,11 +59,10 @@ class DialButton extends CanvasButton
         
         br = @canvas.getBoundingClientRect()
         
-        ctr2Pos = vec(br.left+50, br.top+50).to drag.pos
+        ctr2Pos = vec(br.left+50, br.top+50, 0).to drag.pos
         ctr2Pos.y = -ctr2Pos.y
         angle = Math.sign(ctr2Pos.dot(vec 1,0,0)) * ctr2Pos.angle(vec 0,1,0)
         sectn = clamp -6, 6, Math.round angle/22.5
-        
         @setDial     sectn+6
         @dialChanged sectn+6
         

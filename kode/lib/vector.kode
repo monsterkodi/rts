@@ -23,11 +23,12 @@ class Vector extends ThreeVector
         Vector.counter += 1
         
         if x.x? and x.y?
-            super x.x, x.y, x.z ? 0
+            super parseFloat(x.x), parseFloat(x.y), parseFloat(x.z ? 0)
         else if Array.isArray x
-            super x[0], x[1], x[2] ? 0 
+            super parseFloat(x[0]), parseFloat(x[1]), parseFloat(x[2] ? 0)
         else
-            super x, y, z ? 0
+            super parseFloat(x), parseFloat(y), parseFloat(z ? 0)
+            
         if Number.isNaN @x
             throw new Error
             

@@ -41,10 +41,13 @@ function World extends Convert
         @construct.init()
         
         @addFloor()
-        @setLabels prefs.get 'labels'
+        @setLabels prefs.get 'labels' false
         @setSpeed  prefs.get 'speed' 1
         
         post.on 'addTrain' @onAddTrain
+        
+        post.emit 'load'
+        @animate 0
         
     addLabel: (cfg) ->
         
@@ -214,7 +217,7 @@ function World extends Convert
         geom = new PlaneGeometry 1500 1500
         geom.translate 0 0 -0.75
         @floor = new Mesh geom, Materials.floor
-        @floor.visible = prefs.get 'floor'
+        # @floor.visible = prefs.get 'floor' false
         @floor.name = 'floor'
         @scene.add @floor
         @pickables.push @floor
@@ -314,7 +317,6 @@ function World extends Convert
                 
         n1Tracks.push t
         n2Tracks.push t
-        log n1, n2
         t
     
     addTrack: (n1, n2, ctrlPoints, name) ->
@@ -322,9 +324,9 @@ function World extends Convert
         points = [n1.getPos()]
         
         for point,index in ctrlPoints
-            points.push point
+            points.push vec point
             if index % 3 == 2
-                points.push point
+                points.push vec point
         
         points.push n2.getPos()
         

@@ -34,14 +34,13 @@ Materials =
         body:           new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.2 roughness: 0.4 
         piston:         new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1 roughness: 0.8 
         light:          new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1 roughness: 0.8
-        cargo:          new THREE.MeshStandardMaterial color:0x333333, metalness: 0.2 roughness: 0.4 
     station:
         side:           new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5 roughness: 0.2, dithering:true#, side:THREE.DoubleSide
         central:        new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.2 roughness: 0.4
     mining:
-        chalk:          new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.5 roughness: 0.3, emissive:0x777777
-        water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01, emissive:0x6666ff
-        blood:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6 roughness: 0.1, emissive:0xff0000
+        chalk:          new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6 roughness: 0.05, emissive:0x777777
+        water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01, emissive:0x4444aa
+        blood:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000
         stone:          new THREE.MeshStandardMaterial color:0x444444, metalness: 0.5 roughness: 0.01, emissive:0x333333
     track:
         rail:           new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true

@@ -6,6 +6,8 @@
 0000000      000      0000000   000   000  000   000   0000000   00000000
 ###
 
+Cargo = require './cargo'
+
 function Storage
 
     @: (@station) ->
@@ -14,14 +16,52 @@ function Storage
         
         @group = new Group
         @group.name = @name
-        world.addObject   @group
-        world.addPickable @group
         
         @frame = world.construct.meshes.station.storage.clone()
         
         base = Geom.quad size:[4.4 4.4] normal:Vector.unitZ  
-        
-        @group.add new Mesh base, Materials.station.side
+        baseMesh = new Mesh base, Materials.station.side
+        baseMesh.setShadow()
+        @group.add baseMesh
         @group.add @frame
+        
+        world.addObject   @group
+        world.addPickable @group
 
+    hasCargo: -> @cargo
+        
+    miningEnded: ->
+        
+        @cargo = new Cargo @box
+        delete @box
+        
+    cargoTaken: ->
+        
+        delete @cargo
+        @startMiningAnimation()
+        
+    startMiningAnimation: ->
+        
+        @animTime = 0
+        @animDuration = 30
+        @animEnd = @miningEnded
+        @box = new Mesh Geom.box(size:2 pos:[0 0 1]), Materials.mining[@station.resource]
+        @box.scale.set 1 1 0.01
+        @box.position.z = 0
+        @box.setShadow()
+        @group.add @box
+        
+        world.addAnimation @animate
+        
+    animate: (delta, timeSum) =>
+        
+        @animTime += delta
+        if (animFactor = @animTime/@animDuration) <= 1
+            @box.scale.set 1 1 min 1 animFactor*2
+            @box.position.z = max 0 3.5*(animFactor-0.5)
+            world.addAnimation @animate
+        else if @animEnd
+            @animEnd()
+            delete @animEnd
+        
 module.exports = Storage

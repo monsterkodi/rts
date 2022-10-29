@@ -18,11 +18,12 @@ function Save
             stations: {}
             
         post.on 'save'   @onSave
+        post.on 'load'   @onLoad
         post.on 'reload' @onLoad
         
     onSave: => 
-        log @toNoon()
-        prefs.set 'save' @toNoon()
+
+        prefs.set 'save' @currentState()
         
     # 000   000   0000000    0000000   000   000  
     # 0000  000  000   000  000   000  0000  000  
@@ -30,7 +31,9 @@ function Save
     # 000  0000  000   000  000   000  000  0000  
     # 000   000   0000000    0000000   000   000  
     
-    toNoon: ->
+    toNoon: -> noon.stringify @currentState(), circular:true
+        
+    currentState: ->
         
         state = 
             nodes:    {}
@@ -45,8 +48,6 @@ function Save
         @s = @s.set 'nodes'    state.nodes
         @s = @s.set 'tracks'   state.tracks
         
-        noon.stringify @s, circular:true
-        
     # 000       0000000    0000000   0000000    
     # 000      000   000  000   000  000   000  
     # 000      000   000  000000000  000   000  
@@ -55,8 +56,9 @@ function Save
     
     onLoad: =>
         
-        oldNoon = prefs.get 'save'
-        save = noon.parse oldNoon
+        save = prefs.get 'save'
+        return if not save
+        oldNoon = noon.stringify save, circular:true
         
         world.clear()
         
@@ -97,5 +99,7 @@ function Save
             log 'DAFUK?' 
             log 'old:' oldNoon 
             log 'new:' newNoon
+            
+        world.animate 0
             
 module.exports = Save

@@ -19,11 +19,11 @@ class Map extends World
         
     stationTest: ->
 
-        @addCentralStation pos:[  0 0 0]
-        @addMiningStation  pos:[ 18 0 0], resource:'blood'
-        @addMiningStation  pos:[-18 0 0], resource:'stone'
-        @addMiningStation  pos:[ 36 0 0], resource:'water'
-        # @addMiningStation  [-36 0 0], 'chalk'
+        @addCentralStation pos:[-18   0]
+        @addMiningStation  pos:[  0   0], resource:'chalk'
+        @addMiningStation  pos:[  0 -12], resource:'stone'
+        @addMiningStation  pos:[ 18   0], resource:'blood'
+        @addMiningStation  pos:[ 36   0], resource:'water'
         
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  
     # 000          000     000   000     000     000  000   000  0000  000  

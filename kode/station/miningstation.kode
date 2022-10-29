@@ -21,6 +21,9 @@ function MiningStation extends CargoStation
         @storage.group.children[0].material = Materials.mining[@resource]
         @arm.group.children[4].children[0].material = Materials.mining[@resource]
         
+        @storage.startMiningAnimation @resource
+        @arm.resetStorageAnimation()
+        
     toSave: ->
         
         s = super()
