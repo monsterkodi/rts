@@ -45,15 +45,14 @@ function Compass
             
     onDelete: => @object?.del()
                     
-    onRotate: (ray, hit, downRay, lastRay) => 
+    onRotate: (hit, downHit, lastHit) => 
         
         @clearHighlight()
-        point = vec()
-        hit.mesh.getWorldPosition point
+        point = vec @group.position
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, point
-        lastRay.intersectPlane plane, Vector.tmp
-        ray.intersectPlane plane, Vector.tmp2
+        lastHit.ray.intersectPlane plane, Vector.tmp
+        hit.ray.intersectPlane plane, Vector.tmp2
         
         Vector.tmp.sub point
         Vector.tmp2.sub point
@@ -81,38 +80,38 @@ function Compass
     getDir: -> vec(0 1 0).applyQuaternion @wheel.quaternion
     getUp:  -> vec(0 0 1).applyQuaternion @wheel.quaternion
     
-    onEnter: (ray, hit) => 
+    onEnter: (hit, downHit) => 
         
         if hit.name.startsWith 'compass.dot'
             dot = @dots[parseInt hit.name[-1]]
             dot.scale.set 1 1 1.2
             dot.material.emissive.copy dot.material.color
             
-    onLeave: (ray, hit) =>
+    onLeave: (hit, downHit) =>
         
         if hit.name.startsWith 'compass.dot'
             dot = @dots[parseInt hit.name[-1]]
             dot.scale.set 1 1 1
             dot.material.emissive.copy Colors.black
     
-    onMouseDown: (ray, hit) => 
+    onMouseDown: (hit, downHit) =>
 
         if hit.name.startsWith 'compass.dot'
             dotIndex = parseInt hit.name[-1]
             @dots[dotIndex].scale.set 1 1 1
             
-    onMouseUp: (ray, hit) =>
+    onMouseUp: (hit, downHit) =>
         
         @group.visible = true
         
-    onClick: (ray, hit) => 
+    onClick: (hit, downHit) => 
         
         if hit.name.startsWith 'compass.dot'
             dotIndex = parseInt hit.name[-1]
             @dots[dotIndex].scale.set 1 1 1.2
             @rotateTo dotIndex * 360/8
         
-    onDoubleClick: (ray, hit) => 
+    onDoubleClick: (hit, downHit) => 
     
         if hit.name == 'compass.center'
             @object?.compassCenterDoubleClicked?()

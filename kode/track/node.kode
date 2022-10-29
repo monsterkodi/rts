@@ -147,7 +147,7 @@ function Node
         @center.material  = Materials.node.center
         post.removeListener 'delete' @del
         
-    onClickInOut: (ray, hit) => 
+    onClickInOut: (hit) => 
 
         return if Node.clickMode
         return if Node.skipCenter
@@ -162,10 +162,10 @@ function Node
         post.on 'mouseDown' @onMouseDown
         post.on 'mouseUp'   @onMouseUp
         
-    onMouseMove: (ray, hit) =>
+    onMouseMove: (hit, downHit) =>
         
         if Node.clickMode
-            @moveInOutDrag ray, hit
+            @moveInOutDrag hit, downHit
             
         if hitName = hit?.name
             # log hitName, @name
@@ -173,10 +173,10 @@ function Node
                 if hitName.endsWith('.in') or hitName.endsWith('.out')
                     log "could connect #{@name + (@clickTracks == @inTracks ? '.in' : '.out')} to" hitName
         
-    onMouseDown: (ray, hit) =>
-    onMouseUp: (ray, hit) =>
+    onMouseDown: (hit, downHit) =>
+    onMouseUp: (hit, downHit) =>
         
-        @onDragDone ray, hit
+        @onDragDone hit, downHit
         delete @clickTracks
         post.removeListener 'mouseMove' @onMouseMove
         post.removeListener 'mouseDown' @onMouseDown
@@ -215,26 +215,29 @@ function Node
         
         @dragTrack = t
         
-    onInDrag: (ray, hit) =>
+    onInDrag: (hit, downHit) =>
         
         if not @dragTrack ➜ @startDrag @inTracks
             
-        @moveInOutDrag ray, hit
+        @moveInOutDrag hit, downHit
                     
-    onOutDrag: (ray, hit) =>
+    onOutDrag: (hit, downHit) =>
         
         if not @dragTrack ➜ @startDrag @outTracks
 
-        @moveInOutDrag ray, hit
+        @moveInOutDrag hit, downHit
             
-    moveInOutDrag: (ray, hit) ->
+    moveInOutDrag: (hit, downHit) ->
         
         dragNode = @dragTrack.node[1]
             
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, @getPos()
-        ray.intersectPlane plane, Vector.tmp
+        hit.ray.intersectPlane plane, Vector.tmp
         Vector.tmp.round()
+        if Vector.tmp.distanceTo(@getPos()) > 300
+            Vector.tmp.copy @getPos().to(Vector.tmp).setLength 300
+            Vector.tmp.add @getPos()
         dragNode.group.position.copy Vector.tmp # setPos?
         @dragTrack.nodeMoved dragNode
         
@@ -264,16 +267,16 @@ function Node
         
         delete @dragTrack
             
-    onDrag: (ray, hit) =>
+    onDrag: (hit, downHit) =>
 
         world.hideCompass @
         plane = new Plane
-        plane.setFromNormalAndCoplanarPoint Vector.unitZ, hit.mesh.getWorldPosition(Vector.tmp)
-        ray.intersectPlane plane, Vector.tmp
+        plane.setFromNormalAndCoplanarPoint Vector.unitZ, @getPos()
+        hit.ray.intersectPlane plane, Vector.tmp
         Vector.tmp.round()
         @setPos Vector.tmp
         
-    getPos: => @group.position.clone()
+    getPos: => vec @group.position
     setPos: (point) ->
         
         @group.position.copy point
@@ -295,14 +298,14 @@ function Node
     # 000   000  000   000     000     000   000     000     000       
     # 000   000   0000000      000     000   000     000     00000000  
     
-    onRotate: (ray, hit, downRay, lastRay) =>
+    onRotate: (hit, downHit, lastHit) =>
 
         point = vec()
         hit.mesh.getWorldPosition point
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, point
-        lastRay.intersectPlane plane, Vector.tmp
-        ray.intersectPlane plane, Vector.tmp2
+        lastHit.ray.intersectPlane plane, Vector.tmp
+        hit.ray.intersectPlane plane, Vector.tmp2
         
         Vector.tmp.sub point
         Vector.tmp2.sub point

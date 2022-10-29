@@ -8,7 +8,7 @@
 
 kxk = require 'kxk'
 
-{ _, deg2rad, elem, first, last, post, prefs, rad2deg, randInt, randIntRange, stopEvent } = require 'kxk'
+{ _, clamp, deg2rad, elem, first, last, post, prefs, rad2deg, randInt, randIntRange, stopEvent } = require 'kxk'
 
 window.$            = kxk.$
 window._            = _
@@ -51,15 +51,18 @@ for e in expose.split '\n'
     window[e] = THREE[e]
     
 require 'three/examples/js/shaders/CopyShader'
+require 'three/examples/js/shaders/SSAOShader'
 require 'three/examples/js/shaders/LuminosityHighPassShader'
 require 'three/examples/js/postprocessing/Pass'
 require 'three/examples/js/postprocessing/ShaderPass'
 require 'three/examples/js/postprocessing/EffectComposer'
 require 'three/examples/js/postprocessing/RenderPass'
+require 'three/examples/js/postprocessing/SSAOPass'
 require 'three/examples/js/postprocessing/UnrealBloomPass'
+require 'three/examples/js/math/SimplexNoise'
 { Text } = require 'troika-three-text'
 window.Text = Text
-{ EffectComposer, RenderPass, UnrealBloomPass } = THREE
+{ EffectComposer, RenderPass, UnrealBloomPass, SSAOPass, SimplexNoise } = THREE
 
 setShadow = -> @castShadow = @receiveShadow = true
 setShadow.bind window.Mesh
@@ -218,15 +221,22 @@ class RTS
         @composer = new EffectComposer @renderer, renderTarget
         @composer.setPixelRatio window.devicePixelRatio
         @composer.setSize @view.clientWidth, @view.clientHeight
-        @composer.addPass new RenderPass @scene, @camera 
+        @composer.addPass new RenderPass @scene, @camera
         
         resolution = new THREE.Vector2 @view.clientWidth, @view.clientHeight
         strength   = 0.8
         threshold  = 0.8
         radius     = 0
         bloomPass  = new UnrealBloomPass resolution, strength, radius, threshold
-        bloomPass.setSize @view.clientWidth*window.devicePixelRatio, @view.clientHeight*window.devicePixelRatio
         @composer.addPass bloomPass
+        
+        # ssaoPass = new SSAOPass @scene, @camera, @view.clientWidth, @view.clientHeight
+        # ssaoPass.output = 2
+        # ssaoPass.setSize @view.clientWidth, @view.clientHeight
+        # ssaoPass.minDistance  = 0.01
+        # ssaoPass.maxDistance  = 0.3
+        # ssaoPass.kernelRadius = 16
+        # @composer.addPass ssaoPass
         
     # 0000000    00000000   000   0000000   000   000  000000000  000   000  00000000   0000000   0000000  
     # 000   000  000   000  000  000        000   000     000     0000  000  000       000       000       
@@ -236,30 +246,20 @@ class RTS
     
     setBrightness: (@brightness) =>
         
+        @brightness = clamp 0 1 @brightness
         c = Colors.clear.clone()
         c.multiplyScalar @brightness
         @renderer.setClearColor c
         @lightAmbient.intensity = @lightIntensityAmbient * @brightness
-        @lightShadow.intensity = @lightIntensityShadow * @brightness
-        @lightPlayer.intensity = @lightIntensityPlayer * @brightness
+        @lightShadow.intensity  = @lightIntensityShadow  * @brightness
+        @lightPlayer.intensity  = @lightIntensityPlayer  * @brightness
         post.emit 'brightness' @brightness
         prefs.set 'brightness' @brightness
         
-    getBrightness: =>
-        
-        return @brightness
-        
-    resetBrightness: =>
-        
-        @setBrightness 1
-        
-    incrBrightness: =>
-        
-        @setBrightness @getBrightness() + 0.1
-
-    decrBrightness: =>
-        
-        @setBrightness @getBrightness() - 0.1
+    getBrightness:   => @brightness
+    resetBrightness: => @setBrightness 1
+    incrBrightness:  => @setBrightness @getBrightness() + 0.1
+    decrBrightness:  => @setBrightness @getBrightness() - 0.1
         
     #  0000000   000   000  000  00     00   0000000   000000000  00000000  
     # 000   000  0000  000  000  000   000  000   000     000     000       
@@ -328,13 +328,11 @@ class RTS
         @downPos.copy @mouse
         @camMove = event.button != 1
         
-        @downHit = @castRay()
-        @downRay = @mouseRay()
-        @lastRay = @mouseRay()
-            
-        if event.buttons == 1
-            if @downHit?.mesh?.handler?.onMouseDown is func
-                @downHit.mesh.handler.onMouseDown @downRay, @downHit
+        if @downHit = @castRay()
+        
+            if event.buttons == 1
+                if @downHit.mesh?.handler?.onMouseDown is func
+                    @downHit.mesh.handler.onMouseDown @downHit, @downHit
                 
         post.emit 'mouseDown' @downRay, @downHit
             
@@ -345,12 +343,12 @@ class RTS
         hit = @castRay()
         
         if @downHit?.mesh?.onDragDone is func
-            @downHit.mesh.onDragDone @mouseRay(), hit, @downRay, @downHit
+            @downHit.mesh.onDragDone hit, @downHit
         
         if @downHit?.mesh?.handler?.onMouseUp is func
-            @downHit.mesh.handler.onMouseUp @downRay, @downHit
+            @downHit.mesh.handler.onMouseUp hit, @downHit
                     
-        post.emit 'mouseUp' @mouseRay(), hit, @downRay, @downHit
+        post.emit 'mouseUp' hit, @downHit
         
         moved = @downPos.dist @mouse
         if moved < 0.001
@@ -362,64 +360,57 @@ class RTS
         Node.skipCenter = false
                 
         delete @camMove
-        delete @downRay
-        delete @lastRay
         # keep downHit!
         
     onMouseMove: (event) =>
 
         @calcMouse event
-        hit = @castRay()
-        mouseRay = @mouseRay()
-        
-        if event.buttons == 1
-            if @downHit?.mesh?.onDrag is func
-                @downHit.mesh.onDrag mouseRay, @downHit, @downRay, @lastRay
-        
-        if hit
+                
+        if hit = @castRay()
+
+            if event.buttons == 1
+                if @downHit?.mesh?.onDrag is func
+                    @downHit.mesh.onDrag hit, @downHit, @lastHit
             
-            post.emit 'mouseMove' mouseRay, hit, @lastRay
+            post.emit 'mouseMove' hit, @downHit, @lastHit
             
             if @lastHit?.mesh != hit.mesh 
                 if @lastHit?.mesh?.onLeave is func
-                    @lastHit.mesh.onLeave mouseRay, @lastHit, @lastRay
+                    @lastHit.mesh.onLeave hit, @downHit
                 else if @lastHit?.mesh?.handler?.onLeave is func
-                    @lastHit.mesh.handler.onLeave mouseRay, @lastHit, @lastRay
+                    @lastHit.mesh.handler.onLeave hit, @downHit
                 if hit.mesh?.onEnter is func
-                    hit.mesh.onEnter mouseRay, hit, @lastRay
+                    hit.mesh.onEnter hit, @downHit
                 else if hit.mesh?.handler?.onEnter is func
-                    hit.mesh.handler.onEnter mouseRay, hit, @lastRay
+                    hit.mesh.handler.onEnter hit, @downHit
                     
             @lastHit = hit
                 
-        @lastRay = mouseRay
-
     onClick: (event) => 
         
         if hit = @castRay()
-            ray = @mouseRay()
             if hit.mesh?.onClick is func
                 if @downHit.mesh == hit.mesh
-                    hit.mesh.onClick ray, hit
+                    hit.mesh.onClick hit
             else if hit.mesh?.handler?.onClick is func
                 if @downHit.mesh == hit.mesh
-                    hit.mesh.handler.onClick ray, hit
+                    hit.mesh.handler.onClick hit
             else if hit.name == 'floor'
                 world.hideCompass()
                 CurveCtrl.deactivateAll()
             else
                 log 'unhandled click' hit
                 
-            post.emit 'mouseClick' ray, hit
+            post.emit 'mouseClick' hit # not used?
         
     onDblClick: (event) => 
         
         if hit = @castRay()
             
             if hit.mesh?.onDoubleClick is func
-                hit.mesh.onDoubleClick @mouseRay(), hit
+                hit.mesh.onDoubleClick hit
             else if hit.mesh?.handler?.onDoubleClick is func
-                hit.mesh.handler.onDoubleClick @mouseRay(), hit
+                hit.mesh.handler.onDoubleClick hit
             else
                 log 'unhandled doubleClick' hit
                             
@@ -438,11 +429,6 @@ class RTS
             @centerHelper.position.copy hit.point
             @axesHelper.position.copy hit.point
             
-    mouseRay: ->
-        
-        dir = vec(@mouse.x, @mouse.y, 1).unproject(@camera).normalize()
-        new Ray @camera.position, dir
-
     #  0000000   0000000    0000000  000000000  00000000    0000000   000   000  
     # 000       000   000  000          000     000   000  000   000   000 000   
     # 000       000000000  0000000      000     0000000    000000000    00000    
@@ -470,12 +456,15 @@ class RTS
         @arrowHelper.setDirection norm
         @arrowHelper.position.copy point
         
+        ray = new Ray @camera.position, vec(@camera.position).to(point).normalize()
+        
         info = 
             name:   intersect.object.name
             point:  point
             norm:   norm
             dist:   intersect.distance
             mesh:   intersect.object
+            ray:    ray
                     
         info
         

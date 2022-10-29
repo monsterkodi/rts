@@ -18,14 +18,14 @@ class Camera extends PerspectiveCamera
         width  = opt.view.clientWidth 
         height = opt.view.clientHeight
         
-        super 70, width/height, 1, 10000 # fov, aspect, near, far
+        super 70, width/height, 1, 1000 # fov, aspect, near, far
         
         @fov     = 70
         @size    = vec width, height 
         @elem    = opt.view
         @dist    = 10
-        @maxDist = @far/4
-        @minDist = 4
+        @maxDist = @far/2
+        @minDist = @near*2
         @center  = vec()
         @degree  = 60
         @rotate  = 0

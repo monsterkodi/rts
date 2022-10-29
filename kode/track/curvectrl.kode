@@ -118,7 +118,7 @@ function CurveCtrl
             else
                 world.showCompass @, @getPos(), @getDir() 
     
-    onLeave: (ray, hit) =>
+    onLeave: (hit, downHit) =>
         
         if hit.mesh.name == 'prevCtrlEnd'
             @meshPrevCtrlEnd?.material = Materials.ctrl.start
@@ -131,7 +131,7 @@ function CurveCtrl
             @meshCurveStart.material = Materials.ctrl.curve
         @
         
-    onEnter: (ray, hit) =>
+    onEnter: (hit, downHit) =>
         
         if hit.mesh.name == 'prevCtrlEnd'
             @meshPrevCtrlEnd?.material = Materials.ctrl.highlight
@@ -189,16 +189,16 @@ function CurveCtrl
     prevCtrlDist:  -> @prevCtrlEnd.distanceTo @curveStart
     ctrlStartDist: -> @ctrlStart.distanceTo @curveStart
     
-    onDrag: (ray, hit) =>
+    onDrag: (hit, downHit) =>
         
         world.hideCompass @
         
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint Vector.unitZ, @getPos()
-        ray.intersectPlane plane, Vector.tmp
+        hit.ray.intersectPlane plane, Vector.tmp
         Vector.tmp.round()
                     
-        if hit.mesh.name == 'ctrlStart'
+        if downHit.mesh.name == 'ctrlStart'
             
             ray = new Ray @curveStart, @getDir()
             newPos = vec()
@@ -219,7 +219,7 @@ function CurveCtrl
             @meshCtrlRod.scale.set 1 dist, 1
             @meshCtrlStart.position.y = dist
             
-        if hit.mesh.name == 'prevCtrlEnd'
+        if downHit.mesh.name == 'prevCtrlEnd'
             
             ray = new Ray @curveStart, @getDir().negate()
             newPos = vec()
@@ -240,7 +240,7 @@ function CurveCtrl
             @meshPrevCtrlRod.scale.set 1 dist, 1
             @meshPrevCtrlEnd.position.y = -dist
             
-        if hit.mesh.name == 'curveStart'
+        if downHit.mesh.name == 'curveStart'
             @setPos Vector.tmp
             
         @curve.updateArcLengths()
