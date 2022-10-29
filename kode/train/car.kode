@@ -6,17 +6,22 @@
  0000000  000   000  000   000  
 ###
 
-class Car
+function Car
     
-    @: (@mesh) ->
+    @: (@train, @mesh) ->
         
-        world.addObject @mesh
+        world.addObject   @mesh
         world.addPickable @mesh
         
     del: ->
         
-        world.removeObject @mesh
+        world.removeObject   @mesh
         world.removePickable @mesh
+        
+    delta: -> @train.carDelta @
+    nextNode: -> @train.path.nextNode @delta()
+    nextDelta: -> @delta() + @nextDistance()
+    nextDistance: -> @train.path.nextDistance @delta()
         
     update: (delta, timeSum) ->
     

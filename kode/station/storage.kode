@@ -13,6 +13,7 @@ function Storage
     @: (@station) ->
 
         @name = @station.name + '.Storage'
+        @numCargoStored = 0
         
         @group = new Group
         @group.name = @name
@@ -39,6 +40,11 @@ function Storage
         
         delete @cargo
         @startMiningAnimation()
+        
+    storeCargo: (cargo) ->
+        
+        cargo.del()
+        @numCargoStored++
         
     startMiningAnimation: ->
         

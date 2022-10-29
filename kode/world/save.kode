@@ -97,8 +97,8 @@ function Save
         newNoon = @toNoon()
         if newNoon != oldNoon
             log 'DAFUK?' 
-            log 'old:' oldNoon 
-            log 'new:' newNoon
+            # log 'old:' oldNoon 
+            # log 'new:' newNoon
             
         world.animate 0
             

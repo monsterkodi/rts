@@ -1,15 +1,25 @@
 
 Car = require './car'
 
-class Boxcar extends Car
+function Boxcar extends Car
 
-    @: (@train) ->
+    @: (train) ->
         
-        super world.construct.meshes.boxcar.clone()
+        super train, world.construct.meshes.boxcar.clone()
     
-    addCargo: (cargo) ->
+    isEmpty: -> not @hasCargo()
+    hasCargo: -> @cargo
+    takeCargo: -> 
+        delete @waitingForUnload
+        c = @cargo
+        delete @cargo
+        c
         
-        @mesh.add cargo.mesh
+    setCargo: (@cargo) ->
+        delete @waitingForCargo
+        @mesh.add @cargo.mesh
+        @cargo.mesh.quaternion.identity()
+        @cargo.mesh.position.set 0 1.7 -1
         
     setColor: (color) ->
         

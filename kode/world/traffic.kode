@@ -16,6 +16,8 @@ function Traffic
         
         @trains = []
     
+    clear: -> @trains = []
+        
     addTrain: (train) -> @trains.push train
         
     simulate: (scaledDelta, timeSum) ->
@@ -45,7 +47,8 @@ function Traffic
                 
                 tailDelta = train.tailDelta()
                 s = path.prevDistance tailDelta
-                if s > TAIL_DISTANCE
+                n = path.nextDistance tailDelta
+                if s > min TAIL_DISTANCE, n+s/2
                     n = path.prevNode tailDelta
                     if n.train == train
                         n.unblock()
@@ -57,6 +60,8 @@ function Traffic
     # 000   000  0000000        0      000   000  000   000   0000000  00000000  
     
     allowTrainAdvance: (train, advance) ->
+        
+        oldAdvance = advance
         
         if not train.path.isLoop
             halfEngineLength = 1.9
@@ -75,6 +80,10 @@ function Traffic
             # log maxAdvance, advance, train.isOneWay(), train.path.isLoop
             advance = Math.min maxAdvance, advance
             
+        advance = @checkCargo train, advance
+            
+        train.advanceFactor = advance/oldAdvance
+        
         delta = train.path.delta+advance
         
         track = train.path.trackAtDelta delta
@@ -96,8 +105,41 @@ function Traffic
         nn = train.path.nextNode()
         ot = nn.oppositeTracks train.path.currentTrack()
         if ot.length 
-            # log nn.name, ot
             train.path.addTrackNode ot[0], ot[0].nodeOpposite nn
             return ot[0]
+            
+    checkCargo: (train, advance) ->
+        
+        # log 'checkCargo' train.name, advance
+        maxAdvance = advance
+        minCar = null
+        for car in train.boxcars()
+            if car.isEmpty()
+                if car.waitingForCargo
+                    # log 'waitingForCargo' train.name
+                    return 0
+                if cargo = car.nextNode().station?.hasCargo()
+                    if car.nextDistance() < maxAdvance
+                        minCar = car
+                        maxAdvance = car.nextDistance()
+            else
+                if car.waitingForUnload
+                    # log 'waitingForUnload' train.name
+                    return 0
+                if car.nextNode().station?.takesCargo()
+                    if car.nextDistance() < maxAdvance
+                        minCar = car
+                        maxAdvance = car.nextDistance()
+                        
+        if minCar
+            if minCar.isEmpty()
+                # log 'startWaitingForCargo' minCar.name
+                minCar.waitingForCargo = true
+                car.nextNode().station.carWaitingForCargo minCar
+            else
+                minCar.waitingForUnload = true
+                # log 'startWaitingForUnload' minCar.name
+                car.nextNode().station.carWaitingForUnload minCar
+        maxAdvance
 
 module.exports = Traffic

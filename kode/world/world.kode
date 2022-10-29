@@ -145,6 +145,8 @@ function World extends Convert
     
     clear: ->
         
+        @traffic.clear()
+        
         for train in @allTrains()
             train.del()
         

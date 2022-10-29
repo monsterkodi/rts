@@ -24,10 +24,16 @@ function MiningStation extends CargoStation
         @storage.startMiningAnimation @resource
         @arm.resetStorageAnimation()
         
+    takesCargo: -> false        
     toSave: ->
         
         s = super()
         s.resource = @resource
         s
-                
+          
+    carWaitingForCargo: (@waitingCar) ->
+        
+        if @arm.waitingForCar
+            @arm.startLoadingToCar @waitingCar
+        
 module.exports = MiningStation

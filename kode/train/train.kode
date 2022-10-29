@@ -1,6 +1,7 @@
 
 Path = require '../track/path'
 Engine = require './engine'
+Boxcar = require './boxcar'
 
 function Train
     
@@ -13,9 +14,9 @@ function Train
         @path       = new Path @
         @speed      = @cfg.speed ? 1
         @topSpeed   = @speed
+        @advanceFactor = 1
         @cars       = []
         
-        # @mesh       = new Mesh Geom.sphere(radius:0.5), Materials.train.window
         @mesh       = new Mesh Geom.cylinder(radius:0.5, height:0.2), Materials.train.window
         @mesh.train = @
         world.addObject @mesh
@@ -43,11 +44,22 @@ function Train
         else
             warn 'cant reverse oneWay train!'
         
+    #  0000000   0000000   00000000   
+    # 000       000   000  000   000  
+    # 000       000000000  0000000    
+    # 000       000   000  000   000  
+    #  0000000  000   000  000   000  
+    
     addCar: (car) ->
         
+        log car
         @cars.push car
-        car.mesh.name = @name + ".car#{@cars.length-1}"
+        car.index = @cars.length-1
+        car.name = @name + ".#{car.constructor.name[0]}#{car.index}"
+        car.mesh.name = car.name
         car
+        
+    boxcars: -> @cars.filter (c) -> c instanceof Boxcar
         
     setColor: (color) ->
         
@@ -70,9 +82,10 @@ function Train
     block:   -> @speed = 0
     unblock: -> @speed = @topSpeed
     
-    tailDelta:     -> @path?.normDelta @path.delta-4.2*(@cars.length-1)
-    tailTrack:     -> @path?.trackAtDelta @tailDelta()
-    prevTailTrack: -> @path?.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]
+    carDelta:   (car) -> @path?.normDelta @path.delta-4.2*(car.index)
+    tailDelta:        -> @path?.normDelta @path.delta-4.2*(@cars.length-1)
+    tailTrack:        -> @path?.trackAtDelta @tailDelta()
+    prevTailTrack:    -> @path?.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]
     tailPrevDistance: -> @path?.prevDistance @tailDelta()
                 
     update: (delta, timeSum) ->

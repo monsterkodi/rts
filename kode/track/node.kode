@@ -241,7 +241,7 @@ function Node
         dragNode.group.position.copy Vector.tmp # setPos?
         @dragTrack.nodeMoved dragNode
         
-    onDragDone: (ray, hit) =>
+    onDragDone: (hit, downHit) =>
         
         if hitName = hit?.name
 

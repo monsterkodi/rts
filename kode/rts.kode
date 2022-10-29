@@ -52,6 +52,7 @@ for e in expose.split '\n'
     
 require 'three/examples/js/shaders/CopyShader'
 require 'three/examples/js/shaders/SSAOShader'
+require 'three/examples/js/shaders/ConvolutionShader'
 require 'three/examples/js/shaders/LuminosityHighPassShader'
 require 'three/examples/js/postprocessing/Pass'
 require 'three/examples/js/postprocessing/ShaderPass'
@@ -59,10 +60,11 @@ require 'three/examples/js/postprocessing/EffectComposer'
 require 'three/examples/js/postprocessing/RenderPass'
 require 'three/examples/js/postprocessing/SSAOPass'
 require 'three/examples/js/postprocessing/UnrealBloomPass'
+require 'three/examples/js/postprocessing/BloomPass'
 require 'three/examples/js/math/SimplexNoise'
 { Text } = require 'troika-three-text'
 window.Text = Text
-{ EffectComposer, RenderPass, UnrealBloomPass, SSAOPass, SimplexNoise } = THREE
+{ EffectComposer, RenderPass, UnrealBloomPass, SSAOPass, SimplexNoise, BloomPass, ShaderPass } = THREE
 
 setShadow = -> @castShadow = @receiveShadow = true
 setShadow.bind window.Mesh
@@ -202,7 +204,9 @@ class RTS
                 
         @lastAnimationTime = window.performance.now()
                 
-        world.create()
+        if not prefs.get 'save'
+            world.create()
+            
         @animationStep()
         
         @paused = prefs.get 'paused' false
@@ -218,25 +222,35 @@ class RTS
         size = @renderer.getDrawingBufferSize new THREE.Vector2()
         renderTarget = new THREE.WebGLRenderTarget size.width, size.height, samples:4
             
+        vw = @view.clientWidth 
+        vh = @view.clientHeight
+        
         @composer = new EffectComposer @renderer, renderTarget
         @composer.setPixelRatio window.devicePixelRatio
-        @composer.setSize @view.clientWidth, @view.clientHeight
+        @composer.setSize vw, vh
         @composer.addPass new RenderPass @scene, @camera
         
-        resolution = new THREE.Vector2 @view.clientWidth, @view.clientHeight
+        resolution = new THREE.Vector2 vw, vh
         strength   = 0.8
         threshold  = 0.8
         radius     = 0
-        bloomPass  = new UnrealBloomPass resolution, strength, radius, threshold
-        @composer.addPass bloomPass
-        
-        # ssaoPass = new SSAOPass @scene, @camera, @view.clientWidth, @view.clientHeight
-        # ssaoPass.output = 2
-        # ssaoPass.setSize @view.clientWidth, @view.clientHeight
+        unrealBloomPass  = new UnrealBloomPass resolution, strength, radius, threshold
+        @composer.addPass unrealBloomPass
+                        
+        # ssaoPass = new SSAOPass @scene, @camera, vw, vh
+        # ssaoPass.output = 0
+        # ssaoPass.setSize vw, vh
         # ssaoPass.minDistance  = 0.01
         # ssaoPass.maxDistance  = 0.3
         # ssaoPass.kernelRadius = 16
         # @composer.addPass ssaoPass
+        
+        # strength = 1, kernelSize = 25, sigma = 4, resolution = 256
+        # bloomPass  = new BloomPass 1, 25, 4, 256
+        # @composer.addPass bloomPass
+        
+        # effectCopy = new ShaderPass THREE.CopyShader
+        # @composer.addPass effectCopy
         
     # 0000000    00000000   000   0000000   000   000  000000000  000   000  00000000   0000000   0000000  
     # 000   000  000   000  000  000        000   000     000     0000  000  000       000       000       

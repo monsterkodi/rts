@@ -9,5 +9,10 @@
 function Cargo
 
     @: (@mesh) ->
+        
+    del: ->
+        
+        @mesh.removeFromParent()
+        delete @mesh
 
 module.exports = Cargo

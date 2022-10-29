@@ -67,10 +67,70 @@ function Arm
         @curveHelper = new CurveHelper
         # @group.add @curveHelper.group
         
-        @resetAnimation()
-       
-    checkForDockingCargo: => log 'checkForDockingCargo'
+        @startAnimation duration: 5 points: [vec(-6 0 1), vec(-6 0 1)] # initial arm position
+                   
+    #  0000000  00000000  000   000  000000000  00000000    0000000   000      
+    # 000       000       0000  000     000     000   000  000   000  000      
+    # 000       0000000   000 0 000     000     0000000    000000000  000      
+    # 000       000       000  0000     000     000   000  000   000  000      
+    #  0000000  00000000  000   000     000     000   000  000   000  0000000  
     
+    startUnloadingCar: ->
+            
+        @waitingForCar = false
+        @startAnimation duration:5 animEnd:@takeCargoFromCar, points: [ # lower hand to car
+            vec(-6 0 1)
+            vec(-6 0 -2)
+            ]
+            
+    takeCargoFromCar: =>
+        
+        @cargo = @station.waitingCar.cargo
+        @handMesh.add @cargo.mesh
+        @cargo.mesh.quaternion.identity()
+        @cargo.mesh.position.set 0 0 -2.3
+        
+        @startAnimation duration:5 animEnd:@releaseWaitingCar, points: [ # lift cargo from car
+            vec(-6 0 -2) 
+            vec(-6 0 1)
+        ]
+       
+    releaseWaitingCar: =>
+        
+        @station.waitingCar.takeCargo()
+        delete @station.waitingCar
+        
+        @startAnimation duration:30 animEnd:@storeCargoInStorage, points: [ # move cargo to storage
+            vec(-6 0 1), vec(-6 0 3), vec(-6 -1 3.5), vec(-4 -4 3), vec(0 -5.5 2.5), 
+            vec( 4 -4 3), vec( 6 -1 3.5),  vec( 6 0 3), vec( 6 0 1), vec( 6 0 -1.05)
+            ]
+            
+    storeCargoInStorage: =>
+        
+        @station.storage.storeCargo @cargo
+        delete @cargo
+        @storageToDockingAnimation @checkForUnloadingCar
+        
+    checkForUnloadingCar: => 
+    
+        if @station.waitingCar
+            @startUnloadingCar()
+        else
+            @waitingForCar = true
+                    
+    # 00     00  000  000   000  000  000   000   0000000     
+    # 000   000  000  0000  000  000  0000  000  000          
+    # 000000000  000  000 0 000  000  000 0 000  000  0000    
+    # 000 0 000  000  000  0000  000  000  0000  000   000    
+    # 000   000  000  000   000  000  000   000   0000000     
+    
+    checkForLoadingToCar: => 
+    
+        if @station.waitingCar
+            @startLoadingToCar()
+        else
+            @waitingForCar = true
+            
     checkForStorageCargo: =>
         
         if @cargo = @station.storage.hasCargo()
@@ -78,14 +138,35 @@ function Arm
             @cargo.mesh.quaternion.identity()
             @cargo.mesh.position.set 0 0 -2.3
             @station.storage.cargoTaken()
-            @storageToDockingAnimation()
+            @storageToDockingAnimation @checkForLoadingToCar
+                    
+    startLoadingToCar: ->
         
-    resetAnimation: -> @startAnimation duration: 5 points: [vec(-6 0 1), vec(-6 0 1)]
-
-    storageToDockingAnimation: ->
+        @startAnimation duration:5 animEnd:@loadCargoToCar, points: [
+            vec(-6 0 1)
+            vec(-6 0 -2)
+            ]
+            
+    loadCargoToCar: =>
         
-        @startAnimation duration: 30 animEnd: @checkForDockingCargo, points: [
-            vec( 6 0 -1.05)
+        @station.waitingCar.setCargo @cargo
+        delete @station.waitingCar
+        delete @cargo
+        @startAnimation duration:5 animEnd:@resetStorageAnimation, points: [
+            vec(-6 0 -2)
+            vec(-6 0 1)
+            ]
+            
+    resetStorageAnimation: => # called from MiningStation constructor and loadCargoToCar.animEnd to move arm to the storage
+        
+        @startAnimation duration:30 animEnd:@checkForStorageCargo, points: [
+            vec(-6 0 1), vec(-6 0 3), vec(-6 -1 3.5), vec(-4 -4 3), vec(0 -5.5 2.5), vec( 4 -4 3), vec( 6 -1 3.5),  vec( 6 0 3), vec( 6 0 1), vec( 6 0 -1.05)
+            ]
+            
+    storageToDockingAnimation: (animEnd) =>
+        
+        @startAnimation duration:30 animEnd:animEnd, points: [
+            vec( 6 0 -1.05) # resting position over storage
             vec( 6 0 1), 
             vec( 6 0 3), 
             vec( 6 1 3.5),  
@@ -94,14 +175,14 @@ function Arm
             vec(-4 4 3), 
             vec(-6 1 3.5), 
             vec(-6 0 3), 
-            vec(-6 0 1), 
+            vec(-6 0 1) # resting position over car
             ]
     
-    resetStorageAnimation: ->
-        
-        @startAnimation duration: 30 animEnd: @checkForStorageCargo, points: [
-            vec(-6 0 1), vec(-6 0 3), vec(-6 -1 3.5), vec(-4 -4 3), vec(0 -5.5 2.5), vec( 4 -4 3), vec( 6 -1 3.5),  vec( 6 0 3), vec( 6 0 1), vec( 6 0 -1.05)
-            ]
+    #  0000000   000   000  000  00     00   0000000   000000000  000   0000000   000   000  
+    # 000   000  0000  000  000  000   000  000   000     000     000  000   000  0000  000  
+    # 000000000  000 0 000  000  000000000  000000000     000     000  000   000  000 0 000  
+    # 000   000  000  0000  000  000 0 000  000   000     000     000  000   000  000  0000  
+    # 000   000  000   000  000  000   000  000   000     000     000   0000000   000   000  
     
     startAnimation: (cfg)->
         
@@ -120,7 +201,6 @@ function Arm
         
         @animTime += delta
         if (animFactor = @animTime/@animDuration) <= 1
-            
             basePos = vec @baseMesh.position
             wristPos = vec @handCurvePath.getPointAt animFactor
             @handMesh.position.copy wristPos
@@ -166,9 +246,8 @@ function Arm
                 
             world.addAnimation @animate
             
-        else if @animEnd
-            
-            @animEnd()
-            delete @animEnd
+        else 
+            if @animEnd
+                @animEnd()
 
 module.exports = Arm

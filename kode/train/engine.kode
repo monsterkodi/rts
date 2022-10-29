@@ -8,11 +8,11 @@
 
 Car = require './car'
 
-class Engine extends Car
+function Engine extends Car
     
-    @: (@train) ->
+    @: (train) ->
         
-        super world.construct.meshes.engine.clone()
+        super train, world.construct.meshes.engine.clone()
         
         label = world.addLabel text:@train.name, size:0.5 mono:true
         label.position.z = 2.0
@@ -60,7 +60,7 @@ class Engine extends Car
         x = 0.2*Math.sin 2*timeSum*train.speed
         @mesh.children[1].scale.set 1.2+x, 1 1
         
-        sin = Math.sin 2*timeSum*train.speed
+        sin = Math.sin 2*timeSum*train.speed*train.advanceFactor
         if sin > 0
             c = 0.5+sin
         else

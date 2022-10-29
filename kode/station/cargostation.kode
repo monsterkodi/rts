@@ -35,5 +35,9 @@ function CargoStation extends Station
             @node = world.nodeWithName cfg.node
         else
             @node = world.addNode pos:@docking.position.clone().add(vec cfg.pos), name:'n'+@name, fixed:true
-
+            
+        @node.station = @
+        
+    hasCargo: -> @arm.cargo
+                
 module.exports = CargoStation
