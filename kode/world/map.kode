@@ -10,7 +10,7 @@ World = require './world'
 
 class Map extends World
         
-    create: -> 
+    create: ->
     
         # @addObject new Mesh Geom.roundedFrame({}), Materials.ctrl.start
         # @addObject new Mesh Geom.roundedFrame({}), Materials.wireframe
@@ -21,7 +21,7 @@ class Map extends World
 
         @addCentralStation pos:[-18   0]
         @addMiningStation  pos:[  0   0], resource:'chalk'
-        @addMiningStation  pos:[  0 -12], resource:'stone'
+        # @addMiningStation  pos:[  0 -12], resource:'stone'
         @addMiningStation  pos:[ 18   0], resource:'blood'
         @addMiningStation  pos:[ 36   0], resource:'water'
         
