@@ -118,7 +118,7 @@ function CurveCtrl
             else
                 world.showCompass @, @getPos(), @getDir() 
     
-    onLeave: (hit, downHit) =>
+    onLeave: (hit) =>
         
         if hit.mesh.name == 'prevCtrlEnd'
             @meshPrevCtrlEnd?.material = Materials.ctrl.start
@@ -131,7 +131,7 @@ function CurveCtrl
             @meshCurveStart.material = Materials.ctrl.curve
         @
         
-    onEnter: (hit, downHit) =>
+    onEnter: (hit) =>
         
         if hit.mesh.name == 'prevCtrlEnd'
             @meshPrevCtrlEnd?.material = Materials.ctrl.highlight

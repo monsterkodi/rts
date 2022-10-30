@@ -390,13 +390,13 @@ class RTS
             
             if @lastHit?.mesh != hit.mesh 
                 if @lastHit?.mesh?.onLeave is func
-                    @lastHit.mesh.onLeave hit, @downHit
+                    @lastHit.mesh.onLeave @lastHit, hit
                 else if @lastHit?.mesh?.handler?.onLeave is func
-                    @lastHit.mesh.handler.onLeave hit, @downHit
+                    @lastHit.mesh.handler.onLeave @lastHit, hit
                 if hit.mesh?.onEnter is func
-                    hit.mesh.onEnter hit, @downHit
+                    hit.mesh.onEnter hit, @lastHit
                 else if hit.mesh?.handler?.onEnter is func
-                    hit.mesh.handler.onEnter hit, @downHit
+                    hit.mesh.handler.onEnter hit, @lastHit
                     
             @lastHit = hit
                 

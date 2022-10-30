@@ -120,7 +120,7 @@ function Traffic
                 if car.waitingForCargo
                     # log 'waitingForCargo' train.name
                     return 0
-                if cargo = car.nextNode().station?.providesCargo()
+                if car.nextNode().station?.providesCargo()
                     if car.nextDistance() < maxAdvance
                         minCar = car
                         maxAdvance = car.nextDistance()
@@ -137,7 +137,10 @@ function Traffic
             if minCar.isEmpty()
                 # log 'startWaitingForCargo' minCar.name
                 minCar.waitingForCargo = true
-                car.nextNode().station.carWaitingForCargo minCar
+                if not car.nextNode().station?.carWaitingForCargo is func 
+                    log car.nextNode()
+                else
+                    car.nextNode().station.carWaitingForCargo minCar
             else
                 minCar.waitingForUnload = true
                 # log 'startWaitingForUnload' minCar.name

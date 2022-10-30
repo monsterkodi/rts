@@ -325,18 +325,16 @@ function World extends Convert
     
     addTrack: (n1, n2, ctrlPoints, name) ->
         
-        points = [n1.getPos()]
+        # points = [n1.getPos()]
+#         
+        # for point,index in ctrlPoints
+            # points.push vec point
+            # # if index % 3 == 2
+                # # points.push vec point
+#         
+        # points.push n2.getPos()
         
-        for point,index in ctrlPoints
-            points.push vec point
-            if index % 3 == 2
-                points.push vec point
-        
-        points.push n2.getPos()
-        
-        track = new Track points, name
-        track.node[0] = n1
-        track.node[1] = n2
+        track = new Track n1, n2, ctrlPoints, name
         track
                         
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  

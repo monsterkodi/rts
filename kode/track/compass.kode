@@ -80,14 +80,14 @@ function Compass
     getDir: -> vec(0 1 0).applyQuaternion @wheel.quaternion
     getUp:  -> vec(0 0 1).applyQuaternion @wheel.quaternion
     
-    onEnter: (hit, downHit) => 
+    onEnter: (hit) => 
         
         if hit.name.startsWith 'compass.dot'
             dot = @dots[parseInt hit.name[-1]]
             dot.scale.set 1 1 1.2
             dot.material.emissive.copy dot.material.color
             
-    onLeave: (hit, downHit) =>
+    onLeave: (hit) =>
         
         if hit.name.startsWith 'compass.dot'
             dot = @dots[parseInt hit.name[-1]]

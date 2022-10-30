@@ -34,6 +34,9 @@ function Convert
         inPoints = inTrack.getCtrlPointsFromNode inNode, true
         outPoints = outTrack.getCtrlPointsFromNode node
         
+        log inPoints, outPoints
+        log inPoints.concat outPoints
+        
         t = @addTrack inNode, outNode, inPoints.concat outPoints
         
         t.node[0] = inNode

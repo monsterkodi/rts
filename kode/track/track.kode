@@ -13,20 +13,24 @@ function Track
 
     @id: 0
 
-    @: (points, @name) ->
+    @: (n1, n2, points, @name) ->
         
         Track.id++
         
         @name ?= "t#{Track.id}"
+        @node  = [n1, n2]
         
         @curve = new CurvePath
-        @node  = []
         @ctrls = []
         
-        curveNum = Math.floor points.length / 4
+        points.unshift n1.getPos()
+        curveNum = points.length / 3
+        if curveNum % 1
+            log 'darfuk?'
+        points.push n2.getPos()
         
         for index in 0...curveNum
-            p = points.slice index*4, index*4+4
+            p = points.slice index*3, index*3+4
             @curve.add new CubicBezierCurve3 p[0], p[1], p[2], p[3]
         
         for index in 0...curveNum
@@ -52,7 +56,7 @@ function Track
         node: @node.map (n) -> n.name
         ctrl: ctrl
         
-    del: ->
+    del: =>
         
         if @mesh
             post.emit 'delTrack' @
@@ -60,11 +64,12 @@ function Track
             @node[0]?.removeTrack @
             @node[1]?.removeTrack @
             
+            delete @mesh.handler
             world.removePickable @mesh
             world.removeObject @mesh
             for ctrl in @ctrls
                 ctrl.del()
-            @mesh?.removeFromParent()
+            # @mesh.removeFromParent()
             delete @curve
             delete @node
             delete @ctrls
@@ -79,10 +84,14 @@ function Track
             
     onEnter: -> 
         
+        post.on 'delete' @del
+        @mesh.material = Materials.track.highlight
         world.cursorTrack = @
         
     onLeave: -> 
         
+        post.removeListener 'delete' @del
+        @mesh.material = Materials.track.rail
         if world.cursorTrack == @
             delete world.cursorTrack
             

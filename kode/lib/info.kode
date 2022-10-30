@@ -47,6 +47,9 @@ class Info
             add "   next   #{train.path.nextDistance().toFixed 1}"
             add "   prev tail #{train.path.prevDistance(train.tailDelta()).toFixed 1}"
             # add "   next tail #{train.path.nextDistance(train.tailDelta()).toFixed 1}"
+            
+            for car in train.boxcars()
+                add "   " + car.name + " " + car.nextNode().name
             add "#{train.path.toString()}"
             
         pi = add "oimo" 

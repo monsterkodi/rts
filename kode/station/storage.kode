@@ -20,7 +20,7 @@ function Storage
         
         @frame = world.construct.meshes.station.storage.clone()
         
-        base = Geom.quad size:[4.4 4.4] normal:Vector.unitZ  
+        base = Geom.quad size:[4.4 4.4] normal:Vector.unitZ
         baseMesh = new Mesh base, Materials.station.side
         baseMesh.setShadow()
         @group.add baseMesh
@@ -30,44 +30,78 @@ function Storage
         world.addPickable @group
 
     hasCargo: -> @cargo
+                
+    #  0000000  000000000   0000000   00000000   000  000   000   0000000   
+    # 000          000     000   000  000   000  000  0000  000  000        
+    # 0000000      000     000   000  0000000    000  000 0 000  000  0000  
+    #      000     000     000   000  000   000  000  000  0000  000   000  
+    # 0000000      000      0000000   000   000  000  000   000   0000000   
+                
+    storeCargo: (cargo) ->
         
-    miningEnded: ->
+        @startStoringAnimation cargo.resource
+        cargo.del()
+        @numCargoStored++
+                
+    startStoringAnimation: (resource) ->
         
-        @cargo = new Cargo @box
-        delete @box
+        @animTime = 0
+        @animDuration = 10
+        @box = new Mesh Geom.box(size:2 pos:[0 0 1]), Materials.mining[resource]
+        @box.scale.set 1 1 1
+        @box.position.z = 3.5
+        @box.setShadow()
+        @group.add @box
         
+        world.addAnimation @animateStoring
+        
+    animateStoring: (delta, timeSum) =>
+        
+        @animTime += delta
+        if (animFactor = @animTime/@animDuration) <= 1
+            @box.scale.set 1 1 1 - 2 * max 0 animFactor-0.5
+            @box.position.z = 3.5 - 3.5 * min 1 animFactor * 2
+            world.addAnimation @animateStoring
+        else 
+            @box.removeFromParent()
+            delete @box
+        
+    # 00     00  000  000   000  000  000   000   0000000   
+    # 000   000  000  0000  000  000  0000  000  000        
+    # 000000000  000  000 0 000  000  000 0 000  000  0000  
+    # 000 0 000  000  000  0000  000  000  0000  000   000  
+    # 000   000  000  000   000  000  000   000   0000000   
+    
     cargoTaken: ->
         
         delete @cargo
         @startMiningAnimation()
-        
-    storeCargo: (cargo) ->
-        
-        cargo.del()
-        @numCargoStored++
-        
+    
     startMiningAnimation: ->
         
         @animTime = 0
         @animDuration = 30
-        @animEnd = @miningEnded
         @box = new Mesh Geom.box(size:2 pos:[0 0 1]), Materials.mining[@station.resource]
         @box.scale.set 1 1 0.01
         @box.position.z = 0
         @box.setShadow()
         @group.add @box
         
-        world.addAnimation @animate
-        
-    animate: (delta, timeSum) =>
+        world.addAnimation @animateMining
+            
+    animateMining: (delta, timeSum) =>
         
         @animTime += delta
         if (animFactor = @animTime/@animDuration) <= 1
             @box.scale.set 1 1 min 1 animFactor*2
             @box.position.z = max 0 3.5*(animFactor-0.5)
-            world.addAnimation @animate
-        else if @animEnd
-            @animEnd()
-            delete @animEnd
+            world.addAnimation @animateMining
+        else 
+            @miningEnded()
+            
+    miningEnded: ->
+        
+        @cargo = new Cargo @box, @station.resource
+        delete @box
         
 module.exports = Storage
