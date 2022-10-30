@@ -11,7 +11,7 @@ function Path
     @: (@train) ->
         
         @name   = @train.name + '.path'
-        log '+Path' @name
+        # log '+Path' @name
         @delta  = 0
         @tracks = []
         @nodes  = []
@@ -44,8 +44,8 @@ function Path
         @nodes.push @tracks[-1].node[@revers[-1] ? 0 : 1]
         
     del: ->
-        log '-Path' @name
-        @train.path = null
+        # log '-Path' @name
+        delete @train.path
         
     updateLoop: ->
        

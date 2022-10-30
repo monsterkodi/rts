@@ -82,8 +82,6 @@ function Traffic
             
         advance = @checkCargo train, advance
             
-        train.advanceFactor = advance/oldAdvance
-        
         delta = train.path.delta+advance
         
         track = train.path.trackAtDelta delta
@@ -93,11 +91,15 @@ function Traffic
             if other.tailTrack() == track
                 trainToOther = other.tailPrevDistance() - train.path.prevDistance(delta)
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
-                    return 0
+                    advance = 0
+                    break
             else if other.prevTailTrack() == track
                 trainToOther = other.tailPrevDistance() + train.path.nextDistance(delta)
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
-                    return 0
+                    advance = 0
+                    break
+                    
+        train.advanceFactor = advance/oldAdvance
         advance
         
     extendTrainPath: (train) ->
@@ -118,7 +120,7 @@ function Traffic
                 if car.waitingForCargo
                     # log 'waitingForCargo' train.name
                     return 0
-                if cargo = car.nextNode().station?.hasCargo()
+                if cargo = car.nextNode().station?.providesCargo()
                     if car.nextDistance() < maxAdvance
                         minCar = car
                         maxAdvance = car.nextDistance()

@@ -142,6 +142,7 @@ function Arm
                     
     startLoadingToCar: ->
         
+        @waitingForCar = false
         @startAnimation duration:5 animEnd:@loadCargoToCar, points: [
             vec(-6 0 1)
             vec(-6 0 -2)

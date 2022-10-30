@@ -15,7 +15,7 @@ function CentralStation extends CargoStation
         
         cfg.name ?= "C#{Station.id+1}"
         super cfg
-        
+                
         label = world.addLabel text:'▴➜▪➜●' mono:true position:[0 -2.61 1.2], color:0xffffff, scale:1.4
         label.rotateX deg2rad 90
         @group.add label
@@ -24,6 +24,7 @@ function CentralStation extends CargoStation
           
     hasCargo: -> false
     takesCargo: -> true        
+    providesCargo: -> false
     
     carWaitingForUnload: (@waitingCar) ->
         

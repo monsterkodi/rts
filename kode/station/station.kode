@@ -17,6 +17,7 @@ function Station
         @name  = cfg.name ? ("S" + Station.id)
         @group = new Group
         if cfg.pos ➜ @group.position.copy vec cfg.pos
+        if cfg.dir ➜ @group.quaternion.copy Quaternion.unitVectors Vector.unitY, cfg.dir
 
         @group.station    = @
         @group.name       = @name
@@ -34,6 +35,7 @@ function Station
         
         name: @name
         pos:  @group.position
+        dir:  vec(Vector.unitY).applyQuaternion @group.quaternion
         node: @node.name
         
     del: ->

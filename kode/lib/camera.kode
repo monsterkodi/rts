@@ -18,7 +18,7 @@ class Camera extends PerspectiveCamera
         width  = opt.view.clientWidth 
         height = opt.view.clientHeight
         
-        super 70, width/height, 1, 100 # fov, aspect, near, far
+        super 70, width/height, 1, 1000 # fov, aspect, near, far
         
         @fov     = 70
         @size    = vec width, height 

@@ -21,7 +21,7 @@ class Construct
     init: -> 
         
         # count = geom.attributes.position.count
-        ●▸ init
+        # ●▸ init
         
         @initCargo()
         
@@ -32,7 +32,7 @@ class Construct
         @initArmbase()
         @initDocking()
         @initStorage()
-        ●▪ init
+        # ●▪ init
         
     #  0000000   0000000   00000000    0000000    0000000   
     # 000       000   000  000   000  000        000   000  

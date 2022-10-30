@@ -21,6 +21,7 @@ function CargoStation extends Station
         
         @docking = world.construct.meshes.station.docking.clone()
         @docking.position.x = -6
+        @docking.visible = false
         @group.add @docking
         
         @storage = new Storage @
@@ -34,7 +35,9 @@ function CargoStation extends Station
         if cfg.node
             @node = world.nodeWithName cfg.node
         else
-            @node = world.addNode pos:@docking.position.clone().add(vec cfg.pos), name:'n'+@name, fixed:true
+            @docking.getWorldPosition Vector.tmp
+            @node = world.addNode pos:Vector.tmp, name:'n'+@name, fixed:true
+            @node.setDir cfg.dir if cfg.dir
             
         @node.station = @
         

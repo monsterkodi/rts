@@ -19,6 +19,7 @@ function Train
         
         @mesh       = new Mesh Geom.cylinder(radius:0.5, height:0.2), Materials.train.window
         @mesh.train = @
+        @mesh.visible = false
         world.addObject @mesh
         
     del: ->
@@ -52,7 +53,6 @@ function Train
     
     addCar: (car) ->
         
-        log car
         @cars.push car
         car.index = @cars.length-1
         car.name = @name + ".#{car.constructor.name[0]}#{car.index}"

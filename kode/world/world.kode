@@ -250,6 +250,8 @@ function World extends Convert
         train = new Train {speed, name}
         @addEngine train
         @addBoxcar train
+        @addBoxcar train
+        @addBoxcar train
         @addEngine train
             
         @traffic.addTrain train
