@@ -61,19 +61,28 @@ function CargoSelector
         
         switch hit.name
             'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1.5 1
+        for r in ['chalk' 'blood' 'water']
+            if not @train.resource[r]
+                @group.add @[r]
                     
     onLeave: (hit, nextHit, event) =>
-        
+
         switch hit.name
             'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
+
+        for r in ['chalk' 'blood' 'water']
+            if not @train.resource[r]
+                @[r].removeFromParent()
             
-    onMouseDown: (hit, downHit) =>
+    onMouseDown: (hit, event) =>
         
         switch hit.name
             'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
             'cargo' ➜
                     ➜ 
-                        @del() 
+                        if event.buttons == 1
+                            if @train.resource['water'] and @train.resource['blood'] and @train.resource['chalk'] 
+                                @del() 
 
     onMouseUp: (hit, downHit) =>
         

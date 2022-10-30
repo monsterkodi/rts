@@ -346,9 +346,9 @@ class RTS
         
             if event.buttons == 1
                 if @downHit.mesh?.handler?.onMouseDown is func
-                    @downHit.mesh.handler.onMouseDown @downHit, @downHit
+                    @downHit.mesh.handler.onMouseDown @downHit, event
                 
-        post.emit 'mouseDown' @downHit, @downHit
+        post.emit 'mouseDown' @downHit, event
             
     onMouseUp: (event) =>
 
