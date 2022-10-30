@@ -84,6 +84,22 @@ function Physics
             b.mesh.position.copy b.getPosition()
             b.mesh.quaternion.copy b.getQuaternion()
             
+    addCar: (car) ->
+        
+        p = vec()
+        car.mesh.getWorldPosition p
+        b = @world.add type:'cylinder' radius:2, height:6, pos:[p.x, p.y, p.z], density:1 restitution:1 move:true
+        b.mesh = car.mesh
+        b.mesh.add new Mesh Geom.cylinder(radius:2, height:6, dir:Vector.unitX), Materials.wireframe
+        b
+            
+    addTrain: (train) ->
+        
+        bodies = []
+        for car in train.cars
+            bodies.push @addCar car
+        bodies
+            
     addChain: ->
         
         num = 24
