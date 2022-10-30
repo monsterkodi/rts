@@ -206,6 +206,14 @@ function Track
             node == @node[0] ➜ return @node[1]
             node == @node[1] ➜ return @node[0]
                              ➜ log 'nodeOpposite.dafuk?'
+           
+    getLength: -> @curve.getLength()
+    trainCurveDistance: (train) ->
+        
+        if train.path.revers[train.path.indexAtDelta()]
+            nd = train.path.prevDistance()
+        else
+            nd = train.path.nextDistance()
                              
     getPoints: ->
         

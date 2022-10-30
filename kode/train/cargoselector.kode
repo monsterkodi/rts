@@ -76,6 +76,7 @@ function CargoSelector
             
     onMouseDown: (hit, event) =>
         
+        return if not hit
         switch hit.name
             'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
             'cargo' ➜

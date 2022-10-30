@@ -14,12 +14,26 @@ function Physics
 
         @world = new OIMO.World
             timestep:   1/60  
-            gravity:   [0,5,-5] 
+            gravity:   [0,0,-9] 
         
-        @body = @world.add 
+        @bodies = []
+        @boxes = []
+        
+        @body = @world.add
             type:        'sphere'  
             size:        [0.5 0.5 0.5]   
             pos:         [0,0,50]  
+            move:        true      
+            kinematic:   true
+            density:     1
+            restitution: 0.1
+            friction:    0.1
+            
+        @pole = @world.add 
+            type:        'cylinder'
+            radius:      0.2
+            height:      5
+            pos:        [0 0 -0.5]   
             move:        true      
             kinematic:   true
             density:     1
@@ -35,10 +49,10 @@ function Physics
         
         world.addObject @mesh
         
-        # ground = @world.add 
-            # size:    [3000 3000 10] 
-            # pos:     [0 0 -5.5] 
-            # density: 1000
+        ground = @world.add
+            size:    [3000 3000 10] 
+            pos:     [0 0 -6] 
+            density: 1000
         
         # @world.postLoop = @postLoop
         # @world.play()
@@ -50,6 +64,7 @@ function Physics
         target.scale 5
         target.add rts.centerHelper.position
         @body.position.copy vec(@body.position).lerp target, 0.2
+        @pole.position.copy vec(@pole.position).lerp target, 0.2
         
         @world.step()
         @postLoop()
@@ -58,24 +73,26 @@ function Physics
         
         @mesh.position.copy @body.getPosition()
         @mesh.quaternion.copy rts.centerHelper.quaternion
-        # @mesh.quaternion.copy @body.getQuaternion()
         
         for b in @boxes
             
             b.mesh.position.copy b.getPosition()
             b.mesh.quaternion.copy b.getQuaternion()
-        
+            
+        for b in @bodies
+            
+            b.mesh.position.copy b.getPosition()
+            b.mesh.quaternion.copy b.getQuaternion()
+            
     addChain: ->
-
-        p = @body.position
         
-        @boxes = []
+        num = 24
+        for i in 0...num
     
-        for i in 0...6
-    
+            p = @body.position
             s = 0.5
-            b = @world.add type:'sphere' size:[s, s, s], pos:[p.x, p.y, p.z-i*s], density:0.5 restitution:1 move:true
-            b.mesh = new Mesh Geom.sphere(radius:s/2+(1-i/6)*0.2, sgmt:8), Materials.physics.chain
+            b = @world.add type:'sphere' size:[s, s, s], pos:[p.x, p.y-i*s, p.z], density:1 restitution:1 move:true
+            b.mesh = new Mesh Geom.sphere(radius:s/2+(1 - i/num)*0.2, sgmt:8), Materials.physics.chain
             b.mesh.setShadow()
             world.addObject b.mesh
             @boxes.push b 
@@ -85,18 +102,18 @@ function Physics
                     type:  'jointBall'
                     body1: @body
                     body2: b.name
-                    pos1:  [0, 0, -s/2]
-                    pos2:  [0, 0,  s/2]
-                    axe1:  [0, 0, -1]
-                    axe2:  [0, 0,  1] 
+                    pos1:  [0, -s/2, 0]
+                    pos2:  [0,  s/2, 0]
+                    axe1:  [0, -1  , 0]
+                    axe2:  [0,  1  , 0] 
             else 
                 @world.add 
                     type:'jointBall'
                     body1: b.name-1
                     body2: b.name
-                    pos1:  [0, 0, -s/2]
-                    pos2:  [0, 0,  s/2]
-                    axe1:  [0, 0, -1]
-                    axe2:  [0, 0,  1] 
+                    pos1:  [0, -s/2, 0]
+                    pos2:  [0,  s/2, 0]
+                    axe1:  [0, -1  , 0]
+                    axe2:  [0,  1  , 0] 
 
 module.exports = Physics

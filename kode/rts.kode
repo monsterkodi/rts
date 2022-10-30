@@ -358,6 +358,8 @@ class RTS
         
         if @downHit?.mesh?.onDragDone is func
             @downHit.mesh.onDragDone hit, @downHit
+        else if @downHit?.mesh?.handler?.onDragDone is func
+            @downHit.mesh.handler.onDragDone hit, @downHit
         
         if @downHit?.mesh?.handler?.onMouseUp is func
             @downHit.mesh.handler.onMouseUp hit, @downHit
@@ -385,6 +387,8 @@ class RTS
             if event.buttons == 1
                 if @downHit?.mesh?.onDrag is func
                     @downHit.mesh.onDrag hit, @downHit, @lastHit
+                else if @downHit?.mesh?.handler?.onDrag is func
+                    @downHit.mesh.handler.onDrag hit, @downHit, @lastHit
             
             post.emit 'mouseMove' hit, @downHit, @lastHit
             

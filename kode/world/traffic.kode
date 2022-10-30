@@ -12,13 +12,13 @@ REAREND_DISTANCE = 6
 
 function Traffic
 
-    @: ->
-        
-        @trains = []
-    
+    @:     -> @clear()
     clear: -> @trains = []
         
     addTrain: (train) -> @trains.push train
+    subTrain: (train) -> 
+        if (i = @trains.indexOf train) >= 0
+            @trains.splice i, 1
         
     simulate: (scaledDelta, timeSum) ->
         
@@ -68,11 +68,12 @@ function Traffic
     
     allowTrainAdvance: (train, advance) ->
         
+        path = train.path
         oldAdvance = advance
         
-        if not train.path.isLoop
+        if not path.isLoop
             halfEngineLength = 1.9
-            maxAdvance = train.path.getLength()-train.path.delta-halfEngineLength
+            maxAdvance = path.getLength()-path.delta-halfEngineLength
             if advance > maxAdvance < 0.0001
                 if @extendTrainPath train
                     # log 'path extended'
@@ -84,25 +85,30 @@ function Traffic
                     else
                         train.reverse()
                         return @allowTrainAdvance train, advance
-            # log maxAdvance, advance, train.isOneWay(), train.path.isLoop
+            # log maxAdvance, advance, train.isOneWay(), path.isLoop
             advance = Math.min maxAdvance, advance
             
         advance = @checkCargo train, advance
             
-        delta = train.path.delta+advance
+        delta = path.delta+advance
         
-        track = train.path.trackAtDelta delta
+        track = path.trackAtDelta delta
         
         for other in @trains
             continue if other == train
             if other.tailTrack() == track
-                trainToOther = other.tailPrevDistance() - train.path.prevDistance(delta)
+                trainToOther = other.tailPrevDistance() - path.prevDistance(delta)
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
                     advance = 0
                     break
             else if other.prevTailTrack() == track
-                trainToOther = other.tailPrevDistance() + train.path.nextDistance(delta)
+                trainToOther = other.tailPrevDistance() + path.nextDistance(delta)
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
+                    advance = 0
+                    break
+            if other.headTrack() == track
+                dist = Math.abs track.trainCurveDistance(train) - track.trainCurveDistance(other)
+                if dist < 4.5
                     advance = 0
                     break
                     

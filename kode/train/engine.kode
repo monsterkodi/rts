@@ -63,6 +63,23 @@ function Engine extends Car
         if event.buttons == 0
             if not @cargoSelector
                 @cargoSelector = new CargoSelector @
+                
+    onDrag: (hit, downHit) =>
+        
+        return if @physics
+        dist = hit.point.distanceTo downHit.point
+        if dist > 0.5
+            log 'startDrag!' @name
+            if @isRearEngine()
+                @train.removeCar @
+                @physics = world.physics.addCar @
+            else
+                @train.removeFromTrack()
+                @physics = world.physics.addTrain @train
+            
+    onDragDone: (hit, downHit) =>
+        
+        log 'drag done!' @name
             
     onLeave: (hit, nextHit, event) =>
         

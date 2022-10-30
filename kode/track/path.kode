@@ -113,9 +113,9 @@ function Path
                 return i
         log 'dafuk?' @name, d, nd, cd
         
-    nodeAtDelta:  (d) -> @nodes[@indexAtDelta d]
-    curveAtDelta: (d) -> @tracks[@indexAtDelta d].curve
-    posAtDelta:   (d) ->
+    nodeAtDelta:  (d=@delta) -> @nodes[@indexAtDelta d]
+    curveAtDelta: (d=@delta) -> @tracks[@indexAtDelta d].curve
+    posAtDelta:   (d=@delta) ->
         d = @normDelta d
         di = @indexAtDelta d
         restDelta = d - @deltaAtIndex di
@@ -133,7 +133,7 @@ function Path
     currentTrack: -> @tracks[@currentIndex()]
     nextTrack:    -> @tracks[@normIndex @currentIndex()+1]
     
-    trackAtDelta: (d) -> @tracks[@normIndex @indexAtDelta d]
+    trackAtDelta: (d=@delta) -> @tracks[@normIndex @indexAtDelta d]
         
     currentCurve: -> @currentTrack().curve
     currentPos:   -> @posAtDelta @delta

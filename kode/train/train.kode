@@ -26,10 +26,18 @@ function Train
         
     del: ->
         
+        world.traffic.subTrain @
         for car in @cars
             car.del()
         @cars = []
         world.removeObject @mesh
+        
+    removeFromTrack: ->
+        
+        world.traffic.subTrain @
+        if @track
+            @track.subTrain @
+            @track = null
         
     isOneWay: -> return not (@cars[-1] instanceof Engine)
     
@@ -85,6 +93,7 @@ function Train
     unblock: -> @speed = @topSpeed
     
     carDelta:   (car) -> @path?.normDelta @path.delta-4.2*(car.index)
+    headTrack:        -> @path?.trackAtDelta()
     tailDelta:        -> @path?.normDelta @path.delta-4.2*(@cars.length-1)
     tailTrack:        -> @path?.trackAtDelta @tailDelta()
     prevTailTrack:    -> @path?.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]

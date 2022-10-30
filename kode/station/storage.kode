@@ -20,7 +20,7 @@ function Storage
         
         @frame = world.construct.meshes.station.storage.clone()
         
-        base = Geom.quad size:[4.4 4.4] normal:Vector.unitZ
+        base = Geom.merge Geom.quad(size:[4.4 4.4] normal:Vector.unitZ), Geom.quad(size:[4.4 4.4] normal:Vector.minusZ, pos:[0 0 -0.1])
         baseMesh = new Mesh base, Materials.station.side
         baseMesh.setShadow()
         @group.add baseMesh
@@ -80,7 +80,7 @@ function Storage
     startMiningAnimation: ->
         
         @animTime = 0
-        @animDuration = 30
+        @animDuration = 18
         @box = new Mesh Geom.box(size:2 pos:[0 0 1]), Materials.mining[@station.resource]
         @box.position.z = 0
         @box.scale.set 1 1 0.01

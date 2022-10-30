@@ -20,7 +20,7 @@ Materials =
         curve:          new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     compass:
         head:           new THREE.MeshStandardMaterial color:Colors.compass.head,   metalness: 0.5, roughness: 0.5
-        wheel:          new THREE.MeshStandardMaterial color:0x111111,             metalness: 0.8, roughness: 0.45, dithering:true
+        wheel:          new THREE.MeshStandardMaterial color:0x111111,              metalness: 0.8, roughness: 0.45, dithering:true
         dot0:           new THREE.MeshStandardMaterial color:Colors.compass.center, metalness: 0.5, roughness: 0.5  
         dot1:           new THREE.MeshStandardMaterial color:Colors.compass.head,   metalness: 0.5, roughness: 0.5  
         dot2:           new THREE.MeshStandardMaterial color:Colors.compass.center, metalness: 0.5, roughness: 0.5  
@@ -38,10 +38,10 @@ Materials =
         side:           new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5 roughness: 0.2, dithering:true, side:THREE.DoubleSide
         central:        new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.2 roughness: 0.4
     mining:
-        chalk:          new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6 roughness: 0.05, emissive:0x777777, side:THREE.DoubleSide, dithering:true
-        water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01, emissive:0x4444aa, side:THREE.DoubleSide, dithering:true
-        blood:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, side:THREE.DoubleSide, dithering:true
-        stone:          new THREE.MeshStandardMaterial color:0x444444, metalness: 0.5 roughness: 0.01, emissive:0x333333, side:THREE.DoubleSide, dithering:true
+        chalk:          new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6 roughness: 0.05, emissive:0x777777, dithering:true
+        water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01, emissive:0x4444aa, dithering:true
+        blood:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, dithering:true
+        stone:          new THREE.MeshStandardMaterial color:0x444444, metalness: 0.5 roughness: 0.01, emissive:0x333333, dithering:true
     selector:
         chalk:          new THREE.MeshStandardMaterial color:0x888888, metalness: 0.6 roughness: 0.05
         water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01
@@ -55,7 +55,7 @@ Materials =
         center:         new THREE.MeshStandardMaterial color:Colors.track,    metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
         out:            new THREE.MeshStandardMaterial color:Colors.node.out, metalness: 0.5, roughness: 0.5
         in:             new THREE.MeshStandardMaterial color:Colors.node.in,  metalness: 0.5, roughness: 0.5
-        highlightIn:    new THREE.MeshStandardMaterial color:Colors.node.in,  metalness: 0.5, roughness: 0.5,  emissive: Colors.node.in
+        highlightIn:    new THREE.MeshStandardMaterial color:Colors.node.in,  metalness: 0.5, roughness: 0.5, emissive: Colors.node.in
         highlightOut:   new THREE.MeshStandardMaterial color:Colors.node.out, metalness: 0.5, roughness: 0.5, emissive: Colors.node.out
     menu:
         active:         new THREE.MeshStandardMaterial color:Colors.menu.active,       metalness: 0.2, roughness: 0.5, emissive: Colors.menu.active
