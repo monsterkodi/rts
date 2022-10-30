@@ -243,6 +243,8 @@ function World extends Convert
             train = @addTrain()
             train.path.addTrackNode @cursorTrack, @cursorTrack.node[1]
             train.path.delta = train.path.getLength()/2
+            train.track = @cursorTrack
+            @cursorTrack.addTrain train
             # train.path.addTrackNode @cursorTrack, @cursorTrack.node[0]
     
     addTrain: (speed=1, name='T') ->
@@ -252,7 +254,7 @@ function World extends Convert
         @addBoxcar train
         @addBoxcar train
         @addBoxcar train
-        @addEngine train
+        # @addEngine train
             
         @traffic.addTrain train
         

@@ -30,18 +30,18 @@ function CurveCtrl
         @group.name = 'ctrl'
         
         if @isMid
-            geom = new BoxGeometry 1 1 1
-            mesh = new Mesh geom, Materials.ctrl.start
+            mesh = new Mesh Geom.box(), Materials.ctrl.start
             @prevCtrlEnd = @curvePath.curves[@index-1].v2
             mesh.position.y = -@prevCtrlDist()
-            mesh.onDrag = @onDrag 
+            mesh.onDrag = @onDrag
+            mesh.onDragDone = @onDragDone
             mesh.name = 'prevCtrlEnd'
             mesh.handler = @
             mesh.visible = false
             @meshPrevCtrlEnd = mesh
             @group.add @meshPrevCtrlEnd
 
-            geom = new BoxGeometry 0.35 1 0.35
+            geom = Geom.box size:[0.35 1 0.35]
             mesh = new Mesh geom, Materials.ctrl.start
             mesh.scale.set 1 @prevCtrlDist(), 1
             mesh.position.y = -@prevCtrlDist()/2
@@ -51,9 +51,10 @@ function CurveCtrl
             @group.add @meshPrevCtrlRod
             
         if not @isFirst
-            geom = Geom.cylinder heigt:0.71 radius:0.7 smnt:32
+            geom = Geom.cylinder height:0.71 radius:0.7 smnt:32
             mesh = new Mesh geom, Materials.ctrl.curve
             mesh.onDrag = @onDrag 
+            mesh.onDragDone = @onDragDone
             mesh.onClick = @onCenterClick
             mesh.name = 'curveStart'
             mesh.handler = @
@@ -63,10 +64,10 @@ function CurveCtrl
             world.addPickable @meshCurveStart
             @group.add @meshCurveStart
         
-        geom = new BoxGeometry 1 1 1
-        mesh = new Mesh geom, Materials.ctrl.start
+        mesh = new Mesh Geom.box(), Materials.ctrl.start
         if not @isFirst
             mesh.onDrag = @onDrag 
+            mesh.onDragDone = @onDragDone
         else
             mesh.material = Materials.ctrl.transparent
             
@@ -77,7 +78,7 @@ function CurveCtrl
         @meshCtrlStart = mesh
         @group.add @meshCtrlStart
 
-        geom = new BoxGeometry 0.35 1 0.35
+        geom = Geom.box size:[0.35 1 0.35]
         mesh = new Mesh geom, Materials.ctrl.start
         mesh.scale.set 1 @ctrlStartDist(), 1
         mesh.position.y = @ctrlStartDist()/2
@@ -118,31 +119,33 @@ function CurveCtrl
             else
                 world.showCompass @, @getPos(), @getDir() 
     
-    onLeave: (hit) =>
-        
-        if hit.mesh.name == 'prevCtrlEnd'
-            @meshPrevCtrlEnd?.material = Materials.ctrl.start
-            @meshPrevCtrlRod?.material = Materials.ctrl.start
-        if hit.mesh.name == 'ctrlStart'
-            @meshCtrlStart?.material = Materials.ctrl.start
-            @meshCtrlRod?.material   = Materials.ctrl.start
-        if hit.mesh.name == 'curveStart'
-            post.removeListener 'delete' @onDelete
-            @meshCurveStart.material = Materials.ctrl.curve
+    onLeave: (hit, nextHit, event) =>
+
+        if event.buttons == 0
+            if hit.mesh.name == 'prevCtrlEnd'
+                @meshPrevCtrlEnd?.material = Materials.ctrl.start
+                @meshPrevCtrlRod?.material = Materials.ctrl.start
+            if hit.mesh.name == 'ctrlStart'
+                @meshCtrlStart?.material = Materials.ctrl.start
+                @meshCtrlRod?.material   = Materials.ctrl.start
+            if hit.mesh.name == 'curveStart'
+                post.removeListener 'delete' @onDelete
+                @meshCurveStart.material = Materials.ctrl.curve
         @
         
     onEnter: (hit) =>
-        
-        if hit.mesh.name == 'prevCtrlEnd'
-            @meshPrevCtrlEnd?.material = Materials.ctrl.highlight
-            @meshPrevCtrlRod?.material = Materials.ctrl.highlight
-        if hit.mesh.name == 'ctrlStart'
-            @meshCtrlStart?.material = Materials.ctrl.highlight
-            @meshCtrlRod?.material   = Materials.ctrl.highlight
-        if hit.mesh.name == 'curveStart'
-            @meshCurveStart.material = Materials.ctrl.highlight
-            post.on 'delete' @onDelete
-            @activate()
+
+        if event.buttons == 0
+            if hit.mesh.name == 'prevCtrlEnd'
+                @meshPrevCtrlEnd?.material = Materials.ctrl.highlight
+                @meshPrevCtrlRod?.material = Materials.ctrl.highlight
+            if hit.mesh.name == 'ctrlStart'
+                @meshCtrlStart?.material = Materials.ctrl.highlight
+                @meshCtrlRod?.material   = Materials.ctrl.highlight
+            if hit.mesh.name == 'curveStart'
+                @meshCurveStart.material = Materials.ctrl.highlight
+                post.on 'delete' @onDelete
+                @activate()
         @
         
     onDelete: => log 'delete ctrl!'
@@ -189,6 +192,18 @@ function CurveCtrl
     prevCtrlDist:  -> @prevCtrlEnd.distanceTo @curveStart
     ctrlStartDist: -> @ctrlStart.distanceTo @curveStart
     
+    onDragDone: (hit, downHit) =>
+        
+        if hit.mesh.name != downHit.mesh.name
+            if downHit.mesh.name == 'prevCtrlEnd'
+                    @meshPrevCtrlEnd?.material = Materials.ctrl.start
+                    @meshPrevCtrlRod?.material = Materials.ctrl.start
+            if downHit.mesh.name == 'ctrlStart'
+                @meshCtrlStart?.material = Materials.ctrl.start
+                @meshCtrlRod?.material   = Materials.ctrl.start
+            if downHit.mesh.name == 'curveStart'
+                @meshCurveStart.material = Materials.ctrl.curve
+        
     onDrag: (hit, downHit) =>
         
         world.hideCompass @

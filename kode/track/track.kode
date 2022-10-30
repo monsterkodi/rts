@@ -20,6 +20,8 @@ function Track
         @name ?= "t#{Track.id}"
         @node  = [n1, n2]
         
+        @trains = []
+        
         @curve = new CurvePath
         @ctrls = []
         
@@ -41,6 +43,34 @@ function Track
         @mesh.track  = @
         @mesh.toSave = @toSave
         @mesh.toSave.key = 'tracks'
+        
+    hasTrain: (train) -> @trains.indexOf(train) >= 0
+    addTrain: (train) -> 
+    
+        if not @hasTrain() 
+            @trains.push train
+            if not @blockMesh
+                @blockMesh = new Mesh Geom.triangle(size:[0.5 0.5 0.73]), Materials.track.block
+                @blockMesh.noHitTest = true
+                if train.path.revers[train.path.indexAtDelta()]
+                    ld = 6/@curve.getLength()
+                    tangent = @curve.getTangentAt ld
+                    tangent.multiplyScalar -1
+                else
+                    ld = (@curve.getLength()-6)/@curve.getLength()
+                    tangent = @curve.getTangentAt ld
+                @curve.getPointAt ld, @blockMesh.position
+                @blockMesh.quaternion.copy Quaternion.unitVectors Vector.unitY, tangent
+                @mesh.add @blockMesh
+            
+    subTrain: (train) -> 
+    
+        if (i = @trains.indexOf(train)) >= 0
+            @trains.splice i, 1
+            
+        if empty @trains
+            @blockMesh.removeFromParent()
+            delete @blockMesh
         
     toSave: =>
 
@@ -69,7 +99,6 @@ function Track
             world.removeObject @mesh
             for ctrl in @ctrls
                 ctrl.del()
-            # @mesh.removeFromParent()
             delete @curve
             delete @node
             delete @ctrls
@@ -82,11 +111,12 @@ function Track
     # 000 0 000  000   000  000   000       000  000         
     # 000   000   0000000    0000000   0000000   00000000    
             
-    onEnter: -> 
+    onEnter: (hit, lastHit, event) -> 
         
-        post.on 'delete' @del
-        @mesh.material = Materials.track.highlight
-        world.cursorTrack = @
+        if event.buttons == 0
+            post.on 'delete' @del
+            @mesh.material = Materials.track.highlight
+            world.cursorTrack = @
         
     onLeave: -> 
         
@@ -149,10 +179,12 @@ function Track
         else
             @createMesh()                
             
-        @curve.getPointAt 0.25, @label.position
+        # @curve.getPointAt 0.25, @label.position
+        ld = 4/@curve.getLength()
+        @curve.getPointAt ld, @label.position
         @label.position.z = 0.36
         
-        @curve.getTangentAt 0.5, Vector.tmp
+        @curve.getTangentAt ld, Vector.tmp
         @label.quaternion.copy Quaternion.unitVectors Vector.unitY, Vector.tmp
         
     createMesh: ->    

@@ -7,6 +7,7 @@
 ###
 
 Car = require './car'
+CargoSelector = require './cargoselector'
 
 function Engine extends Car
     
@@ -20,6 +21,10 @@ function Engine extends Car
         label.color = 0xffffff
         label.name = @train.name + '.label'
         @mesh.add label
+
+        @mesh.handler = @
+        for child in @mesh.children
+            child.handler = @
 
     setColor: (color) ->
         
@@ -52,6 +57,19 @@ function Engine extends Car
         
         if @isRearEngine()
             @mesh.rotateY deg2rad 180
+            
+    onEnter: (hit, nextHit, event) =>
+        
+        if event.buttons == 0
+            if not @cargoSelector
+                @cargoSelector = new CargoSelector @
+            
+    onLeave: (hit, nextHit, event) =>
+        
+        # if event.buttons == 0
+            # if @cargoSelector
+                # @cargoSelector.del()
+                # delete @cargoSelector
         
     update: (delta, timeSum, train) ->
         

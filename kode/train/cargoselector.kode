@@ -1,0 +1,89 @@
+###
+ 0000000   0000000   00000000    0000000    0000000    0000000  00000000  000      00000000   0000000  000000000   0000000   00000000 
+000       000   000  000   000  000        000   000  000       000       000      000       000          000     000   000  000   000
+000       000000000  0000000    000  0000  000   000  0000000   0000000   000      0000000   000          000     000   000  0000000  
+000       000   000  000   000  000   000  000   000       000  000       000      000       000          000     000   000  000   000
+ 0000000  000   000  000   000   0000000    0000000   0000000   00000000  0000000  00000000   0000000     000      0000000   000   000
+###
+
+function CargoSelector
+
+    @: (@engine) ->
+        
+        @train = @engine.train
+        @group = new Group
+        
+        mesh = new Mesh Geom.cylbox(radius:0.5 height:0.35 length:3 sgmt:16 pos:[0 1.7 0]), Materials.train.window
+        mesh.handler = @
+        mesh.name = 'cargo'
+        mesh.visible = false
+        @group.add mesh
+        
+        mat = Materials[@train.resource.chalk ? 'mining' : 'selector'].chalk
+        @chalk = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:32 pos:[0 0.2 0]), mat
+        @chalk.position.y = 1.7
+        @chalk.position.z = 1
+        @chalk.handler = @
+        @chalk.name = 'chalk'
+        @chalk.setShadow()
+        @group.add @chalk
+
+        mat = Materials[@train.resource.water ? 'mining' : 'selector'].water
+        @water = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:32 pos:[0 0.2 0]), mat
+        @water.position.y = 1.7
+        @water.handler = @
+        @water.name = 'water'
+        @water.setShadow()
+        @group.add @water
+
+        mat = Materials[@train.resource.blood ? 'mining' : 'selector'].blood
+        @blood = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:24 pos:[0 0.2 0]), mat
+        @blood.position.y = 1.7
+        @blood.position.z = -1
+        @blood.handler = @
+        @blood.name = 'blood'
+        @blood.setShadow()
+        @group.add @blood
+        
+        post.on 'mouseDown' @onMouseDown
+        
+        @engine.mesh.add @group
+        
+    del: ->
+        
+        if @group
+            delete @engine.cargoSelector
+            post.removeListener 'mouseDown' @onMouseDown
+            @group.removeFromParent()
+            delete @group
+        
+    onEnter: (hit, prevHit, event) ->
+        
+        switch hit.name
+            'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1.5 1
+                    
+    onLeave: (hit, nextHit, event) =>
+        
+        switch hit.name
+            'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
+            
+    onMouseDown: (hit, downHit) =>
+        
+        switch hit.name
+            'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
+            'cargo' ➜
+                    ➜ 
+                        @del() 
+
+    onMouseUp: (hit, downHit) =>
+        
+        switch hit.name
+            'chalk' 'blood' 'water' 
+                @[hit.name].scale.set 1 1.5 1
+                @train.resource[hit.name] = not @train.resource[hit.name]
+                if @train.resource[hit.name]
+                    @[hit.name].material = Materials.mining[hit.name]
+                else
+                    @[hit.name].material = Materials.selector[hit.name]
+
+module.exports = CargoSelector

@@ -8,40 +8,36 @@
 
 class GridHelper extends LineSegments
 
-    @: (size=100) ->
+    @: (size=600) ->
 
         c1 = new Color 0x000000
-        c2 = new Color 0x111111
-        c3 = new Color 0x222222
-        c4 = new Color 0x333333
+        c2 = new Color 0x303030
+        c3 = new Color 0x383838
+        c4 = new Color 0x404040
 
         halfSize = size / 2
 
         vertices = []
         colors   = []
 
-        k = -halfSize
         j = 0
-        
-        for i in 0..size
+        for i in -halfSize...halfSize
 
-            vertices.push -halfSize, k, 0, halfSize, k, 0
-            vertices.push k, -halfSize, 0, k, halfSize, 0
+            vertices.push -halfSize, i, 0, halfSize, i, 0
+            vertices.push i, -halfSize, 0, i, halfSize, 0
 
-            color = i == halfSize ? c1 : (i % 10 == 0) ? c2 : (i % 5 == 0) ? c3 : c4 
+            color = i == 0 ? c1 : (i % 12 == 0) ? c2 : (i % 6 == 0) ? c3 : c4 
 
             for c in 0...4
                 color.toArray colors, j 
                 j += 3
-            
-            k++
 
         geom = new BufferGeometry()
         geom.setAttribute 'position' new THREE.Float32BufferAttribute vertices, 3 
         geom.setAttribute 'color'    new THREE.Float32BufferAttribute colors, 3 
 
-        material = new THREE.LineBasicMaterial vertexColors:true toneMapped:false polygonOffset:true polygonOffsetFactor:-1.0
-        material.linewidth = 2
+        material = new THREE.LineBasicMaterial vertexColors:true polygonOffset:true polygonOffsetFactor:-1.0 #toneMapped:false
+        # material.linewidth = 2 
         super geom, material
 
     dispose: ->

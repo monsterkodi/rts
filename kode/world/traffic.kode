@@ -28,30 +28,37 @@ function Traffic
         
         for train in @trains
             if path = train.path
-                p = path.nextDistance()
-                if p < HEAD_DISTANCE                         # train is close to target node
-                    n = path.nextNode()
-                    if n and n.train != train                      # if node is not owned by train
-                        if not n.train                       #      if node not occupied
-                            n.setTrain train                 #          train occupies node 
+                nd = path.nextDistance()
+                if nd < HEAD_DISTANCE                         # train is close to target node
+                    nn = path.nextNode()
+                    if nn and nn.train != train               # if node is not owned by train
+                        if not nn.train                       #      if node not occupied
+                            nn.setTrain train                 #          train occupies node 
                         else 
-                            if train not in n.blockedTrains  # if train not alreay blocked by node
-                                if train.path
-                                    if train.path.currentTrack()  != n.train.tailTrack() and 
-                                        train.path.currentTrack() != n.train.prevTailTrack() and
-                                        train.path.nextTrack()    != n.train.tailTrack()
-                                        n.block train            #      train gets blocked
-                                    else 
-                                        if train.path.currentTrack() == n.train.prevTailTrack()
-                                            n.setTrain train     # train is the new occupant
+                            if train not in nn.blockedTrains  # if train not alreay blocked by node
+                                if path.currentTrack()  != nn.train.tailTrack() and 
+                                    path.currentTrack() != nn.train.prevTailTrack() and
+                                    path.nextTrack()    != nn.train.tailTrack()
+                                    nn.block train            #      train gets blocked
+                                else 
+                                    if path.currentTrack() == nn.train.prevTailTrack()
+                                        nn.setTrain train     # train is the new occupant
                 
+                pd = path.prevDistance()
+                if pd < 1
+                    ct = path.currentTrack()
+                    if not ct.hasTrain train
+                        train.track.subTrain train
+                        train.track = ct
+                        train.track.addTrain train
+                                        
                 tailDelta = train.tailDelta()
-                s = path.prevDistance tailDelta
-                n = path.nextDistance tailDelta
-                if s > min TAIL_DISTANCE, n+s/2
-                    n = path.prevNode tailDelta
-                    if n.train == train
-                        n.unblock()
+                tpd = path.prevDistance tailDelta
+                tnd = path.nextDistance tailDelta
+                if tpd > min TAIL_DISTANCE, tnd+tpd/2
+                    tpn = path.prevNode tailDelta
+                    if tpn.train == train
+                        tpn.unblock()
                                     
     #  0000000   0000000    000   000   0000000   000   000   0000000  00000000  
     # 000   000  000   000  000   000  000   000  0000  000  000       000       
@@ -120,10 +127,11 @@ function Traffic
                 if car.waitingForCargo
                     # log 'waitingForCargo' train.name
                     return 0
-                if car.nextNode().station?.providesCargo()
-                    if car.nextDistance() < maxAdvance
-                        minCar = car
-                        maxAdvance = car.nextDistance()
+                if resource = car.nextNode().station?.providesCargo()
+                    if car.train.resource[resource]
+                        if car.nextDistance() < maxAdvance
+                            minCar = car
+                            maxAdvance = car.nextDistance()
             else
                 if car.waitingForUnload
                     # log 'waitingForUnload' train.name

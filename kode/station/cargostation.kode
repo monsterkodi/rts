@@ -39,7 +39,6 @@ function CargoStation extends Station
             @node = world.addNode pos:Vector.tmp, name:'n'+@name, fixed:true
             @node.setDir cfg.dir if cfg.dir
             
-        log 'set node station' @node.name, @name
         @node.station = @
         
     hasCargo: -> @arm.cargo

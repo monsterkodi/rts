@@ -161,7 +161,7 @@ class RTS
         
         @setBrightness prefs.get 'brightness' 1.0
                 
-        @gridHelper = new GridHelper 100
+        @gridHelper = new GridHelper()
         @gridHelper.visible = prefs.get 'grid' false
         @scene.add @gridHelper
         
@@ -348,7 +348,7 @@ class RTS
                 if @downHit.mesh?.handler?.onMouseDown is func
                     @downHit.mesh.handler.onMouseDown @downHit, @downHit
                 
-        post.emit 'mouseDown' @downRay, @downHit
+        post.emit 'mouseDown' @downHit, @downHit
             
     onMouseUp: (event) =>
 
@@ -390,13 +390,13 @@ class RTS
             
             if @lastHit?.mesh != hit.mesh 
                 if @lastHit?.mesh?.onLeave is func
-                    @lastHit.mesh.onLeave @lastHit, hit
+                    @lastHit.mesh.onLeave @lastHit, hit, event
                 else if @lastHit?.mesh?.handler?.onLeave is func
-                    @lastHit.mesh.handler.onLeave @lastHit, hit
+                    @lastHit.mesh.handler.onLeave @lastHit, hit, event
                 if hit.mesh?.onEnter is func
-                    hit.mesh.onEnter hit, @lastHit
+                    hit.mesh.onEnter hit, @lastHit, event
                 else if hit.mesh?.handler?.onEnter is func
-                    hit.mesh.handler.onEnter hit, @lastHit
+                    hit.mesh.handler.onEnter hit, @lastHit, event
                     
             @lastHit = hit
                 

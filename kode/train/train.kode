@@ -16,6 +16,8 @@ function Train
         @topSpeed   = @speed
         @advanceFactor = 1
         @cars       = []
+        @track      = null
+        @resource   = blood:true water:true chalk:true
         
         @mesh       = new Mesh Geom.cylinder(radius:0.5, height:0.2), Materials.train.window
         @mesh.train = @

@@ -10,7 +10,7 @@ class Info
 
     @: ->
                     
-        @elem = elem class:'info', style:'position:absolute; z-index:1; bottom:10px; right:20px; pointer-events: none;'
+        @elem = elem class:'info' style:'position:absolute; z-index:1; bottom:10px; right:20px; pointer-events: none;'
 
         document.body.appendChild @elem
           
@@ -52,6 +52,13 @@ class Info
                 add "   " + car.name + " " + car.nextNode().name
             add "#{train.path.toString()}"
             
+        add '....................................................'
+        
+        for track in world.allTracks()
+            add "#{track.name}"
+            for train in track.trains
+                add "   #{train.name}"
+
         pi = add "oimo" 
         pi.innerHTML = world.physics.world.getInfo()
 

@@ -140,11 +140,12 @@ function Node
     onLeaveOut:    => @outMesh.material = Materials.node.out
     
     onEnterCenter: => 
-        @center.material  = Materials.ctrl.highlight
+        @center.material = Materials.ctrl.highlight
         post.on 'delete' @del
         
-    onLeaveCenter: => 
-        @center.material  = Materials.node.center
+    onLeaveCenter: (hit, nextHit, event) => 
+        if event.buttons == 0
+            @center.material = Materials.node.center
         post.removeListener 'delete' @del
         
     onClickInOut: (hit) => 

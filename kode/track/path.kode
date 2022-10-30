@@ -21,7 +21,7 @@ function Path
         post.on 'delNode'  @onDelNode
         
     toString: ->
-        s = @name + ' ' + @isLoop ? 'loop' : ''
+        s = @name + ' ' + (@isLoop ? 'loop' : 'oneway')
         s += '\n'
         for i in 0...@tracks.length
             s += @tracks[i].name
@@ -101,7 +101,7 @@ function Path
                 log @name, ti, @tracks[ti]
         cd
             
-    indexAtDelta: (d) ->
+    indexAtDelta: (d=@delta) ->
         nd = @normDelta d
         cd = 0
         for t,i in @tracks
@@ -151,11 +151,11 @@ function Path
 
     getTangent: (point, offset=0) ->
         d = @delta+offset
+        p = @posAtDelta d
+        c = @curveAtDelta d
+        c.getTangentAt p, point
         if @revers[@indexAtDelta d]
-            @curveAtDelta(d).getTangentAt @posAtDelta(d), point
             point.multiplyScalar -1
-        else
-            @curveAtDelta(d).getTangentAt @posAtDelta(d), point
 
     moveMesh: (mesh, offset) ->
         

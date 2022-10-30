@@ -25,7 +25,7 @@ function MiningStation extends CargoStation
         @arm.resetStorageAnimation()
         
     takesCargo: -> false        
-    providesCargo: -> true
+    providesCargo: -> @resource
     toSave: ->
         
         s = super()
