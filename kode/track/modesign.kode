@@ -1,0 +1,22 @@
+
+# 00     00   0000000   0000000    00000000   0000000  000   0000000   000   000  
+# 000   000  000   000  000   000  000       000       000  000        0000  000  
+# 000000000  000   000  000   000  0000000   0000000   000  000  0000  000 0 000  
+# 000 0 000  000   000  000   000  000            000  000  000   000  000  0000  
+# 000   000   0000000   0000000    00000000  0000000   000   0000000   000   000  
+
+function ModeSign
+
+    @: (@track, @node) ->
+        
+        atStart = node == @track.node[0]
+        geom = Geom.box size:10
+        @mesh = new Mesh geom, Materials.track.rail
+        @mesh.position.copy @node.getPos()
+        world.scene.add @mesh
+        
+    del: ->
+        
+        @mesh.removeFromParent()
+
+module.exports = ModeSign

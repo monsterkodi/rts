@@ -28,6 +28,8 @@ function CargoStation extends Station
         @storage.group.position.x = 6
         @group.add @storage.group
         
+        world.physics.addStorage @storage
+        
         @arm = new Arm @
         @arm.group.position.z = 5.1
         @group.add @arm.group

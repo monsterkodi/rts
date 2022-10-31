@@ -49,7 +49,7 @@ function Storage
         @animDuration = 10
         @box = new Mesh Geom.box(size:2 pos:[0 0 1]), Materials.mining[resource]
         @box.scale.set 1 1 1
-        @box.position.z = 1.5
+        @box.position.z = 1.75
         @box.setShadow()
         @group.add @box
         
@@ -60,7 +60,7 @@ function Storage
         @animTime += delta
         if (animFactor = @animTime/@animDuration) <= 1
             @box.scale.set 1 1 1 - (1/0.75) * max 0 animFactor-0.25
-            @box.position.z = 1.5 - 1.5 * min 1 animFactor * 8
+            @box.position.z = 1.75 - 1.75 * min 1 animFactor * 8
             world.addAnimation @animateStoring
         else 
             @box.removeFromParent()

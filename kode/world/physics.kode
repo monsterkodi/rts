@@ -96,13 +96,17 @@ function Physics
         # @poleBody.position.copy rts.centerHelper.position
         @poleBody.quaternion.copy rts.centerHelper.quaternion
 
+        p = vec()
+        q = new Quaternion
         for b in @cannon.bodies
             if b.kinematic
-                b.position.copy b.kinematic.position
-                b.quaternion.copy b.kinematic.quaternion
+                b.kinematic.getWorldPosition p
+                b.kinematic.getWorldQuaternion q
+                b.position.copy p
+                b.quaternion.copy q
                     
         # @cannon.fixedStep()
-        @cannon.step 1/60, scaledDelta, 10 # max substeps
+        @cannon.step 1/60, scaledDelta, 1 # 10 # max substeps
         if prefs.get 'cannon'
             @cannonDebugger.update()
         
@@ -158,6 +162,12 @@ function Physics
         car.body = cb
         cb
 
+    # 000   000  000  000   000  00000000  00     00   0000000   000000000  000   0000000  
+    # 000  000   000  0000  000  000       000   000  000   000     000     000  000       
+    # 0000000    000  000 0 000  0000000   000000000  000000000     000     000  000       
+    # 000  000   000  000  0000  000       000 0 000  000   000     000     000  000       
+    # 000   000  000  000   000  00000000  000   000  000   000     000     000   0000000  
+    
     addKinematicCar: (car) ->
         
         cb = new CANNON.Body type:CANNON.Body.KINEMATIC, shape:new CANNON.Cylinder 1 1 3.5 8
@@ -174,6 +184,16 @@ function Physics
             if body.kinematic == car.mesh
                 @cannon.removeBody body
                 return
+                
+    addKinematicArm: (arm) ->
+        
+        cb = new CANNON.Body type:CANNON.Body.KINEMATIC
+        cb.addShape new CANNON.Box new CANNON.Vec3 1.2 1.2 1.2
+        cb.shapeOffsets[0].z = -1.2
+        mesh = arm.handMesh
+        cb.kinematic = mesh
+        @cannon.addBody cb
+        cb
         
     # 000000000  00000000    0000000   000  000   000  
     #    000     000   000  000   000  000  0000  000  
@@ -236,4 +256,20 @@ function Physics
                 cstr.collideConnected = false
             @cannon.addConstraint cstr
 
+    addStation: (station) ->
+        
+        cb = new CANNON.Body type:CANNON.Body.STATIC
+        cb.addShape new CANNON.Box new CANNON.Vec3 3 3 3
+        cb.shapeOffsets[0].z = 2.5
+        cb.position.copy station.group.position
+        @cannon.addBody cb
+        
+    addStorage: (storage) -> 
+
+        cb = new CANNON.Body type:CANNON.Body.STATIC
+        cb.addShape new CANNON.Box new CANNON.Vec3 3 3 0.5
+        storage.group.getWorldPosition Vector.tmp
+        cb.position.copy Vector.tmp
+        @cannon.addBody cb
+        
 module.exports = Physics

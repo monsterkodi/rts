@@ -4,7 +4,9 @@
 ![screenshot](img/rts07.png)
 ![screenshot](img/rts08.png)
 ![screenshot](img/rts09.png)
+![screenshot](img/rts10.png)
 
+- track modes
 - track creation
     - covert middle nodes to ctrls
     - in-between drag sets dir of node

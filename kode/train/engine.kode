@@ -17,7 +17,7 @@ function Engine extends Car
         
         label = world.addLabel text:@train.name, size:0.5 mono:true
         label.position.z = 2.0
-        label.position.y = 0.9
+        # label.position.y = 0.0
         label.color = 0xffffff
         label.name = @train.name + '.label'
         @mesh.add label

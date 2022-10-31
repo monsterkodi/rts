@@ -236,14 +236,17 @@ function World extends Convert
     #    000     000   000  000   000  000  000  0000  
     #    000     000   000  000   000  000  000   000  
     
-    onAddTrain: =>
+    onAddTrain: (track, delta) =>
         
-        if @cursorTrack and @cursorTrack.node[0] and @cursorTrack.node[1]
+        track ?= @cursorTrack
+        delta ?= track.curve.getLength()/2
+        
+        if track and track.node[0] and track.node[1]
             train = @addTrain boxcars:3, traffic:true
-            train.path.addTrackNode @cursorTrack, @cursorTrack.node[1]
-            train.path.delta = train.path.getLength()/2
-            train.track = @cursorTrack
-            @cursorTrack.addTrain train
+            train.path.addTrackNode track, track.node[1]
+            train.path.delta = delta
+            train.track = track
+            track.addTrain train
     
     addTrain: (cfg) ->
 

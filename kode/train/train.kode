@@ -94,12 +94,21 @@ function Train
     unblock: -> @speed = @topSpeed
     
     carDelta:   (car) -> @path?.normDelta @path.delta-4.2*(car.index)
-    headTrack:        -> @path?.trackAtDelta()
     tailDelta:        -> @path?.normDelta @path.delta-4.2*(@cars.length-1)
+    headTrack:        -> @path?.currentTrack() # @path?.trackAtDelta()
+    prevTrack:        -> @path?.prevTrack()
     tailTrack:        -> @path?.trackAtDelta @tailDelta()
     prevTailTrack:    -> @path?.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]
-    tailPrevDistance: -> @path?.prevDistance @tailDelta()
-                
+    # tailPrevDistance: -> @path?.prevDistance @tailDelta()
+    tailPrevDistance: -> 
+        # @normDelta @deltaAtIndex(@indexAtDelta(d)+1) - d
+        # @normDelta d - @deltaAtIndex(@indexAtDelta(d))
+        td = @tailDelta()
+        pi = @path.normIndex @path.indexAtDelta td
+        ds = td - @path.deltaAtIndex pi
+      
+    trackRevers:      -> @path?.revers[@path.indexAtDelta()]
+    
     update: (delta, timeSum) ->
         
         return if not @path

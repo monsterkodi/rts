@@ -31,6 +31,8 @@ function Station
         world.addObject   @group
         world.addPickable @group
         
+        world.physics.addStation @
+        
     toSave: =>
         
         name: @name

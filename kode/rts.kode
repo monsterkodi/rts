@@ -412,17 +412,17 @@ class RTS
         if hit = @castRay()
             if hit.mesh?.onClick is func
                 if @downHit.mesh == hit.mesh
-                    hit.mesh.onClick hit
+                    hit.mesh.onClick hit, event
             else if hit.mesh?.handler?.onClick is func
                 if @downHit.mesh == hit.mesh
-                    hit.mesh.handler.onClick hit
+                    hit.mesh.handler.onClick hit, event
             else if hit.name == 'floor'
                 world.hideCompass()
                 CurveCtrl.deactivateAll()
             else
                 log 'unhandled click' hit
                 
-            post.emit 'mouseClick' hit # not used?
+            post.emit 'mouseClick' hit, event # not used?
         
     onDblClick: (event) => 
         
