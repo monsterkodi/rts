@@ -20,8 +20,10 @@ class Debug
         @brightness = @value text:'light' value: rts.getBrightness().toFixed(1), reset:rts.resetBrightness, incr:rts.incrBrightness, decr:rts.decrBrightness
         @toggles    = {}
         
-        setInfo = (v) -> prefs.set 'info' v
-        getInfo =     -> prefs.get 'info'
+        setInfo   = (v) -> prefs.set 'info' v
+        getInfo   =     -> prefs.get 'info'
+        setCannon = (v) -> prefs.set 'get' v
+        getCannon =     -> prefs.get 'get'
         
         @toggle text:'info'   set: setInfo, get: getInfo
         @toggle text:'wire'                 parent:@mats, set: Materials.setWire, get: Materials.getWire
@@ -29,7 +31,8 @@ class Debug
         @toggle text:'lable'  pref:'lable' parent:@mats,  set: world.setLabels,   get: world.getLabels
         @toggle text:'axes'   pref:'axes'   parent:@help, obj: rts.axesHelper,         key:'visible'
         @toggle text:'arrow'  pref:'arrow'  parent:@help, obj: rts.arrowHelper,        key:'visible'
-        @toggle text:'center' pref:'center' parent:@help, obj: rts.centerHelper,       key:'visible'
+        # @toggle text:'center' pref:'center' parent:@help, obj: rts.centerHelper,       key:'visible'
+        @toggle text:'cannon' pref:'cannon' parent:@help, set: setCannon, get: getCannon
         @toggle text:'shadow' pref:'shadow' parent:@shdw, obj: rts.shadowCameraHelper, key:'visible'
         @toggle text:'light'  pref:'light'  parent:@shdw, obj: rts.lightShadowHelper,  key:'visible'
         @toggle text:'grid'   pref:'grid'   parent:@grid, obj: rts.gridHelper,         key:'visible'

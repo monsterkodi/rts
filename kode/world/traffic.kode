@@ -17,6 +17,24 @@ function Traffic
         
     addTrain: (train) -> @trains.push train
     subTrain: (train) -> 
+        
+        path = train.path
+        
+        if nn = path.nextNode()
+            nn.unblockTrain train
+            if nn.train == train
+                nn.unblockAll()
+
+        if pn = path.prevNode()
+            if pn.train == train
+                pn.unblockAll()
+                
+        # go trough all nodes from head to tail here?
+                
+        if tpn = path.prevNode train.tailDelta()
+            if tpn.train == train
+                tpn.unblockAll()
+        
         if (i = @trains.indexOf train) >= 0
             @trains.splice i, 1
         
@@ -39,7 +57,7 @@ function Traffic
                                 if path.currentTrack()  != nn.train.tailTrack() and 
                                     path.currentTrack() != nn.train.prevTailTrack() and
                                     path.nextTrack()    != nn.train.tailTrack()
-                                    nn.block train            #      train gets blocked
+                                    nn.blockTrain train       #      train gets blocked
                                 else 
                                     if path.currentTrack() == nn.train.prevTailTrack()
                                         nn.setTrain train     # train is the new occupant
@@ -58,7 +76,7 @@ function Traffic
                 if tpd > min TAIL_DISTANCE, tnd+tpd/2
                     tpn = path.prevNode tailDelta
                     if tpn.train == train
-                        tpn.unblock()
+                        tpn.unblockAll()
                                     
     #  0000000   0000000    000   000   0000000   000   000   0000000  00000000  
     # 000   000  000   000  000   000  000   000  0000  000  000       000       
@@ -109,6 +127,9 @@ function Traffic
             if other.headTrack() == track
                 dist = Math.abs track.trainCurveDistance(train) - track.trainCurveDistance(other)
                 if dist < 4.5
+                    log 'heads on collision!'
+                    world.physics.addTrain train
+                    world.physics.addTrain other
                     advance = 0
                     break
                     

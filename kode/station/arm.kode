@@ -87,15 +87,18 @@ function Arm
             
     takeCargoFromCar: =>
         
-        @cargo = @station.waitingCar.cargo
-        @handMesh.add @cargo.mesh
-        @cargo.mesh.quaternion.identity()
-        @cargo.mesh.position.set 0 0 -2.3
-        
-        @startAnimation duration:ANIM_DURATION/6, animEnd:@releaseWaitingCar, points: [ # lift cargo from car
-            vec(-6 0 -2) 
-            vec(-6 0 1)
-        ]
+        if @cargo = @station.waitingCar.cargo
+            @handMesh.add @cargo.mesh
+            @cargo.mesh.quaternion.identity()
+            @cargo.mesh.position.set 0 0 -2.3
+            
+            @startAnimation duration:ANIM_DURATION/6, animEnd:@releaseWaitingCar, points: [ # lift cargo from car
+                vec(-6 0 -2) 
+                vec(-6 0 1)
+            ]
+        else 
+            log 'no cargo on waitingCar?'
+            delete @station.waitingCar
        
     releaseWaitingCar: =>
         
@@ -138,7 +141,7 @@ function Arm
         if @cargo = @station.storage.hasCargo()
             @handMesh.add @cargo.mesh
             @cargo.mesh.quaternion.identity()
-            @cargo.mesh.position.set 0 0 -2.3
+            @cargo.mesh.position.set 0 0 -1.3
             @station.storage.cargoTaken()
             @storageToDockingAnimation @checkForLoadingToCar
                     

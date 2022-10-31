@@ -29,6 +29,9 @@ function Node
         @blocks        = []
         @gizmo         = {}
 
+        # adds @nodeBox to group in @setTrain!
+        # adds meshes to @blocks in and trains to @blockedTrains in @blockTrain
+        
         @group = new Group
         @group.name = @name
         @group.node = @
@@ -365,7 +368,7 @@ function Node
     # 000   000  000      000   000  000       000  000   
     # 0000000    0000000   0000000    0000000  000   000  
     
-    block: (train) ->
+    blockTrain: (train) ->
         
         @blockedTrains.push train
         train.block()
@@ -379,8 +382,16 @@ function Node
         mesh.lookAt Vector.tmp
         world.addObject mesh
         @blocks.push mesh
+        
+    unblockTrain: (train) ->
+        
+        train.unblock()
+        if (index = @blockedTrains.indexOf train) >= 0
+            world.removeObject @blocks[index]
+            @blocks.splice index, 1
+            @blockedTrains.splice index, 1
                 
-    unblock: ->
+    unblockAll: ->
         
         @setTrain null
                 
@@ -392,6 +403,7 @@ function Node
         
         @nodeBox.removeFromParent()
         delete @nodeBox
+        
         @blockedTrains = []
         @blocks = []
         

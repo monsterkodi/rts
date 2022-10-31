@@ -204,8 +204,11 @@ class RTS
                 
         @lastAnimationTime = window.performance.now()
                 
-        # if not prefs.get 'save'
-        world.create()
+        if not prefs.get 'save'
+            world.create()
+        else
+            post.emit 'load'
+            # world.animate 0
             
         @animationStep()
         

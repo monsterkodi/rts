@@ -12,11 +12,11 @@ Train          = require '../train/train'
 Engine         = require '../train/engine'
 Boxcar         = require '../train/boxcar'
 Compass        = require '../track/compass'
-Physics        = require '../physics/physics'
 Station        = require '../station/station'
 MiningStation  = require '../station/miningstation'
 CentralStation = require '../station/centralstation'
 Construct      = require './construct'
+Physics        = require './physics'
 Convert        = require './convert'
 Traffic        = require './traffic'
 Save           = require './save'
@@ -45,10 +45,7 @@ function World extends Convert
         @setSpeed  prefs.get 'speed' 1
         
         post.on 'addTrain' @onAddTrain
-        
-        # post.emit 'load'
-        @animate 0
-        
+                
     addLabel: (cfg) ->
         
         label = new Text()

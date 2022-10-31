@@ -69,7 +69,6 @@ function Engine extends Car
                 @train.removeCar @
                 world.physics.addCar @
             else
-                @train.removeFromTrack()
                 world.physics.addTrain @train
             
     onDragDone: (hit, downHit) =>

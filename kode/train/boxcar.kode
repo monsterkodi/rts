@@ -19,7 +19,7 @@ function Boxcar extends Car
         delete @waitingForCargo
         @mesh.add @cargo.mesh
         @cargo.mesh.quaternion.identity()
-        @cargo.mesh.position.set 0 0.85 -1
+        @cargo.mesh.position.set 0 0.85 0
         
     setColor: (color) ->
         

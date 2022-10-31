@@ -13,8 +13,7 @@ function Physics
 
     @: ->
 
-        @cannon = new CANNON.World
-            gravity: new CANNON.Vec3 0 0 -9
+        @cannon = new CANNON.World gravity: new CANNON.Vec3 0 0 -9
             
         @cannonDebugger = new CannonDebugger world.scene, @cannon
         
@@ -27,52 +26,41 @@ function Physics
         @poleBody = new CANNON.Body
             type: CANNON.Body.KINEMATIC
             shape: new CANNON.Cylinder 0.1 0.1 5 8
+        @poleBody.addShape new CANNON.Sphere 0.3
+        @poleBody.shapeOffsets[1].y = 2.65
         @poleBody.position.set 0 0 5
         @poleBody.quaternion.copy Quaternion.unitVectors Vector.unitY, Vector.unitZ
         @cannon.addBody @poleBody
-        
-        @sphereBody = new CANNON.Body
-            mass: 0.1 # kg
-            shape: new CANNON.Sphere 1
-        @sphereBody.position.set 0 0 12
-        @cannon.addBody @sphereBody
-
-        geometry = new THREE.SphereGeometry 1
-        material = new THREE.MeshNormalMaterial()
-        @sphereMesh = new THREE.Mesh geometry, material
-        @sphereMesh.setShadow()
-        world.scene.add @sphereMesh
-        
-        @cylinderBody1 = new CANNON.Body
-            mass: 0.1
-            shape: new CANNON.Cylinder 0.8 1 4 16
-        @cylinderBody1.position.set -5 0 5
-        @cylinderBody1.shapeOrientations[0].setFromVectors new CANNON.Vec3(0 1 0), new CANNON.Vec3(0 0 1)
-        @cannon.addBody @cylinderBody1
-              
-        @cylinderBody2 = new CANNON.Body
-            mass: 0.1
-            shape: new CANNON.Cylinder 0.5 1 4 16
-        @cylinderBody2.position.set 5 0 5
-        @cylinderBody2.shapeOrientations[0].setFromVectors new CANNON.Vec3(0 1 0), new CANNON.Vec3(0 0 1)
-        @cannon.addBody @cylinderBody2
-        
-        constraint = new CANNON.ConeTwistConstraint @cylinderBody1, @cylinderBody2,
-            collideConnected: true 
-            wakeUpBodies:true
-            # angle: deg2rad 90 
-            axisA:  new CANNON.Vec3  0 0 1
-            pivotA: new CANNON.Vec3  0 0 3
-            axisB:  new CANNON.Vec3  0 0 -1
-            pivotB: new CANNON.Vec3  0 0 3
-            maxForce: 10
-            twistAngle: deg2rad 180
-        
-        @cannon.addConstraint constraint
+           
+        if false
+            @cylinderBody1 = new CANNON.Body
+                mass: 0.1
+                shape: new CANNON.Cylinder 0.8 1 4 16
+            @cylinderBody1.position.set -5 0 5
+            @cylinderBody1.shapeOrientations[0].setFromVectors new CANNON.Vec3(0 1 0), new CANNON.Vec3(0 0 1)
+            @cannon.addBody @cylinderBody1
+                  
+            @cylinderBody2 = new CANNON.Body
+                mass: 0.1
+                shape: new CANNON.Cylinder 0.5 1 4 16
+            @cylinderBody2.position.set 5 0 5
+            @cylinderBody2.shapeOrientations[0].setFromVectors new CANNON.Vec3(0 1 0), new CANNON.Vec3(0 0 1)
+            @cannon.addBody @cylinderBody2
+            
+            constraint = new CANNON.ConeTwistConstraint @cylinderBody1, @cylinderBody2,
+                collideConnected: true 
+                wakeUpBodies:true
+                # angle: deg2rad 90 
+                axisA:  new CANNON.Vec3  0 0 1
+                pivotA: new CANNON.Vec3  0 0 3
+                axisB:  new CANNON.Vec3  0 0 -1
+                pivotB: new CANNON.Vec3  0 0 3
+                maxForce: 10
+                twistAngle: deg2rad 180
+            
+            @cannon.addConstraint constraint
             
         @addChain()
-        # @world.postLoop = @postLoop
-        # @world.play()
         
     simulate: (scaledDelta, timeSum) ->
         
@@ -83,8 +71,10 @@ function Physics
         @poleBody.position.copy vec(@poleBody.position).lerp target, 0.2
         @poleBody.quaternion.copy rts.centerHelper.quaternion
         
-        @cannon.fixedStep()
-        # @cannonDebugger.update()
+        # @cannon.fixedStep()
+        @cannon.step 1/60, scaledDelta
+        if prefs.get 'cannon'
+            @cannonDebugger.update()
         @postLoop()
         
     postLoop: =>
@@ -93,14 +83,37 @@ function Physics
             b.mesh.position.copy b.position
             b.mesh.quaternion.copy b.quaternion
             
+    addCargo: (cargo) ->
+        
+        return if not cargo
+        
+        quat = new Quaternion
+        pos = vec()
+        cargo.mesh.getWorldPosition pos
+        cargo.mesh.getWorldQuaternion quat
+        world.scene.add cargo.mesh
+        cargo.mesh.position.copy pos
+        cargo.mesh.quaternion.copy quat
+        cargo.mesh.position.z += 2
+
+        cb = new CANNON.Body mass:1, shape:new CANNON.Box new CANNON.Vec3 1 1 1
+        cb.quaternion.copy cargo.mesh.quaternion
+        cb.position.copy cargo.mesh.position
+        cb.mesh = cargo.mesh
+        @cannon.addBody cb
+        @bodies.push cb
+        cargo.body = cb
+        cb
+            
     addCar: (car) ->
+        
+        @addCargo car.takeCargo?()
         
         cb = new CANNON.Body mass:1, shape:new CANNON.Cylinder 1 1 3.5 8
         cb.shapeOrientations[0].setFromVectors new CANNON.Vec3(0 1 0), new CANNON.Vec3(0 0 1)
-        p = vec()
-        car.mesh.getWorldPosition p
-        cb.position.copy p
+        car.mesh.position.z += 0.5
         cb.quaternion.copy car.mesh.quaternion
+        cb.position.copy car.mesh.position
         cb.mesh = car.mesh
         @cannon.addBody cb
         @bodies.push cb
@@ -110,6 +123,8 @@ function Physics
     addTrain: (train) ->
         
         return if train.cars[0].body
+        
+        train.removeFromTrack()
         
         for car in train.cars
             @addCar car
