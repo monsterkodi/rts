@@ -111,22 +111,17 @@ class Construct
         
         geom = Geom.subtract body, wind
 
-        offset = 0.85
-        
         rail = new BoxGeometry 1 1 8
         rail.translate 0 -1 0
         geom = Geom.subtract geom, rail
-        geom.translate 0 offset, 0
         
         @meshes.engine = new Mesh geom, Materials.train.body
         @meshes.engine.setShadow()
         
         geom = Geom.intersect body, wind
-        geom.translate 0 offset, 0
         
         piston = new CylinderGeometry 0.5 0.5 1.6 16 1 
         piston.rotateZ Math.PI/2
-        piston.translate 0 offset, 0
 
         left  = new CylinderGeometry 0.2 0.2 0.2 16 1 false -Math.PI/2, Math.PI
         left.rotateX -0.41
@@ -140,11 +135,11 @@ class Construct
 
         light = Geom.merge left, right
         light.rotateX Math.PI/2
-        light.translate 0 offset+0.24, 1.67
+        light.translate 0 0.24, 1.67
         
         tail = new CylinderGeometry 0.25 0.25 0.05 16 1 
         tail.rotateX Math.PI/2
-        tail.translate 0 offset, -2
+        tail.translate 0 0 -2
         
         @meshes.engine.add new Mesh geom,   Materials.train.window
         @meshes.engine.add new Mesh piston, Materials.train.piston
@@ -174,8 +169,6 @@ class Construct
         wind = new BoxGeometry 1.5 0.5 0.5
         wind.translate 0 0.5 1.6
         
-        offset = 0.85
-        
         rail = new BoxGeometry 1 1 8
         rail.translate 0 -1 0
         geom = Geom.subtract pill, rail
@@ -184,14 +177,12 @@ class Construct
         box.translate 0 0.3 0
         geom = Geom.subtract geom, box
         
-        geom.translate 0 offset, 0
-        
         @meshes.boxcar = new Mesh geom, Materials.train.body
         @meshes.boxcar.setShadow()
                 
         tail = new CylinderGeometry 0.25 0.25 0.05 16 1 
         tail.rotateX Math.PI/2
-        tail.translate 0 offset, -2
+        tail.translate 0 0 -2
         
         @meshes.boxcar.add new Mesh tail, Materials.train.light
                         

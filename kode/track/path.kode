@@ -164,6 +164,7 @@ function Path
         Vector.tmp.add mesh.position
         mesh.up.set 0 0 1
         mesh.lookAt Vector.tmp
+        mesh.position.add vec(mesh.up).scale 0.85
         
     normDelta: (d) ->
         

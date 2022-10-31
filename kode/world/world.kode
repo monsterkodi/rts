@@ -46,7 +46,7 @@ function World extends Convert
         
         post.on 'addTrain' @onAddTrain
         
-        post.emit 'load'
+        # post.emit 'load'
         @animate 0
         
     addLabel: (cfg) ->
@@ -240,23 +240,27 @@ function World extends Convert
     onAddTrain: =>
         
         if @cursorTrack and @cursorTrack.node[0] and @cursorTrack.node[1]
-            train = @addTrain()
+            train = @addTrain boxcars:3, traffic:true
             train.path.addTrackNode @cursorTrack, @cursorTrack.node[1]
             train.path.delta = train.path.getLength()/2
             train.track = @cursorTrack
             @cursorTrack.addTrain train
-            # train.path.addTrackNode @cursorTrack, @cursorTrack.node[0]
     
-    addTrain: (speed=1, name='T') ->
+    addTrain: (cfg) ->
 
-        train = new Train {speed, name}
+        speed = cfg.speed ? 1
+        
+        train = new Train {speed, name:'T'}
         @addEngine train
-        @addBoxcar train
-        @addBoxcar train
-        @addBoxcar train
-        # @addEngine train
-            
-        @traffic.addTrain train
+        
+        if cfg.boxcars
+            for i in 0...cfg.boxcars
+                @addBoxcar train
+        if cfg.rearengine
+            @addEngine train
+        
+        if cfg.traffic
+            @traffic.addTrain train
         
         colorName = 'white'
         colorName = name if name in Object.keys Colors.train

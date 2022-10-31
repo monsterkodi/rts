@@ -15,7 +15,27 @@ class Map extends World
         # @addObject new Mesh Geom.roundedFrame({}), Materials.ctrl.start
         # @addObject new Mesh Geom.roundedFrame({}), Materials.wireframe
         # @trainTest()
-        @stationTest()
+        # @stationTest()
+        @physicsTest()
+        
+    physicsTest: ->
+        
+        for x in 0..5
+            for y in 0..5
+                train = @addTrain traffic:false, boxcars:2
+                train.cars[0].mesh.position.x = x*4
+                train.cars[0].mesh.position.y = y*30
+                train.cars[0].mesh.position.z = 4
+
+                train.cars[1].mesh.position.x = x*4
+                train.cars[1].mesh.position.y = y*30+5
+                train.cars[1].mesh.position.z = 4
+
+                train.cars[2].mesh.position.x = x*4
+                train.cars[2].mesh.position.y = y*30+10
+                train.cars[2].mesh.position.z = 4
+                
+                world.physics.addTrain train
         
     stationTest: ->
 

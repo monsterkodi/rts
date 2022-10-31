@@ -12,8 +12,9 @@ function CargoSelector
         
         @train = @engine.train
         @group = new Group
+        @group.position.y = 0.85
         
-        mesh = new Mesh Geom.cylbox(radius:0.5 height:0.35 length:3 sgmt:16 pos:[0 1.7 0]), Materials.train.window
+        mesh = new Mesh Geom.cylbox(radius:0.5 height:0.35 length:3 sgmt:16), Materials.train.window
         mesh.handler = @
         mesh.name = 'cargo'
         mesh.visible = false
@@ -21,7 +22,6 @@ function CargoSelector
         
         mat = Materials[@train.resource.chalk ? 'mining' : 'selector'].chalk
         @chalk = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:32 pos:[0 0.2 0]), mat
-        @chalk.position.y = 1.7
         @chalk.position.z = 1
         @chalk.handler = @
         @chalk.name = 'chalk'
@@ -30,7 +30,6 @@ function CargoSelector
 
         mat = Materials[@train.resource.water ? 'mining' : 'selector'].water
         @water = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:32 pos:[0 0.2 0]), mat
-        @water.position.y = 1.7
         @water.handler = @
         @water.name = 'water'
         @water.setShadow()
@@ -38,7 +37,6 @@ function CargoSelector
 
         mat = Materials[@train.resource.blood ? 'mining' : 'selector'].blood
         @blood = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:24 pos:[0 0.2 0]), mat
-        @blood.position.y = 1.7
         @blood.position.z = -1
         @blood.handler = @
         @blood.name = 'blood'

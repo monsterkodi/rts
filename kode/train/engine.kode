@@ -31,11 +31,6 @@ function Engine extends Car
         super color
         
         @mesh.children[1].material = @mesh.children[1].material.clone()
-        # @mesh.children[2].material = @mesh.children[2].material.clone()
-        # @mesh.children[2].material.emissive.copy color
-
-        # @mesh.children[3].material = @mesh.children[3].material.clone()
-        # @mesh.children[3].material.emissive.copy color
         
     setColorByName: (@colorName) ->
         
@@ -61,7 +56,7 @@ function Engine extends Car
     onEnter: (hit, nextHit, event) =>
         
         if event.buttons == 0
-            if not @cargoSelector
+            if not @cargoSelector and not @body
                 @cargoSelector = new CargoSelector @
                 
     onDrag: (hit, downHit) =>
@@ -72,21 +67,16 @@ function Engine extends Car
             log 'startDrag!' @name
             if @isRearEngine()
                 @train.removeCar @
-                @physics = world.physics.addCar @
+                world.physics.addCar @
             else
                 @train.removeFromTrack()
-                @physics = world.physics.addTrain @train
+                world.physics.addTrain @train
             
     onDragDone: (hit, downHit) =>
         
         log 'drag done!' @name
             
     onLeave: (hit, nextHit, event) =>
-        
-        # if event.buttons == 0
-            # if @cargoSelector
-                # @cargoSelector.del()
-                # delete @cargoSelector
         
     update: (delta, timeSum, train) ->
         

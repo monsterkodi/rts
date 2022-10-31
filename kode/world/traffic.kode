@@ -46,11 +46,11 @@ function Traffic
                 
                 pd = path.prevDistance()
                 if pd < 1
-                    ct = path.currentTrack()
-                    if not ct.hasTrain train
-                        train.track.subTrain train
-                        train.track = ct
-                        train.track.addTrain train
+                    if ct = path.currentTrack()
+                        if not ct.hasTrain train
+                            train.track.subTrain train
+                            train.track = ct
+                            train.track.addTrain train
                                         
                 tailDelta = train.tailDelta()
                 tpd = path.prevDistance tailDelta
