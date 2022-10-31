@@ -155,6 +155,8 @@ function World extends Convert
             
         for track in @allTracks()
             track.del()
+            
+        @physics.clear()
                     
     #  0000000   0000000   00     00  00000000  00000000    0000000   
     # 000       000   000  000   000  000       000   000  000   000  
@@ -407,5 +409,9 @@ function World extends Convert
     removeObject: (mesh) ->
         
         mesh.removeFromParent()
+        
+    addBody: (body) -> @physics.addBody body
+        
+    removeBody: (body) -> if body ➜ @physics.removeBody body
             
 module.exports = World

@@ -17,8 +17,6 @@ function Physics
             
         @cannonDebugger = new CannonDebugger world.scene, @cannon
         
-        @bodies = []
-        
         groundBody = new CANNON.Body type:CANNON.Body.STATIC, shape: new CANNON.Plane()
         groundBody.position.z = -0.5
         @cannon.addBody groundBody
@@ -62,6 +60,26 @@ function Physics
             
         @addChain()
         
+    clear: ->
+        
+        meshBodies = @cannon.bodies.filter (b) -> b.mesh and not b.keep
+        log meshBodies.length
+        for body in meshBodies
+            @removeBody body
+        
+    addBody: (body) -> @cannon.addBody body
+    removeBody: (body) ->
+        
+        body.mesh.removeFromParent()
+        delete body.mesh
+        @cannon.removeBody body
+        
+    #  0000000  000  00     00  000   000  000       0000000   000000000  00000000  
+    # 000       000  000   000  000   000  000      000   000     000     000       
+    # 0000000   000  000000000  000   000  000      000000000     000     0000000   
+    #      000  000  000 0 000  000   000  000      000   000     000     000       
+    # 0000000   000  000   000   0000000   0000000  000   000     000     00000000  
+    
     simulate: (scaledDelta, timeSum) ->
         
         target = vec Vector.unitY
@@ -72,17 +90,21 @@ function Physics
         @poleBody.quaternion.copy rts.centerHelper.quaternion
         
         # @cannon.fixedStep()
-        @cannon.step 1/60, scaledDelta
+        @cannon.step 1/60, scaledDelta, 10 # max substeps
         if prefs.get 'cannon'
             @cannonDebugger.update()
-        @postLoop()
         
-    postLoop: =>
-        
-        for b in @bodies
-            b.mesh.position.copy b.position
-            b.mesh.quaternion.copy b.quaternion
+        for b in @cannon.bodies
+            if b.mesh
+                b.mesh.position.copy b.position
+                b.mesh.quaternion.copy b.quaternion
             
+    #  0000000   0000000   00000000    0000000    0000000   
+    # 000       000   000  000   000  000        000   000  
+    # 000       000000000  0000000    000  0000  000   000  
+    # 000       000   000  000   000  000   000  000   000  
+    #  0000000  000   000  000   000   0000000    0000000   
+    
     addCargo: (cargo) ->
         
         return if not cargo
@@ -101,10 +123,15 @@ function Physics
         cb.position.copy cargo.mesh.position
         cb.mesh = cargo.mesh
         @cannon.addBody cb
-        @bodies.push cb
         cargo.body = cb
         cb
             
+    #  0000000   0000000   00000000   
+    # 000       000   000  000   000  
+    # 000       000000000  0000000    
+    # 000       000   000  000   000  
+    #  0000000  000   000  000   000  
+    
     addCar: (car) ->
         
         @addCargo car.takeCargo?()
@@ -116,10 +143,15 @@ function Physics
         cb.position.copy car.mesh.position
         cb.mesh = car.mesh
         @cannon.addBody cb
-        @bodies.push cb
         car.body = cb
         cb
             
+    # 000000000  00000000    0000000   000  000   000  
+    #    000     000   000  000   000  000  0000  000  
+    #    000     0000000    000000000  000  000 0 000  
+    #    000     000   000  000   000  000  000  0000  
+    #    000     000   000  000   000  000  000   000  
+    
     addTrain: (train) ->
         
         return if train.cars[0].body
@@ -140,10 +172,16 @@ function Physics
                     # maxForce: 10
                     twistAngle: deg2rad 90
             
+    #  0000000  000   000   0000000   000  000   000  
+    # 000       000   000  000   000  000  0000  000  
+    # 000       000000000  000000000  000  000 0 000  
+    # 000       000   000  000   000  000  000  0000  
+    #  0000000  000   000  000   000  000  000   000  
+    
     addChain: ->
         
         cbs = []
-        num = 24
+        num = 16
         for i in 0...num
     
             p = @poleBody.position
@@ -152,10 +190,10 @@ function Physics
             cb = new CANNON.Body mass:1 shape:new CANNON.Sphere r
             cb.position.set p.x, p.y-i*0.5, p.z
             cb.mesh = new Mesh Geom.sphere(radius:r, sgmt:8), Materials.physics.chain
+            cb.keep = true
             cb.mesh.setShadow()
             world.scene.add cb.mesh
             cbs.push cb
-            @bodies.push cb
             @cannon.addBody cb
             
         for cb,i in cbs

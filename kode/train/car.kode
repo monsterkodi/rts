@@ -15,6 +15,7 @@ function Car
         
     del: ->
         
+        world.removeBody     @body
         world.removeObject   @mesh
         world.removePickable @mesh
         
