@@ -99,6 +99,11 @@ function Arm
         else 
             log 'no cargo on waitingCar?'
             delete @station.waitingCar
+            @waitingForCar = true
+            @startAnimation duration:ANIM_DURATION/6, points: [ # raise arm
+                vec(-6 0 -2)
+                vec(-6 0 1)
+                ]
        
     releaseWaitingCar: =>
         

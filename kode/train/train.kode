@@ -26,7 +26,7 @@ function Train
         
     del: ->
         
-        world.traffic.subTrain @
+        @removeFromTrack()
         for car in @cars
             car.del()
         @cars = []
@@ -34,6 +34,7 @@ function Train
         
     removeFromTrack: ->
         
+        world.physics.removeKinematicCar @cars[0]
         world.traffic.subTrain @
         if @track
             @track.subTrain @

@@ -250,7 +250,9 @@ function World extends Convert
         speed = cfg.speed ? 1
         
         train = new Train {speed, name:'T'}
-        @addEngine train
+        engine = @addEngine train
+        
+        @physics.addKinematicCar engine
         
         if cfg.boxcars
             for i in 0...cfg.boxcars
