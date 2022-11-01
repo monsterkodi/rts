@@ -8,7 +8,7 @@
 
 HEAD_DISTANCE    = 12
 TAIL_DISTANCE    = 8
-REAREND_DISTANCE = 6
+REAREND_DISTANCE = 8
 
 function Traffic
 
@@ -62,13 +62,13 @@ function Traffic
                                     if path.currentTrack() == nn.train.prevTailTrack()
                                         nn.setTrain train     # train is the new occupant
                 
-                pd = path.prevDistance()
-                if pd < 1
-                    if ct = path.currentTrack()
-                        if not ct.hasTrain train
-                            train.track.subTrain train
-                            train.track = ct
-                            train.track.addTrain train
+                # pd = path.prevDistance()
+                # if pd < 1
+                if ct = path.currentTrack()
+                    if not ct.hasTrain train
+                        train.track.subTrain train
+                        train.track = ct
+                        train.track.addTrain train
                                         
                 tailDelta = train.tailDelta()
                 tpd = path.prevDistance tailDelta
@@ -108,9 +108,9 @@ function Traffic
             
         advance = @checkCargo train, advance
             
-        delta = path.delta+advance
+        delta = path.normDelta path.delta+advance
         
-        track = train.headTrack() #path.trackAtDelta delta
+        track = path.trackAtDelta delta
         
         for other in @trains
             continue if other == train
@@ -125,7 +125,7 @@ function Traffic
                     advance = 0
                     break
             if other.headTrack() == track
-                if train.trackRevers() != other.trackRevers()
+                if path.revers[path.indexAtDelta delta] != other.trackRevers()
                     dist = Math.abs track.trainCurveDistance(train) - track.trainCurveDistance(other)
                     if dist < 4.5
                         log 'heads on collision!'
@@ -141,7 +141,7 @@ function Traffic
         
         nn = train.path.nextNode()
         ot = nn.oppositeTracks train.path.currentTrack()
-        if ot.length 
+        if ot and ot.length 
             train.path.addTrackNode ot[0], ot[0].nodeOpposite nn
             return ot[0]
             

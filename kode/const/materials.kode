@@ -54,10 +54,10 @@ Materials =
         blood:          material 0xff0000, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, dithering:true
         stuff:          material 0xffff00, metalness: 0.6 roughness: 0.01, emissive:0x888800, dithering:true
     selector:
-        chalk:          material 0x888888, metalness: 0.6 roughness: 0.05
-        water:          material 0x4444ff, metalness: 0.6 roughness: 0.01
-        blood:          material 0xff0000, metalness: 0.6 roughness: 0.1
-        stone:          material 0x444444, metalness: 0.5 roughness: 0.01
+        chalk:          material 0xffffff, metalness: 0.2 roughness: 0.4
+        water:          material 0xffffff, metalness: 0.2 roughness: 0.4
+        blood:          material 0xffffff, metalness: 0.2 roughness: 0.4
+        stuff:          material 0xffffff, metalness: 0.2 roughness: 0.4
     track:
         rail:           material Colors.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
         highlight:      material 0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000

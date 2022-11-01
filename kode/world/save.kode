@@ -8,6 +8,8 @@
 
 Immutable = require 'seamless-immutable'
 
+Cargo = require '../station/cargo'
+
 function Save
 
     @: ->
@@ -63,7 +65,7 @@ function Save
         return if not save
         oldNoon = noon.stringify save, circular:true
         
-        log oldNoon
+        # log oldNoon
         
         world.clear()
         
@@ -104,7 +106,14 @@ function Save
             
             track = world.trackWithName train.track
             node  = world.nodeWithName  train.node
-            world.onAddTrain track, train.prevDist, node
+            if t = world.onAddTrain track, train.prevDist, node
+                t.resource = train.resource
+                for car,i in train.cars
+                    if car.type == 'boxcar'
+                        if car.cargo
+                            c = t.cars[i]
+                            box = new Mesh Geom.box(size:2), Materials.mining[car.cargo]
+                            c.setCargo new Cargo box, car.cargo
                 
         newNoon = @toNoon()
         if newNoon != oldNoon

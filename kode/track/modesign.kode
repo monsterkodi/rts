@@ -13,8 +13,6 @@ function ModeSign
 
     @: (@track) ->
         
-        @updateMode()
-
     del: -> @mesh.removeFromParent()
     
     matName: -> 

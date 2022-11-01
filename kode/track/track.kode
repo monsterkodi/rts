@@ -9,6 +9,7 @@
 Rail = require './rail'
 CurveCtrl = require '../track/curvectrl'
 ModeSign = require './modesign'
+Train = require '../train/train'
 
 function Track
 
@@ -40,13 +41,19 @@ function Track
         for index in 0...curveNum
             @ctrls.push new CurveCtrl @, index
                     
-        @createRail()     
         @modeSign = new ModeSign @
+        @createRail()     
         
         @mesh.track  = @
         @mesh.toSave = @toSave
         @mesh.toSave.key = 'tracks'
         
+    # 000000000  00000000    0000000   000  000   000  
+    #    000     000   000  000   000  000  0000  000  
+    #    000     0000000    000000000  000  000 0 000  
+    #    000     000   000  000   000  000  000  0000  
+    #    000     000   000  000   000  000  000   000  
+    
     hasTrain: (train) -> @trains.indexOf(train) >= 0
     addTrain: (train) -> 
     
@@ -74,7 +81,18 @@ function Track
         if empty @trains
             @blockMesh.removeFromParent()
             delete @blockMesh
+            
+    explodeTrains: ->
         
+        for train in @trains
+            train.explode()
+        
+    #  0000000   0000000   000   000  00000000  
+    # 000       000   000  000   000  000       
+    # 0000000   000000000   000 000   0000000   
+    #      000  000   000     000     000       
+    # 0000000   000   000      0      00000000  
+    
     toSave: =>
 
         fix = (p) -> x:p.x.toFixed(1), y:p.y.toFixed(1), z:p.z.toFixed(1)
@@ -93,6 +111,7 @@ function Track
     del: =>
         
         if @mesh
+            @explodeTrains()
             @modeSign.del()
             post.emit 'delTrack' @
             
@@ -148,13 +167,23 @@ function Track
         if event.button == 1 # middle button
             @nextMode()
         if event.button == 0
+            
+            boxcars = 3
+            length  = (boxcars+1)*Train.carDist
+            
             delta = @deltaClosestToPoint hit.point
-            node = @node[1]
+            
             if @mode == ModeSign.backward
                 delta = @curve.getLength()-delta
                 node = @node[0]
-            world.onAddTrain @, delta, node
-                        
+            else
+                node = @node[1]
+
+            if delta < length # tail outside track
+                return
+                
+            world.onAddTrain @, delta, node, boxcars
+            
     onDoubleClick: =>
         
         log 'split track!'
@@ -231,6 +260,8 @@ function Track
         @curve.getTangentAt ld, Vector.tmp
         @label.quaternion.copy Quaternion.unitVectors Vector.unitY, Vector.tmp
         
+        @modeSign.updateMode()
+        
     createMesh: ->    
     
         @mesh = new Mesh @rail, Materials.track.rail
@@ -285,5 +316,5 @@ function Track
         points = @getCtrlPoints includeLast
         if node == @node[1] ➜ points.reverse()
         points
-        
+                
 module.exports = Track

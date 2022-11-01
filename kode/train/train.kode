@@ -5,6 +5,7 @@ Boxcar = require './boxcar'
 
 function Train
     
+    @carDist:   4.2
     @numTrains: 0
 
     @: (@cfg) ->
@@ -17,7 +18,7 @@ function Train
         @advanceFactor = 1
         @cars       = []
         @track      = null
-        @resource   = blood:true water:true chalk:true
+        @resource   = blood:true water:true stuff:true
         
         @mesh       = new Mesh Geom.cylinder(radius:0.5, height:0.2), Materials.train.window
         @mesh.train = @
@@ -28,7 +29,13 @@ function Train
         @mesh.toSave.key = 'trains'
         
         world.addObject @mesh
-        
+                
+    #  0000000   0000000   000   000  00000000  
+    # 000       000   000  000   000  000       
+    # 0000000   000000000   000 000   0000000   
+    #      000  000   000     000     000       
+    # 0000000   000   000      0      00000000  
+    
     toSave: =>
 
         name:     @name
@@ -47,6 +54,8 @@ function Train
             car.del()
         @cars = []
         world.removeObject @mesh
+
+    explode: -> world.physics.addTrain @
         
     removeFromTrack: ->
         
@@ -109,21 +118,23 @@ function Train
     block:   -> @speed = 0
     unblock: -> @speed = @topSpeed
     
-    carDelta:   (car) -> @path?.normDelta @path.delta-4.2*(car.index)
-    tailDelta:        -> @path?.normDelta @path.delta-4.2*(@cars.length-1)
-    headTrack:        -> @path?.currentTrack() # @path?.trackAtDelta()
+    carDelta:   (car) -> @path?.normDelta @path.delta-Train.carDist*(car.index)
+    tailDelta:        -> @path?.normDelta @path.delta-Train.carDist*(@cars.length-1)
+    headTrack:        -> @path?.currentTrack()
     prevTrack:        -> @path?.prevTrack()
+    nextNode:         -> @path.nextNode()
     tailTrack:        -> @path?.trackAtDelta @tailDelta()
     prevTailTrack:    -> @path?.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]
-    # tailPrevDistance: -> @path?.prevDistance @tailDelta()
-    tailPrevDistance: -> 
-        # @normDelta @deltaAtIndex(@indexAtDelta(d)+1) - d
-        # @normDelta d - @deltaAtIndex(@indexAtDelta(d))
-        td = @tailDelta()
-        pi = @path.normIndex @path.indexAtDelta td
-        ds = td - @path.deltaAtIndex pi
+    tailPrevDistance: -> @path.prevDistance @tailDelta()
+    headPrevDistance: -> @path.prevDistance()
       
     trackRevers:      -> @path?.revers[@path.indexAtDelta()]
+    
+    # 000   000  00000000   0000000     0000000   000000000  00000000  
+    # 000   000  000   000  000   000  000   000     000     000       
+    # 000   000  00000000   000   000  000000000     000     0000000   
+    # 000   000  000        000   000  000   000     000     000       
+    #  0000000   000        0000000    000   000     000     00000000  
     
     update: (delta, timeSum) ->
         
@@ -131,16 +142,17 @@ function Train
 
         advance = delta * @speed
         
-        advance = world.traffic.allowTrainAdvance @, advance
+        if advance > 0
+            advance = world.traffic.allowTrainAdvance @, advance
         
         @path.advance advance
                 
-        for car, index in @cars
+        for car,index in @cars
             car.update delta, timeSum, @
-            car.moveToPathDelta @path, -4.2*index
+            car.moveToPathDelta @path, -Train.carDist*index
             
         @mesh.position.copy @cars[0].mesh.position
-        @mesh.position.z += 1.8
+        @mesh.position.z += 1
         @mesh.material = @cars[0].mesh.children[1].material
         
         if @preview

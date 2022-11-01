@@ -84,7 +84,7 @@ function Engine extends Car
         
         return if @isRearEngine()
         
-        x = 0.2*Math.sin 2*timeSum*train.speed
+        x = 0.2*Math.sin 2*timeSum*train.speed*train.advanceFactor
         @mesh.children[1].scale.set 1.2+x, 1 1
         
         sin = Math.sin 2*timeSum*train.speed*train.advanceFactor

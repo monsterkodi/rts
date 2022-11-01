@@ -10,11 +10,18 @@ class Info
 
     @: ->
                     
-        @elem = elem class:'info' style:'position:absolute; z-index:1; bottom:10px; right:20px; pointer-events: none;'
-
+        @elem  = elem class:'info' style:'bottom:10px; right:20px;'
+        @train = elem class:'info' style:'top:40px; left:20px;'
+        @track = elem class:'info' style:'top:40px; left:350px;'
+        
         document.body.appendChild @elem
+        document.body.appendChild @train
+        document.body.appendChild @track
           
-    del: -> @elem.remove()
+    del: -> 
+        @elem.remove()
+        @train.remove()
+        @track.remove()
         
     # 0000000    00000000    0000000   000   000
     # 000   000  000   000  000   000  000 0 000
@@ -24,28 +31,27 @@ class Info
                 
     draw: (info) =>
         
-        info = _.clone rts.renderer.info.render
-
-        @elem.innerHTML = ''
+        @elem.innerHTML  = ''
+        @train.innerHTML = ''
+        @track.innerHTML = ''
 
         add = (text) => elem class:'infoText' parent:@elem, text:text
-        add "objct: #{world.scene.children.length}"
-        add "vects: #{Vector.counter}"
-        add "quats: #{Quaternion.counter}"
-        add "calls: #{info.calls}"
-        add "trias: #{info.triangles}"
-        add "lines: #{info.lines}"
+        
+        for k,v of info
+            add "#{k} #{v}"
                     
-        add '....................................................'
+        add = (text) => elem class:'infoText' parent:@train, text:text
         
         for train in world.traffic.trains
             add "#{train.name}"
+            add "   track  #{train.track.name}"
             add "   delta  #{train.path.delta.toFixed 1}"
             add "   tail   #{train.tailDelta().toFixed 1}"
             add "   length #{train.path.getLength().toFixed 1}"
             # add "   prev   #{train.path.prevDistance().toFixed 1}"
-            add "   next   #{train.path.nextDistance().toFixed 1}"
+            add "   hnd    #{train.path.nextDistance().toFixed 1}"
             # add "   prev tail #{train.path.prevDistance(train.tailDelta()).toFixed 1}"
+            add "   hpd    #{train.headPrevDistance().toFixed 1}"
             add "   tpd    #{train.tailPrevDistance().toFixed 1}"
             # add "   next tail #{train.path.nextDistance(train.tailDelta()).toFixed 1}"
             
@@ -54,11 +60,11 @@ class Info
             add "   tailTrack #{train.tailTrack().name}"
             add "   prevTailTrack #{train.prevTailTrack().name}"
             
-            for car in train.boxcars()
-                add "   " + car.name + " " + car.nextNode().name
+            # for car in train.boxcars()
+                # add "   " + car.name + " " + car.nextNode().name
             add "#{train.path.toString()}"
             
-        add '....................................................'
+        add = (text) => elem class:'infoText' parent:@track, text:text
         
         for track in world.allTracks()
             add "#{track.name}"

@@ -116,7 +116,8 @@ class RTS
         @renderer.setClearColor Colors.menu.background     
         @renderer.shadowMap.enabled = true
         @renderer.shadowMap.type = THREE.PCFSoftShadowMap
-          
+        @renderer.info.autoReset = false
+        
         @camera = new Camera view:@view
         @scene  = new THREE.Scene()
         
@@ -373,7 +374,7 @@ class RTS
         if moved < 0.001
             @onClick event
         if moved < 0.01
-            if event.button != 0
+            if event.button == 2
                 @focusOnHit()
         
         Node.skipCenter = false
@@ -496,16 +497,29 @@ class RTS
     # 000   000  00000000  000   000  0000000    00000000  000   000  
     
     render: ->
-
+        
         @lightPlayer.position.copy @camera.position
         @renderer.render world.scene, @camera
+        info = 
+            vecs:       Vector.counter
+            quats:      Quaternion.counter
+            frame:      @renderer.info.render.frame
+            calls:      @renderer.info.render.calls
+            lines:      @renderer.info.render.lines
+            points:     @renderer.info.render.points
+            textures:   @renderer.info.memory.textures
+            programs:   @renderer.info.programs.length
+            geometries: @renderer.info.memory.geometries
+            triangles:  @renderer.info.render.triangles
+
         @composer.render()
+        @renderer.info.reset()
         
         @fps.draw()
         
         if prefs.get 'info'
             @info ?= new Info
-            @info.draw()
+            @info.draw info
         else if @info?
             @info.del()
             delete @info

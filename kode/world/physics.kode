@@ -106,7 +106,7 @@ function Physics
                 b.quaternion.copy q
                     
         # @cannon.fixedStep()
-        @cannon.step 1/60, scaledDelta, 1 # 10 # max substeps
+        @cannon.step 1/60, scaledDelta, 10 # max substeps
         if prefs.get 'cannon'
             @cannonDebugger.update()
         

@@ -88,7 +88,7 @@ function CurveCtrl
         @group.add @meshCtrlRod
         
         @group.position.copy @curveStart
-        @setDir @curve.getTangent 0, Vector.tmp
+        @setDir @curve.getTangent(0 Vector.tmp), false # don't update track!
             
         world.addObject @group
         
@@ -263,7 +263,7 @@ function CurveCtrl
                 
     compassRotated: (dir) => @setDir dir
                 
-    setDir: (dir) ->
+    setDir: (dir, moved=true) ->
         
         quat = Quaternion.unitVectors Vector.unitY, dir
         @group.quaternion.copy quat
@@ -272,7 +272,7 @@ function CurveCtrl
         @meshPrevCtrlEnd?.getWorldPosition @prevCtrlEnd
         
         @curve.updateArcLengths()
-        @track.ctrlMoved()
+        if moved ➜ @track.ctrlMoved()
         
     # 00     00   0000000   000   000  00000000  
     # 000   000  000   000  000   000  000       

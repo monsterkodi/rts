@@ -19,7 +19,10 @@ function Path
         post.on 'delTrack' @onDelTrack
         post.on 'delNode'  @onDelNode
 
-    del: -> delete @train.path
+    del: -> 
+    
+        @train.explode()
+        delete @train.path
 
     toSave: ->
         
@@ -61,16 +64,14 @@ function Path
         
     onDelTrack: (track) =>
         
-        while (i = @tracks.indexOf track) >= 0
-            @tracks.splice i, 1
-            @revers.splice i, 1
-            
-        # log 'deltrack' @name, track.name, @tracks.length, @revers.length, @nodes.length
-        
-        if empty @tracks
-            @del()
-        else
-            @updateLoop()
+        if track in @tracks
+            ▴ track != @train.track
+            ▴ @currentTrack() == @train.track
+            @delta  = @prevDistance()
+            @tracks = [@currentTrack()]
+            @nodes  = [@nextNode()]
+            @revers = [@tracks[0].node[1] != @nodes[0]]
+            @isLoop = false
             
     onDelNode: (node) =>
         
@@ -92,17 +93,18 @@ function Path
             if @tracks[ti].curve
                 cd += @tracks[ti].curve.getLength()
             else
-                log @name, ti, @tracks[ti]
+                log 'dafuk?' @name, ti, @tracks[ti]
         cd
                 
     deltaAtIndex: (index) ->
-        index = @normIndex index
+        if index >= @tracks.length ➜ return @getLength()
+        if index <= 0 ➜ return 0
         cd = 0
         for ti in 0...index
             if @tracks[ti].curve
                 cd += @tracks[ti].curve.getLength()
             else
-                log @name, ti, @tracks[ti]
+                log 'dafuk?' @name, ti, @tracks[ti]
         cd
             
     indexAtDelta: (d=@delta) ->
@@ -112,7 +114,7 @@ function Path
             if t.curve
                 cd += t.curve.getLength()
             else
-                log @name, i, t
+                log 'dafuk?' @name, i, t
             if cd >= nd
                 return i
         log 'dafuk?' @name, d, nd, cd
@@ -120,9 +122,15 @@ function Path
     nodeAtDelta:  (d=@delta) -> @nodes[@indexAtDelta d]
     curveAtDelta: (d=@delta) -> @tracks[@indexAtDelta d].curve
     posAtDelta:   (d=@delta) ->
-        d = @normDelta d
-        di = @indexAtDelta d
-        restDelta = d - @deltaAtIndex di
+        nd = @normDelta d
+        di = @indexAtDelta nd
+        restDelta = nd - @deltaAtIndex di
+        if restDelta < 0
+            log 'darfugg?'
+        else if restDelta > @tracks[di].curve.getLength()
+            for t,i in @tracks
+                log i, t.curve.getLength(), @deltaAtIndex i
+            log 'aertfsf?'
         p = restDelta / @tracks[di].curve.getLength()
         if @revers[di]
             p = 1 - p
@@ -142,22 +150,34 @@ function Path
     currentCurve: -> @currentTrack().curve
     currentPos:   -> @posAtDelta @delta
     
-    nextDistance: (d=@delta) -> @normDelta @deltaAtIndex(@indexAtDelta(d)+1) - d
-    prevDistance: (d=@delta) -> @normDelta d - @deltaAtIndex(@indexAtDelta(d))
+    # nextDistance: (d=@delta) -> @normDelta @deltaAtIndex(@indexAtDelta(d)+1) - d
+    nextDistance: (d=@delta) -> @deltaAtIndex(@indexAtDelta(d)+1) - d
+    # prevDistance: (d=@delta) -> @normDelta d - @deltaAtIndex(@indexAtDelta(d))
+    prevDistance: (d=@delta) -> d - @deltaAtIndex @indexAtDelta d
             
     advance: (delta) ->
         
         @delta = @normDelta @delta+delta
     
     getPoint: (point, offset=0) ->
-        d = @delta+offset
+        d = @normDelta @delta+offset
         @curveAtDelta(d).getPointAt @posAtDelta(d), point
 
     getTangent: (point, offset=0) ->
-        d = @delta+offset
+        d = @normDelta @delta+offset
         p = @posAtDelta d
         c = @curveAtDelta d
-        c.getTangentAt p, point
+        if not point 
+            log 'darfugg?'
+            return vec 0 1 0
+        if not c
+            log 'DARKFUG?'
+            return vec 0 1 0
+        try
+            c.getTangentAt p, point
+        catch err
+            error 'ERROR!' err
+            return vec 0 1 0
         if @revers[@indexAtDelta d]
             point.multiplyScalar -1
 

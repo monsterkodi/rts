@@ -20,13 +20,13 @@ function CargoSelector
         mesh.visible = false
         @group.add mesh
         
-        mat = Materials[@train.resource.chalk ? 'mining' : 'selector'].stuff
-        @chalk = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:32 pos:[0 0.2 0]), mat
-        @chalk.position.z = 1
-        @chalk.handler = @
-        @chalk.name = 'chalk'
-        @chalk.setShadow()
-        @group.add @chalk
+        mat = Materials[@train.resource.stuff ? 'mining' : 'selector'].stuff
+        @stuff = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:32 pos:[0 0.2 0]), mat
+        @stuff.position.z = 1
+        @stuff.handler = @
+        @stuff.name = 'stuff'
+        @stuff.setShadow()
+        @group.add @stuff
 
         mat = Materials[@train.resource.water ? 'mining' : 'selector'].water
         @water = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:32 pos:[0 0.2 0]), mat
@@ -58,17 +58,17 @@ function CargoSelector
     onEnter: (hit, prevHit, event) ->
         
         switch hit.name
-            'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1.5 1
-        for r in ['chalk' 'blood' 'water']
+            'stuff' 'blood' 'water' ➜ @[hit.name].scale.set 1 1.5 1
+        for r in ['stuff' 'blood' 'water']
             if not @train.resource[r]
                 @group.add @[r]
                     
     onLeave: (hit, nextHit, event) =>
 
         switch hit.name
-            'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
+            'stuff' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
 
-        for r in ['chalk' 'blood' 'water']
+        for r in ['stuff' 'blood' 'water']
             if not @train.resource[r]
                 @[r].removeFromParent()
             
@@ -76,17 +76,17 @@ function CargoSelector
         
         return if not hit
         switch hit.name
-            'chalk' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
+            'stuff' 'blood' 'water' ➜ @[hit.name].scale.set 1 1 1
             'cargo' ➜
                     ➜ 
                         if event.buttons == 1
-                            if @train.resource['water'] and @train.resource['blood'] and @train.resource['chalk'] 
+                            if @train.resource['water'] and @train.resource['blood'] and @train.resource['stuff'] 
                                 @del() 
 
     onMouseUp: (hit, downHit) =>
         
         switch hit.name
-            'chalk' 'blood' 'water' 
+            'stuff' 'blood' 'water' 
                 @[hit.name].scale.set 1 1.5 1
                 @train.resource[hit.name] = not @train.resource[hit.name]
                 if @train.resource[hit.name]
