@@ -6,68 +6,79 @@
 000   000  000   000     000     00000000  000   000  000  000   000  0000000  0000000 
 ###
 
+material = (color, cfg) ->
+    
+    cfg.color = color 
+    clss = THREE.MeshStandardMaterial
+    switch cfg.typ 
+        'lambert' ➜ clss = THREE.MeshLambertMaterial
+        'basic'   ➜ clss = THREE.MeshBasicMaterial
+        'shadow'  ➜ clss = THREE.ShadowMaterial
+    delete cfg.typ
+    new clss cfg
+
 Materials = 
     misc:
-        transparent:    new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.1
-        flat:           new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.5, roughness: 0.7, flatShading:true, dithering:true
-    wireframe:          new THREE.MeshBasicMaterial    color:0x888888, wireframe: true
-    floor:              new THREE.MeshStandardMaterial color:0x222222, dithering:true
-    shadow:             new THREE.ShadowMaterial       opacity: 0.2, depthWrite:false
+        transparent:    material 0x888888, typ:'lambert' depthWrite:false, transparent:true, opacity:0.1
+        flat:           material 0xffffff, metalness: 0.5, roughness: 0.7, flatShading:true, dithering:true
+    wireframe:          material 0x888888, typ:'basic' wireframe: true
+    floor:              material 0x222222, dithering:true
+    shadow:             material 0x000000, typ:'shadow' opacity:0.2 depthWrite:false
     ctrl:
-        transparent:    new THREE.MeshLambertMaterial  color:0x888888, depthWrite:false, transparent:true, opacity:0.0
-        highlight:      new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
-        start:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5
-        curve:          new THREE.MeshStandardMaterial color:0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
+        transparent:    material 0x888888, typ:'lambert' depthWrite:false, transparent:true, opacity:0.0
+        highlight:      material 0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
+        start:          material 0xff0000, metalness: 0.5, roughness: 0.5
+        curve:          material 0x111111, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
     compass:
-        head:           new THREE.MeshStandardMaterial color:Colors.compass.head,   metalness: 0.5, roughness: 0.5
-        wheel:          new THREE.MeshStandardMaterial color:0x111111,              metalness: 0.8, roughness: 0.45, dithering:true
-        dot0:           new THREE.MeshStandardMaterial color:Colors.compass.center, metalness: 0.5, roughness: 0.5  
-        dot1:           new THREE.MeshStandardMaterial color:Colors.compass.head,   metalness: 0.5, roughness: 0.5  
-        dot2:           new THREE.MeshStandardMaterial color:Colors.compass.center, metalness: 0.5, roughness: 0.5  
-        dot3:           new THREE.MeshStandardMaterial color:Colors.compass.head,   metalness: 0.5, roughness: 0.5  
-        dot4:           new THREE.MeshStandardMaterial color:Colors.compass.center, metalness: 0.5, roughness: 0.5  
-        dot5:           new THREE.MeshStandardMaterial color:Colors.compass.head,   metalness: 0.5, roughness: 0.5  
-        dot6:           new THREE.MeshStandardMaterial color:Colors.compass.center, metalness: 0.5, roughness: 0.5  
-        dot7:           new THREE.MeshStandardMaterial color:Colors.compass.head,   metalness: 0.5, roughness: 0.5  
+        head:           material Colors.compass.head,   metalness: 0.5, roughness: 0.5
+        wheel:          material 0x111111,              metalness: 0.8, roughness: 0.45, dithering:true
+        dot0:           material Colors.compass.center, metalness: 0.5, roughness: 0.5  
+        dot1:           material Colors.compass.head,   metalness: 0.5, roughness: 0.5  
+        dot2:           material Colors.compass.center, metalness: 0.5, roughness: 0.5  
+        dot3:           material Colors.compass.head,   metalness: 0.5, roughness: 0.5  
+        dot4:           material Colors.compass.center, metalness: 0.5, roughness: 0.5  
+        dot5:           material Colors.compass.head,   metalness: 0.5, roughness: 0.5  
+        dot6:           material Colors.compass.center, metalness: 0.5, roughness: 0.5  
+        dot7:           material Colors.compass.head,   metalness: 0.5, roughness: 0.5  
     train:
-        window:         new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5 roughness: 0.2 
-        body:           new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.2 roughness: 0.4 
-        piston:         new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1 roughness: 0.8 
-        light:          new THREE.MeshStandardMaterial color:0x000000, metalness: 0.1 roughness: 0.8
+        window:         material 0x000000, metalness: 0.5 roughness: 0.2 
+        body:           material 0xffffff, metalness: 0.2 roughness: 0.4 
+        piston:         material 0x000000, metalness: 0.1 roughness: 0.8 
+        light:          material 0x000000, metalness: 0.1 roughness: 0.8
     station:
-        side:           new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5 roughness: 0.2, dithering:true, side:THREE.DoubleSide
-        central:        new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.2 roughness: 0.4
+        side:           material 0x000000, metalness: 0.5 roughness: 0.2, dithering:true, side:THREE.DoubleSide
+        central:        material 0xffffff, metalness: 0.2 roughness: 0.4
     mining:
-        chalk:          new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6 roughness: 0.05, emissive:0x777777, dithering:true
-        water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01, emissive:0x4444aa, dithering:true
-        blood:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, dithering:true
-        stuff:          new THREE.MeshStandardMaterial color:0xffff00, metalness: 0.6 roughness: 0.01, emissive:0x888800, dithering:true
+        chalk:          material 0xffffff, metalness: 0.6 roughness: 0.05, emissive:0x777777, dithering:true
+        water:          material 0x4444ff, metalness: 0.6 roughness: 0.01, emissive:0x4444aa, dithering:true
+        blood:          material 0xff0000, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, dithering:true
+        stuff:          material 0xffff00, metalness: 0.6 roughness: 0.01, emissive:0x888800, dithering:true
     selector:
-        chalk:          new THREE.MeshStandardMaterial color:0x888888, metalness: 0.6 roughness: 0.05
-        water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01
-        blood:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6 roughness: 0.1
-        stone:          new THREE.MeshStandardMaterial color:0x444444, metalness: 0.5 roughness: 0.01
+        chalk:          material 0x888888, metalness: 0.6 roughness: 0.05
+        water:          material 0x4444ff, metalness: 0.6 roughness: 0.01
+        blood:          material 0xff0000, metalness: 0.6 roughness: 0.1
+        stone:          material 0x444444, metalness: 0.5 roughness: 0.01
     track:
-        rail:           new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
-        highlight:      new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
-        block:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
+        rail:           material Colors.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
+        highlight:      material 0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
+        block:          material 0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
         mode:
-            twoway:     new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.5, roughness: 0.5
-            oneway:     new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.5, roughness: 0.5, emissive:0x222222
-            highlight:  new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
+            twoway:     material Colors.track, metalness: 0.5, roughness: 0.5
+            oneway:     material Colors.track, metalness: 0.5, roughness: 0.5, emissive:0x222222
+            highlight:  material 0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
     node:
-        center:         new THREE.MeshStandardMaterial color:Colors.track,    metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
-        out:            new THREE.MeshStandardMaterial color:Colors.node.out, metalness: 0.5, roughness: 0.5
-        in:             new THREE.MeshStandardMaterial color:Colors.node.in,  metalness: 0.5, roughness: 0.5
-        highlightIn:    new THREE.MeshStandardMaterial color:Colors.node.in,  metalness: 0.5, roughness: 0.5, emissive: Colors.node.in
-        highlightOut:   new THREE.MeshStandardMaterial color:Colors.node.out, metalness: 0.5, roughness: 0.5, emissive: Colors.node.out
+        center:         material Colors.track,    metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
+        out:            material Colors.node.out, metalness: 0.5, roughness: 0.5
+        in:             material Colors.node.in,  metalness: 0.5, roughness: 0.5
+        highlightIn:    material Colors.node.in,  metalness: 0.5, roughness: 0.5, emissive: Colors.node.in
+        highlightOut:   material Colors.node.out, metalness: 0.5, roughness: 0.5, emissive: Colors.node.out
     menu:
-        active:         new THREE.MeshStandardMaterial color:Colors.menu.active,       metalness: 0.2, roughness: 0.5, emissive: Colors.menu.active
-        inactive:       new THREE.MeshStandardMaterial color:Colors.menu.inactive,     metalness: 0.9, roughness: 0.75
-        activeHigh:     new THREE.MeshStandardMaterial color:Colors.menu.activeHigh,   metalness: 0.9, roughness: 0.75
-        inactiveHigh:   new THREE.MeshStandardMaterial color:Colors.menu.inactiveHigh, metalness: 0.9, roughness: 0.75
+        active:         material Colors.menu.active,       metalness: 0.2, roughness: 0.5, emissive: Colors.menu.active
+        inactive:       material Colors.menu.inactive,     metalness: 0.9, roughness: 0.75
+        activeHigh:     material Colors.menu.activeHigh,   metalness: 0.9, roughness: 0.75
+        inactiveHigh:   material Colors.menu.inactiveHigh, metalness: 0.9, roughness: 0.75
     physics:
-        chain:          new THREE.MeshStandardMaterial color:0x000000, metalness: 0.5, roughness: 0.2
+        chain:          material 0x000000, metalness: 0.5, roughness: 0.2
 
     setWire: (wire) ->
         
@@ -89,13 +100,4 @@ Materials =
     getFlat: -> prefs.get 'flat'
     toggleFlat: -> Materials.setFlat not Materials.getFlat()
 
-    setDither: (dither) ->
-        
-        Materials.floor.dithering = dither
-        Materials.floor.needsUpdate = true
-            
-    toggleDither: ->
-        
-        Materials.setDither not Materials.dither
-        
 module.exports = Materials
