@@ -20,7 +20,7 @@ function CargoSelector
         mesh.visible = false
         @group.add mesh
         
-        mat = Materials[@train.resource.chalk ? 'mining' : 'selector'].chalk
+        mat = Materials[@train.resource.chalk ? 'mining' : 'selector'].stuff
         @chalk = new Mesh Geom.cylinder(dir:Vector.unitY, radius:0.4 height:0.4 sgmt:32 pos:[0 0.2 0]), mat
         @chalk.position.z = 1
         @chalk.handler = @

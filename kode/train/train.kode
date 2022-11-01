@@ -21,8 +21,24 @@ function Train
         
         @mesh       = new Mesh Geom.cylinder(radius:0.5, height:0.2), Materials.train.window
         @mesh.train = @
+        @mesh.name  = @name
         @mesh.visible = false
+        
+        @mesh.toSave     = @toSave
+        @mesh.toSave.key = 'trains'
+        
         world.addObject @mesh
+        
+    toSave: =>
+
+        name:     @name
+        speed:    @speed
+        track:    @track?.name
+        prevDist: @path.prevDistance()
+        node:     @path.nextNode().name
+        resource: @resource
+        path:     @path.toSave()
+        cars:     @cars.map (c) -> c.toSave()
         
     del: ->
         

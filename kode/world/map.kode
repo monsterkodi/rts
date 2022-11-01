@@ -15,8 +15,8 @@ class Map extends World
         # @addObject new Mesh Geom.roundedFrame({}), Materials.ctrl.start
         # @addObject new Mesh Geom.roundedFrame({}), Materials.wireframe
         # @trainTest()
-        # @stationTest()
-        @physicsTest()
+        @stationTest()
+        # @physicsTest()
         
     physicsTest: ->
         
@@ -41,7 +41,8 @@ class Map extends World
 
         @addCentralStation pos:[-18   0]
         @addCentralStation pos:[-36   0] dir:Vector.minusY
-        @addMiningStation  pos:[  0   0], resource:'chalk'
+        # @addMiningStation  pos:[  0   0], resource:'chalk'
+        @addMiningStation  pos:[  0   0], resource:'stuff'
         # @addMiningStation  pos:[  0 -12], resource:'stone'
         @addMiningStation  pos:[ 18   0], resource:'blood'
         @addMiningStation  pos:[ 36   0], resource:'water'

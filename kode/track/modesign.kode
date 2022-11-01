@@ -25,7 +25,10 @@ function ModeSign
             
     updateMode: ->
         
-        mat = @mesh?.material ? Materials.track.mode[@matName()]
+        if @mesh?.material == Materials.track.mode.highlight
+            mat = @mesh.material
+        else 
+            mat = Materials.track.mode[@matName()]
         @mesh?.removeFromParent()
         switch @track.mode
             ModeSign.twoway ➜   geom = Geom.cylinder(radius:0.25 height:0.72); 

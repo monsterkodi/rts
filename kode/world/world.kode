@@ -299,6 +299,10 @@ function World extends Convert
     nodeWithName: (name) -> 
         for node in @allNodes()
             return node if node.name == name
+            
+    trackWithName: (name) ->
+        for track in @allTracks()
+            return track if track.name == name
         
     connectNodes: (n1, n2) -> @connectNodeTracks n1, n1.outTracks, n2, n2.inTracks
         

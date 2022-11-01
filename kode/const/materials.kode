@@ -41,7 +41,7 @@ Materials =
         chalk:          new THREE.MeshStandardMaterial color:0xffffff, metalness: 0.6 roughness: 0.05, emissive:0x777777, dithering:true
         water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01, emissive:0x4444aa, dithering:true
         blood:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, dithering:true
-        stone:          new THREE.MeshStandardMaterial color:0x444444, metalness: 0.5 roughness: 0.01, emissive:0x333333, dithering:true
+        stuff:          new THREE.MeshStandardMaterial color:0xffff00, metalness: 0.6 roughness: 0.01, emissive:0x888800, dithering:true
     selector:
         chalk:          new THREE.MeshStandardMaterial color:0x888888, metalness: 0.6 roughness: 0.05
         water:          new THREE.MeshStandardMaterial color:0x4444ff, metalness: 0.6 roughness: 0.01

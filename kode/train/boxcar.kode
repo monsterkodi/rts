@@ -6,6 +6,11 @@ function Boxcar extends Car
     @: (train) ->
         
         super train, world.construct.meshes.boxcar.clone()
+        
+    toSave: -> 
+        
+        type:  'boxcar'
+        cargo: @cargo?.resource
     
     isEmpty: -> not @hasCargo()
     hasCargo: -> @cargo

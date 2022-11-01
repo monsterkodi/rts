@@ -87,6 +87,7 @@ function Track
         
         name: @name
         node: @node.map (n) -> n.name
+        mode: @mode
         ctrl: ctrl
         
     del: =>
@@ -118,7 +119,7 @@ function Track
     
     nextMode: -> @setMode (@mode+1)%3
         
-    setMode: (@mode) -> 
+    setMode: (@mode) ->
         
         @modeSign.updateMode()
             

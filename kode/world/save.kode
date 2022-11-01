@@ -16,6 +16,7 @@ function Save
             nodes:    {}
             tracks:   {}
             stations: {}
+            trains:   {}
             
         post.on 'save'   @onSave
         post.on 'load'   @onLoad
@@ -39,6 +40,7 @@ function Save
             nodes:    {}
             tracks:   {}
             stations: {}
+            trains:   {}
 
         childs = world.scene.children.filter (child) -> child.toSave is func
         for child in childs
@@ -47,6 +49,7 @@ function Save
         @s = @s.set 'stations' state.stations
         @s = @s.set 'nodes'    state.nodes
         @s = @s.set 'tracks'   state.tracks
+        @s = @s.set 'trains'   state.trains
         
     # 000       0000000    0000000   0000000    
     # 000      000   000  000   000  000   000  
@@ -59,6 +62,8 @@ function Save
         save = prefs.get 'save'
         return if not save
         oldNoon = noon.stringify save, circular:true
+        
+        log oldNoon
         
         world.clear()
         
@@ -77,6 +82,7 @@ function Save
             
             ctrl = track.ctrl.map (c) -> vec c
             t = world.addTrack n1, n2, ctrl, name
+            t.setMode track.mode ? 0
             
             s1 = save.nodes[n1.name]
             if name in (s1.in ? [])
@@ -93,6 +99,12 @@ function Save
                 n2.outTracks.push t
             else
                 log 'dafuk?' s2, n2
+                
+        for name,train of save.trains
+            
+            track = world.trackWithName train.track
+            node  = world.nodeWithName  train.node
+            world.onAddTrain track, train.prevDist, node
                 
         newNoon = @toNoon()
         if newNoon != oldNoon

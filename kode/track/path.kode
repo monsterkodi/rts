@@ -11,7 +11,6 @@ function Path
     @: (@train) ->
         
         @name   = @train.name + '.path'
-        # log '+Path' @name
         @delta  = 0
         @tracks = []
         @nodes  = []
@@ -19,6 +18,15 @@ function Path
         
         post.on 'delTrack' @onDelTrack
         post.on 'delNode'  @onDelNode
+
+    del: -> delete @train.path
+
+    toSave: ->
+        
+        delta:  @delta
+        tracks: @tracks.map (t) -> t.name
+        nodes:  @nodes.map (n) -> n.name
+        revers: @revers
         
     toString: ->
         s = @name + ' ' + (@isLoop ? 'loop' : 'oneway')
@@ -42,10 +50,6 @@ function Path
         @nodes.reverse()
         @nodes.shift()
         @nodes.push @tracks[-1].node[@revers[-1] ? 0 : 1]
-        
-    del: ->
-        # log '-Path' @name
-        delete @train.path
         
     updateLoop: ->
        

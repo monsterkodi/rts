@@ -6,14 +6,19 @@
 ![screenshot](img/rts09.png)
 ![screenshot](img/rts10.png)
 
-- track modes
+- traffic
+    - check track mode
+- vanish ctrls by timer
 - track creation
-    - covert middle nodes to ctrls
+    - convert middle nodes to ctrls
     - in-between drag sets dir of node
     - split track
+    
+- train creator station
+- cleaning station
+    - cleaning bot
+- dead eye physic trains
    
-- block tracks
-- load & save trains
 - convertCtrlToNode
 - tangent rods on nodes
 - grid lines on hovered node/ctrl centers
