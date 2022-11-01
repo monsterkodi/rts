@@ -141,9 +141,12 @@ function Traffic
         
         nn = train.path.nextNode()
         ot = nn.oppositeTracks train.path.currentTrack()
-        if ot and ot.length 
-            train.path.addTrackNode ot[0], ot[0].nodeOpposite nn
-            return ot[0]
+        for nextTrack in ot
+            nextNode  = nextTrack.nodeOpposite nn
+            nnopptrck = nextNode.oppositeTracks(nextTrack) ? []
+            if nnopptrck.length
+                train.path.addTrackNode nextTrack, nextNode
+                return nextTrack
             
     checkCargo: (train, advance) ->
         

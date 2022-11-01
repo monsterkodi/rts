@@ -174,14 +174,18 @@ function Track
             delta = @deltaClosestToPoint hit.point
             
             if @mode == ModeSign.backward
-                delta = @curve.getLength()-delta
                 node = @node[0]
+                delta = @curve.getLength()-delta
+                if delta < length # tail outside track
+                    log 'tail outside backward track'
+                    return
             else
                 node = @node[1]
-
-            if delta < length # tail outside track
-                return
+                if delta < length # tail outside track
+                    log 'tail outside forward track'
+                    return
                 
+            log 'addTrain delta' delta, 'node' node.name
             world.onAddTrain @, delta, node, boxcars
             
     onDoubleClick: =>
@@ -191,7 +195,7 @@ function Track
     deltaClosestToPoint: (point) ->
         
         curveLength = @curve.getLength()
-        numPoints = parseInt curveLength/4
+        numPoints = parseInt curveLength
         points = @curve.getSpacedPoints numPoints
         dists  = points.map (p) -> p.distanceTo point
         mi = 0
@@ -245,6 +249,8 @@ function Track
     
     createRail: ->
         
+        @explodeTrains()
+        
         @rail = new Rail @curve, 100
                 
         if @mesh
@@ -283,6 +289,7 @@ function Track
                              ➜ log 'nodeOpposite.dafuk?'
            
     getLength: -> @curve.getLength()
+    
     trainCurveDistance: (train) ->
         
         if train.path.revers[train.path.indexAtDelta()]

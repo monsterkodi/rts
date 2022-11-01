@@ -118,6 +118,8 @@ function Train
     block:   -> @speed = 0
     unblock: -> @speed = @topSpeed
     
+    getLength: -> @cars.length * Train.carDist
+    
     carDelta:   (car) -> @path?.normDelta @path.delta-Train.carDist*(car.index)
     tailDelta:        -> @path?.normDelta @path.delta-Train.carDist*(@cars.length-1)
     headTrack:        -> @path?.currentTrack()

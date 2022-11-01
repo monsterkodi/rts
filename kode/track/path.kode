@@ -67,6 +67,9 @@ function Path
         if track in @tracks
             ▴ track != @train.track
             ▴ @currentTrack() == @train.track
+            if @currentTrack() != @train.track
+                log @currentTrack().name, @train?.track?.name
+                return
             @delta  = @prevDistance()
             @tracks = [@currentTrack()]
             @nodes  = [@nextNode()]
@@ -156,7 +159,7 @@ function Path
     prevDistance: (d=@delta) -> d - @deltaAtIndex @indexAtDelta d
             
     advance: (delta) ->
-        
+        # log 'advance' @delta, delta, @getLength(), @normDelta @delta+delta
         @delta = @normDelta @delta+delta
     
     getPoint: (point, offset=0) ->

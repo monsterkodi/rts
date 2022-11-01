@@ -203,7 +203,7 @@ function Node
             dir.negate()
         
         n1 = @
-        n2 = world.addNode @getPos().add dir
+        n2 = world.addNode pos:@getPos().add dir
         
         n2.setDir dir
         
@@ -245,6 +245,22 @@ function Node
         dragNode.group.position.copy Vector.tmp # setPos?
         @dragTrack.nodeMoved dragNode
         
+        Vector.tmp1.copy @dragTrack.node[0].trackDir @dragTrack # dir at start node
+        @dragTrack.node[0].getPos Vector.tmp2
+        @dragTrack.node[1].getPos Vector.tmp3
+        Vector.tmp3.sub(Vector.tmp2).normalize() # start node to end node
+        dot = Vector.tmp1.dot Vector.tmp3 # negative if end node is 'behind' start node
+        log @dragTrack.name, @dragTrack.node[0].name, Vector.tmp1, Vector.tmp3, dot
+        if dot <= 0
+            @dragTrack.node[1].setDir Vector.tmp1.negate()
+        else if dot > 0.7
+            @dragTrack.node[1].setDir Vector.tmp1
+        else
+            @dragTrack.node[0].getRight Vector.tmp2
+            dot = Vector.tmp2.dot Vector.tmp3
+            if dot < 0 ➜ Vector.tmp2.negate()
+            @dragTrack.node[1].setDir Vector.tmp2
+        
     onDragDone: (hit, downHit) =>
         
         if hitName = hit?.name
@@ -280,7 +296,7 @@ function Node
         Vector.tmp.round()
         @setPos Vector.tmp
         
-    getPos: => vec @group.position
+    getPos: (p) => p ?= vec(); p.copy @group.position
     setPos: (point) ->
         
         @group.position.copy point
@@ -323,8 +339,9 @@ function Node
         
     compassRotated: (dir) => @setDir dir
         
-    getUp: -> vec(Vector.unitZ).applyQuaternion @group.quaternion
-    getDir: -> vec(Vector.unitY).applyQuaternion @group.quaternion
+    getUp:    (u) -> u ?= vec(); u.copy(Vector.unitZ).applyQuaternion @group.quaternion
+    getDir:   (d) -> d ?= vec(); d.copy(Vector.unitY).applyQuaternion @group.quaternion
+    getRight: (r) -> r ?= vec(); r.copy(Vector.unitX).applyQuaternion @group.quaternion
     setDir: (dir) ->
         
         quat = Quaternion.unitVectors Vector.unitY, dir
@@ -412,6 +429,13 @@ function Node
     #    000     0000000    000000000  000       0000000    
     #    000     000   000  000   000  000       000  000   
     #    000     000   000  000   000   0000000  000   000  
+    
+    trackDir: (track) -> 
+    
+        dir = @getDir Vector.tmp
+        if track in @inTracks
+            dir.negate()
+        dir
     
     allTracks: -> @inTracks.concat @outTracks
     
