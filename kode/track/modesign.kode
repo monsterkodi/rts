@@ -7,16 +7,58 @@
 
 function ModeSign
 
-    @: (@track, @node) ->
+    @twoway: 0
+    @forward: 1
+    @backward: 2
+
+    @: (@track) ->
         
-        atStart = node == @track.node[0]
-        geom = Geom.box size:10
-        @mesh = new Mesh geom, Materials.track.rail
-        @mesh.position.copy @node.getPos()
-        world.scene.add @mesh
+        @updateMode()
+
+    del: -> @mesh.removeFromParent()
+    
+    matName: -> 
+        switch @track.mode
+            ModeSign.twoway ➜   'twoway'
+            ModeSign.forward,
+            ModeSign.backward ➜ 'oneway'
+            
+    updateMode: ->
         
-    del: ->
+        mat = @mesh?.material ? Materials.track.mode[@matName()]
+        @mesh?.removeFromParent()
+        switch @track.mode
+            ModeSign.twoway ➜   geom = Geom.cylinder(radius:0.25 height:0.72); 
+            ModeSign.forward ➜  geom = Geom.triangle(width:0.5 height:0.72 depth:1); 
+            ModeSign.backward ➜ geom = Geom.triangle(width:0.5 height:0.72 depth:1); geom.rotateZ deg2rad 180
         
-        @mesh.removeFromParent()
+        @mesh = new THREE.InstancedMesh geom, mat, 100
+        @mesh.handler = @
+        @setCurve @track.curve
+        @track.mesh.add @mesh
+    
+    onClick: (hit, event) => @track.nextMode()
+        
+    onEnter: (hit, nextHit, event) => @mesh.material = Materials.track.mode.highlight
+    onLeave: (hit, nextHit, event) => @mesh.material = Materials.track.mode[@matName()]
+        
+    setCurve: (curve) ->
+
+        curveLength = curve.getLength()
+        points = curve.getSpacedPoints parseInt curveLength/4
+        return if points.length < 5
+        points.pop()
+        points.pop()
+        points.shift()
+        points.shift()
+        mat = new THREE.Matrix4
+        for point,index in points
+            tangent = curve.getTangentAt (index+2)/(points.length-1+4)
+            quat = Quaternion.unitVectors Vector.unitY, tangent
+            mat.compose point, quat, vec 1 1 1
+            @mesh.setMatrixAt index, mat
+            
+        @mesh.count = points.length
+        @mesh.instanceMatrix.needsUpdate = true
 
 module.exports = ModeSign

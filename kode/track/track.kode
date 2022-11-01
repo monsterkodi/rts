@@ -8,12 +8,7 @@
 
 Rail = require './rail'
 CurveCtrl = require '../track/curvectrl'
-StopSign = require './stopsign'
-
-class Mode
-    @twoway: 0
-    @forward: 1
-    @backward: 2
+ModeSign = require './modesign'
 
 function Track
 
@@ -26,7 +21,7 @@ function Track
         @name ?= "t#{Track.id}"
         @node  = [n1, n2]
         
-        @mode   = Mode.twoway 
+        @mode   = ModeSign.twoway 
         @trains = []
         
         @curve = new CurvePath
@@ -46,6 +41,7 @@ function Track
             @ctrls.push new CurveCtrl @, index
                     
         @createRail()     
+        @modeSign = new ModeSign @
         
         @mesh.track  = @
         @mesh.toSave = @toSave
@@ -96,7 +92,7 @@ function Track
     del: =>
         
         if @mesh
-            @stopSignAtNode null
+            @modeSign.del()
             post.emit 'delTrack' @
             
             @node[0]?.removeTrack @
@@ -107,6 +103,7 @@ function Track
             world.removeObject @mesh
             for ctrl in @ctrls
                 ctrl.del()
+            delete @modeSign
             delete @curve
             delete @node
             delete @ctrls
@@ -121,20 +118,9 @@ function Track
     
     nextMode: -> @setMode (@mode+1)%3
         
-    setMode: (@mode) -> @updateSigns()
+    setMode: (@mode) -> 
         
-    updateSigns: ->
-        
-        switch @mode
-            Mode.forward  ➜ @stopSignAtNode @node[1]
-            Mode.backward ➜ @stopSignAtNode @node[0]
-            Mode.twoway   ➜ @stopSignAtNode null
-            
-    stopSignAtNode: (node) ->
-        
-        @stopSign?.del()
-        delete @stopSign
-        if node ➜ @stopSign = new StopSign @, node
+        @modeSign.updateMode()
             
     # 00     00   0000000   000   000   0000000  00000000    
     # 000   000  000   000  000   000  000       000         
@@ -161,10 +147,12 @@ function Track
         if event.button == 1 # middle button
             @nextMode()
         if event.button == 0
-            log 'left' event.button
             delta = @deltaClosestToPoint hit.point
-            log 'onClick' @name, hit.point, delta
-            world.onAddTrain @, delta
+            node = @node[1]
+            if @mode == ModeSign.backward
+                delta = @curve.getLength()-delta
+                node = @node[0]
+            world.onAddTrain @, delta, node
                         
     onDoubleClick: =>
         

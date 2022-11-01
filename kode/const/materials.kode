@@ -51,6 +51,10 @@ Materials =
         rail:           new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
         highlight:      new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
         block:          new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
+        mode:
+            twoway:     new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.5, roughness: 0.5
+            oneway:     new THREE.MeshStandardMaterial color:Colors.track, metalness: 0.5, roughness: 0.5, emissive:0x222222
+            highlight:  new THREE.MeshStandardMaterial color:0xff0000, metalness: 0.5, roughness: 0.5, emissive:0xff0000
     node:
         center:         new THREE.MeshStandardMaterial color:Colors.track,    metalness: 0.8, roughness: 0.45, flatShading:true, dithering:true
         out:            new THREE.MeshStandardMaterial color:Colors.node.out, metalness: 0.5, roughness: 0.5
