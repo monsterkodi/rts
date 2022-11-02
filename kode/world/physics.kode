@@ -69,7 +69,6 @@ function Physics
     clear: ->
         
         meshBodies = @cannon.bodies.filter (b) -> b.mesh and not b.keep
-        log meshBodies.length
         for body in meshBodies
             @removeBody body
         

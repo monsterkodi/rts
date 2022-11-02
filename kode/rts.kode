@@ -209,7 +209,6 @@ class RTS
             world.create()
         else
             post.emit 'load'
-            # world.animate 0
             
         @animationStep()
         

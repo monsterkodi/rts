@@ -288,6 +288,21 @@ function Track
             node == @node[1] ➜ return @node[0]
                              ➜ log 'nodeOpposite.dafuk?'
            
+    modeForNode: (node) ->
+        
+        if @mode == ModeSign.twoway ➜ return @mode
+
+        if node == @node[@mode%2]
+            if @ in node.inTracks
+                return ModeSign.forward
+            else
+                return ModeSign.backward
+        else
+            if @ in node.outTracks
+                return ModeSign.forward
+            else
+                return ModeSign.backward
+                             
     getLength: -> @curve.getLength()
     
     trainCurveDistance: (train) ->

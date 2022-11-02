@@ -122,6 +122,6 @@ function Save
             # log 'new:' newNoon
 
         # log newNoon
-        world.animate 0
+        # world.animate 0
             
 module.exports = Save

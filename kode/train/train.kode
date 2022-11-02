@@ -55,10 +55,13 @@ function Train
         @cars = []
         world.removeObject @mesh
 
-    explode: -> world.physics.addTrain @
+    explode: -> 
+    
+        world.physics.addTrain @
         
     removeFromTrack: ->
         
+        delete @mesh.toSave
         world.physics.removeKinematicCar @cars[0]
         world.traffic.subTrain @
         if @track
@@ -106,31 +109,23 @@ function Train
         
         for car in @cars
             car.setColorByName name
-            
-    addPreview: ->
-        
-        @preview = @cars[0].mesh.clone()
-        @preview.material = Materials.misc.transparent
-        for c in @preview.children
-            c.material = Materials.misc.transparent
-        world.scene.add @preview
-        
+                    
     block:   -> @speed = 0
     unblock: -> @speed = @topSpeed
     
     getLength: -> @cars.length * Train.carDist
     
-    carDelta:   (car) -> @path?.normDelta @path.delta-Train.carDist*(car.index)
-    tailDelta:        -> @path?.normDelta @path.delta-Train.carDist*(@cars.length-1)
-    headTrack:        -> @path?.currentTrack()
-    prevTrack:        -> @path?.prevTrack()
+    carDelta:   (car) -> @path.normDelta @path.delta-Train.carDist*(car.index)
+    tailDelta:        -> @path.normDelta @path.delta-Train.carDist*(@cars.length-1)
+    headTrack:        -> @path.currentTrack()
+    prevTrack:        -> @path.prevTrack()
     nextNode:         -> @path.nextNode()
-    tailTrack:        -> @path?.trackAtDelta @tailDelta()
-    prevTailTrack:    -> @path?.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]
+    tailTrack:        -> @path.trackAtDelta @tailDelta()
+    prevTailTrack:    -> @path.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]
     tailPrevDistance: -> @path.prevDistance @tailDelta()
     headPrevDistance: -> @path.prevDistance()
       
-    trackRevers:      -> @path?.revers[@path.indexAtDelta()]
+    trackRevers:      -> @path.revers[@path.indexAtDelta()]
     
     # 000   000  00000000   0000000     0000000   000000000  00000000  
     # 000   000  000   000  000   000  000   000     000     000       
@@ -138,29 +133,22 @@ function Train
     # 000   000  000        000   000  000   000     000     000       
     #  0000000   000        0000000    000   000     000     00000000  
     
-    update: (delta, timeSum) ->
+    update: (scaledDelta, timeSum) ->
         
-        return if not @path
+        for car,index in @cars
+            car.update scaledDelta, timeSum, @
+            
+    advance: (advance) ->
+        
+        ▴ @path
 
-        advance = delta * @speed
-        
-        if advance > 0
-            advance = world.traffic.allowTrainAdvance @, advance
-        
         @path.advance advance
                 
         for car,index in @cars
-            car.update delta, timeSum, @
             car.moveToPathDelta @path, -Train.carDist*index
             
         @mesh.position.copy @cars[0].mesh.position
         @mesh.position.z += 1
         @mesh.material = @cars[0].mesh.children[1].material
         
-        if @preview
-            #@path.moveMesh @preview, 8
-            # log @path.delta, @path.currentIndex(), @path.nextNode().name
-            @preview.position.copy @path.nextNode().position
-            # @preview.needsUpdate = true
-                        
 module.exports = Train

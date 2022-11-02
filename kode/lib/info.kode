@@ -10,18 +10,21 @@ class Info
 
     @: ->
                     
-        @elem  = elem class:'info' style:'bottom:10px; right:20px;'
+        @info  = elem class:'info' style:'bottom:10px; right:20px;'
         @train = elem class:'info' style:'top:40px; left:20px;'
         @track = elem class:'info' style:'top:40px; left:350px;'
+        @node  = elem class:'info' style:'top:400px; left:350px;'
         
-        document.body.appendChild @elem
+        document.body.appendChild @info
         document.body.appendChild @train
         document.body.appendChild @track
+        document.body.appendChild @node
           
     del: -> 
-        @elem.remove()
+        @info.remove()
         @train.remove()
         @track.remove()
+        @node.remove()
         
     # 0000000    00000000    0000000   000   000
     # 000   000  000   000  000   000  000 0 000
@@ -31,11 +34,12 @@ class Info
                 
     draw: (info) =>
         
-        @elem.innerHTML  = ''
+        @info.innerHTML  = ''
         @train.innerHTML = ''
         @track.innerHTML = ''
+        @node.innerHTML = ''
 
-        add = (text) => elem class:'infoText' parent:@elem, text:text
+        add = (text) => elem class:'infoText' parent:@info, text:text
         
         for k,v of info
             add "#{k} #{v}"
@@ -67,9 +71,23 @@ class Info
         add = (text) => elem class:'infoText' parent:@track, text:text
         
         for track in world.allTracks()
-            add "#{track.name}"
+            s = "#{rpad 3 track.name}    #{track.mode} #{rpad 4 track.node[0].name} ▸ #{rpad 4 track.node[1].name}" 
             for train in track.trains
-                add "   #{train.name}"
+                s += ' ' + rpad 3 train.name
+            add s
 
+        add = (text) => elem class:'infoText' parent:@node, text:text
+        
+        for node in world.allNodes()
+            s = rpad 5 node.name
+            s += node.commonMode() + ' '
+            s += '●'
+            for track in node.outTracks
+                s += ' ' + rpad 3 track.name
+            s += ' ▴'
+            for track in node.inTracks
+                s += ' ' + rpad 3 track.name
+            add s
+            
 module.exports = Info
 

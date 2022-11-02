@@ -47,11 +47,13 @@ function ModeSign
 
         curveLength = curve.getLength()
         points = curve.getSpacedPoints parseInt curveLength/4
-        return if points.length < 5
-        points.pop()
-        points.pop()
-        points.shift()
-        points.shift()
+        if points.length >= 5
+            points.pop()
+            points.pop()
+            points.shift()
+            points.shift()
+        else
+            points = [curve.getPointAt 0.5]
         mat = new THREE.Matrix4
         for point,index in points
             tangent = curve.getTangentAt (index+2)/(points.length-1+4)

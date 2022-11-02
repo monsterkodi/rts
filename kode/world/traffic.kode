@@ -40,7 +40,19 @@ function Traffic
         
     simulate: (scaledDelta, timeSum) ->
         
+        ▴ scaledDelta > 0
+        
         @nodeSignals()
+        
+        for train in @trains
+            
+            advance = scaledDelta * train.speed
+            if advance > 0
+                advance = @allowTrainAdvance train, advance
+            if advance
+                train.advance advance
+                
+            train.update scaledDelta, timeSum
         
     nodeSignals: ->
         

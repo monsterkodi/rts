@@ -250,10 +250,9 @@ function Node
         @dragTrack.node[1].getPos Vector.tmp3
         Vector.tmp3.sub(Vector.tmp2).normalize() # start node to end node
         dot = Vector.tmp1.dot Vector.tmp3 # negative if end node is 'behind' start node
-        log @dragTrack.name, @dragTrack.node[0].name, Vector.tmp1, Vector.tmp3, dot
         if dot <= 0
             @dragTrack.node[1].setDir Vector.tmp1.negate()
-        else if dot > 0.7
+        else if dot > 0.75
             @dragTrack.node[1].setDir Vector.tmp1
         else
             @dragTrack.node[0].getRight Vector.tmp2
@@ -429,6 +428,23 @@ function Node
     #    000     0000000    000000000  000       0000000    
     #    000     000   000  000   000  000       000  000   
     #    000     000   000  000   000   0000000  000   000  
+    
+    commonMode: ->
+        
+        inMode  = @tracksMode @inTracks
+        outMode = @tracksMode @outTracks
+        inMode == outMode ? inMode : 0
+        
+    tracksMode: (tracks) ->
+        mode = 0
+        for track in tracks
+            trackMode = track.modeForNode @
+            if mode != trackMode
+                if mode == 0
+                    mode = trackMode
+                else if trackMode != 0
+                    return 0
+        mode
     
     trackDir: (track) -> 
     

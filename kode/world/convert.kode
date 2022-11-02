@@ -19,6 +19,8 @@ function Convert
     
     onConvertNodeToCtrl: (node) => 
         
+        mode = node.commonMode()
+        
         inTrack = node.inTracks[0]
         outTrack = node.outTracks[0]
         ▴ inTrack and outTrack
@@ -51,5 +53,7 @@ function Convert
         inTrack.del()
         outTrack.del()
         node.del()
+        
+        t.setMode mode
         
 module.exports = Convert

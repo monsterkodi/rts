@@ -87,6 +87,7 @@ function World extends Convert
             
     animate: (delta) ->
 
+        ▴ delta > 0
         scaledDelta = delta * @speed
         @timeSum += scaledDelta
         
@@ -96,7 +97,6 @@ function World extends Convert
             animation scaledDelta, @timeSum
         
         @simulate scaledDelta
-        post.emit 'tick'
         
     #  0000000   0000000   00     00  00000000    0000000    0000000   0000000  
     # 000       000   000  000   000  000   000  000   000  000       000       
@@ -198,9 +198,6 @@ function World extends Convert
         @physics.simulate scaledDelta, @timeSum
         @traffic.simulate scaledDelta, @timeSum
         
-        for train in @traffic.trains
-            train.update scaledDelta, @timeSum            
-        
     # 00000000  000       0000000    0000000   00000000   
     # 000       000      000   000  000   000  000   000  
     # 000000    000      000   000  000   000  0000000    
@@ -243,7 +240,7 @@ function World extends Convert
             train.track = track
             track.addTrain train
             if rts.paused
-                train.update 0
+                train.advance 0
             train
     
     addTrain: (cfg) ->
