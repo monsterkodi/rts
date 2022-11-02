@@ -32,7 +32,7 @@ function Path
         revers: @revers
         
     toString: ->
-        s = @name + ' ' + (@isLoop ? 'loop' : 'oneway')
+        s = @name
         s += '\n'
         for i in 0...@tracks.length
             s += @tracks[i].name
@@ -54,14 +54,6 @@ function Path
         @nodes.shift()
         @nodes.push @tracks[-1].node[@revers[-1] ? 0 : 1]
         
-    updateLoop: ->
-       
-        ts = @tracks[0]
-        te = @tracks[-1]
-        ns = ts.node[@revers[0] ? 1 : 0] 
-        ne = te.node[@revers[-1] ? 0 : 1] 
-        @isLoop = ns == ne and ts in ns.oppositeTracks(te)
-        
     onDelTrack: (track) =>
         
         if track in @tracks
@@ -74,7 +66,6 @@ function Path
             @tracks = [@currentTrack()]
             @nodes  = [@nextNode()]
             @revers = [@tracks[0].node[1] != @nodes[0]]
-            @isLoop = false
             
     onDelNode: (node) =>
         
@@ -87,8 +78,6 @@ function Path
         @tracks.push track
         @revers.push track.node[0] == node
         
-        @updateLoop()
-                           
     getLength: -> 
         
         cd = 0

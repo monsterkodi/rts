@@ -74,8 +74,6 @@ function Traffic
                                     if path.currentTrack() == nn.train.prevTailTrack()
                                         nn.setTrain train     # train is the new occupant
                 
-                # pd = path.prevDistance()
-                # if pd < 1
                 if ct = path.currentTrack()
                     if not ct.hasTrain train
                         train.track.subTrain train
@@ -101,22 +99,19 @@ function Traffic
         path = train.path
         oldAdvance = advance
         
-        if not path.isLoop
-            halfEngineLength = 1.9
-            maxAdvance = path.getLength()-path.delta-halfEngineLength
-            if advance > maxAdvance < 0.0001
-                if @extendTrainPath train
-                    # log 'path extended'
-                    return @allowTrainAdvance train, advance
+        halfEngineLength = 1.9
+        maxAdvance = path.getLength()-path.delta-halfEngineLength
+        if advance > maxAdvance < 0.0001
+            if @extendTrainPath train
+                return @allowTrainAdvance train, advance
+            else
+                if train.isOneWay()
+                    return maxAdvance
                 else
-                    if train.isOneWay()
-                        # log train.name, 'stopped at path end'
-                        return maxAdvance
-                    else
-                        train.reverse()
-                        return @allowTrainAdvance train, advance
-            # log maxAdvance, advance, train.isOneWay(), path.isLoop
-            advance = Math.min maxAdvance, advance
+                    train.reverse()
+                    return @allowTrainAdvance train, advance
+
+        advance = Math.min maxAdvance, advance
             
         advance = @checkCargo train, advance
             
@@ -153,8 +148,12 @@ function Traffic
         
         nn = train.path.nextNode()
         ot = nn.oppositeTracks train.path.currentTrack()
+        mode = ot == nn.outTracks ? 1 : 2
         for nextTrack in ot
             nextNode  = nextTrack.nodeOpposite nn
+            trackMode = nextTrack.modeForNode(nn) or 3
+            if not (mode & trackMode)
+                continue # track points in the wrong direction
             nnopptrck = nextNode.oppositeTracks(nextTrack) ? []
             if nnopptrck.length
                 train.path.addTrackNode nextTrack, nextNode
