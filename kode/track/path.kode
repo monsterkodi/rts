@@ -41,7 +41,6 @@ function Path
                 s += @tracks[i].node[1].name + ' ◂ ' + @tracks[i].node[0].name
             else
                 s += @tracks[i].node[0].name + ' ▸ ' + @tracks[i].node[1].name
-            # s += @nodes[i].name
             s += '\n'
         s
             
@@ -77,6 +76,14 @@ function Path
         @nodes.push node
         @tracks.push track
         @revers.push track.node[0] == node
+        
+    shiftTail: ->
+        
+        ▴ @tracks.length > 1
+        @delta -= @deltaAtIndex 1
+        @nodes.shift()
+        @tracks.shift()
+        @revers.shift()
         
     getLength: -> 
         

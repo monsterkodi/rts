@@ -168,7 +168,7 @@ function Track
             @nextMode()
         if event.button == 0
             
-            boxcars = 3
+            boxcars = 15
             length  = (boxcars+1)*Train.carDist
             
             delta = @deltaClosestToPoint hit.point

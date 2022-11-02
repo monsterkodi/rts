@@ -38,6 +38,12 @@ function Traffic
         if (i = @trains.indexOf train) >= 0
             @trains.splice i, 1
         
+    #  0000000  000  00     00  000   000  000       0000000   000000000  00000000  
+    # 000       000  000   000  000   000  000      000   000     000     000       
+    # 0000000   000  000000000  000   000  000      000000000     000     0000000   
+    #      000  000  000 0 000  000   000  000      000   000     000     000       
+    # 0000000   000  000   000   0000000   0000000  000   000     000     00000000  
+    
     simulate: (scaledDelta, timeSum) ->
         
         ▴ scaledDelta > 0
@@ -52,8 +58,17 @@ function Traffic
             if advance
                 train.advance advance
                 
+        for train in @trains
+            
+            @pruneTrainPath train
             train.update scaledDelta, timeSum
         
+    #  0000000  000   0000000   000   000   0000000   000       0000000  
+    # 000       000  000        0000  000  000   000  000      000       
+    # 0000000   000  000  0000  000 0 000  000000000  000      0000000   
+    #      000  000  000   000  000  0000  000   000  000           000  
+    # 0000000   000   0000000   000   000  000   000  0000000  0000000   
+    
     nodeSignals: ->
         
         for train in @trains
@@ -144,6 +159,12 @@ function Traffic
         train.advanceFactor = advance/oldAdvance
         advance
         
+    # 00000000  000   000  000000000  00000000  000   000  0000000    
+    # 000        000 000      000     000       0000  000  000   000  
+    # 0000000     00000       000     0000000   000 0 000  000   000  
+    # 000        000 000      000     000       000  0000  000   000  
+    # 00000000  000   000     000     00000000  000   000  0000000    
+    
     extendTrainPath: (train) ->
         
         nn = train.path.nextNode()
@@ -158,7 +179,22 @@ function Traffic
             if nnopptrck.length
                 train.path.addTrackNode nextTrack, nextNode
                 return nextTrack
+                
+    pruneTrainPath: (train) ->
+        
+        tailDelta = train.tailDelta()
+        tailIndex = train.path.indexAtDelta tailDelta
+        if tailIndex > 0
+            headIndex = train.path.currentIndex()
+            log 'pruneTrainPath' tailIndex, headIndex
+            train.path.shiftTail()
             
+    #  0000000   0000000   00000000    0000000    0000000   
+    # 000       000   000  000   000  000        000   000  
+    # 000       000000000  0000000    000  0000  000   000  
+    # 000       000   000  000   000  000   000  000   000  
+    #  0000000  000   000  000   000   0000000    0000000   
+    
     checkCargo: (train, advance) ->
         
         # log 'checkCargo' train.name, advance
@@ -187,14 +223,14 @@ function Traffic
             if minCar.isEmpty()
                 # log 'startWaitingForCargo' minCar.name
                 minCar.waitingForCargo = true
-                if not car.nextNode().station?.carWaitingForCargo is func 
-                    log car.nextNode()
+                if not minCar.nextNode().station?.carWaitingForCargo is func 
+                    log 'darfuggy?' minCar.nextNode()
                 else
-                    car.nextNode().station.carWaitingForCargo minCar
+                    minCar.nextNode().station.carWaitingForCargo minCar
             else
                 minCar.waitingForUnload = true
                 # log 'startWaitingForUnload' minCar.name
-                car.nextNode().station.carWaitingForUnload minCar
+                minCar.nextNode().station.carWaitingForUnload minCar
         maxAdvance
 
 module.exports = Traffic
