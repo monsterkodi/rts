@@ -276,7 +276,7 @@ World = (function ()
 
     World.prototype["addTrain"] = function (cfg)
     {
-        var colorName, engine, i, speed, train, _248_26_
+        var engine, i, speed, train, _248_26_
 
         speed = ((_248_26_=cfg.speed) != null ? _248_26_ : 1)
         train = new Train({speed:speed,name:'T'})
@@ -297,12 +297,6 @@ World = (function ()
         {
             this.traffic.addTrain(train)
         }
-        colorName = 'white'
-        if (_k_.in(name,Object.keys(Colors.train)))
-        {
-            colorName = name
-        }
-        train.setColorByName(colorName)
         return train
     }
 
@@ -315,13 +309,9 @@ World = (function ()
     {
         var boxcar, n
 
-        for (var _276_17_ = n = 0, _276_21_ = num; (_276_17_ <= _276_21_ ? n < num : n > num); (_276_17_ <= _276_21_ ? ++n : --n))
+        for (var _275_17_ = n = 0, _275_21_ = num; (_275_17_ <= _275_21_ ? n < num : n > num); (_275_17_ <= _275_21_ ? ++n : --n))
         {
             boxcar = train.addCar(new Boxcar(train))
-            if (_k_.in(train.name,Object.keys(Colors.train)))
-            {
-                boxcar.setColorByName(train.name)
-            }
         }
     }
 
@@ -379,9 +369,9 @@ World = (function ()
         var node
 
         var list = _k_.list(this.allNodes())
-        for (var _294_17_ = 0; _294_17_ < list.length; _294_17_++)
+        for (var _293_17_ = 0; _293_17_ < list.length; _293_17_++)
         {
-            node = list[_294_17_]
+            node = list[_293_17_]
             if (node.name === name)
             {
                 return node
@@ -394,9 +384,9 @@ World = (function ()
         var track
 
         var list = _k_.list(this.allTracks())
-        for (var _298_18_ = 0; _298_18_ < list.length; _298_18_++)
+        for (var _297_18_ = 0; _297_18_ < list.length; _297_18_++)
         {
-            track = list[_298_18_]
+            track = list[_297_18_]
             if (track.name === name)
             {
                 return track

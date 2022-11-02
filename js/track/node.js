@@ -16,6 +16,7 @@ Node = (function ()
     {
         var geom, label, pos, _22_26_, _23_27_
 
+        this["onRemoveTrain"] = this["onRemoveTrain"].bind(this)
         this["compassRotated"] = this["compassRotated"].bind(this)
         this["onRotate"] = this["onRotate"].bind(this)
         this["getPos"] = this["getPos"].bind(this)
@@ -529,6 +530,14 @@ Node = (function ()
         }
     }
 
+    Node.prototype["onRemoveTrain"] = function (train)
+    {
+        if (train === this.train)
+        {
+            return this.setTrain(null)
+        }
+    }
+
     Node.prototype["blockTrain"] = function (train)
     {
         var geom, mesh
@@ -563,15 +572,15 @@ Node = (function ()
         var block, t
 
         var list = _k_.list(this.blockedTrains)
-        for (var _416_14_ = 0; _416_14_ < list.length; _416_14_++)
+        for (var _421_14_ = 0; _421_14_ < list.length; _421_14_++)
         {
-            t = list[_416_14_]
+            t = list[_421_14_]
             t.unblock()
         }
         var list1 = _k_.list(this.blocks)
-        for (var _419_18_ = 0; _419_18_ < list1.length; _419_18_++)
+        for (var _424_18_ = 0; _424_18_ < list1.length; _424_18_++)
         {
-            block = list1[_419_18_]
+            block = list1[_424_18_]
             world.removeObject(block)
         }
         this.setTrain(null)
@@ -596,9 +605,9 @@ Node = (function ()
 
         mode = 0
         var list = _k_.list(tracks)
-        for (var _444_18_ = 0; _444_18_ < list.length; _444_18_++)
+        for (var _449_18_ = 0; _449_18_ < list.length; _449_18_++)
         {
-            track = list[_444_18_]
+            track = list[_449_18_]
             trackMode = track.modeForNode(this)
             if (mode !== trackMode)
             {

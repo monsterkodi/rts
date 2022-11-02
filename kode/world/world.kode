@@ -261,9 +261,8 @@ function World extends Convert
         if cfg.traffic
             @traffic.addTrain train
         
-        colorName = 'white'
-        colorName = name if name in Object.keys Colors.train
-        train.setColorByName colorName
+        # if name in Object.keys Colors.train
+            # train.setColorByName name
         
         train
 
@@ -275,7 +274,7 @@ function World extends Convert
         
         for n in 0...num
             boxcar = train.addCar new Boxcar train
-            boxcar.setColorByName train.name if train.name in Object.keys Colors.train
+            # boxcar.setColorByName train.name if train.name in Object.keys Colors.train
             
     # 000000000  00000000    0000000    0000000  000   000  
     #    000     000   000  000   000  000       000  000   

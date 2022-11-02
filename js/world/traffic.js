@@ -143,7 +143,6 @@ Traffic = (function ()
                     tpn = path.prevNode(tailDelta)
                     if (tpn.train === train)
                     {
-                        console.log('unblockAll!',tpd,tpn.name,tpn.train.name)
                         tpn.unblockAll()
                     }
                 }
@@ -183,9 +182,9 @@ Traffic = (function ()
         delta = path.normDelta(path.delta + advance)
         track = path.trackAtDelta(delta)
         var list = _k_.list(this.trains)
-        for (var _138_18_ = 0; _138_18_ < list.length; _138_18_++)
+        for (var _137_18_ = 0; _137_18_ < list.length; _137_18_++)
         {
-            other = list[_138_18_]
+            other = list[_137_18_]
             if (other === train)
             {
                 continue
@@ -215,9 +214,9 @@ Traffic = (function ()
                     dist = Math.abs(track.trainCurveDistance(train) - track.trainCurveDistance(other))
                     if (dist < 4.5)
                     {
-                        console.log('heads on collision!')
-                        world.physics.addTrain(train)
-                        world.physics.addTrain(other)
+                        console.log('heads on collision!',train.name,other.name)
+                        train.explode()
+                        other.explode()
                         advance = 0
                         break
                     }
@@ -230,22 +229,22 @@ Traffic = (function ()
 
     Traffic.prototype["extendTrainPath"] = function (train)
     {
-        var mode, nextNode, nextTrack, nn, nnopptrck, ot, trackMode, _179_59_
+        var mode, nextNode, nextTrack, nn, nnopptrck, ot, trackMode, _178_59_
 
         nn = train.path.nextNode()
         ot = nn.oppositeTracks(train.path.currentTrack())
         mode = (ot === nn.outTracks ? 1 : 2)
         var list = _k_.list(ot)
-        for (var _174_22_ = 0; _174_22_ < list.length; _174_22_++)
+        for (var _173_22_ = 0; _173_22_ < list.length; _173_22_++)
         {
-            nextTrack = list[_174_22_]
+            nextTrack = list[_173_22_]
             nextNode = nextTrack.nodeOpposite(nn)
             trackMode = nextTrack.modeForNode(nn) || 3
             if (!(mode & trackMode))
             {
                 continue
             }
-            nnopptrck = ((_179_59_=nextNode.oppositeTracks(nextTrack)) != null ? _179_59_ : [])
+            nnopptrck = ((_178_59_=nextNode.oppositeTracks(nextTrack)) != null ? _178_59_ : [])
             if (nnopptrck.length)
             {
                 train.path.addTrackNode(nextTrack,nextNode)
@@ -270,14 +269,14 @@ Traffic = (function ()
 
     Traffic.prototype["checkCargo"] = function (train, advance)
     {
-        var car, maxAdvance, minCar, resource, _215_52_, _224_41_, _233_48_
+        var car, maxAdvance, minCar, resource, _214_52_, _223_41_, _232_48_
 
         maxAdvance = advance
         minCar = null
         var list = _k_.list(train.boxcars())
-        for (var _210_16_ = 0; _210_16_ < list.length; _210_16_++)
+        for (var _209_16_ = 0; _209_16_ < list.length; _209_16_++)
         {
-            car = list[_210_16_]
+            car = list[_209_16_]
             if (car.isEmpty())
             {
                 if (car.waitingForCargo)

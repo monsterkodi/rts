@@ -27,6 +27,7 @@ Track = (function ()
         this["onEnter"] = this["onEnter"].bind(this)
         this["del"] = this["del"].bind(this)
         this["toSave"] = this["toSave"].bind(this)
+        this["onRemoveTrain"] = this["onRemoveTrain"].bind(this)
         Track.id++
         this.name = ((_22_14_=this.name) != null ? _22_14_ : `t${Track.id}`)
         this.node = [n1,n2]
@@ -64,36 +65,20 @@ Track = (function ()
 
     Track.prototype["addTrain"] = function (train)
     {
-        var ld, tangent
-
         if (!this.hasTrain())
         {
             this.trains.push(train)
             if (!this.blockMesh)
             {
-                this.blockMesh = new Mesh(Geom.triangle({size:[0.5,0.5,0.73]}),Materials.track.block)
-                this.blockMesh.noHitTest = true
-                if (train.path.revers[train.path.indexAtDelta()])
-                {
-                    ld = 6 / this.curve.getLength()
-                    tangent = this.curve.getTangentAt(ld)
-                    tangent.multiplyScalar(-1)
-                }
-                else
-                {
-                    ld = (this.curve.getLength() - 6) / this.curve.getLength()
-                    tangent = this.curve.getTangentAt(ld)
-                }
-                this.curve.getPointAt(ld,this.blockMesh.position)
-                this.blockMesh.quaternion.copy(Quaternion.unitVectors(Vector.unitY,tangent))
-                return this.mesh.add(this.blockMesh)
+                this.addExitBlockForTrain(train)
+                return this.addExitBlockForTrainAndNode(train,train.nextNode())
             }
         }
     }
 
     Track.prototype["subTrain"] = function (train)
     {
-        var i
+        var i, _72_22_
 
         if ((i = this.trains.indexOf(train)) >= 0)
         {
@@ -101,8 +86,12 @@ Track = (function ()
         }
         if (_k_.empty(this.trains))
         {
-            this.blockMesh.removeFromParent()
+            ;(this.blockMesh != null ? this.blockMesh.removeFromParent() : undefined)
             return delete this.blockMesh
+        }
+        else if (train === this.exitBlockTrain)
+        {
+            return this.exitBlockTrain = this.trains[0]
         }
     }
 
@@ -111,10 +100,71 @@ Track = (function ()
         var train
 
         var list = _k_.list(this.trains)
-        for (var _87_18_ = 0; _87_18_ < list.length; _87_18_++)
+        for (var _79_18_ = 0; _79_18_ < list.length; _79_18_++)
         {
-            train = list[_87_18_]
+            train = list[_79_18_]
             train.explode()
+        }
+    }
+
+    Track.prototype["addExitBlockForTrain"] = function (train)
+    {
+        var dir, ld
+
+        if (train.path.revers[train.path.indexAtDelta()])
+        {
+            ld = 6 / this.curve.getLength()
+            dir = -1
+        }
+        else
+        {
+            ld = (this.curve.getLength() - 6) / this.curve.getLength()
+            dir = 1
+        }
+        return this.addExitBlock(train,ld,dir)
+    }
+
+    Track.prototype["addExitBlockForTrainAndNode"] = function (train, node)
+    {
+        var dir, ld, nextNode, nextTrack, oppTracks
+
+        oppTracks = node.oppositeTracks(this)
+        if (oppTracks.length === 1)
+        {
+            nextTrack = oppTracks[0]
+            ld = 0.5
+            dir = 1
+            nextTrack.addExitBlock(train,ld,dir)
+            if (nextNode = nextTrack.nodeOpposite())
+            {
+                return nextTrack.addExitBlockForTrainAndNode(train,nextNode)
+            }
+        }
+    }
+
+    Track.prototype["addExitBlock"] = function (train, ld, dir = 1)
+    {
+        var tangent
+
+        this.exitBlockTrain = train
+        this.blockMesh = new Mesh(Geom.triangle({size:[0.5,0.5,0.73]}),Materials.track.block)
+        this.blockMesh.noHitTest = true
+        tangent = this.curve.getTangentAt(ld)
+        tangent.multiplyScalar(dir)
+        this.curve.getPointAt(ld,this.blockMesh.position)
+        this.blockMesh.quaternion.copy(Quaternion.unitVectors(Vector.unitY,tangent))
+        return this.mesh.add(this.blockMesh)
+    }
+
+    Track.prototype["onRemoveTrain"] = function (train)
+    {
+        var _129_22_
+
+        if (train === this.exitBlockTrain)
+        {
+            ;(this.blockMesh != null ? this.blockMesh.removeFromParent() : undefined)
+            delete this.exitBlockTrain
+            return delete this.blockMesh
         }
     }
 
@@ -127,7 +177,7 @@ Track = (function ()
             return {x:p.x.toFixed(1),y:p.y.toFixed(1),z:p.z.toFixed(1)}
         }
         ctrl = []
-        for (var _100_17_ = i = 0, _100_21_ = this.curve.curves.length; (_100_17_ <= _100_21_ ? i < this.curve.curves.length : i > this.curve.curves.length); (_100_17_ <= _100_21_ ? ++i : --i))
+        for (var _143_17_ = i = 0, _143_21_ = this.curve.curves.length; (_143_17_ <= _143_21_ ? i < this.curve.curves.length : i > this.curve.curves.length); (_143_17_ <= _143_21_ ? ++i : --i))
         {
             ctrl.push(fix(this.curve.curves[i].v1))
             ctrl.push(fix(this.curve.curves[i].v2))
@@ -157,9 +207,9 @@ Track = (function ()
             world.removePickable(this.mesh)
             world.removeObject(this.mesh)
             var list = _k_.list(this.ctrls)
-            for (var _124_21_ = 0; _124_21_ < list.length; _124_21_++)
+            for (var _167_21_ = 0; _167_21_ < list.length; _167_21_++)
             {
-                ctrl = list[_124_21_]
+                ctrl = list[_167_21_]
                 ctrl.del()
             }
             delete this.modeSign
@@ -417,9 +467,9 @@ Track = (function ()
 
         points = []
         var list = _k_.list(this.curve.curves)
-        for (var _318_18_ = 0; _318_18_ < list.length; _318_18_++)
+        for (var _361_18_ = 0; _361_18_ < list.length; _361_18_++)
         {
-            curve = list[_318_18_]
+            curve = list[_361_18_]
             points = points.concat([curve.v0,curve.v1,curve.v2,curve.v3])
         }
         return points
@@ -431,9 +481,9 @@ Track = (function ()
 
         points = []
         var list = _k_.list(this.curve.curves)
-        for (var _325_18_ = 0; _325_18_ < list.length; _325_18_++)
+        for (var _368_18_ = 0; _368_18_ < list.length; _368_18_++)
         {
-            curve = list[_325_18_]
+            curve = list[_368_18_]
             points = points.concat([curve.v1,curve.v2,curve.v3])
         }
         if (!includeLast)

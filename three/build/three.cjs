@@ -22646,6 +22646,7 @@ class Curve {
 
 
 	getPointAt(u, optionalTarget) {
+        if (u<0 || u>1) { console.warning("getPointAt u:", u); }
 		const t = this.getUtoTmapping(u);
 		return this.getPoint(t, optionalTarget);
 	} // Get sequence of points using getPoint( t )
@@ -22776,6 +22777,7 @@ class Curve {
 	}
 
 	getTangentAt(u, optionalTarget) {
+        if (u<0 || u>1) { console.warning("getTangentAt u:", u); }
 		const t = this.getUtoTmapping(u);
 		return this.getTangent(t, optionalTarget);
 	}

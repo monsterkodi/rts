@@ -67,12 +67,7 @@ function Engine extends Car
         return if @physics
         dist = hit.point.distanceTo downHit.point
         if dist > 0.5
-            log 'startDrag!' @name
-            if @isRearEngine()
-                @train.removeCar @
-                world.physics.addCar @
-            else
-                world.physics.addTrain @train
+            @train.explode()
             
     onDragDone: (hit, downHit) =>
         

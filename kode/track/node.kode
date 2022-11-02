@@ -382,6 +382,11 @@ function Node
             @inMesh.scale.set 1 1 1
             @outMesh.scale.set 1 1 1
         
+    onRemoveTrain: (train) =>
+        
+        if train == @train
+            @setTrain null
+            
     # 0000000    000       0000000    0000000  000   000  
     # 000   000  000      000   000  000       000  000   
     # 0000000    000      000   000  000       0000000    

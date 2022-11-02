@@ -101,7 +101,6 @@ function Traffic
                 if tpd > min TAIL_DISTANCE, tnd+tpd/2
                     tpn = path.prevNode tailDelta
                     if tpn.train == train
-                        log 'unblockAll!' tpd, tpn.name, tpn.train.name
                         tpn.unblockAll()
                                     
     #  0000000   0000000    000   000   0000000   000   000   0000000  00000000  
@@ -151,9 +150,9 @@ function Traffic
                 if path.revers[path.indexAtDelta delta] != other.trackRevers()
                     dist = Math.abs track.trainCurveDistance(train) - track.trainCurveDistance(other)
                     if dist < 4.5
-                        log 'heads on collision!'
-                        world.physics.addTrain train
-                        world.physics.addTrain other
+                        log 'heads on collision!' train.name, other.name
+                        train.explode()
+                        other.explode()
                         advance = 0
                         break
                     

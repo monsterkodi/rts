@@ -93,16 +93,7 @@ Engine = (function ()
         dist = hit.point.distanceTo(downHit.point)
         if (dist > 0.5)
         {
-            console.log('startDrag!',this.name)
-            if (this.isRearEngine())
-            {
-                this.train.removeCar(this)
-                return world.physics.addCar(this)
-            }
-            else
-            {
-                return world.physics.addTrain(this.train)
-            }
+            return this.train.explode()
         }
     }
 

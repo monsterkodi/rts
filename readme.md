@@ -7,7 +7,11 @@
 ![screenshot](img/rts10.png)
 ![screenshot](img/rts11.png)
 
+- traffic
+    - block not only track entrance at next node, but also consecutive single oopposite tracks
+
 - dead eye physic trains
+- use same blinking piston material for all trains
 - grid lines on hovered node/ctrl centers
 - tangent rods on nodes
 - top view
@@ -19,6 +23,7 @@
     - in-between drag sets dir of node
     - split track
     - convertCtrlToNode
+    - make oneWay the default
     
 - train creator station
 - cleaning station

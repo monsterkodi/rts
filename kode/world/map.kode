@@ -14,7 +14,6 @@ class Map extends World
     
         # @addObject new Mesh Geom.roundedFrame({}), Materials.ctrl.start
         # @addObject new Mesh Geom.roundedFrame({}), Materials.wireframe
-        # @trainTest()
         @stationTest()
         # @physicsTest()
         
@@ -43,98 +42,7 @@ class Map extends World
         @addCentralStation pos:[-36   0] dir:Vector.minusY
         # @addMiningStation  pos:[  0   0], resource:'chalk'
         @addMiningStation  pos:[  0   0], resource:'stuff'
-        # @addMiningStation  pos:[  0 -12], resource:'stone'
         @addMiningStation  pos:[ 18   0], resource:'blood'
         @addMiningStation  pos:[ 36   0], resource:'water'
         
-    #  0000000  000000000   0000000   000000000  000   0000000   000   000  
-    # 000          000     000   000     000     000  000   000  0000  000  
-    # 0000000      000     000000000     000     000  000   000  000 0 000  
-    #      000     000     000   000     000     000  000   000  000  0000  
-    # 0000000      000     000   000     000     000   0000000   000   000  
-    
-    stationTest2: ->
-        
-        @addCentralStation [0 0 0]
-        for y in -15..15
-            @addMiningStation [  0 y*6 0], 'gold' if y != 0
-            @addMiningStation [ 18 y*6 0], 'silver'
-            @addMiningStation [-18 y*6 0], 'gold'
-            @addMiningStation [ 36 y*6 0], 'steel'
-            @addMiningStation [-36 y*6 0], 'chalk'
-            @addMiningStation [ 54 y*6 0], 'gold'
-            @addMiningStation [-54 y*6 0], 'silver'
-            @addMiningStation [ 72 y*6 0], 'gold'
-            @addMiningStation [-72 y*6 0], 'steel'
-            @addMiningStation [ 90 y*6 0], 'gold'
-            @addMiningStation [-90 y*6 0], 'silver'
-
-    # 000000000  00000000    0000000   000  000   000   0000000  
-    #    000     000   000  000   000  000  0000  000  000       
-    #    000     0000000    000000000  000  000 0 000  0000000   
-    #    000     000   000  000   000  000  000  0000       000  
-    #    000     000   000  000   000  000  000   000  0000000   
-    
-    trainTest: ->
-        
-        n1 = @addNode [ 14 0 0] 'n1'
-        n2 = @addNode [-26 0 0] 'n2'
-        n3 = @addNode [ -6 0 0] 'n3' 
-        
-        n2.rotate 180
-        n3.rotate 180
-        
-        t1 = @connectNodes n1, n2, 't1' 
-        t2 = @connectNodes n2, n1, 't2'
-        t3 = @connectNodes n1, n3, 't3'
-        t4 = @connectNodeTracks n3, n3.outTracks, n2, n2.outTracks, 't4'
-        t5 = @connectNodeTracks n3, n3.inTracks,  n2, n2.inTracks, 't5'
-        t6 = @connectNodes n3, n1, 't6'
-               
-        train = @addTrain 1 'red'
-        train.path.addTrackNode t1, n2
-        train.path.addTrackNode t2, n1
-        train.path.addTrackNode t1, n2
-        train.path.addTrackNode t2, n1
-        train.path.addTrackNode t3, n3
-        train.path.addTrackNode t4, n2
-        train.path.addTrackNode t5, n3
-        train.path.addTrackNode t6, n1
-
-        train = @addTrain 1 'yellow'
-        @addBoxcar train, 2
-        train.path.addTrackNode t2, n1
-        train.path.addTrackNode t1, n2
-
-        train = @addTrain 1 'blue'
-        @addBoxcar train
-        train.path.addTrackNode t4, n2
-        train.path.addTrackNode t5, n3
-        train.path.addTrackNode t6, n1
-        train.path.addTrackNode t1, n2
-        train.path.addTrackNode t2, n1
-        train.path.addTrackNode t3, n3
-        
-        train = @addTrain 1 'green'
-        train.path.addTrackNode t1, n2
-        train.path.addTrackNode t2, n1
-
-        train = @addTrain 1 'black'
-        train.path.addTrackNode t3, n3
-        train.path.addTrackNode t4, n2
-        train.path.addTrackNode t5, n3
-        train.path.addTrackNode t6, n1
-        train.path.addTrackNode t1, n2
-        train.path.addTrackNode t2, n1
-
-        train = @addTrain 1 'white'
-        train.path.addTrackNode t2, n1
-        train.path.addTrackNode t3, n3
-        train.path.addTrackNode t4, n2
-        train.path.addTrackNode t5, n3
-        train.path.addTrackNode t6, n1
-        train.path.addTrackNode t1, n2
-        
-        central = @addCentral [0 0 0]
-                
 module.exports = Map

@@ -83,9 +83,9 @@ Physics = (function ()
         p = vec()
         q = new Quaternion
         var list = _k_.list(this.cannon.bodies)
-        for (var _100_14_ = 0; _100_14_ < list.length; _100_14_++)
+        for (var _95_14_ = 0; _95_14_ < list.length; _95_14_++)
         {
-            b = list[_100_14_]
+            b = list[_95_14_]
             if (b.kinematic)
             {
                 b.kinematic.getWorldPosition(p)
@@ -100,9 +100,9 @@ Physics = (function ()
             this.cannonDebugger.update()
         }
         var list1 = _k_.list(this.cannon.bodies)
-        for (var _112_14_ = 0; _112_14_ < list1.length; _112_14_++)
+        for (var _106_14_ = 0; _106_14_ < list1.length; _106_14_++)
         {
-            b = list1[_112_14_]
+            b = list1[_106_14_]
             if (b.mesh)
             {
                 b.mesh.position.copy(b.position)
@@ -138,7 +138,7 @@ Physics = (function ()
 
     Physics.prototype["addCar"] = function (car)
     {
-        var cb, _152_31_
+        var cb, _146_31_
 
         this.addCargo((typeof car.takeCargo === "function" ? car.takeCargo() : undefined))
         cb = new CANNON.Body({mass:1,shape:new CANNON.Cylinder(1,1,3.5,8)})
@@ -170,9 +170,9 @@ Physics = (function ()
         var body
 
         var list = _k_.list(this.cannon.bodies)
-        for (var _182_17_ = 0; _182_17_ < list.length; _182_17_++)
+        for (var _176_17_ = 0; _176_17_ < list.length; _176_17_++)
         {
-            body = list[_182_17_]
+            body = list[_176_17_]
             if (body.kinematic === car.mesh)
             {
                 this.cannon.removeBody(body)
@@ -196,28 +196,17 @@ Physics = (function ()
 
     Physics.prototype["addTrain"] = function (train)
     {
-        var car, i
+        var car
 
         if (train.cars[0].body)
         {
             return
         }
-        train.removeFromTrack()
         var list = _k_.list(train.cars)
-        for (var _209_16_ = 0; _209_16_ < list.length; _209_16_++)
+        for (var _201_16_ = 0; _201_16_ < list.length; _201_16_++)
         {
-            car = list[_209_16_]
+            car = list[_201_16_]
             this.addCar(car)
-        }
-        return
-        var list1 = _k_.list(train.cars)
-        for (i = 0; i < list1.length; i++)
-        {
-            car = list1[i]
-            if (i > 0)
-            {
-                this.cannon.addConstraint(new CANNON.ConeTwistConstraint(train.cars[i - 1].body,car.body,{axisA:new CANNON.Vec3(0,0,1),pivotA:new CANNON.Vec3(0,0,3),axisB:new CANNON.Vec3(0,0,-1),pivotB:new CANNON.Vec3(0,0,3),twistAngle:deg2rad(90)}))
-            }
         }
     }
 
@@ -227,7 +216,7 @@ Physics = (function ()
 
         cbs = []
         num = 16
-        for (var _233_17_ = i = 0, _233_21_ = num; (_233_17_ <= _233_21_ ? i < num : i > num); (_233_17_ <= _233_21_ ? ++i : --i))
+        for (var _223_17_ = i = 0, _223_21_ = num; (_223_17_ <= _223_21_ ? i < num : i > num); (_223_17_ <= _223_21_ ? ++i : --i))
         {
             p = this.poleBody.position
             r = 0.25 + (1 - i / num) * 0.2

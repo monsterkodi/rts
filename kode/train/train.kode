@@ -28,6 +28,9 @@ function Train
         @mesh.toSave     = @toSave
         @mesh.toSave.key = 'trains'
         
+        colors = Object.keys Colors.train
+        @setColorByName colors[Train.numTrains % colors.length]
+        
         world.addObject @mesh
                 
     #  0000000   0000000   000   000  00000000  
@@ -57,13 +60,20 @@ function Train
 
     explode: -> 
     
+        @removeFromTrack()
         world.physics.addTrain @
         
     removeFromTrack: ->
         
-        delete @mesh.toSave
-        world.physics.removeKinematicCar @cars[0]
+        for track in world.allTracks()
+            track.onRemoveTrain @
+
+        for node in world.allNodes()
+            node.onRemoveTrain @
+            
         world.traffic.subTrain @
+        world.physics.removeKinematicCar @cars[0]
+        delete @mesh.toSave
         if @track
             @track.subTrain @
             @track = null
@@ -96,6 +106,7 @@ function Train
         car.index = @cars.length-1
         car.name = @name + ".#{car.constructor.name[0]}#{car.index}"
         car.mesh.name = car.name
+        car.setColorByName @colorName
         car
         
     boxcars: -> @cars.filter (c) -> c instanceof Boxcar
@@ -107,6 +118,7 @@ function Train
             
     setColorByName: (name) ->
         
+        @colorName = name
         for car in @cars
             car.setColorByName name
                     
@@ -118,6 +130,7 @@ function Train
     carDelta:   (car) -> @path.normDelta @path.delta-Train.carDist*(car.index)
     tailDelta:        -> @path.normDelta @path.delta-Train.carDist*(@cars.length-1)
     headTrack:        -> @path.currentTrack()
+    currentTrack:     -> @path.currentTrack()
     prevTrack:        -> @path.prevTrack()
     nextNode:         -> @path.nextNode()
     tailTrack:        -> @path.trackAtDelta @tailDelta()

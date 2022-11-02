@@ -55,23 +55,13 @@ function Track
     #    000     000   000  000   000  000  000   000  
     
     hasTrain: (train) -> @trains.indexOf(train) >= 0
-    addTrain: (train) -> 
+    addTrain: (train) ->
     
         if not @hasTrain() 
             @trains.push train
             if not @blockMesh
-                @blockMesh = new Mesh Geom.triangle(size:[0.5 0.5 0.73]), Materials.track.block
-                @blockMesh.noHitTest = true
-                if train.path.revers[train.path.indexAtDelta()]
-                    ld = 6/@curve.getLength()
-                    tangent = @curve.getTangentAt ld
-                    tangent.multiplyScalar -1
-                else
-                    ld = (@curve.getLength()-6)/@curve.getLength()
-                    tangent = @curve.getTangentAt ld
-                @curve.getPointAt ld, @blockMesh.position
-                @blockMesh.quaternion.copy Quaternion.unitVectors Vector.unitY, tangent
-                @mesh.add @blockMesh
+                @addExitBlockForTrain train
+                @addExitBlockForTrainAndNode train, train.nextNode()
             
     subTrain: (train) -> 
     
@@ -79,13 +69,66 @@ function Track
             @trains.splice i, 1
             
         if empty @trains
-            @blockMesh.removeFromParent()
+            @blockMesh?.removeFromParent()
             delete @blockMesh
+        else if train == @exitBlockTrain
+            @exitBlockTrain = @trains[0]
             
     explodeTrains: ->
         
         for train in @trains
             train.explode()
+            
+    # 00000000  000   000  000  000000000  0000000    000       0000000    0000000  000   000  
+    # 000        000 000   000     000     000   000  000      000   000  000       000  000   
+    # 0000000     00000    000     000     0000000    000      000   000  000       0000000    
+    # 000        000 000   000     000     000   000  000      000   000  000       000  000   
+    # 00000000  000   000  000     000     0000000    0000000   0000000    0000000  000   000  
+    
+    
+    addExitBlockForTrain: (train) ->
+                
+        if train.path.revers[train.path.indexAtDelta()]
+            ld = 6/@curve.getLength()
+            dir = -1
+        else
+            ld = (@curve.getLength()-6)/@curve.getLength()
+            dir = 1
+            
+        @addExitBlock train, ld, dir
+                
+    addExitBlockForTrainAndNode: (train, node) ->
+        
+        oppTracks = node.oppositeTracks @
+        
+        if oppTracks.length == 1
+            
+            nextTrack = oppTracks[0]
+            ld = 0.5
+            dir = 1
+            nextTrack.addExitBlock train, ld, dir
+            
+            if nextNode = nextTrack.nodeOpposite()
+                nextTrack.addExitBlockForTrainAndNode train, nextNode
+    
+    addExitBlock: (train, ld, dir=1) ->
+        
+        @exitBlockTrain = train
+        
+        @blockMesh = new Mesh Geom.triangle(size:[0.5 0.5 0.73]), Materials.track.block
+        @blockMesh.noHitTest = true
+        tangent = @curve.getTangentAt ld
+        tangent.multiplyScalar dir
+        @curve.getPointAt ld, @blockMesh.position
+        @blockMesh.quaternion.copy Quaternion.unitVectors Vector.unitY, tangent
+        @mesh.add @blockMesh
+                   
+    onRemoveTrain: (train) =>
+        
+        if train == @exitBlockTrain
+            @blockMesh?.removeFromParent()
+            delete @exitBlockTrain
+            delete @blockMesh
         
     #  0000000   0000000   000   000  00000000  
     # 000       000   000  000   000  000       
