@@ -1,0 +1,122 @@
+body {
+  font-family: "Meslo LG S", "Bitstream Vera Sans Mono", "Menlo", "Cousine", "DejaVu Sans Mono", "Andale Mono", monospace;
+  font-size: 15px;
+  background: #181818;
+}
+#main {
+  position: relative;
+  overflow: hidden;
+}
+.buttons {
+  position: absolute;
+  left: 0px;
+  top: 100px;
+  right: unset;
+  bottom: unset;
+}
+.buttons:hover {
+  border-right: 50px solid transparent;
+  border-bottom: 50px solid transparent;
+}
+.botMenu {
+  display: inline-block;
+  height: 100px;
+}
+.subMenu {
+  position: absolute;
+  width: 100px;
+}
+.canvasButton {
+  display: block;
+}
+.canvasButtonInline {
+  display: inline-block;
+}
+.botMenu {
+  position: absolute;
+}
+.buyButton,
+.tradeButton,
+.brainButton {
+  position: absolute;
+}
+.queueButton {
+  border-bottom: 1px solid #151515;
+}
+.buyButton,
+.canvasButton,
+.canvasButtonInline {
+  width: 100px;
+  height: 100px;
+}
+.fps {
+  position: absolute;
+  top: 0;
+  right: 100px;
+}
+.graph {
+  position: absolute;
+  top: 0;
+  left: 100px;
+}
+.speedButton {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+.opacityButton {
+  position: absolute;
+  right: 0;
+  top: 100px;
+}
+.volumeButton {
+  position: absolute;
+  right: 0;
+  top: 200px;
+}
+.info,
+.debug {
+  display: table;
+}
+.infoText,
+.label {
+  white-space: pre;
+}
+.info {
+  color: #666;
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+}
+.tooltip {
+  white-space: nowrap;
+  padding: 3px;
+  padding-left: 6px;
+  padding-right: 6px;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  font-family: Bahnschrift Light, Helvetica Neue, Ebrima, Varela Round, Helvetica, Arial;
+  font-size: 14px;
+  opacity: 0;
+  transform: scaleY(0);
+  transition: transform 0.2s ease-in, opacity 0.2s ease-in;
+}
+.box {
+  display: table;
+}
+.incr,
+.decr {
+  padding-right: 10px;
+  padding-left: 10px;
+  display: inline-block;
+}
+.incr:hover,
+.decr:hover,
+.btn:hover,
+.value:hover {
+  background-color: #444;
+}
+.label,
+.value {
+  display: inline-block;
+}

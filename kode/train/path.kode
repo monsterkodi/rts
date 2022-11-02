@@ -32,16 +32,15 @@ function Path
         revers: @revers
         
     toString: ->
-        s = @name
-        s += '\n'
+        s = @train.name
         for i in 0...@tracks.length
+            s += ' ➜ '
             s += @tracks[i].name
-            s += ' '
             if @revers[i]
-                s += @tracks[i].node[1].name + ' ◂ ' + @tracks[i].node[0].name
+                s += ' ◂ ' + @nodes[i].name #+ @tracks[i].node[0].name
             else
-                s += @tracks[i].node[0].name + ' ▸ ' + @tracks[i].node[1].name
-            s += '\n'
+                s += ' ▸ ' + @nodes[i].name  #+ @tracks[i].node[1].name
+            # s += 'n'
         s
             
     reverse: ->
@@ -126,10 +125,10 @@ function Path
         restDelta = nd - @deltaAtIndex di
         if restDelta < 0
             log 'darfugg?'
-        else if restDelta > @tracks[di].curve.getLength()
+        else if restDelta - @tracks[di].curve.getLength() > 0.001
             for t,i in @tracks
                 log i, t.curve.getLength(), @deltaAtIndex i
-            log 'aertfsf?'
+            log 'aertfsf?' restDelta, di, @tracks.length, @tracks[di].curve.getLength()
         p = restDelta / @tracks[di].curve.getLength()
         if @revers[di]
             p = 1 - p
@@ -138,25 +137,26 @@ function Path
     currentIndex: -> @indexAtDelta @delta
     
     nextNode: (d=@delta) -> @nodes[@indexAtDelta(d)]
-    prevNode: (d=@delta) -> @nodes[@normIndex @indexAtDelta(d)-1]
+    prevNode: (d=@delta) -> 
+        di = @indexAtDelta d
+        if di == 0
+            @tracks[0].node[@revers[0] ? 1 : 0]
+        else
+            @nodes[di-1]
     
-    prevTrack:    -> @tracks[@normIndex @currentIndex()-1]
+    prevTrack:    -> @tracks[@currentIndex()-1]
     currentTrack: -> @tracks[@currentIndex()]
-    nextTrack:    -> @tracks[@normIndex @currentIndex()+1]
+    nextTrack:    -> @tracks[@currentIndex()+1]
     
-    trackAtDelta: (d=@delta) -> @tracks[@normIndex @indexAtDelta d]
+    trackAtDelta: (d=@delta) -> @tracks[@indexAtDelta d]
         
     currentCurve: -> @currentTrack().curve
     currentPos:   -> @posAtDelta @delta
     
-    # nextDistance: (d=@delta) -> @normDelta @deltaAtIndex(@indexAtDelta(d)+1) - d
     nextDistance: (d=@delta) -> @deltaAtIndex(@indexAtDelta(d)+1) - d
-    # prevDistance: (d=@delta) -> @normDelta d - @deltaAtIndex(@indexAtDelta(d))
     prevDistance: (d=@delta) -> d - @deltaAtIndex @indexAtDelta d
             
-    advance: (delta) ->
-        # log 'advance' @delta, delta, @getLength(), @normDelta @delta+delta
-        @delta = @normDelta @delta+delta
+    advance: (delta) -> @delta = @normDelta @delta+delta
     
     getPoint: (point, offset=0) ->
         d = @normDelta @delta+offset
@@ -195,10 +195,4 @@ function Path
         return 0 if not length
         (d+10*length) % length
         
-    normIndex: (i) ->
-         
-        length = @tracks.length
-        return 0 if not length
-        (i+10*length) % length
-            
 module.exports = Path

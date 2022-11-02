@@ -13,7 +13,7 @@ class Info
         @info  = elem class:'info' style:'bottom:10px; right:20px;'
         @train = elem class:'info' style:'top:40px; left:20px;'
         @track = elem class:'info' style:'top:40px; left:350px;'
-        @node  = elem class:'info' style:'top:400px; left:350px;'
+        @node  = elem class:'info' style:'bottom:10px; left:350px;'
         
         document.body.appendChild @info
         document.body.appendChild @train
@@ -60,9 +60,10 @@ class Info
             # add "   next tail #{train.path.nextDistance(train.tailDelta()).toFixed 1}"
             
             add "   headTrack #{train.headTrack().name}"
-            add "   prevTrack #{train.prevTrack().name}"
+            add "   prevTrack #{train.prevTrack()?.name}"
             add "   tailTrack #{train.tailTrack().name}"
-            add "   prevTailTrack #{train.prevTailTrack().name}"
+            add "   prevTailTrack #{train.tailPrevTrack()?.name}"
+            add "   tailPrevNode #{train.tailPrevNode()?.name}"
             
             # for car in train.boxcars()
                 # add "   " + car.name + " " + car.nextNode().name
@@ -87,6 +88,13 @@ class Info
             s += ' ▴'
             for track in node.inTracks
                 s += ' ' + rpad 3 track.name
+                
+            s += ' ▪ '
+            s += (node.train?.name ? '')
+            s += ' ▪ '
+            for train in node.blockedTrains
+                s += ' ' + rpad 3 train.name
+                
             add s
             
 module.exports = Info

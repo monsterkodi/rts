@@ -71,7 +71,7 @@ function Arm
         
         world.physics.addKinematicArm @
         
-        @startAnimation duration: 5 points: [vec(-6 0 1), vec(-6 0 1)] # initial arm position
+        @startAnimation duration:5 points:[vec(-6 0 1), vec(-6 0 1)] # initial arm position
                    
     #  0000000  00000000  000   000  000000000  00000000    0000000   000      
     # 000       000       0000  000     000     000   000  000   000  000      
@@ -211,56 +211,56 @@ function Arm
         world.addAnimation @animate
         
     animate: (delta, timeSum) =>
-        
-        @animTime += delta
-        if (animFactor = @animTime/@animDuration) <= 1
-            basePos = vec @baseMesh.position
-            wristPos = vec @handCurvePath.getPointAt animFactor
-            @handMesh.position.copy wristPos
-            @wristMesh.position.copy wristPos
-            
-            c2h = vec(wristPos).minus basePos
-            c2h.z = 0
-            dx = c2h.normalize()
-            dz = Vector.unitZ
-            dy = vec(dz).cross dx
-            @handMesh.quaternion.setFromRotationMatrix (new Matrix4).makeBasis dx, dy, dz
-            @wristMesh.quaternion.copy @handMesh.quaternion
-            
-            dx = c2h.normalize()
-            dz = Vector.unitZ
-            dy = dz.crossed dx
-            dx = dy.crossed dz
-            @baseMesh.quaternion.setFromRotationMatrix (new Matrix4).makeBasis dx, dy, dz
-            @elbowMesh.quaternion.copy @baseMesh.quaternion
 
-            o = Vector.midPoint basePos, wristPos
-            d = basePos.to(wristPos).normalize()
-            r = d.crossed Vector.unitZ
-            u = r.crossed d
-            ray = new Ray o, u
-            baseSphere = new Sphere basePos, 4.5
-            elbowPos = vec()
-            if ray.intersectSphere baseSphere, elbowPos
-                @elbowMesh.position.copy elbowPos.minus basePos
-                
-                @bone[0].position.copy Vector.midPoint(elbowPos, basePos).sub basePos
-                @bone[0].quaternion.copy Quaternion.unitVectors Vector.unitZ, elbowPos.to(basePos).normalize()
-                
-                @bone[1].position.copy Vector.midPoint(elbowPos, wristPos).sub basePos
-                @bone[1].quaternion.copy Quaternion.unitVectors Vector.unitZ, elbowPos.to(wristPos).normalize()
+        @animTime += min @animDuration, delta
+        animFactor = clamp 0 1 @animTime/@animDuration
+        
+        basePos = vec @baseMesh.position
+        wristPos = vec @handCurvePath.getPointAt animFactor
+        @handMesh.position.copy wristPos
+        @wristMesh.position.copy wristPos
+        
+        c2h = vec(wristPos).minus basePos
+        c2h.z = 0
+        dx = c2h.normalize()
+        dz = Vector.unitZ
+        dy = vec(dz).cross dx
+        @handMesh.quaternion.setFromRotationMatrix (new Matrix4).makeBasis dx, dy, dz
+        @wristMesh.quaternion.copy @handMesh.quaternion
+        
+        dx = c2h.normalize()
+        dz = Vector.unitZ
+        dy = dz.crossed dx
+        dx = dy.crossed dz
+        @baseMesh.quaternion.setFromRotationMatrix (new Matrix4).makeBasis dx, dy, dz
+        @elbowMesh.quaternion.copy @baseMesh.quaternion
+
+        o = Vector.midPoint basePos, wristPos
+        d = basePos.to(wristPos).normalize()
+        r = d.crossed Vector.unitZ
+        u = r.crossed d
+        ray = new Ray o, u
+        baseSphere = new Sphere basePos, 4.5
+        elbowPos = vec()
+        if ray.intersectSphere baseSphere, elbowPos
+            @elbowMesh.position.copy elbowPos.minus basePos
             
-            c = clamp 0 1 Math.sin @animTime
-            col = @handMesh.children[0].material.color
-            @elbowPiston.material.color.copy col
-            @wristPiston.material.color.copy col
-            @elbowPiston.material.emissive.setRGB col.r*c, col.g*c, col.b*c
-            @wristPiston.material.emissive.copy @elbowPiston.material.emissive
-                
+            @bone[0].position.copy Vector.midPoint(elbowPos, basePos).sub basePos
+            @bone[0].quaternion.copy Quaternion.unitVectors Vector.unitZ, elbowPos.to(basePos).normalize()
+            
+            @bone[1].position.copy Vector.midPoint(elbowPos, wristPos).sub basePos
+            @bone[1].quaternion.copy Quaternion.unitVectors Vector.unitZ, elbowPos.to(wristPos).normalize()
+        
+        c = clamp 0 1 Math.sin @animTime
+        col = @handMesh.children[0].material.color
+        @elbowPiston.material.color.copy col
+        @wristPiston.material.color.copy col
+        @elbowPiston.material.emissive.setRGB col.r*c, col.g*c, col.b*c
+        @wristPiston.material.emissive.copy @elbowPiston.material.emissive
+          
+        if animFactor < 1
             world.addAnimation @animate
-            
-        else 
-            if @animEnd
-                @animEnd()
+        else if @animEnd
+            @animEnd()
 
 module.exports = Arm

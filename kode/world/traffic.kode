@@ -82,11 +82,11 @@ function Traffic
                         else 
                             if train not in nn.blockedTrains  # if train not alreay blocked by node
                                 if path.currentTrack()  != nn.train.tailTrack() and 
-                                    path.currentTrack() != nn.train.prevTailTrack() and
+                                    path.currentTrack() != nn.train.tailPrevTrack() and
                                     path.nextTrack()    != nn.train.tailTrack()
                                     nn.blockTrain train       #      train gets blocked
                                 else 
-                                    if path.currentTrack() == nn.train.prevTailTrack()
+                                    if path.currentTrack() == nn.train.tailPrevTrack()
                                         nn.setTrain train     # train is the new occupant
                 
                 if ct = path.currentTrack()
@@ -101,6 +101,7 @@ function Traffic
                 if tpd > min TAIL_DISTANCE, tnd+tpd/2
                     tpn = path.prevNode tailDelta
                     if tpn.train == train
+                        log 'unblockAll!' tpd, tpn.name, tpn.train.name
                         tpn.unblockAll()
                                     
     #  0000000   0000000    000   000   0000000   000   000   0000000  00000000  
@@ -141,7 +142,7 @@ function Traffic
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
                     advance = 0
                     break
-            else if other.prevTailTrack() == track
+            else if other.tailPrevTrack() == track
                 trainToOther = other.tailPrevDistance() + path.nextDistance(delta)
                 if trainToOther < REAREND_DISTANCE
                     advance = 0
@@ -180,11 +181,17 @@ function Traffic
                 train.path.addTrackNode nextTrack, nextNode
                 return nextTrack
                 
+    # 00000000   00000000   000   000  000   000  00000000  
+    # 000   000  000   000  000   000  0000  000  000       
+    # 00000000   0000000    000   000  000 0 000  0000000   
+    # 000        000   000  000   000  000  0000  000       
+    # 000        000   000   0000000   000   000  00000000  
+    
     pruneTrainPath: (train) ->
         
         tailDelta = train.tailDelta()
         tailIndex = train.path.indexAtDelta tailDelta
-        if tailIndex > 0
+        if tailIndex > 1
             headIndex = train.path.currentIndex()
             log 'pruneTrainPath' tailIndex, headIndex
             train.path.shiftTail()

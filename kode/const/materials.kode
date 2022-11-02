@@ -14,6 +14,7 @@ material = (color, cfg) ->
         'lambert' ➜ clss = THREE.MeshLambertMaterial
         'basic'   ➜ clss = THREE.MeshBasicMaterial
         'shadow'  ➜ clss = THREE.ShadowMaterial
+        'toon'    ➜ clss = THREE.MeshToonMaterial
     delete cfg.typ
     new clss cfg
 
@@ -21,6 +22,7 @@ Materials =
     misc:
         transparent:    material 0x888888, typ:'lambert' depthWrite:false, transparent:true, opacity:0.1
         flat:           material 0xffffff, metalness: 0.5, roughness: 0.7, flatShading:true, dithering:true
+        toon:           material 0xffffff, typ:'toon'
     wireframe:          material 0x888888, typ:'basic' wireframe: true
     floor:              material 0x222222, dithering:true
     shadow:             material 0x000000, typ:'shadow' opacity:0.2 depthWrite:false

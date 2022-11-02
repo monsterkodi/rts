@@ -1,5 +1,5 @@
 
-Path = require '../track/path'
+Path   = require './path'
 Engine = require './engine'
 Boxcar = require './boxcar'
 
@@ -121,7 +121,8 @@ function Train
     prevTrack:        -> @path.prevTrack()
     nextNode:         -> @path.nextNode()
     tailTrack:        -> @path.trackAtDelta @tailDelta()
-    prevTailTrack:    -> @path.tracks[@path.normIndex @path.indexAtDelta(@tailDelta())-1]
+    tailPrevTrack:    -> @path.prevTrack @tailDelta()
+    tailPrevNode:     -> @path.prevNode @tailDelta()
     tailPrevDistance: -> @path.prevDistance @tailDelta()
     headPrevDistance: -> @path.prevDistance()
       

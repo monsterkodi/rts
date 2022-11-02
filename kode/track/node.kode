@@ -357,7 +357,11 @@ function Node
     #    000     000   000  000   000  000  000  0000  
     #    000     000   000  000   000  000  000   000  
     
-    setTrain: (@train) ->
+    setTrain: (train) ->
+        
+        return if train == @train
+        @train = train
+        log @name, '▪' @train?.name
         
         if @train 
             if not @nodeBox
@@ -409,13 +413,13 @@ function Node
                 
     unblockAll: ->
         
-        @setTrain null
-                
         for t in @blockedTrains
             t.unblock()            
         
         for block in @blocks
             world.removeObject block
+        
+        @setTrain null
         
         @nodeBox.removeFromParent()
         delete @nodeBox
