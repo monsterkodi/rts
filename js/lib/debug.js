@@ -21,6 +21,7 @@ class Debug
         this.mats = elem({class:'debug',style:'position:absolute; z-index:1; bottom:10px; left:300px;',parent:this.elem})
         this.grid = elem({class:'debug',style:'position:absolute; z-index:1; bottom:10px; left:450px;',parent:this.elem})
         this.shdw = elem({class:'debug',style:'position:absolute; z-index:1; bottom:10px; left:600px;',parent:this.elem})
+        this.tool = elem({class:'debug',style:'position:absolute; z-index:1; bottom:10px; left:750px;',parent:this.elem})
         this.worldSpeed = this.value({text:'speed',value:world.speed.toFixed(1),reset:this.resetWorldSpeed,incr:this.incrWorldSpeed,decr:this.decrWorldSpeed})
         this.brightness = this.value({text:'light',value:rts.getBrightness().toFixed(1),reset:rts.resetBrightness,incr:rts.incrBrightness,decr:rts.decrBrightness})
         this.toggles = {}
@@ -51,6 +52,9 @@ class Debug
         this.toggle({text:'light',pref:'light',parent:this.shdw,obj:rts.lightShadowHelper,key:'visible'})
         this.toggle({text:'grid',pref:'grid',parent:this.grid,obj:rts.gridHelper,key:'visible'})
         this.toggle({text:'floor',pref:'floor',parent:this.grid,obj:world.floor,key:'visible'})
+        this.button({text:'~trains',parent:this.tool,click:world.delTrains})
+        this.button({text:'~tracks',parent:this.tool,click:world.delTracks})
+        this.button({text:'~tidyup',parent:this.tool,click:world.tidyUp})
         document.body.appendChild(this.elem)
         post.on('worldSpeed',this.updateWorldSpeed)
         post.on('brightness',this.updateBrightness)
@@ -90,7 +94,7 @@ class Debug
 
     updateWorldSpeed ()
     {
-        var _72_19_
+        var _77_19_
 
         if ((this.worldSpeed != null)) { this.worldSpeed.children[2].innerHTML = world.speed.toFixed(1) }
         return 0
@@ -98,7 +102,7 @@ class Debug
 
     updateBrightness ()
     {
-        var _76_19_
+        var _81_19_
 
         if ((this.brightness != null)) { this.brightness.children[2].innerHTML = rts.getBrightness().toFixed(1) }
         return 0
@@ -117,14 +121,14 @@ class Debug
 
     button (cfg)
     {
-        var _87_86_
+        var _92_88_
 
-        return elem({class:'btn',text:cfg.text,click:cfg.cb,parent:((_87_86_=cfg.parent) != null ? _87_86_ : this.elem)})
+        return elem({class:'btn',text:cfg.text,click:cfg.click,parent:((_92_88_=cfg.parent) != null ? _92_88_ : this.elem)})
     }
 
     static tglBtn (btn, cfg)
     {
-        var val, _106_14_
+        var val, _111_14_
 
         if (_k_.isFunc(cfg.get) && _k_.isFunc(cfg.set))
         {
@@ -152,7 +156,7 @@ class Debug
 
     toggle (cfg)
     {
-        var btn, tgl, val, _114_80_
+        var btn, tgl, val, _119_80_
 
         tgl = function (cfg)
         {
@@ -161,7 +165,7 @@ class Debug
                 return Debug.tglBtn(btn,cfg)
             }
         }
-        btn = elem({class:'btn',text:cfg.text,click:tgl(cfg),parent:((_114_80_=cfg.parent) != null ? _114_80_ : this.elem)})
+        btn = elem({class:'btn',text:cfg.text,click:tgl(cfg),parent:((_119_80_=cfg.parent) != null ? _119_80_ : this.elem)})
         if (_k_.isFunc(cfg.get))
         {
             val = cfg.get()

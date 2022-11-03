@@ -61,8 +61,7 @@ function Track
     
         if not @hasTrain() 
             @trains.push train
-            if @trains.length == 1
-                @addExitBlockForTrainAtNode train, train.nextNode()
+            @addExitBlockForTrainAtNode train, train.nextNode()
             
     subTrain: (train) -> 
     
@@ -98,12 +97,12 @@ function Track
         if oppTracks.length == 1 and sibTracks.length == 1
             nextTrack = oppTracks[0]
             oppNode = nextTrack.nodeOpposite node
-            log 'next ------------- ' @name, train.name, nextTrack.name, oppNode.name
+            # log 'next ------------- ' @name, train.name, nextTrack.name, oppNode.name
             nextTrack.addExitBlockForTrainAtNode train, oppNode
     
     addExitBlock: (train, node, ld, dir=1) ->
         
-        log 'exitBlock' @name, node.name, train.name, ld, dir
+        # log 'exitBlock' @name, node.name, train.name, ld, dir
         
         if train in @exitBlockTrains
             ▴ node == @exitBlockNode
@@ -141,7 +140,7 @@ function Track
         
         if @blockMesh
             ▴ @exitBlockTrains.length == 0
-            log "removeBlock #{@name} #{@exitBlockNode.name}"
+            # log "removeBlock #{@name} #{@exitBlockNode.name}"
             @blockMesh.removeFromParent()
             delete @exitBlockNode 
             delete @blockMesh
@@ -317,7 +316,6 @@ function Track
         else
             @createMesh()                
             
-        # @curve.getPointAt 0.25, @label.position
         ld = 4/@curve.getLength()
         @curve.getPointAt ld, @label.position
         @label.position.z = 0.36
@@ -370,6 +368,13 @@ function Track
             nd = train.path.prevDistance()
         else
             nd = train.path.nextDistance()
+            
+    lastTrainDistance: ->
+        
+        if empty @trains ➜ return @getLength()
+        lastTrain = @trains[-1]
+        if lastTrain.tailTrack() != @ ➜ return 0
+        lastTrain.tailPrevDistance()
                              
     getPoints: ->
         

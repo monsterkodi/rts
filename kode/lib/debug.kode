@@ -15,6 +15,7 @@ class Debug
         @mats = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:300px;' parent:@elem
         @grid = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:450px;' parent:@elem
         @shdw = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:600px;' parent:@elem
+        @tool = elem class:'debug' style:'position:absolute; z-index:1; bottom:10px; left:750px;' parent:@elem
 
         @worldSpeed = @value text:'speed' value: world.speed.toFixed(1), reset:@resetWorldSpeed, incr:@incrWorldSpeed, decr:@decrWorldSpeed
         @brightness = @value text:'light' value: rts.getBrightness().toFixed(1), reset:rts.resetBrightness, incr:rts.incrBrightness, decr:rts.decrBrightness
@@ -37,7 +38,11 @@ class Debug
         @toggle text:'light'  pref:'light'  parent:@shdw, obj: rts.lightShadowHelper,  key:'visible'
         @toggle text:'grid'   pref:'grid'   parent:@grid, obj: rts.gridHelper,         key:'visible'
         @toggle text:'floor'  pref:'floor'  parent:@grid, obj: world.floor,            key:'visible'
-                
+        
+        @button text:'~trains' parent:@tool, click:world.delTrains
+        @button text:'~tracks' parent:@tool, click:world.delTracks
+        @button text:'~tidyup' parent:@tool, click:world.tidyUp
+        
         document.body.appendChild @elem
         
         post.on 'worldSpeed'   @updateWorldSpeed
@@ -84,7 +89,7 @@ class Debug
         dec = elem class:'decr'  text:'<' click:cfg.decr
         box = elem class:'box'   children: [lbl, dec, val, inc], parent:@elem
         
-    button: (cfg) -> elem class:'btn', text:cfg.text, click:cfg.cb, parent:cfg.parent ? @elem
+    button: (cfg) -> elem class:'btn' text:cfg.text, click:cfg.click, parent:cfg.parent ? @elem
         
     @tglBtn: (btn, cfg) ->
         

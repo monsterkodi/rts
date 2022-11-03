@@ -48,6 +48,7 @@ function Train
         node:     @path.nextNode().name
         resource: @resource
         path:     @path.toSave()
+        color:    @colorName
         cars:     @cars.map (c) -> c.toSave()
         
     del: ->
@@ -73,6 +74,10 @@ function Train
             
         world.traffic.subTrain @
         world.physics.removeKinematicCar @cars[0]
+        
+        for car in @cars
+            car.deadEye()
+        
         delete @mesh.toSave
         if @track
             @track.subTrain @

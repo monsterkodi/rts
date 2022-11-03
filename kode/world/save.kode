@@ -104,14 +104,19 @@ function Save
                 
         for name,train of save.trains
             
+            log train
+            
             track = world.trackWithName train.track
             node  = world.nodeWithName  train.node
-            if t = world.onAddTrain track, train.prevDist, node
+            boxcars = train.cars.filter((c) -> c.type == 'boxcar').length
+            if t = world.onAddTrain track, train.prevDist, node, boxcars
                 t.resource = train.resource
+                t.setColorByName train.color if train.color
                 for car,i in train.cars
                     if car.type == 'boxcar'
                         if car.cargo
                             c = t.cars[i]
+                            ▴ c
                             box = new Mesh Geom.box(size:2), Materials.mining[car.cargo]
                             c.setCargo new Cargo box, car.cargo
                 

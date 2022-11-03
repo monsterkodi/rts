@@ -76,6 +76,8 @@ function Physics
     removeBody: (body) ->
         
         body.mesh.removeFromParent()
+        delete body.obj.body
+        delete body.obj
         delete body.mesh
         @cannon.removeBody body
         
@@ -92,12 +94,15 @@ function Physics
 
         p = vec()
         q = new Quaternion
+        cnt = 0
         for b in @cannon.bodies
             if b.kinematic
+                cnt++
                 b.kinematic.getWorldPosition p
                 b.kinematic.getWorldQuaternion q
                 b.position.copy p
                 b.quaternion.copy q
+        # log 'kinematics' cnt
                     
         @cannon.step 1/60, scaledDelta, 10 # max substeps
         if prefs.get 'cannon'
@@ -131,8 +136,9 @@ function Physics
         cb.quaternion.copy cargo.mesh.quaternion
         cb.position.copy cargo.mesh.position
         cb.mesh = cargo.mesh
+        cb.obj  = cargo
         @cannon.addBody cb
-        cargo.body = cb
+        cb.obj.body = cb
         cb
             
     #  0000000   0000000   00000000   
@@ -151,8 +157,9 @@ function Physics
         cb.quaternion.copy car.mesh.quaternion
         cb.position.copy car.mesh.position
         cb.mesh = car.mesh
+        cb.obj  = car
         @cannon.addBody cb
-        car.body = cb
+        cb.obj.body = cb
         cb
 
     # 000   000  000  000   000  00000000  00     00   0000000   000000000  000   0000000  

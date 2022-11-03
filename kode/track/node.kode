@@ -233,6 +233,10 @@ function Node
             
     moveInOutDrag: (hit, downHit) ->
         
+        ▴ @dragTrack
+        ▴ @dragTrack.node
+        ▴ @dragTrack.node[1]
+        
         dragNode = @dragTrack.node[1]
             
         plane = new Plane

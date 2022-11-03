@@ -1,6 +1,6 @@
 // monsterkodi/kode 0.243.0
 
-var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
 
 var Compass, CurveCtrl, Node
 
@@ -308,6 +308,9 @@ Node = (function ()
     {
         var dot, dragNode, plane
 
+        _k_.assert(".", 236, 8, "assert failed!" + " this.dragTrack", this.dragTrack)
+        _k_.assert(".", 237, 8, "assert failed!" + " this.dragTrack.node", this.dragTrack.node)
+        _k_.assert(".", 238, 8, "assert failed!" + " this.dragTrack.node[1]", this.dragTrack.node[1])
         dragNode = this.dragTrack.node[1]
         plane = new Plane
         plane.setFromNormalAndCoplanarPoint(Vector.unitZ,this.getPos())
@@ -405,18 +408,18 @@ Node = (function ()
 
         this.group.position.copy(point)
         var list = _k_.list(this.outTracks)
-        for (var _303_18_ = 0; _303_18_ < list.length; _303_18_++)
+        for (var _307_18_ = 0; _307_18_ < list.length; _307_18_++)
         {
-            track = list[_303_18_]
+            track = list[_307_18_]
             track.nodeMoved(this)
         }
         var list1 = _k_.list(this.inTracks)
-        for (var _305_18_ = 0; _305_18_ < list1.length; _305_18_++)
+        for (var _309_18_ = 0; _309_18_ < list1.length; _309_18_++)
         {
-            track = list1[_305_18_]
+            track = list1[_309_18_]
             track.nodeMoved(this)
         }
-        for (var _308_17_ = i = 0, _308_21_ = this.blockedTrains.length; (_308_17_ <= _308_21_ ? i < this.blockedTrains.length : i > this.blockedTrains.length); (_308_17_ <= _308_21_ ? ++i : --i))
+        for (var _312_17_ = i = 0, _312_21_ = this.blockedTrains.length; (_312_17_ <= _312_21_ ? i < this.blockedTrains.length : i > this.blockedTrains.length); (_312_17_ <= _312_21_ ? ++i : --i))
         {
             block = this.blocks[i]
             train = this.blockedTrains[i]
@@ -478,15 +481,15 @@ Node = (function ()
         quat = Quaternion.unitVectors(Vector.unitY,dir)
         this.group.quaternion.copy(quat)
         var list = _k_.list(this.outTracks)
-        for (var _349_18_ = 0; _349_18_ < list.length; _349_18_++)
+        for (var _353_18_ = 0; _353_18_ < list.length; _353_18_++)
         {
-            track = list[_349_18_]
+            track = list[_353_18_]
             track.nodeRotated(this)
         }
         var list1 = _k_.list(this.inTracks)
-        for (var _351_18_ = 0; _351_18_ < list1.length; _351_18_++)
+        for (var _355_18_ = 0; _355_18_ < list1.length; _355_18_++)
         {
-            track = list1[_351_18_]
+            track = list1[_355_18_]
             track.nodeRotated(this)
         }
     }
@@ -514,9 +517,9 @@ Node = (function ()
             }
             this.nodeBox.material = this.train.cars[0].mesh.material
             var list = _k_.list(this.blocks)
-            for (var _376_22_ = 0; _376_22_ < list.length; _376_22_++)
+            for (var _380_22_ = 0; _380_22_ < list.length; _380_22_++)
             {
-                block = list[_376_22_]
+                block = list[_380_22_]
                 block.material = this.nodeBox.material
             }
             this.inMesh.scale.set(1,1,0.72)
@@ -584,15 +587,15 @@ Node = (function ()
         var block, t
 
         var list = _k_.list(this.blockedTrains)
-        for (var _429_14_ = 0; _429_14_ < list.length; _429_14_++)
+        for (var _433_14_ = 0; _433_14_ < list.length; _433_14_++)
         {
-            t = list[_429_14_]
+            t = list[_433_14_]
             t.unblock()
         }
         var list1 = _k_.list(this.blocks)
-        for (var _432_18_ = 0; _432_18_ < list1.length; _432_18_++)
+        for (var _436_18_ = 0; _436_18_ < list1.length; _436_18_++)
         {
-            block = list1[_432_18_]
+            block = list1[_436_18_]
             world.removeObject(block)
         }
         this.setTrain(null)
@@ -617,9 +620,9 @@ Node = (function ()
 
         mode = 0
         var list = _k_.list(tracks)
-        for (var _457_18_ = 0; _457_18_ < list.length; _457_18_++)
+        for (var _461_18_ = 0; _461_18_ < list.length; _461_18_++)
         {
-            track = list[_457_18_]
+            track = list[_461_18_]
             trackMode = track.modeForNode(this)
             if (mode !== trackMode)
             {

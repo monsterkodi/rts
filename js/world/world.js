@@ -26,6 +26,9 @@ World = (function ()
     {
         this.scene = scene
     
+        this["tidyUp"] = this["tidyUp"].bind(this)
+        this["delTracks"] = this["delTracks"].bind(this)
+        this["delTrains"] = this["delTrains"].bind(this)
         this["onAddTrain"] = this["onAddTrain"].bind(this)
         this["hideCompass"] = this["hideCompass"].bind(this)
         this["setLabels"] = this["setLabels"].bind(this)
@@ -315,6 +318,19 @@ World = (function ()
         }
     }
 
+    World.prototype["delTrains"] = function ()
+    {
+        var train
+
+        console.log('delTrains')
+        var list = _k_.list(this.allTrains())
+        for (var _282_18_ = 0; _282_18_ < list.length; _282_18_++)
+        {
+            train = list[_282_18_]
+            train.del()
+        }
+    }
+
     World.prototype["addNode"] = function (cfg)
     {
         return new Node(cfg)
@@ -369,9 +385,9 @@ World = (function ()
         var node
 
         var list = _k_.list(this.allNodes())
-        for (var _293_17_ = 0; _293_17_ < list.length; _293_17_++)
+        for (var _299_17_ = 0; _299_17_ < list.length; _299_17_++)
         {
-            node = list[_293_17_]
+            node = list[_299_17_]
             if (node.name === name)
             {
                 return node
@@ -384,9 +400,9 @@ World = (function ()
         var track
 
         var list = _k_.list(this.allTracks())
-        for (var _297_18_ = 0; _297_18_ < list.length; _297_18_++)
+        for (var _303_18_ = 0; _303_18_ < list.length; _303_18_++)
         {
-            track = list[_297_18_]
+            track = list[_303_18_]
             if (track.name === name)
             {
                 return track
@@ -437,6 +453,29 @@ World = (function ()
 
         track = new Track(n1,n2,ctrlPoints,name)
         return track
+    }
+
+    World.prototype["delTracks"] = function ()
+    {
+        var node, track
+
+        console.log('delTracks')
+        this.delTrains()
+        var list = _k_.list(this.allTracks())
+        for (var _349_18_ = 0; _349_18_ < list.length; _349_18_++)
+        {
+            track = list[_349_18_]
+            track.del()
+        }
+        var list1 = _k_.list(this.allNodes())
+        for (var _351_17_ = 0; _351_17_ < list1.length; _351_17_++)
+        {
+            node = list1[_351_17_]
+            if (!node.fixed)
+            {
+                node.del()
+            }
+        }
     }
 
     World.prototype["addCentralStation"] = function (cfg)
@@ -536,6 +575,11 @@ World = (function ()
         {
             return this.physics.removeBody(body)
         }
+    }
+
+    World.prototype["tidyUp"] = function ()
+    {
+        return this.physics.clear()
     }
 
     return World

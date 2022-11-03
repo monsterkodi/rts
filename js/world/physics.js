@@ -70,24 +70,28 @@ Physics = (function ()
     Physics.prototype["removeBody"] = function (body)
     {
         body.mesh.removeFromParent()
+        delete body.obj.body
+        delete body.obj
         delete body.mesh
         return this.cannon.removeBody(body)
     }
 
     Physics.prototype["simulate"] = function (scaledDelta, timeSum)
     {
-        var b, p, q
+        var b, cnt, p, q
 
         this.poleBody.position.copy(vec(this.poleBody.position).lerp(rts.centerHelper.position,0.2))
         this.poleBody.quaternion.copy(rts.centerHelper.quaternion)
         p = vec()
         q = new Quaternion
+        cnt = 0
         var list = _k_.list(this.cannon.bodies)
-        for (var _95_14_ = 0; _95_14_ < list.length; _95_14_++)
+        for (var _98_14_ = 0; _98_14_ < list.length; _98_14_++)
         {
-            b = list[_95_14_]
+            b = list[_98_14_]
             if (b.kinematic)
             {
+                cnt++
                 b.kinematic.getWorldPosition(p)
                 b.kinematic.getWorldQuaternion(q)
                 b.position.copy(p)
@@ -100,9 +104,9 @@ Physics = (function ()
             this.cannonDebugger.update()
         }
         var list1 = _k_.list(this.cannon.bodies)
-        for (var _106_14_ = 0; _106_14_ < list1.length; _106_14_++)
+        for (var _111_14_ = 0; _111_14_ < list1.length; _111_14_++)
         {
-            b = list1[_106_14_]
+            b = list1[_111_14_]
             if (b.mesh)
             {
                 b.mesh.position.copy(b.position)
@@ -131,14 +135,15 @@ Physics = (function ()
         cb.quaternion.copy(cargo.mesh.quaternion)
         cb.position.copy(cargo.mesh.position)
         cb.mesh = cargo.mesh
+        cb.obj = cargo
         this.cannon.addBody(cb)
-        cargo.body = cb
+        cb.obj.body = cb
         return cb
     }
 
     Physics.prototype["addCar"] = function (car)
     {
-        var cb, _146_31_
+        var cb, _152_31_
 
         this.addCargo((typeof car.takeCargo === "function" ? car.takeCargo() : undefined))
         cb = new CANNON.Body({mass:1,shape:new CANNON.Cylinder(1,1,3.5,8)})
@@ -147,8 +152,9 @@ Physics = (function ()
         cb.quaternion.copy(car.mesh.quaternion)
         cb.position.copy(car.mesh.position)
         cb.mesh = car.mesh
+        cb.obj = car
         this.cannon.addBody(cb)
-        car.body = cb
+        cb.obj.body = cb
         return cb
     }
 
@@ -170,9 +176,9 @@ Physics = (function ()
         var body
 
         var list = _k_.list(this.cannon.bodies)
-        for (var _176_17_ = 0; _176_17_ < list.length; _176_17_++)
+        for (var _183_17_ = 0; _183_17_ < list.length; _183_17_++)
         {
-            body = list[_176_17_]
+            body = list[_183_17_]
             if (body.kinematic === car.mesh)
             {
                 this.cannon.removeBody(body)
@@ -203,9 +209,9 @@ Physics = (function ()
             return
         }
         var list = _k_.list(train.cars)
-        for (var _201_16_ = 0; _201_16_ < list.length; _201_16_++)
+        for (var _208_16_ = 0; _208_16_ < list.length; _208_16_++)
         {
-            car = list[_201_16_]
+            car = list[_208_16_]
             this.addCar(car)
         }
     }
@@ -216,7 +222,7 @@ Physics = (function ()
 
         cbs = []
         num = 16
-        for (var _223_17_ = i = 0, _223_21_ = num; (_223_17_ <= _223_21_ ? i < num : i > num); (_223_17_ <= _223_21_ ? ++i : --i))
+        for (var _230_17_ = i = 0, _230_21_ = num; (_230_17_ <= _230_21_ ? i < num : i > num); (_230_17_ <= _230_21_ ? ++i : --i))
         {
             p = this.poleBody.position
             r = 0.25 + (1 - i / num) * 0.2

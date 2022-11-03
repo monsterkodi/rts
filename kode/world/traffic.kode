@@ -6,9 +6,10 @@
    000     000   000  000   000  000       000       000   0000000
 ###
 
-HEAD_DISTANCE    = 12
-TAIL_DISTANCE    = 8
-REAREND_DISTANCE = 8
+HEAD_DISTANCE      = 12
+TAIL_DISTANCE      = 8
+REAREND_DISTANCE   = 8
+COLLISION_DISTANCE = 4
 
 function Traffic
 
@@ -160,8 +161,9 @@ function Traffic
             if other.headTrack() == track
                 if path.revers[path.indexAtDelta delta] != other.trackRevers()
                     dist = Math.abs track.trainCurveDistance(train) - track.trainCurveDistance(other)
-                    if dist < 4.5
+                    if dist < COLLISION_DISTANCE
                         log '------------------ XXXXXXXXXXXXXX  heads on collision!' train.name, other.name
+                        # rts.paused = true
                         train.explode()
                         other.explode()
                         advance = 0
@@ -181,6 +183,7 @@ function Traffic
         nn = train.nextNode()
         ot = nn.oppositeTracks train.currentTrack()
         mode = ot == nn.outTracks ? 1 : 2
+        choices = []
         for nextTrack in ot
             nextNode  = nextTrack.nodeOpposite nn
             trackMode = nextTrack.modeForNode(nn) or 3
@@ -191,8 +194,27 @@ function Traffic
                 continue
             nnopptrck = nextNode.oppositeTracks(nextTrack) ? []
             if nnopptrck.length
-                train.path.addTrackNode nextTrack, nextNode
-                return nextTrack
+                choices.push [nextTrack, nextNode]
+                
+        if choices.length
+            if choices.length == 1
+                nextTrack = choices[0][0]
+                nextNode  = choices[0][1]
+            else
+                # choice = randInt choices.length
+                tracks = choices.map (c) -> c[0]
+                length = tracks.map (t) -> t.lastTrainDistance()
+                total  = 0
+                accum  = length.map (l) -> total += l
+                randm  = randRange 0 total
+                choice = 0
+                while accum[choice] < randm ➜ choice++
+                # log "#{choice+1}" randm.toFixed(1), accum.map (a) -> a.toFixed(1)
+                nextTrack = choices[choice][0]
+                nextNode  = choices[choice][1]
+                
+            train.path.addTrackNode nextTrack, nextNode
+            return nextTrack
                 
     # 00000000   00000000   000   000  000   000  00000000  
     # 000   000  000   000  000   000  0000  000  000       

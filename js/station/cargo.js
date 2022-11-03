@@ -11,6 +11,8 @@ Cargo = (function ()
     {
         this.mesh = mesh
         this.resource = resource
+    
+        this.mesh.setShadow()
     }
 
     Cargo.prototype["del"] = function ()

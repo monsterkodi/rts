@@ -43,7 +43,7 @@ Train = (function ()
     {
         var _46_24_
 
-        return {name:this.name,speed:this.speed,track:(this.track != null ? this.track.name : undefined),prevDist:this.path.prevDistance(),node:this.path.nextNode().name,resource:this.resource,path:this.path.toSave(),cars:this.cars.map(function (c)
+        return {name:this.name,speed:this.speed,track:(this.track != null ? this.track.name : undefined),prevDist:this.path.prevDistance(),node:this.path.nextNode().name,resource:this.resource,path:this.path.toSave(),color:this.colorName,cars:this.cars.map(function (c)
         {
             return c.toSave()
         })}
@@ -55,9 +55,9 @@ Train = (function ()
 
         this.removeFromTrack()
         var list = _k_.list(this.cars)
-        for (var _56_16_ = 0; _56_16_ < list.length; _56_16_++)
+        for (var _57_16_ = 0; _57_16_ < list.length; _57_16_++)
         {
-            car = list[_56_16_]
+            car = list[_57_16_]
             car.del()
         }
         this.cars = []
@@ -72,22 +72,28 @@ Train = (function ()
 
     Train.prototype["removeFromTrack"] = function ()
     {
-        var node, track
+        var car, node, track
 
         var list = _k_.list(world.allTracks())
-        for (var _68_18_ = 0; _68_18_ < list.length; _68_18_++)
+        for (var _69_18_ = 0; _69_18_ < list.length; _69_18_++)
         {
-            track = list[_68_18_]
+            track = list[_69_18_]
             track.onRemoveTrain(this)
         }
         var list1 = _k_.list(world.allNodes())
-        for (var _71_17_ = 0; _71_17_ < list1.length; _71_17_++)
+        for (var _72_17_ = 0; _72_17_ < list1.length; _72_17_++)
         {
-            node = list1[_71_17_]
+            node = list1[_72_17_]
             node.onRemoveTrain(this)
         }
         world.traffic.subTrain(this)
         world.physics.removeKinematicCar(this.cars[0])
+        var list2 = _k_.list(this.cars)
+        for (var _78_16_ = 0; _78_16_ < list2.length; _78_16_++)
+        {
+            car = list2[_78_16_]
+            car.deadEye()
+        }
         delete this.mesh.toSave
         if (this.track)
         {
@@ -143,9 +149,9 @@ Train = (function ()
         var car
 
         var list = _k_.list(this.cars)
-        for (var _116_16_ = 0; _116_16_ < list.length; _116_16_++)
+        for (var _121_16_ = 0; _121_16_ < list.length; _121_16_++)
         {
-            car = list[_116_16_]
+            car = list[_121_16_]
             car.setColor(color)
         }
     }
@@ -156,9 +162,9 @@ Train = (function ()
 
         this.colorName = name
         var list = _k_.list(this.cars)
-        for (var _122_16_ = 0; _122_16_ < list.length; _122_16_++)
+        for (var _127_16_ = 0; _127_16_ < list.length; _127_16_++)
         {
-            car = list[_122_16_]
+            car = list[_127_16_]
             car.setColorByName(name)
         }
     }
@@ -257,7 +263,7 @@ Train = (function ()
     {
         var car, index
 
-        _k_.assert(".", 157, 8, "assert failed!" + " this.path", this.path)
+        _k_.assert(".", 162, 8, "assert failed!" + " this.path", this.path)
         this.path.advance(advance)
         var list = _k_.list(this.cars)
         for (index = 0; index < list.length; index++)

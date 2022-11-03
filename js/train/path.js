@@ -1,6 +1,6 @@
 // monsterkodi/kode 0.243.0
 
-var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
+var _k_ = {in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
 var Path
 
@@ -227,7 +227,7 @@ Path = (function ()
         {
             p = 1 - p
         }
-        return p
+        return _k_.clamp(0,1,p)
     }
 
     Path.prototype["currentIndex"] = function ()
@@ -302,10 +302,12 @@ Path = (function ()
 
     Path.prototype["getPoint"] = function (point, offset = 0)
     {
-        var d
+        var d, u
 
         d = this.normDelta(this.delta + offset)
-        return this.curveAtDelta(d).getPointAt(this.posAtDelta(d),point)
+        u = this.posAtDelta(d)
+        _k_.assert(".", 164, 8, "assert failed!" + " (0 <= u && u <= 1)", (0 <= u && u <= 1))
+        return this.curveAtDelta(d).getPointAt(u,point)
     }
 
     Path.prototype["getTangent"] = function (point, offset = 0)
@@ -325,6 +327,7 @@ Path = (function ()
             console.log('DARKFUG?')
             return vec(0,1,0)
         }
+        _k_.assert(".", 177, 8, "assert failed!" + " (0 <= p && p <= 1)", (0 <= p && p <= 1))
         try
         {
             c.getTangentAt(p,point)

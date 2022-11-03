@@ -1,6 +1,6 @@
 // monsterkodi/kode 0.243.0
 
-var _k_ = {isFunc: function (o) {return typeof o === 'function'}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
+var _k_ = {isFunc: function (o) {return typeof o === 'function'}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}}
 
 var Cargo, Immutable, Save
 
@@ -52,7 +52,7 @@ Save = (function ()
 
     Save.prototype["onLoad"] = function ()
     {
-        var box, c, car, ctrl, i, n1, n2, name, newNoon, node, oldNoon, s, s1, s2, save, station, t, track, train, _100_36_, _87_33_, _90_30_, _92_36_, _98_30_
+        var box, boxcars, c, car, ctrl, i, n1, n2, name, newNoon, node, oldNoon, s, s1, s2, save, station, t, track, train, _100_36_, _87_33_, _90_30_, _92_36_, _98_30_
 
         save = prefs.get('save')
         if (!save)
@@ -112,11 +112,20 @@ Save = (function ()
         for (name in save.trains)
         {
             train = save.trains[name]
+            console.log(train)
             track = world.trackWithName(train.track)
             node = world.nodeWithName(train.node)
-            if (t = world.onAddTrain(track,train.prevDist,node))
+            boxcars = train.cars.filter(function (c)
+            {
+                return c.type === 'boxcar'
+            }).length
+            if (t = world.onAddTrain(track,train.prevDist,node,boxcars))
             {
                 t.resource = train.resource
+                if (train.color)
+                {
+                    t.setColorByName(train.color)
+                }
                 var list = _k_.list(train.cars)
                 for (i = 0; i < list.length; i++)
                 {
@@ -126,6 +135,7 @@ Save = (function ()
                         if (car.cargo)
                         {
                             c = t.cars[i]
+                            _k_.assert(".", 119, 28, "assert failed!" + " c", c)
                             box = new Mesh(Geom.box({size:2}),Materials.mining[car.cargo])
                             c.setCargo(new Cargo(box,car.cargo))
                         }

@@ -132,7 +132,7 @@ function Path
         p = restDelta / @tracks[di].curve.getLength()
         if @revers[di]
             p = 1 - p
-        p
+        clamp 0 1 p
                 
     currentIndex: -> @indexAtDelta @delta
     
@@ -160,7 +160,9 @@ function Path
     
     getPoint: (point, offset=0) ->
         d = @normDelta @delta+offset
-        @curveAtDelta(d).getPointAt @posAtDelta(d), point
+        u = @posAtDelta d
+        ▴ 0 <= u <= 1
+        @curveAtDelta(d).getPointAt u, point
 
     getTangent: (point, offset=0) ->
         d = @normDelta @delta+offset
@@ -172,6 +174,7 @@ function Path
         if not c
             log 'DARKFUG?'
             return vec 0 1 0
+        ▴ 0 <= p <= 1
         try
             c.getTangentAt p, point
         catch err

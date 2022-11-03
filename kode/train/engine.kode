@@ -21,10 +21,6 @@ function Engine extends Car
         label.name = @train.name + '.label'
         @mesh.add label
 
-        @mesh.handler = @
-        for child in @mesh.children
-            child.handler = @
-        
     toSave: -> 
         
         type:  'engine'
@@ -39,11 +35,17 @@ function Engine extends Car
         
         @setColor Colors.train[@colorName]
         
-        @mesh.children[2].material = @mesh.children[2].material.clone() # piston
+        @mesh.children[2].material = @mesh.children[2].material.clone() # head lights
         @mesh.children[2].material.emissive.copy Colors.piston[@colorName]
 
-        @mesh.children[3].material = @mesh.children[3].material.clone() # lights
+        @mesh.children[3].material = @mesh.children[3].material.clone() # tail light
         @mesh.children[3].material.emissive.copy Colors.piston[@colorName]
+        
+    deadEye: ->
+        
+        @mesh.children[1].material = Materials.train.window # piston
+        @mesh.children[2].material = Materials.train.window # head lights
+        @mesh.children[3].material = Materials.train.window # tail light
         
     isRearEngine: ->
         
@@ -62,16 +64,9 @@ function Engine extends Car
             if not @cargoSelector and not @body
                 @cargoSelector = new CargoSelector @
                 
-    onDrag: (hit, downHit) =>
+    # onDragDone: (hit, downHit) =>
         
-        return if @physics
-        dist = hit.point.distanceTo downHit.point
-        if dist > 0.5
-            @train.explode()
-            
-    onDragDone: (hit, downHit) =>
-        
-        log 'drag done!' @name
+        # log 'drag done!' @name
             
     onLeave: (hit, nextHit, event) =>
         

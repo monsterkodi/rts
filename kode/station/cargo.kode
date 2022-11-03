@@ -10,6 +10,8 @@ function Cargo
 
     @: (@mesh, @resource) ->
         
+        @mesh.setShadow()
+        
     del: ->
         
         @mesh.removeFromParent()

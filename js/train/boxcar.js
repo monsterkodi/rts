@@ -42,6 +42,7 @@ Boxcar = (function ()
 
         delete this.waitingForUnload
         c = this.cargo
+        delete (c != null ? c.mesh.handler : undefined)
         delete this.cargo
         return c
     }
@@ -51,6 +52,7 @@ Boxcar = (function ()
         this.cargo = cargo
     
         delete this.waitingForCargo
+        this.cargo.mesh.handler = this
         this.mesh.add(this.cargo.mesh)
         this.cargo.mesh.quaternion.identity()
         return this.cargo.mesh.position.set(0,0.85,0)
@@ -69,6 +71,11 @@ Boxcar = (function ()
         this.setColor(Colors.train[name])
         this.mesh.children[0].material = this.mesh.children[0].material.clone()
         return this.mesh.children[0].material.emissive.copy(Colors.piston[name])
+    }
+
+    Boxcar.prototype["deadEye"] = function ()
+    {
+        return this.mesh.children[0].material = Materials.train.window
     }
 
     return Boxcar

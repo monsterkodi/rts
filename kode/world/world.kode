@@ -276,6 +276,12 @@ function World extends Convert
             boxcar = train.addCar new Boxcar train
             # boxcar.setColorByName train.name if train.name in Object.keys Colors.train
             
+    delTrains: =>
+        
+        log 'delTrains'
+        for train in @allTrains()
+            train.del()
+            
     # 000000000  00000000    0000000    0000000  000   000  
     #    000     000   000  000   000  000       000  000   
     #    000     0000000    000000000  000       0000000    
@@ -335,6 +341,16 @@ function World extends Convert
         
         track = new Track n1, n2, ctrlPoints, name
         track
+        
+    delTracks: =>
+        
+        log 'delTracks'
+        @delTrains()
+        for track in @allTracks()
+            track.del()
+        for node in @allNodes()
+            if not node.fixed
+                node.del()
                         
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  
     # 000          000     000   000     000     000  000   000  0000  000  
@@ -407,5 +423,7 @@ function World extends Convert
     addBody: (body) -> @physics.addBody body
         
     removeBody: (body) -> if body ➜ @physics.removeBody body
+    
+    tidyUp: => @physics.clear()
             
 module.exports = World

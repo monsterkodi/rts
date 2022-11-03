@@ -7,9 +7,6 @@
 ![screenshot](img/rts12.png)
 ![screenshot](img/rts13.png)
 
-- traffic
-    - block not only track entrance at next node, but also consecutive single opposite tracks
-
 - dead eye physic trains
 - use same blinking piston material for all trains
 - grid lines on hovered node/ctrl centers

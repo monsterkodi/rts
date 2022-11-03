@@ -8,7 +8,7 @@
 
 kxk = require 'kxk'
 
-{ _, clamp, deg2rad, elem, first, last, post, prefs, rad2deg, randInt, randIntRange, stopEvent } = require 'kxk'
+{ _, clamp, deg2rad, elem, first, last, post, prefs, rad2deg, randInt, randIntRange, randRange, stopEvent } = require 'kxk'
 
 window.$            = kxk.$
 window._            = _
@@ -16,6 +16,7 @@ window.post         = post
 window.prefs        = prefs
 window.randInt      = randInt
 window.randIntRange = randIntRange
+window.randRange    = randRange
 window.deg2rad      = deg2rad
 window.rad2deg      = rad2deg
 window.stopEvent    = stopEvent

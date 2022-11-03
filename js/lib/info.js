@@ -10,10 +10,14 @@ class Info
         this.info = elem({class:'info',style:'bottom:10px; right:20px;'})
         this.train = elem({class:'info',style:'top:40px; left:20px;'})
         this.track = elem({class:'info',style:'top:40px; left:350px;'})
+        this.paths = elem({class:'info',style:'bottom:10px; left:700px;'})
+        this.station = elem({class:'info',style:'top:40px; left:700px;'})
         this.node = elem({class:'info',style:'bottom:10px; left:350px;'})
         document.body.appendChild(this.info)
         document.body.appendChild(this.train)
         document.body.appendChild(this.track)
+        document.body.appendChild(this.paths)
+        document.body.appendChild(this.station)
         document.body.appendChild(this.node)
     }
 
@@ -22,16 +26,20 @@ class Info
         this.info.remove()
         this.train.remove()
         this.track.remove()
+        this.paths.remove()
+        this.station.remove()
         return this.node.remove()
     }
 
     draw (info)
     {
-        var add, k, node, s, track, train, v, _1_18_, _1_20_, _1_21_, _1_26_, _1_28_, _1_33_, _89_28_, _89_35_
+        var add, car, corpses, k, node, s, station, track, train, v, _1_18_, _1_25_, _1_26_, _1_33_, _106_28_, _106_35_
 
         this.info.innerHTML = ''
         this.train.innerHTML = ''
         this.track.innerHTML = ''
+        this.paths.innerHTML = ''
+        this.station.innerHTML = ''
         this.node.innerHTML = ''
         add = (function (text)
         {
@@ -42,40 +50,66 @@ class Info
             v = info[k]
             add(`${k} ${v}`)
         }
+        corpses = world.allTrains().length - world.traffic.trains.length
+        add(`bodies  ${world.physics.cannon.bodies.length}`)
+        add(`corpses ${corpses}`)
+        add(`trains  ${world.traffic.trains.length}`)
+        add(`tracks  ${world.allTracks().length}`)
+        add(`nodes   ${world.allNodes().length}`)
+        add = (function (text)
+        {
+            return elem({class:'infoText',parent:this.station,text:text})
+        }).bind(this)
+        var list = _k_.list(world.allStations())
+        for (var _64_20_ = 0; _64_20_ < list.length; _64_20_++)
+        {
+            station = list[_64_20_]
+            add(`${_k_.rpad(5,station.name)} ${((_1_25_=(station.waitingCar != null ? station.waitingCar.name : undefined)) != null ? _1_25_ : '')} ${(station.arm.waitingForCar ? 'waiting' : '')}`)
+        }
         add = (function (text)
         {
             return elem({class:'infoText',parent:this.train,text:text})
         }).bind(this)
-        var list = _k_.list(world.traffic.trains)
-        for (var _49_18_ = 0; _49_18_ < list.length; _49_18_++)
+        var list1 = _k_.list(world.traffic.trains)
+        for (var _69_18_ = 0; _69_18_ < list1.length; _69_18_++)
         {
-            train = list[_49_18_]
+            train = list1[_69_18_]
             add(`${train.name} ${train.colorName} ${((_1_18_=train.blockReason) != null ? _1_18_ : '')}`)
             add(`   ${train.track.name} ▴ ${train.path.delta.toFixed(1)} td ${train.tailDelta().toFixed(1)}`)
-            add(`   hnd ${train.path.nextDistance().toFixed(1)} hpd ${train.headPrevDistance().toFixed(1)} tpd ${train.tailPrevDistance().toFixed(1)}`)
-            add(`   htr ${train.headTrack().name} ttr ${train.tailTrack().name}`)
-            add(`   tpn ${(train.tailPrevNode() != null ? train.tailPrevNode().name : undefined)} tpt ${((_1_28_=(train.tailPrevTrack() != null ? train.tailPrevTrack().name : undefined)) != null ? _1_28_ : '?')} `)
+            var list2 = _k_.list(train.boxcars())
+            for (var _75_20_ = 0; _75_20_ < list2.length; _75_20_++)
+            {
+                car = list2[_75_20_]
+                if (car.waitingForUnload || car.waitingForLoad)
+                {
+                    add(`   ${car.name} ${(car.waitingForUnload ? 'unload' : '')} ${(car.waitingForCargo ? 'cargo' : '')}`)
+                }
+            }
         }
         add(" ")
-        var list1 = _k_.list(world.traffic.trains)
-        for (var _65_18_ = 0; _65_18_ < list1.length; _65_18_++)
+        add = (function (text)
         {
-            train = list1[_65_18_]
+            return elem({class:'infoText',parent:this.paths,text:text})
+        }).bind(this)
+        var list3 = _k_.list(world.traffic.trains)
+        for (var _82_18_ = 0; _82_18_ < list3.length; _82_18_++)
+        {
+            train = list3[_82_18_]
             add(`${train.path.toString()}`)
         }
         add = (function (text)
         {
             return elem({class:'infoText',parent:this.track,text:text})
         }).bind(this)
-        var list2 = _k_.list(world.allTracks())
-        for (var _70_18_ = 0; _70_18_ < list2.length; _70_18_++)
+        var list4 = _k_.list(world.allTracks())
+        for (var _87_18_ = 0; _87_18_ < list4.length; _87_18_++)
         {
-            track = list2[_70_18_]
+            track = list4[_87_18_]
             s = `${_k_.rpad(4,track.name)} ${track.mode} ${_k_.rpad(4,track.node[0].name)} ▸ ${_k_.rpad(4,track.node[1].name)} ▪ ${_k_.rpad(5,((_1_33_=(track.exitBlockNode != null ? track.exitBlockNode.name : undefined)) != null ? _1_33_ : ''))}`
-            var list3 = _k_.list(track.trains)
-            for (var _72_22_ = 0; _72_22_ < list3.length; _72_22_++)
+            var list5 = _k_.list(track.trains)
+            for (var _89_22_ = 0; _89_22_ < list5.length; _89_22_++)
             {
-                train = list3[_72_22_]
+                train = list5[_89_22_]
                 s += ' ' + _k_.rpad(3,train.name)
             }
             add(s)
@@ -84,33 +118,33 @@ class Info
         {
             return elem({class:'infoText',parent:this.node,text:text})
         }).bind(this)
-        var list4 = _k_.list(world.allNodes())
-        for (var _78_17_ = 0; _78_17_ < list4.length; _78_17_++)
+        var list6 = _k_.list(world.allNodes())
+        for (var _95_17_ = 0; _95_17_ < list6.length; _95_17_++)
         {
-            node = list4[_78_17_]
+            node = list6[_95_17_]
             s = _k_.rpad(5,node.name)
             s += node.commonMode() + ' '
             s += '●'
-            var list5 = _k_.list(node.outTracks)
-            for (var _82_22_ = 0; _82_22_ < list5.length; _82_22_++)
+            var list7 = _k_.list(node.outTracks)
+            for (var _99_22_ = 0; _99_22_ < list7.length; _99_22_++)
             {
-                track = list5[_82_22_]
+                track = list7[_99_22_]
                 s += ' ' + _k_.rpad(3,track.name)
             }
             s += ' ▴'
-            var list6 = _k_.list(node.inTracks)
-            for (var _85_22_ = 0; _85_22_ < list6.length; _85_22_++)
+            var list8 = _k_.list(node.inTracks)
+            for (var _102_22_ = 0; _102_22_ < list8.length; _102_22_++)
             {
-                track = list6[_85_22_]
+                track = list8[_102_22_]
                 s += ' ' + _k_.rpad(3,track.name)
             }
             s += ' ▪ '
-            s += (((_89_35_=(node.train != null ? node.train.name : undefined)) != null ? _89_35_ : ''))
+            s += (((_106_35_=(node.train != null ? node.train.name : undefined)) != null ? _106_35_ : ''))
             s += ' ▪ '
-            var list7 = _k_.list(node.blockedTrains)
-            for (var _91_22_ = 0; _91_22_ < list7.length; _91_22_++)
+            var list9 = _k_.list(node.blockedTrains)
+            for (var _108_22_ = 0; _108_22_ < list9.length; _108_22_++)
             {
-                train = list7[_91_22_]
+                train = list9[_108_22_]
                 s += ' ' + _k_.rpad(3,train.name)
             }
             add(s)

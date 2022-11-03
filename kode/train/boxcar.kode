@@ -18,11 +18,13 @@ function Boxcar extends Car
     takeCargo: -> 
         delete @waitingForUnload
         c = @cargo
+        delete c?.mesh.handler
         delete @cargo
         c
         
     setCargo: (@cargo) ->
         delete @waitingForCargo
+        @cargo.mesh.handler = @
         @mesh.add @cargo.mesh
         @cargo.mesh.quaternion.identity()
         @cargo.mesh.position.set 0 0.85 0
@@ -41,4 +43,8 @@ function Boxcar extends Car
         @mesh.children[0].material = @mesh.children[0].material.clone()
         @mesh.children[0].material.emissive.copy Colors.piston[name]
 
+    deadEye: ->
+        
+        @mesh.children[0].material = Materials.train.window
+        
 module.exports = Boxcar

@@ -1,6 +1,6 @@
 // monsterkodi/kode 0.243.0
 
-var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
+var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}}
 
 var Car, CargoSelector, Engine
 
@@ -12,11 +12,9 @@ Engine = (function ()
     _k_.extend(Engine, Car)
     function Engine (train)
     {
-        var child, label
+        var label
 
         this["onLeave"] = this["onLeave"].bind(this)
-        this["onDragDone"] = this["onDragDone"].bind(this)
-        this["onDrag"] = this["onDrag"].bind(this)
         this["onEnter"] = this["onEnter"].bind(this)
         Engine.__super__.constructor.call(this,train,world.construct.meshes.engine.clone())
         label = world.addLabel({text:this.train.name,size:0.5,mono:true})
@@ -24,13 +22,6 @@ Engine = (function ()
         label.color = 0xffffff
         label.name = this.train.name + '.label'
         this.mesh.add(label)
-        this.mesh.handler = this
-        var list = _k_.list(this.mesh.children)
-        for (var _25_18_ = 0; _25_18_ < list.length; _25_18_++)
-        {
-            child = list[_25_18_]
-            child.handler = this
-        }
     }
 
     Engine.prototype["toSave"] = function ()
@@ -54,6 +45,13 @@ Engine = (function ()
         this.mesh.children[2].material.emissive.copy(Colors.piston[this.colorName])
         this.mesh.children[3].material = this.mesh.children[3].material.clone()
         return this.mesh.children[3].material.emissive.copy(Colors.piston[this.colorName])
+    }
+
+    Engine.prototype["deadEye"] = function ()
+    {
+        this.mesh.children[1].material = Materials.train.window
+        this.mesh.children[2].material = Materials.train.window
+        return this.mesh.children[3].material = Materials.train.window
     }
 
     Engine.prototype["isRearEngine"] = function ()
@@ -80,26 +78,6 @@ Engine = (function ()
                 return this.cargoSelector = new CargoSelector(this)
             }
         }
-    }
-
-    Engine.prototype["onDrag"] = function (hit, downHit)
-    {
-        var dist
-
-        if (this.physics)
-        {
-            return
-        }
-        dist = hit.point.distanceTo(downHit.point)
-        if (dist > 0.5)
-        {
-            return this.train.explode()
-        }
-    }
-
-    Engine.prototype["onDragDone"] = function (hit, downHit)
-    {
-        console.log('drag done!',this.name)
     }
 
     Engine.prototype["onLeave"] = function (hit, nextHit, event)

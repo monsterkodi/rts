@@ -13,11 +13,22 @@ function Car
         world.addObject   @mesh
         world.addPickable @mesh
         
+        @mesh.handler = @
+        for child in @mesh.children
+            child.handler = @
+        
     del: ->
         
         world.removeBody     @body
         world.removeObject   @mesh
         world.removePickable @mesh
+        
+    onDrag: (hit, downHit) =>
+        
+        return if @body
+        dist = hit.point.distanceTo downHit.point
+        if dist > 0.5
+            @train.explode()
         
     delta: -> @train.carDelta @
     nextNode: -> @train.path.nextNode @delta()

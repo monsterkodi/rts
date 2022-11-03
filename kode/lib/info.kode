@@ -10,20 +10,26 @@ class Info
 
     @: ->
                     
-        @info  = elem class:'info' style:'bottom:10px; right:20px;'
-        @train = elem class:'info' style:'top:40px; left:20px;'
-        @track = elem class:'info' style:'top:40px; left:350px;'
-        @node  = elem class:'info' style:'bottom:10px; left:350px;'
+        @info    = elem class:'info' style:'bottom:10px; right:20px;'
+        @train   = elem class:'info' style:'top:40px; left:20px;'
+        @track   = elem class:'info' style:'top:40px; left:350px;'
+        @paths   = elem class:'info' style:'bottom:10px; left:700px;'
+        @station = elem class:'info' style:'top:40px; left:700px;'
+        @node    = elem class:'info' style:'bottom:10px; left:350px;'
         
         document.body.appendChild @info
         document.body.appendChild @train
         document.body.appendChild @track
+        document.body.appendChild @paths
+        document.body.appendChild @station
         document.body.appendChild @node
           
     del: -> 
         @info.remove()
         @train.remove()
         @track.remove()
+        @paths.remove()
+        @station.remove()
         @node.remove()
         
     # 0000000    00000000    0000000   000   000
@@ -37,31 +43,42 @@ class Info
         @info.innerHTML  = ''
         @train.innerHTML = ''
         @track.innerHTML = ''
+        @paths.innerHTML = ''
+        @station.innerHTML = ''
         @node.innerHTML = ''
 
         add = (text) => elem class:'infoText' parent:@info, text:text
         
         for k,v of info
             add "#{k} #{v}"
-                    
+            
+        corpses = world.allTrains().length - world.traffic.trains.length
+        add "bodies  #{world.physics.cannon.bodies.length}"
+        add "corpses #{corpses}"
+        add "trains  #{world.traffic.trains.length}"
+        add "tracks  #{world.allTracks().length}"
+        add "nodes   #{world.allNodes().length}"
+
+        add = (text) => elem class:'infoText' parent:@station, text:text
+        
+        for station in world.allStations()
+            add "#{rpad 5 station.name} #{station.waitingCar?.name ? ''} #{station.arm.waitingForCar ? 'waiting' : ''}"
+        
         add = (text) => elem class:'infoText' parent:@train, text:text
         
         for train in world.traffic.trains
             add "#{train.name} #{train.colorName} #{train.blockReason ? ''}" 
             add "   #{train.track.name} ▴ #{train.path.delta.toFixed 1} td #{train.tailDelta().toFixed 1}"
-            # add "   path length #{train.path.getLength().toFixed 1}"
-            # add "   prev   #{train.path.prevDistance().toFixed 1}"
-            add "   hnd #{train.path.nextDistance().toFixed 1} hpd #{train.headPrevDistance().toFixed 1} tpd #{train.tailPrevDistance().toFixed 1}"
-            # add "   prev tail #{train.path.prevDistance(train.tailDelta()).toFixed 1}"
-            # add "   next tail #{train.path.nextDistance(train.tailDelta()).toFixed 1}"
-            
-            add "   htr #{train.headTrack().name} ttr #{train.tailTrack().name}"
-            # add "   prevTrack #{train.prevTrack()?.name}"
-            add "   tpn #{train.tailPrevNode()?.name} tpt #{train.tailPrevTrack()?.name ? '?'} "
-            
-            # for car in train.boxcars()
-                # add "   " + car.name + " " + car.nextNode().name
+            # add "   hnd #{train.path.nextDistance().toFixed 1} hpd #{train.headPrevDistance().toFixed 1} tpd #{train.tailPrevDistance().toFixed 1}"
+            # add "   htr #{train.headTrack().name} ttr #{train.tailTrack().name}"
+            # add "   tpn #{train.tailPrevNode()?.name} tpt #{train.tailPrevTrack()?.name ? '?'} "
+            for car in train.boxcars()
+                if car.waitingForUnload or car.waitingForLoad
+                    add "   #{car.name} #{car.waitingForUnload ? 'unload' : ''} #{car.waitingForCargo ? 'cargo' : ''}" 
         add " "    
+        
+        add = (text) => elem class:'infoText' parent:@paths, text:text
+        
         for train in world.traffic.trains
             add "#{train.path.toString()}"
             

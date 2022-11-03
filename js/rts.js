@@ -2,7 +2,7 @@
 
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, isFunc: function (o) {return typeof o === 'function'}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
-var BloomPass, Camera, Config, CurveCtrl, Debug, deg2rad, e, EffectComposer, elem, expose, FPS, GridHelper, Info, kxk, Map, Menu, Node, post, prefs, rad2deg, randInt, randIntRange, RenderPass, setShadow, ShaderPass, SimplexNoise, Sound, SSAOPass, stopEvent, Text, tmpMatrix, UnrealBloomPass, World, _
+var BloomPass, Camera, Config, CurveCtrl, Debug, deg2rad, e, EffectComposer, elem, expose, FPS, GridHelper, Info, kxk, Map, Menu, Node, post, prefs, rad2deg, randInt, randIntRange, randRange, RenderPass, setShadow, ShaderPass, SimplexNoise, Sound, SSAOPass, stopEvent, Text, tmpMatrix, UnrealBloomPass, World, _
 
 kxk = require('kxk')
 _ = require('kxk')._
@@ -16,6 +16,7 @@ prefs = require('kxk').prefs
 rad2deg = require('kxk').rad2deg
 randInt = require('kxk').randInt
 randIntRange = require('kxk').randIntRange
+randRange = require('kxk').randRange
 stopEvent = require('kxk').stopEvent
 
 window.$ = kxk.$
@@ -24,6 +25,7 @@ window.post = post
 window.prefs = prefs
 window.randInt = randInt
 window.randIntRange = randIntRange
+window.randRange = randRange
 window.deg2rad = deg2rad
 window.rad2deg = rad2deg
 window.stopEvent = stopEvent
@@ -50,9 +52,9 @@ LineSegments
 QuadraticBezierCurve3
 CubicBezierCurve3`
 var list = _k_.list(expose.split('\n'))
-for (var _49_6_ = 0; _49_6_ < list.length; _49_6_++)
+for (var _50_6_ = 0; _50_6_ < list.length; _50_6_++)
 {
-    e = list[_49_6_]
+    e = list[_50_6_]
     window[e] = THREE[e]
 }
 require('three/examples/js/shaders/CopyShader')
@@ -114,7 +116,7 @@ class RTS
 {
     constructor (view)
     {
-        var cam, canvas, _138_74_
+        var cam, canvas, _139_74_
 
         this.view = view
     
@@ -321,9 +323,9 @@ class RTS
         oldAnimations = this.animations.clone()
         this.animations = []
         var list1 = _k_.list(oldAnimations)
-        for (var _314_22_ = 0; _314_22_ < list1.length; _314_22_++)
+        for (var _315_22_ = 0; _315_22_ < list1.length; _315_22_++)
         {
-            animation = list1[_314_22_]
+            animation = list1[_315_22_]
             animation(delta)
         }
         this.menu.animate(delta)
@@ -336,9 +338,9 @@ class RTS
             oldWorldAnimations = this.worldAnimations.clone()
             this.worldAnimations = []
             var list2 = _k_.list(oldWorldAnimations)
-            for (var _329_26_ = 0; _329_26_ < list2.length; _329_26_++)
+            for (var _330_26_ = 0; _330_26_ < list2.length; _330_26_++)
             {
-                animation = list2[_329_26_]
+                animation = list2[_330_26_]
                 animation(delta * world.speed)
             }
         }
@@ -348,7 +350,7 @@ class RTS
 
     onMouseDown (event)
     {
-        var _351_32_, _351_41_
+        var _352_32_, _352_41_
 
         this.calcMouse(event)
         this.downPos.copy(this.mouse)
@@ -357,7 +359,7 @@ class RTS
         {
             if (event.buttons === 1)
             {
-                if (_k_.isFunc(((_351_32_=this.downHit.mesh) != null ? (_351_41_=_351_32_.handler) != null ? _351_41_.onMouseDown : undefined : undefined)))
+                if (_k_.isFunc(((_352_32_=this.downHit.mesh) != null ? (_352_41_=_352_32_.handler) != null ? _352_41_.onMouseDown : undefined : undefined)))
                 {
                     this.downHit.mesh.handler.onMouseDown(this.downHit,event)
                 }
@@ -368,19 +370,19 @@ class RTS
 
     onMouseUp (event)
     {
-        var hit, moved, _362_19_, _362_25_, _364_24_, _364_30_, _364_39_, _367_19_, _367_25_, _367_34_
+        var hit, moved, _363_19_, _363_25_, _365_24_, _365_30_, _365_39_, _368_19_, _368_25_, _368_34_
 
         this.calcMouse(event)
         hit = this.castRay()
-        if (_k_.isFunc(((_362_19_=this.downHit) != null ? (_362_25_=_362_19_.mesh) != null ? _362_25_.onDragDone : undefined : undefined)))
+        if (_k_.isFunc(((_363_19_=this.downHit) != null ? (_363_25_=_363_19_.mesh) != null ? _363_25_.onDragDone : undefined : undefined)))
         {
             this.downHit.mesh.onDragDone(hit,this.downHit)
         }
-        else if (_k_.isFunc(((_364_24_=this.downHit) != null ? (_364_30_=_364_24_.mesh) != null ? (_364_39_=_364_30_.handler) != null ? _364_39_.onDragDone : undefined : undefined : undefined)))
+        else if (_k_.isFunc(((_365_24_=this.downHit) != null ? (_365_30_=_365_24_.mesh) != null ? (_365_39_=_365_30_.handler) != null ? _365_39_.onDragDone : undefined : undefined : undefined)))
         {
             this.downHit.mesh.handler.onDragDone(hit,this.downHit)
         }
-        if (_k_.isFunc(((_367_19_=this.downHit) != null ? (_367_25_=_367_19_.mesh) != null ? (_367_34_=_367_25_.handler) != null ? _367_34_.onMouseUp : undefined : undefined : undefined)))
+        if (_k_.isFunc(((_368_19_=this.downHit) != null ? (_368_25_=_368_19_.mesh) != null ? (_368_34_=_368_25_.handler) != null ? _368_34_.onMouseUp : undefined : undefined : undefined)))
         {
             this.downHit.mesh.handler.onMouseUp(hit,this.downHit)
         }
@@ -403,18 +405,18 @@ class RTS
 
     onMouseMove (event)
     {
-        var hit, _391_27_, _391_33_, _393_32_, _393_38_, _393_47_, _398_23_, _399_27_, _399_33_, _401_32_, _401_38_, _401_47_, _403_27_, _405_32_, _405_41_
+        var hit, _392_27_, _392_33_, _394_32_, _394_38_, _394_47_, _399_23_, _400_27_, _400_33_, _402_32_, _402_38_, _402_47_, _404_27_, _406_32_, _406_41_
 
         this.calcMouse(event)
         if (hit = this.castRay())
         {
             if (event.buttons === 1)
             {
-                if (_k_.isFunc(((_391_27_=this.downHit) != null ? (_391_33_=_391_27_.mesh) != null ? _391_33_.onDrag : undefined : undefined)))
+                if (_k_.isFunc(((_392_27_=this.downHit) != null ? (_392_33_=_392_27_.mesh) != null ? _392_33_.onDrag : undefined : undefined)))
                 {
                     this.downHit.mesh.onDrag(hit,this.downHit,this.lastHit)
                 }
-                else if (_k_.isFunc(((_393_32_=this.downHit) != null ? (_393_38_=_393_32_.mesh) != null ? (_393_47_=_393_38_.handler) != null ? _393_47_.onDrag : undefined : undefined : undefined)))
+                else if (_k_.isFunc(((_394_32_=this.downHit) != null ? (_394_38_=_394_32_.mesh) != null ? (_394_47_=_394_38_.handler) != null ? _394_47_.onDrag : undefined : undefined : undefined)))
                 {
                     this.downHit.mesh.handler.onDrag(hit,this.downHit,this.lastHit)
                 }
@@ -422,11 +424,11 @@ class RTS
             post.emit('mouseMove',hit,this.downHit,this.lastHit)
             if ((this.lastHit != null ? this.lastHit.mesh : undefined) !== hit.mesh)
             {
-                if (_k_.isFunc(((_399_27_=this.lastHit) != null ? (_399_33_=_399_27_.mesh) != null ? _399_33_.onLeave : undefined : undefined)))
+                if (_k_.isFunc(((_400_27_=this.lastHit) != null ? (_400_33_=_400_27_.mesh) != null ? _400_33_.onLeave : undefined : undefined)))
                 {
                     this.lastHit.mesh.onLeave(this.lastHit,hit,event)
                 }
-                else if (_k_.isFunc(((_401_32_=this.lastHit) != null ? (_401_38_=_401_32_.mesh) != null ? (_401_47_=_401_38_.handler) != null ? _401_47_.onLeave : undefined : undefined : undefined)))
+                else if (_k_.isFunc(((_402_32_=this.lastHit) != null ? (_402_38_=_402_32_.mesh) != null ? (_402_47_=_402_38_.handler) != null ? _402_47_.onLeave : undefined : undefined : undefined)))
                 {
                     this.lastHit.mesh.handler.onLeave(this.lastHit,hit,event)
                 }
@@ -434,7 +436,7 @@ class RTS
                 {
                     hit.mesh.onEnter(hit,this.lastHit,event)
                 }
-                else if (_k_.isFunc(((_405_32_=hit.mesh) != null ? (_405_41_=_405_32_.handler) != null ? _405_41_.onEnter : undefined : undefined)))
+                else if (_k_.isFunc(((_406_32_=hit.mesh) != null ? (_406_41_=_406_32_.handler) != null ? _406_41_.onEnter : undefined : undefined)))
                 {
                     hit.mesh.handler.onEnter(hit,this.lastHit,event)
                 }
@@ -445,7 +447,7 @@ class RTS
 
     onClick (event)
     {
-        var hit, _413_23_, _416_28_, _416_37_
+        var hit, _414_23_, _417_28_, _417_37_
 
         if (hit = this.castRay())
         {
@@ -456,7 +458,7 @@ class RTS
                     hit.mesh.onClick(hit,event)
                 }
             }
-            else if (_k_.isFunc(((_416_28_=hit.mesh) != null ? (_416_37_=_416_28_.handler) != null ? _416_37_.onClick : undefined : undefined)))
+            else if (_k_.isFunc(((_417_28_=hit.mesh) != null ? (_417_37_=_417_28_.handler) != null ? _417_37_.onClick : undefined : undefined)))
             {
                 if (this.downHit.mesh === hit.mesh)
                 {
@@ -478,7 +480,7 @@ class RTS
 
     onDblClick (event)
     {
-        var hit, _431_23_, _433_28_, _433_37_
+        var hit, _432_23_, _434_28_, _434_37_
 
         if (hit = this.castRay())
         {
@@ -486,7 +488,7 @@ class RTS
             {
                 return hit.mesh.onDoubleClick(hit)
             }
-            else if (_k_.isFunc(((_433_28_=hit.mesh) != null ? (_433_37_=_433_28_.handler) != null ? _433_37_.onDoubleClick : undefined : undefined)))
+            else if (_k_.isFunc(((_434_28_=hit.mesh) != null ? (_434_37_=_434_28_.handler) != null ? _434_37_.onDoubleClick : undefined : undefined)))
             {
                 return hit.mesh.handler.onDoubleClick(hit)
             }
@@ -548,7 +550,7 @@ class RTS
 
     render ()
     {
-        var info, _520_18_, _522_21_
+        var info, _521_18_, _523_21_
 
         this.lightPlayer.position.copy(this.camera.position)
         this.renderer.render(world.scene,this.camera)
@@ -558,7 +560,7 @@ class RTS
         this.fps.draw()
         if (prefs.get('info'))
         {
-            this.info = ((_520_18_=this.info) != null ? _520_18_ : new Info)
+            this.info = ((_521_18_=this.info) != null ? _521_18_ : new Info)
             return this.info.draw(info)
         }
         else if ((this.info != null))
