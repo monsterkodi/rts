@@ -1,11 +1,9 @@
 
 ![screenshot](img/rts.png)
 ![screenshot](img/rts06.png)
-![screenshot](img/rts07.png)
 ![screenshot](img/rts08.png)
 ![screenshot](img/rts09.png)
 ![screenshot](img/rts10.png)
-![screenshot](img/rts11.png)
 ![screenshot](img/rts12.png)
 ![screenshot](img/rts13.png)
 
