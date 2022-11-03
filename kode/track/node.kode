@@ -361,7 +361,7 @@ function Node
         
         return if train == @train
         @train = train
-        log @name, '▪' @train?.name
+        # log @name, '▪' @train?.name
         
         if @train 
             if not @nodeBox
@@ -395,12 +395,20 @@ function Node
     
     blockTrain: (train) ->
         
+        return if @blockedTrains.indexOf(train) >= 0
+        
         @blockedTrains.push train
-        train.block()
+        train.block "node #{@name} owned by #{@train?.name}"
         
         geom = Geom.merge new BoxGeometry(0.5 1 0.5), new BoxGeometry(1 0.5 0.5)
         
-        mesh = new Mesh geom, @train.cars[0].mesh.material
+        if @train
+            mat = @train.cars[0].mesh.material
+        else 
+            log 'really?'
+            mat = train.cars[0].mesh.material
+        
+        mesh = new Mesh geom, mat
         train.path.getPoint mesh.position, 3
         train.path.getTangent Vector.tmp, 3
         Vector.tmp.add mesh.position

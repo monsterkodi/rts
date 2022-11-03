@@ -105,7 +105,14 @@ Traffic = (function ()
                     {
                         if (!nn.train)
                         {
-                            nn.setTrain(train)
+                            if (this.trainCanPassThroughNode(train,nn))
+                            {
+                                nn.setTrain(train)
+                            }
+                            else
+                            {
+                                train.block(`cant pass trough ${nn.name}`)
+                            }
                         }
                         else
                         {
@@ -150,6 +157,18 @@ Traffic = (function ()
         }
     }
 
+    Traffic.prototype["trainCanPassThroughNode"] = function (train, node)
+    {
+        var nextTrack, nn
+
+        nn = train.nextNode()
+        _k_.assert(".", 112, 8, "assert failed!" + " nn === node", nn === node)
+        if (nextTrack = this.extendTrainPath(train))
+        {
+            return nextTrack
+        }
+    }
+
     Traffic.prototype["allowTrainAdvance"] = function (train, advance)
     {
         var delta, dist, halfEngineLength, maxAdvance, oldAdvance, other, path, track, trainToOther
@@ -182,9 +201,9 @@ Traffic = (function ()
         delta = path.normDelta(path.delta + advance)
         track = path.trackAtDelta(delta)
         var list = _k_.list(this.trains)
-        for (var _137_18_ = 0; _137_18_ < list.length; _137_18_++)
+        for (var _148_18_ = 0; _148_18_ < list.length; _148_18_++)
         {
-            other = list[_137_18_]
+            other = list[_148_18_]
             if (other === train)
             {
                 continue
@@ -214,7 +233,7 @@ Traffic = (function ()
                     dist = Math.abs(track.trainCurveDistance(train) - track.trainCurveDistance(other))
                     if (dist < 4.5)
                     {
-                        console.log('heads on collision!',train.name,other.name)
+                        console.log('------------------ XXXXXXXXXXXXXX  heads on collision!',train.name,other.name)
                         train.explode()
                         other.explode()
                         advance = 0
@@ -229,22 +248,26 @@ Traffic = (function ()
 
     Traffic.prototype["extendTrainPath"] = function (train)
     {
-        var mode, nextNode, nextTrack, nn, nnopptrck, ot, trackMode, _178_59_
+        var mode, nextNode, nextTrack, nn, nnopptrck, ot, trackMode, _192_59_
 
-        nn = train.path.nextNode()
-        ot = nn.oppositeTracks(train.path.currentTrack())
+        nn = train.nextNode()
+        ot = nn.oppositeTracks(train.currentTrack())
         mode = (ot === nn.outTracks ? 1 : 2)
         var list = _k_.list(ot)
-        for (var _173_22_ = 0; _173_22_ < list.length; _173_22_++)
+        for (var _184_22_ = 0; _184_22_ < list.length; _184_22_++)
         {
-            nextTrack = list[_173_22_]
+            nextTrack = list[_184_22_]
             nextNode = nextTrack.nodeOpposite(nn)
             trackMode = nextTrack.modeForNode(nn) || 3
             if (!(mode & trackMode))
             {
                 continue
             }
-            nnopptrck = ((_178_59_=nextNode.oppositeTracks(nextTrack)) != null ? _178_59_ : [])
+            if (nextTrack.hasExitBlockAtNode(nn))
+            {
+                continue
+            }
+            nnopptrck = ((_192_59_=nextNode.oppositeTracks(nextTrack)) != null ? _192_59_ : [])
             if (nnopptrck.length)
             {
                 train.path.addTrackNode(nextTrack,nextNode)
@@ -262,21 +285,20 @@ Traffic = (function ()
         if (tailIndex > 1)
         {
             headIndex = train.path.currentIndex()
-            console.log('pruneTrainPath',tailIndex,headIndex)
             return train.path.shiftTail()
         }
     }
 
     Traffic.prototype["checkCargo"] = function (train, advance)
     {
-        var car, maxAdvance, minCar, resource, _214_52_, _223_41_, _232_48_
+        var car, maxAdvance, minCar, resource, _228_52_, _237_41_, _246_48_
 
         maxAdvance = advance
         minCar = null
         var list = _k_.list(train.boxcars())
-        for (var _209_16_ = 0; _209_16_ < list.length; _209_16_++)
+        for (var _223_16_ = 0; _223_16_ < list.length; _223_16_++)
         {
-            car = list[_209_16_]
+            car = list[_223_16_]
             if (car.isEmpty())
             {
                 if (car.waitingForCargo)

@@ -47,32 +47,28 @@ class Info
         add = (text) => elem class:'infoText' parent:@train, text:text
         
         for train in world.traffic.trains
-            add "#{train.name}"
-            add "   track  #{train.track.name}"
-            add "   delta  #{train.path.delta.toFixed 1}"
-            add "   tail   #{train.tailDelta().toFixed 1}"
-            add "   length #{train.path.getLength().toFixed 1}"
+            add "#{train.name} #{train.colorName} #{train.blockReason ? ''}" 
+            add "   #{train.track.name} ▴ #{train.path.delta.toFixed 1} td #{train.tailDelta().toFixed 1}"
+            # add "   path length #{train.path.getLength().toFixed 1}"
             # add "   prev   #{train.path.prevDistance().toFixed 1}"
-            add "   hnd    #{train.path.nextDistance().toFixed 1}"
+            add "   hnd #{train.path.nextDistance().toFixed 1} hpd #{train.headPrevDistance().toFixed 1} tpd #{train.tailPrevDistance().toFixed 1}"
             # add "   prev tail #{train.path.prevDistance(train.tailDelta()).toFixed 1}"
-            add "   hpd    #{train.headPrevDistance().toFixed 1}"
-            add "   tpd    #{train.tailPrevDistance().toFixed 1}"
             # add "   next tail #{train.path.nextDistance(train.tailDelta()).toFixed 1}"
             
-            add "   headTrack #{train.headTrack().name}"
-            add "   prevTrack #{train.prevTrack()?.name}"
-            add "   tailTrack #{train.tailTrack().name}"
-            add "   prevTailTrack #{train.tailPrevTrack()?.name}"
-            add "   tailPrevNode #{train.tailPrevNode()?.name}"
+            add "   htr #{train.headTrack().name} ttr #{train.tailTrack().name}"
+            # add "   prevTrack #{train.prevTrack()?.name}"
+            add "   tpn #{train.tailPrevNode()?.name} tpt #{train.tailPrevTrack()?.name ? '?'} "
             
             # for car in train.boxcars()
                 # add "   " + car.name + " " + car.nextNode().name
+        add " "    
+        for train in world.traffic.trains
             add "#{train.path.toString()}"
             
         add = (text) => elem class:'infoText' parent:@track, text:text
         
         for track in world.allTracks()
-            s = "#{rpad 3 track.name}    #{track.mode} #{rpad 4 track.node[0].name} ▸ #{rpad 4 track.node[1].name}" 
+            s = "#{rpad 4 track.name} #{track.mode} #{rpad 4 track.node[0].name} ▸ #{rpad 4 track.node[1].name} ▪ #{rpad 5 track.exitBlockNode?.name ? ''}" 
             for train in track.trains
                 s += ' ' + rpad 3 train.name
             add s

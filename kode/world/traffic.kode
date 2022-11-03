@@ -78,13 +78,16 @@ function Traffic
                     nn = path.nextNode()
                     if nn and nn.train != train               # if node is not owned by train
                         if not nn.train                       #      if node not occupied
-                            nn.setTrain train                 #          train occupies node 
+                            if @trainCanPassThroughNode train, nn
+                                nn.setTrain train             #          train occupies node 
+                            else
+                                train.block "cant pass trough #{nn.name}"  # train blocked by blocked track (or missing track?)
                         else 
                             if train not in nn.blockedTrains  # if train not alreay blocked by node
                                 if path.currentTrack()  != nn.train.tailTrack() and 
                                     path.currentTrack() != nn.train.tailPrevTrack() and
                                     path.nextTrack()    != nn.train.tailTrack()
-                                    nn.blockTrain train       #      train gets blocked
+                                    nn.blockTrain train       #      train gets blocked by occupied node
                                 else 
                                     if path.currentTrack() == nn.train.tailPrevTrack()
                                         nn.setTrain train     # train is the new occupant
@@ -102,7 +105,15 @@ function Traffic
                     tpn = path.prevNode tailDelta
                     if tpn.train == train
                         tpn.unblockAll()
-                                    
+                        
+    trainCanPassThroughNode: (train, node) ->
+        
+        nn = train.nextNode()
+        ▴ nn == node
+        
+        if nextTrack = @extendTrainPath train
+            return nextTrack
+                        
     #  0000000   0000000    000   000   0000000   000   000   0000000  00000000  
     # 000   000  000   000  000   000  000   000  0000  000  000       000       
     # 000000000  000   000   000 000   000000000  000 0 000  000       0000000   
@@ -150,7 +161,7 @@ function Traffic
                 if path.revers[path.indexAtDelta delta] != other.trackRevers()
                     dist = Math.abs track.trainCurveDistance(train) - track.trainCurveDistance(other)
                     if dist < 4.5
-                        log 'heads on collision!' train.name, other.name
+                        log '------------------ XXXXXXXXXXXXXX  heads on collision!' train.name, other.name
                         train.explode()
                         other.explode()
                         advance = 0
@@ -167,14 +178,17 @@ function Traffic
     
     extendTrainPath: (train) ->
         
-        nn = train.path.nextNode()
-        ot = nn.oppositeTracks train.path.currentTrack()
+        nn = train.nextNode()
+        ot = nn.oppositeTracks train.currentTrack()
         mode = ot == nn.outTracks ? 1 : 2
         for nextTrack in ot
             nextNode  = nextTrack.nodeOpposite nn
             trackMode = nextTrack.modeForNode(nn) or 3
             if not (mode & trackMode)
                 continue # track points in the wrong direction
+            if nextTrack.hasExitBlockAtNode nn
+                # log "#{nextTrack.name} exit blocked at node #{nn.name} blocking #{train.name}"
+                continue
             nnopptrck = nextNode.oppositeTracks(nextTrack) ? []
             if nnopptrck.length
                 train.path.addTrackNode nextTrack, nextNode
@@ -192,7 +206,7 @@ function Traffic
         tailIndex = train.path.indexAtDelta tailDelta
         if tailIndex > 1
             headIndex = train.path.currentIndex()
-            log 'pruneTrainPath' tailIndex, headIndex
+            # log 'pruneTrainPath' tailIndex, headIndex
             train.path.shiftTail()
             
     #  0000000   0000000   00000000    0000000    0000000   

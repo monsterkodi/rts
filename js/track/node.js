@@ -493,14 +493,13 @@ Node = (function ()
 
     Node.prototype["setTrain"] = function (train)
     {
-        var block, c1, c2, geom, _364_29_
+        var block, c1, c2, geom
 
         if (train === this.train)
         {
             return
         }
         this.train = train
-        console.log(this.name,'▪',(this.train != null ? this.train.name : undefined))
         if (this.train)
         {
             if (!this.nodeBox)
@@ -540,12 +539,25 @@ Node = (function ()
 
     Node.prototype["blockTrain"] = function (train)
     {
-        var geom, mesh
+        var geom, mat, mesh, _1_6_
 
+        if (this.blockedTrains.indexOf(train) >= 0)
+        {
+            return
+        }
         this.blockedTrains.push(train)
-        train.block()
+        train.block(`node ${this.name} owned by ${(this.train != null ? this.train.name : undefined)}`)
         geom = Geom.merge(new BoxGeometry(0.5,1,0.5),new BoxGeometry(1,0.5,0.5))
-        mesh = new Mesh(geom,this.train.cars[0].mesh.material)
+        if (this.train)
+        {
+            mat = this.train.cars[0].mesh.material
+        }
+        else
+        {
+            console.log('really?')
+            mat = train.cars[0].mesh.material
+        }
+        mesh = new Mesh(geom,mat)
         train.path.getPoint(mesh.position,3)
         train.path.getTangent(Vector.tmp,3)
         Vector.tmp.add(mesh.position)
@@ -572,15 +584,15 @@ Node = (function ()
         var block, t
 
         var list = _k_.list(this.blockedTrains)
-        for (var _421_14_ = 0; _421_14_ < list.length; _421_14_++)
+        for (var _429_14_ = 0; _429_14_ < list.length; _429_14_++)
         {
-            t = list[_421_14_]
+            t = list[_429_14_]
             t.unblock()
         }
         var list1 = _k_.list(this.blocks)
-        for (var _424_18_ = 0; _424_18_ < list1.length; _424_18_++)
+        for (var _432_18_ = 0; _432_18_ < list1.length; _432_18_++)
         {
-            block = list1[_424_18_]
+            block = list1[_432_18_]
             world.removeObject(block)
         }
         this.setTrain(null)
@@ -605,9 +617,9 @@ Node = (function ()
 
         mode = 0
         var list = _k_.list(tracks)
-        for (var _449_18_ = 0; _449_18_ < list.length; _449_18_++)
+        for (var _457_18_ = 0; _457_18_ < list.length; _457_18_++)
         {
-            track = list[_449_18_]
+            track = list[_457_18_]
             trackMode = track.modeForNode(this)
             if (mode !== trackMode)
             {

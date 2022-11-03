@@ -122,8 +122,8 @@ function Train
         for car in @cars
             car.setColorByName name
                     
-    block:   -> @speed = 0
-    unblock: -> @speed = @topSpeed
+    block:   (@blockReason) -> @speed = 0
+    unblock: -> @speed = @topSpeed; delete @blockReason
     
     getLength: -> @cars.length * Train.carDist
     

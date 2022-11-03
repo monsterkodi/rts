@@ -1,6 +1,6 @@
 // monsterkodi/kode 0.243.0
 
-var _k_ = {empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}}
+var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}}
 
 var CurveCtrl, ModeSign, Rail, Track, Train
 
@@ -35,6 +35,7 @@ Track = (function ()
         this.trains = []
         this.curve = new CurvePath
         this.ctrls = []
+        this.exitBlockTrains = []
         points.unshift(n1.getPos())
         curveNum = points.length / 3
         if (curveNum % 1)
@@ -42,12 +43,12 @@ Track = (function ()
             console.log('darfuk?')
         }
         points.push(n2.getPos())
-        for (var _37_21_ = index = 0, _37_25_ = curveNum; (_37_21_ <= _37_25_ ? index < curveNum : index > curveNum); (_37_21_ <= _37_25_ ? ++index : --index))
+        for (var _39_21_ = index = 0, _39_25_ = curveNum; (_39_21_ <= _39_25_ ? index < curveNum : index > curveNum); (_39_21_ <= _39_25_ ? ++index : --index))
         {
             p = points.slice(index * 3,index * 3 + 4)
             this.curve.add(new CubicBezierCurve3(p[0],p[1],p[2],p[3]))
         }
-        for (var _41_21_ = index = 0, _41_25_ = curveNum; (_41_21_ <= _41_25_ ? index < curveNum : index > curveNum); (_41_21_ <= _41_25_ ? ++index : --index))
+        for (var _43_21_ = index = 0, _43_25_ = curveNum; (_43_21_ <= _43_25_ ? index < curveNum : index > curveNum); (_43_21_ <= _43_25_ ? ++index : --index))
         {
             this.ctrls.push(new CurveCtrl(this,index))
         }
@@ -68,30 +69,21 @@ Track = (function ()
         if (!this.hasTrain())
         {
             this.trains.push(train)
-            if (!this.blockMesh)
+            if (this.trains.length === 1)
             {
-                this.addExitBlockForTrain(train)
-                return this.addExitBlockForTrainAndNode(train,train.nextNode())
+                return this.addExitBlockForTrainAtNode(train,train.nextNode())
             }
         }
     }
 
     Track.prototype["subTrain"] = function (train)
     {
-        var i, _72_22_
+        var i
 
         if ((i = this.trains.indexOf(train)) >= 0)
         {
             this.trains.splice(i,1)
-        }
-        if (_k_.empty(this.trains))
-        {
-            ;(this.blockMesh != null ? this.blockMesh.removeFromParent() : undefined)
-            return delete this.blockMesh
-        }
-        else if (train === this.exitBlockTrain)
-        {
-            return this.exitBlockTrain = this.trains[0]
+            return this.removeFromExitBlockTrains(train)
         }
     }
 
@@ -100,18 +92,18 @@ Track = (function ()
         var train
 
         var list = _k_.list(this.trains)
-        for (var _79_18_ = 0; _79_18_ < list.length; _79_18_++)
+        for (var _75_18_ = 0; _75_18_ < list.length; _75_18_++)
         {
-            train = list[_79_18_]
+            train = list[_75_18_]
             train.explode()
         }
     }
 
-    Track.prototype["addExitBlockForTrain"] = function (train)
+    Track.prototype["addExitBlockForTrainAtNode"] = function (train, node)
     {
-        var dir, ld
+        var dir, ld, nextTrack, oppNode, oppTracks, sibTracks
 
-        if (train.path.revers[train.path.indexAtDelta()])
+        if (node === this.node[0])
         {
             ld = 6 / this.curve.getLength()
             dir = -1
@@ -121,49 +113,76 @@ Track = (function ()
             ld = (this.curve.getLength() - 6) / this.curve.getLength()
             dir = 1
         }
-        return this.addExitBlock(train,ld,dir)
-    }
-
-    Track.prototype["addExitBlockForTrainAndNode"] = function (train, node)
-    {
-        var dir, ld, nextNode, nextTrack, oppTracks
-
+        this.addExitBlock(train,node,ld,dir)
         oppTracks = node.oppositeTracks(this)
-        if (oppTracks.length === 1)
+        sibTracks = node.siblingTracks(this)
+        if (oppTracks.length === 1 && sibTracks.length === 1)
         {
             nextTrack = oppTracks[0]
-            ld = 0.5
-            dir = 1
-            nextTrack.addExitBlock(train,ld,dir)
-            if (nextNode = nextTrack.nodeOpposite())
-            {
-                return nextTrack.addExitBlockForTrainAndNode(train,nextNode)
-            }
+            oppNode = nextTrack.nodeOpposite(node)
+            console.log('next ------------- ',this.name,train.name,nextTrack.name,oppNode.name)
+            return nextTrack.addExitBlockForTrainAtNode(train,oppNode)
         }
     }
 
-    Track.prototype["addExitBlock"] = function (train, ld, dir = 1)
+    Track.prototype["addExitBlock"] = function (train, node, ld, dir = 1)
     {
         var tangent
 
-        this.exitBlockTrain = train
-        this.blockMesh = new Mesh(Geom.triangle({size:[0.5,0.5,0.73]}),Materials.track.block)
-        this.blockMesh.noHitTest = true
-        tangent = this.curve.getTangentAt(ld)
-        tangent.multiplyScalar(dir)
-        this.curve.getPointAt(ld,this.blockMesh.position)
-        this.blockMesh.quaternion.copy(Quaternion.unitVectors(Vector.unitY,tangent))
-        return this.mesh.add(this.blockMesh)
+        console.log('exitBlock',this.name,node.name,train.name,ld,dir)
+        if (_k_.in(train,this.exitBlockTrains))
+        {
+            _k_.assert(".", 109, 12, "assert failed!" + " node === this.exitBlockNode", node === this.exitBlockNode)
+            _k_.assert(".", 110, 12, "assert failed!" + " this.blockMesh", this.blockMesh)
+            return
+        }
+        this.exitBlockTrains.push(train)
+        _k_.assert(".", 115, 8, "assert failed!" + " !this.exitBlockNode || this.exitBlockNode === node", !this.exitBlockNode || this.exitBlockNode === node)
+        this.exitBlockNode = node
+        if (!this.blockMesh)
+        {
+            this.blockMesh = new Mesh(Geom.triangle({size:[0.5,0.5,0.73]}),Materials.track.block)
+            this.blockMesh.noHitTest = true
+            tangent = this.curve.getTangentAt(ld)
+            tangent.multiplyScalar(dir)
+            this.curve.getPointAt(ld,this.blockMesh.position)
+            this.blockMesh.quaternion.copy(Quaternion.unitVectors(Vector.unitY,tangent))
+            return this.mesh.add(this.blockMesh)
+        }
+    }
+
+    Track.prototype["hasExitBlockAtNode"] = function (node)
+    {
+        return node === this.exitBlockNode
     }
 
     Track.prototype["onRemoveTrain"] = function (train)
     {
-        var _129_22_
+        return this.removeFromExitBlockTrains(train)
+    }
 
-        if (train === this.exitBlockTrain)
+    Track.prototype["removeFromExitBlockTrains"] = function (train)
+    {
+        var index
+
+        if ((index = this.exitBlockTrains.indexOf(train)) >= 0)
         {
-            ;(this.blockMesh != null ? this.blockMesh.removeFromParent() : undefined)
-            delete this.exitBlockTrain
+            this.exitBlockTrains.splice(index,1)
+            if (_k_.empty(this.exitBlockTrains))
+            {
+                return this.removeExitBlock()
+            }
+        }
+    }
+
+    Track.prototype["removeExitBlock"] = function ()
+    {
+        if (this.blockMesh)
+        {
+            _k_.assert(".", 143, 12, "assert failed!" + " this.exitBlockTrains.length === 0", this.exitBlockTrains.length === 0)
+            console.log(`removeBlock ${this.name} ${this.exitBlockNode.name}`)
+            this.blockMesh.removeFromParent()
+            delete this.exitBlockNode
             return delete this.blockMesh
         }
     }
@@ -177,7 +196,7 @@ Track = (function ()
             return {x:p.x.toFixed(1),y:p.y.toFixed(1),z:p.z.toFixed(1)}
         }
         ctrl = []
-        for (var _143_17_ = i = 0, _143_21_ = this.curve.curves.length; (_143_17_ <= _143_21_ ? i < this.curve.curves.length : i > this.curve.curves.length); (_143_17_ <= _143_21_ ? ++i : --i))
+        for (var _159_17_ = i = 0, _159_21_ = this.curve.curves.length; (_159_17_ <= _159_21_ ? i < this.curve.curves.length : i > this.curve.curves.length); (_159_17_ <= _159_21_ ? ++i : --i))
         {
             ctrl.push(fix(this.curve.curves[i].v1))
             ctrl.push(fix(this.curve.curves[i].v2))
@@ -207,9 +226,9 @@ Track = (function ()
             world.removePickable(this.mesh)
             world.removeObject(this.mesh)
             var list = _k_.list(this.ctrls)
-            for (var _167_21_ = 0; _167_21_ < list.length; _167_21_++)
+            for (var _183_21_ = 0; _183_21_ < list.length; _183_21_++)
             {
-                ctrl = list[_167_21_]
+                ctrl = list[_183_21_]
                 ctrl.del()
             }
             delete this.modeSign
@@ -263,7 +282,7 @@ Track = (function ()
         }
         if (event.button === 0)
         {
-            boxcars = 15
+            boxcars = 5
             length = (boxcars + 1) * Train.carDist
             delta = this.deltaClosestToPoint(hit.point)
             if (this.mode === ModeSign.backward)
@@ -285,7 +304,6 @@ Track = (function ()
                     return
                 }
             }
-            console.log('addTrain delta',delta,'node',node.name)
             return world.onAddTrain(this,delta,node,boxcars)
         }
     }
@@ -467,9 +485,9 @@ Track = (function ()
 
         points = []
         var list = _k_.list(this.curve.curves)
-        for (var _361_18_ = 0; _361_18_ < list.length; _361_18_++)
+        for (var _377_18_ = 0; _377_18_ < list.length; _377_18_++)
         {
-            curve = list[_361_18_]
+            curve = list[_377_18_]
             points = points.concat([curve.v0,curve.v1,curve.v2,curve.v3])
         }
         return points
@@ -481,9 +499,9 @@ Track = (function ()
 
         points = []
         var list = _k_.list(this.curve.curves)
-        for (var _368_18_ = 0; _368_18_ < list.length; _368_18_++)
+        for (var _384_18_ = 0; _384_18_ < list.length; _384_18_++)
         {
-            curve = list[_368_18_]
+            curve = list[_384_18_]
             points = points.concat([curve.v1,curve.v2,curve.v3])
         }
         if (!includeLast)

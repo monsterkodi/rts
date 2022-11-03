@@ -163,14 +163,17 @@ Train = (function ()
         }
     }
 
-    Train.prototype["block"] = function ()
+    Train.prototype["block"] = function (blockReason)
     {
+        this.blockReason = blockReason
+    
         return this.speed = 0
     }
 
     Train.prototype["unblock"] = function ()
     {
-        return this.speed = this.topSpeed
+        this.speed = this.topSpeed
+        return delete this.blockReason
     }
 
     Train.prototype["getLength"] = function ()

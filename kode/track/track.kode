@@ -28,6 +28,8 @@ function Track
         @curve = new CurvePath
         @ctrls = []
         
+        @exitBlockTrains = []
+        
         points.unshift n1.getPos()
         curveNum = points.length / 3
         if curveNum % 1
@@ -59,20 +61,14 @@ function Track
     
         if not @hasTrain() 
             @trains.push train
-            if not @blockMesh
-                @addExitBlockForTrain train
-                @addExitBlockForTrainAndNode train, train.nextNode()
+            if @trains.length == 1
+                @addExitBlockForTrainAtNode train, train.nextNode()
             
     subTrain: (train) -> 
     
         if (i = @trains.indexOf(train)) >= 0
             @trains.splice i, 1
-            
-        if empty @trains
-            @blockMesh?.removeFromParent()
-            delete @blockMesh
-        else if train == @exitBlockTrain
-            @exitBlockTrain = @trains[0]
+            @removeFromExitBlockTrains train
             
     explodeTrains: ->
         
@@ -85,51 +81,71 @@ function Track
     # 000        000 000   000     000     000   000  000      000   000  000       000  000   
     # 00000000  000   000  000     000     0000000    0000000   0000000    0000000  000   000  
     
-    
-    addExitBlockForTrain: (train) ->
+    addExitBlockForTrainAtNode: (train, node) ->
                 
-        if train.path.revers[train.path.indexAtDelta()]
+        if node == @node[0]
             ld = 6/@curve.getLength()
             dir = -1
         else
             ld = (@curve.getLength()-6)/@curve.getLength()
             dir = 1
             
-        @addExitBlock train, ld, dir
+        @addExitBlock train, node, ld, dir
                 
-    addExitBlockForTrainAndNode: (train, node) ->
-        
         oppTracks = node.oppositeTracks @
+        sibTracks = node.siblingTracks @
         
-        if oppTracks.length == 1
-            
+        if oppTracks.length == 1 and sibTracks.length == 1
             nextTrack = oppTracks[0]
-            ld = 0.5
-            dir = 1
-            nextTrack.addExitBlock train, ld, dir
-            
-            if nextNode = nextTrack.nodeOpposite()
-                nextTrack.addExitBlockForTrainAndNode train, nextNode
+            oppNode = nextTrack.nodeOpposite node
+            log 'next ------------- ' @name, train.name, nextTrack.name, oppNode.name
+            nextTrack.addExitBlockForTrainAtNode train, oppNode
     
-    addExitBlock: (train, ld, dir=1) ->
+    addExitBlock: (train, node, ld, dir=1) ->
         
-        @exitBlockTrain = train
+        log 'exitBlock' @name, node.name, train.name, ld, dir
         
-        @blockMesh = new Mesh Geom.triangle(size:[0.5 0.5 0.73]), Materials.track.block
-        @blockMesh.noHitTest = true
-        tangent = @curve.getTangentAt ld
-        tangent.multiplyScalar dir
-        @curve.getPointAt ld, @blockMesh.position
-        @blockMesh.quaternion.copy Quaternion.unitVectors Vector.unitY, tangent
-        @mesh.add @blockMesh
+        if train in @exitBlockTrains
+            ▴ node == @exitBlockNode
+            ▴ @blockMesh
+            return
+        
+        @exitBlockTrains.push train
+        
+        ▴ not @exitBlockNode or @exitBlockNode == node
+        @exitBlockNode = node
+        
+        if not @blockMesh
+            @blockMesh = new Mesh Geom.triangle(size:[0.5 0.5 0.73]), Materials.track.block
+            @blockMesh.noHitTest = true
+            tangent = @curve.getTangentAt ld
+            tangent.multiplyScalar dir
+            @curve.getPointAt ld, @blockMesh.position
+            @blockMesh.quaternion.copy Quaternion.unitVectors Vector.unitY, tangent
+            @mesh.add @blockMesh
+                
+    hasExitBlockAtNode: (node) -> node == @exitBlockNode
                    
     onRemoveTrain: (train) =>
         
-        if train == @exitBlockTrain
-            @blockMesh?.removeFromParent()
-            delete @exitBlockTrain
-            delete @blockMesh
+        @removeFromExitBlockTrains train
         
+    removeFromExitBlockTrains: (train) ->
+        
+        if (index = @exitBlockTrains.indexOf train) >= 0
+            @exitBlockTrains.splice index, 1
+            if empty @exitBlockTrains
+                @removeExitBlock()
+        
+    removeExitBlock: ->
+        
+        if @blockMesh
+            ▴ @exitBlockTrains.length == 0
+            log "removeBlock #{@name} #{@exitBlockNode.name}"
+            @blockMesh.removeFromParent()
+            delete @exitBlockNode 
+            delete @blockMesh
+                
     #  0000000   0000000   000   000  00000000  
     # 000       000   000  000   000  000       
     # 0000000   000000000   000 000   0000000   
@@ -211,7 +227,7 @@ function Track
             @nextMode()
         if event.button == 0
             
-            boxcars = 15
+            boxcars = 5
             length  = (boxcars+1)*Train.carDist
             
             delta = @deltaClosestToPoint hit.point
@@ -228,7 +244,7 @@ function Track
                     log 'tail outside forward track'
                     return
                 
-            log 'addTrain delta' delta, 'node' node.name
+            # log 'addTrain delta' delta, 'node' node.name
             world.onAddTrain @, delta, node, boxcars
             
     onDoubleClick: =>
