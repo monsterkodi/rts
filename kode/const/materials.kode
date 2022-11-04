@@ -23,6 +23,7 @@ Materials =
         transparent:    material 0x888888, typ:'lambert' depthWrite:false, transparent:true, opacity:0.1
         flat:           material 0xffffff, metalness: 0.5, roughness: 0.7, flatShading:true, dithering:true
         toon:           material 0xffffff, typ:'toon'
+    shinyblack:         material 0x000000, metalness: 0.6, roughness: 0.1, flatShading:true
     wireframe:          material 0x888888, typ:'basic' wireframe: true
     floor:              material 0x222222, dithering:true
     shadow:             material 0x000000, typ:'shadow' opacity:0.2 depthWrite:false
@@ -51,10 +52,10 @@ Materials =
         side:           material 0x000000, metalness: 0.5 roughness: 0.2, dithering:true, side:THREE.DoubleSide
         central:        material 0xffffff, metalness: 0.2 roughness: 0.4
     mining:
-        chalk:          material 0xffffff, metalness: 0.6 roughness: 0.05, emissive:0x777777, dithering:true
-        water:          material 0x4444ff, metalness: 0.6 roughness: 0.01, emissive:0x4444aa, dithering:true
-        blood:          material 0xff0000, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, dithering:true
-        stuff:          material 0xffff00, metalness: 0.6 roughness: 0.01, emissive:0x888800, dithering:true
+        chalk:          material Colors.mining.chalk, metalness: 0.6 roughness: 0.05, emissive:0x777777, dithering:true
+        water:          material Colors.mining.water, metalness: 0.6 roughness: 0.01, emissive:0x4444aa, dithering:true
+        blood:          material Colors.mining.blood, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, dithering:true
+        stuff:          material Colors.mining.stuff, metalness: 0.6 roughness: 0.01, emissive:0x888800, dithering:true
     selector:
         chalk:          material 0xffffff, metalness: 0.2 roughness: 0.4
         water:          material 0xffffff, metalness: 0.2 roughness: 0.4

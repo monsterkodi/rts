@@ -39,7 +39,7 @@ class Map extends World
     stationTest: ->
 
         @addCentralStation pos:[-18   0]
-        @addCentralStation pos:[-36   0] dir:Vector.minusY
+        # @addCentralStation pos:[-36   0] dir:Vector.minusY
         # @addMiningStation  pos:[  0   0], resource:'chalk'
         @addMiningStation  pos:[  0   0], resource:'stuff'
         @addMiningStation  pos:[ 18   0], resource:'blood'

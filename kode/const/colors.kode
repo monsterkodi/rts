@@ -17,6 +17,12 @@ Colors =
         head:   color 0x666666
         center: color 0xff0000
         
+    mining:
+        chalk: color 0xffffff
+        water: color 0x4444ff
+        blood: color 0xff0000
+        stuff: color 0xffff00
+        
     dot: [  
             color  0xff0000
             color  0x555555

@@ -1,0 +1,112 @@
+
+#  0000000   00000000   000  0000000    
+# 000        000   000  000  000   000  
+# 000  0000  0000000    000  000   000  
+# 000   000  000   000  000  000   000  
+#  0000000   000   000  000  0000000    
+
+BufferGeometry = THREE.BufferGeometry
+
+class Grid extends BufferGeometry
+
+    @: (sx, sy, nx, ny, pd) ->
+
+        super()
+                    
+        @type = 'Grid'
+
+        vertices = []
+        indices  = []
+        
+        twp = sx / nx
+        thp = sy / ny
+        
+        ox = twp/2-sx/2
+        oy = thp/2-sx/2
+        
+        tw = sx / nx / pd / 2
+        th = sy / ny / pd / 2
+        
+        vs = 0
+        tile = (x, y) =>
+
+            vertices.push x*twp-tw + ox, y*thp-th + oy, 0
+            vertices.push x*twp+tw + ox, y*thp-th + oy, 0
+            vertices.push x*twp+tw + ox, y*thp+th + oy, 0
+            vertices.push x*twp-tw + ox, y*thp+th + oy, 0
+            
+            indices.push vs+0 vs+1 vs+2
+            indices.push vs+2 vs+3 vs+0
+            
+            vs += 4
+
+        for x in 0...nx
+            for y in 0...ny
+                tile x, y
+            
+        @setIndex indices
+        @setAttribute 'position' new THREE.Float32BufferAttribute vertices, 3
+        
+        @computeVertexNormals()
+
+#  0000000   0000000   000       0000000   00000000    0000000   00000000   000  0000000    
+# 000       000   000  000      000   000  000   000  000        000   000  000  000   000  
+# 000       000   000  000      000   000  0000000    000  0000  0000000    000  000   000  
+# 000       000   000  000      000   000  000   000  000   000  000   000  000  000   000  
+#  0000000   0000000   0000000   0000000   000   000   0000000   000   000  000  0000000    
+
+class ColorGrid
+
+    @mat: new THREE.Matrix4
+    
+    @: (cfg) ->
+        
+        gridW   = cfg.gridWidth  ? cfg.gridSize
+        gridH   = cfg.gridHeight ? gridW
+        width   = cfg.width      ? cfg.size
+        height  = cfg.height     ? width
+        padding = cfg.padding    ? 1.2
+
+        @sz     = vec gridW, gridH
+        @geom   = new Grid width, height, @sz.x, @sz.y, padding               
+        mat     = cfg.material ? [Materials.shinyblack].concat Object.values Materials.mining
+        @quads  = new Mesh @geom, mat
+        if cfg.shadows ➜ @quads.setShadow()
+        
+        @setColumns []
+
+    setColumns: (cols) ->
+        
+        @geom.clearGroups()
+        gs = gc = 0 # group start and count
+        vi = ai = 0 # visited and added index count
+        gm = -1     # last group material
+        for col,ci in cols
+            if ci >= @sz.x ➜ break
+            for row,ri in col
+                if ri >= @sz.y ➜ break
+                if row != gm
+                    if gm == -1
+                        gc++
+                        gm = row
+                    else
+                        @geom.addGroup gs*6, gc*6, gm
+                        gm = row
+                        ai = gs+gc
+                        gc = 1
+                        gs = vi
+                else
+                    gc++
+                vi++
+            if rest = @sz.y - ri
+                @geom.addGroup gs*6, gc*6, gm
+                ai = gs+gc
+                gm = 0
+                gc = rest
+                gs = vi
+                vi += rest
+            
+        if ai < @sz.x*@sz.y
+            @geom.addGroup gs*6, (@sz.x*@sz.y-ai)*6, 0
+            
+module.exports = ColorGrid
