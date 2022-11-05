@@ -26,7 +26,6 @@ Needle = (function ()
         this.poleBody.mesh.setShadow()
         world.scene.add(this.poleBody.mesh)
         this.cannon.addBody(this.poleBody)
-        this.addChain()
     }
 
     Needle.prototype["addChain"] = function ()

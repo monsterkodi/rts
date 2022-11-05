@@ -279,10 +279,10 @@ Traffic = (function ()
             {
                 logRearended('loop!')
                 var list = _k_.list(this.rearendedTrains)
-                for (var _201_35_ = 0; _201_35_ < list.length; _201_35_++)
+                for (var _200_35_ = 0; _200_35_ < list.length; _200_35_++)
                 {
-                    train = list[_201_35_][0]
-                    other = list[_201_35_][1]
+                    train = list[_200_35_][0]
+                    other = list[_200_35_][1]
                     advance = scaledDelta * train.speed
                     if (advance > 0)
                     {
@@ -295,9 +295,9 @@ Traffic = (function ()
             stopping = {}
             stopped = {}
             var list1 = _k_.list(this.rearendedTrains)
-            for (var _211_19_ = 0; _211_19_ < list1.length; _211_19_++)
+            for (var _210_19_ = 0; _210_19_ < list1.length; _210_19_++)
             {
-                to = list1[_211_19_]
+                to = list1[_210_19_]
                 stopped[to[0].name] = to[1].name
                 stopping[to[1].name] = to[0].name
             }
@@ -311,16 +311,16 @@ Traffic = (function ()
 
     Traffic.prototype["extendTrainPath"] = function (train)
     {
-        var accum, choice, choices, length, mode, nextNode, nextTrack, nn, nnopptrck, ot, randm, total, trackMode, tracks, _272_59_
+        var accum, choice, choices, length, mode, nextNode, nextTrack, nn, nnopptrck, ot, randm, total, trackMode, tracks, _238_59_
 
         nn = train.nextNode()
         ot = nn.oppositeTracks(train.currentTrack())
         mode = (ot === nn.outTracks ? 1 : 2)
         choices = []
         var list = _k_.list(ot)
-        for (var _264_22_ = 0; _264_22_ < list.length; _264_22_++)
+        for (var _230_22_ = 0; _230_22_ < list.length; _230_22_++)
         {
-            nextTrack = list[_264_22_]
+            nextTrack = list[_230_22_]
             nextNode = nextTrack.nodeOpposite(nn)
             trackMode = nextTrack.modeForNode(nn) || 3
             if (!(mode & trackMode))
@@ -331,7 +331,7 @@ Traffic = (function ()
             {
                 continue
             }
-            nnopptrck = ((_272_59_=nextNode.oppositeTracks(nextTrack)) != null ? _272_59_ : [])
+            nnopptrck = ((_238_59_=nextNode.oppositeTracks(nextTrack)) != null ? _238_59_ : [])
             if (nnopptrck.length)
             {
                 choices.push([nextTrack,nextNode])
@@ -388,14 +388,14 @@ Traffic = (function ()
 
     Traffic.prototype["checkCargo"] = function (train, advance)
     {
-        var car, maxAdvance, minCar, resource, _327_52_, _336_41_, _345_48_
+        var car, maxAdvance, minCar, resource, _293_52_, _302_41_, _311_48_
 
         maxAdvance = advance
         minCar = null
         var list = _k_.list(train.boxcars())
-        for (var _322_16_ = 0; _322_16_ < list.length; _322_16_++)
+        for (var _288_16_ = 0; _288_16_ < list.length; _288_16_++)
         {
-            car = list[_322_16_]
+            car = list[_288_16_]
             if (car.isEmpty())
             {
                 if (car.waitingForCargo)
