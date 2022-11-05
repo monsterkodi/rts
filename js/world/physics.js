@@ -2,34 +2,24 @@
 
 var _k_ = {list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
-var CANNON, CannonDebugger, Physics
+var CANNON, CannonDebugger, Needle, Physics
 
 CANNON = require('cannon-es')
 CannonDebugger = require('cannon-es-debugger')
+Needle = require('./needle')
 
 Physics = (function ()
 {
     function Physics ()
     {
-        var constraint, geom, groundBody
+        var constraint, groundBody
 
         this.cannon = new CANNON.World({gravity:new CANNON.Vec3(0,0,-9)})
         this.cannonDebugger = new CannonDebugger(world.scene,this.cannon)
         groundBody = new CANNON.Body({type:CANNON.Body.STATIC,shape:new CANNON.Plane()})
         groundBody.position.z = -0.5
         this.cannon.addBody(groundBody)
-        this.poleBody = new CANNON.Body({type:CANNON.Body.KINEMATIC})
-        this.poleBody.keep = true
-        this.poleBody.addShape(new CANNON.Cylinder(0.1,0.1,5,8))
-        this.poleBody.addShape(new CANNON.Sphere(0.3))
-        this.poleBody.shapeOffsets[0].y = 2.5
-        this.poleBody.shapeOffsets[1].y = 5
-        this.poleBody.quaternion.copy(Quaternion.unitVectors(Vector.unitY,Vector.unitZ))
-        geom = Geom.merge(Geom.cylinder({radius:0.1,height:5,dir:Vector.unitY,pos:[0,2.5,0]}),Geom.sphere({radius:0.3,pos:[0,5,0]}))
-        this.poleBody.mesh = new Mesh(geom,Materials.physics.chain)
-        this.poleBody.mesh.setShadow()
-        world.scene.add(this.poleBody.mesh)
-        this.cannon.addBody(this.poleBody)
+        this.centerNeedle = new Needle(this.cannon)
         if (false)
         {
             this.cylinderBody1 = new CANNON.Body({mass:0.1,shape:new CANNON.Cylinder(0.8,1,4,16)})
@@ -43,7 +33,6 @@ Physics = (function ()
             constraint = new CANNON.ConeTwistConstraint(this.cylinderBody1,this.cylinderBody2,{collideConnected:true,wakeUpBodies:true,axisA:new CANNON.Vec3(0,0,1),pivotA:new CANNON.Vec3(0,0,3),axisB:new CANNON.Vec3(0,0,-1),pivotB:new CANNON.Vec3(0,0,3),maxForce:10,twistAngle:deg2rad(180)})
             this.cannon.addConstraint(constraint)
         }
-        this.addChain()
     }
 
     Physics.prototype["clear"] = function ()
@@ -55,9 +44,9 @@ Physics = (function ()
             return b.mesh && !b.keep
         })
         var list = _k_.list(meshBodies)
-        for (var _72_17_ = 0; _72_17_ < list.length; _72_17_++)
+        for (var _60_17_ = 0; _60_17_ < list.length; _60_17_++)
         {
-            body = list[_72_17_]
+            body = list[_60_17_]
             this.removeBody(body)
         }
     }
@@ -80,15 +69,14 @@ Physics = (function ()
     {
         var b, cnt, p, q
 
-        this.poleBody.position.copy(vec(this.poleBody.position).lerp(rts.centerHelper.position,0.2))
-        this.poleBody.quaternion.copy(rts.centerHelper.quaternion)
+        this.centerNeedle.simulate(scaledDelta,timeSum)
         p = vec()
         q = new Quaternion
         cnt = 0
         var list = _k_.list(this.cannon.bodies)
-        for (var _98_14_ = 0; _98_14_ < list.length; _98_14_++)
+        for (var _85_14_ = 0; _85_14_ < list.length; _85_14_++)
         {
-            b = list[_98_14_]
+            b = list[_85_14_]
             if (b.kinematic)
             {
                 cnt++
@@ -104,9 +92,9 @@ Physics = (function ()
             this.cannonDebugger.update()
         }
         var list1 = _k_.list(this.cannon.bodies)
-        for (var _111_14_ = 0; _111_14_ < list1.length; _111_14_++)
+        for (var _98_14_ = 0; _98_14_ < list1.length; _98_14_++)
         {
-            b = list1[_111_14_]
+            b = list1[_98_14_]
             if (b.mesh)
             {
                 b.mesh.position.copy(b.position)
@@ -143,7 +131,7 @@ Physics = (function ()
 
     Physics.prototype["addCar"] = function (car)
     {
-        var cb, _152_31_
+        var cb, _139_31_
 
         this.addCargo((typeof car.takeCargo === "function" ? car.takeCargo() : undefined))
         cb = new CANNON.Body({mass:1,shape:new CANNON.Cylinder(1,1,3.5,8)})
@@ -176,9 +164,9 @@ Physics = (function ()
         var body
 
         var list = _k_.list(this.cannon.bodies)
-        for (var _183_17_ = 0; _183_17_ < list.length; _183_17_++)
+        for (var _170_17_ = 0; _170_17_ < list.length; _170_17_++)
         {
-            body = list[_183_17_]
+            body = list[_170_17_]
             if (body.kinematic === car.mesh)
             {
                 this.cannon.removeBody(body)
@@ -202,56 +190,26 @@ Physics = (function ()
 
     Physics.prototype["addTrain"] = function (train)
     {
-        var car
+        var car, i
 
         if (train.cars[0].body)
         {
             return
         }
         var list = _k_.list(train.cars)
-        for (var _208_16_ = 0; _208_16_ < list.length; _208_16_++)
+        for (var _195_16_ = 0; _195_16_ < list.length; _195_16_++)
         {
-            car = list[_208_16_]
+            car = list[_195_16_]
             this.addCar(car)
         }
-    }
-
-    Physics.prototype["addChain"] = function ()
-    {
-        var ballPivot, cb, cbs, cstr, i, num, p, polePivot, r
-
-        cbs = []
-        num = 16
-        for (var _230_17_ = i = 0, _230_21_ = num; (_230_17_ <= _230_21_ ? i < num : i > num); (_230_17_ <= _230_21_ ? ++i : --i))
+        var list1 = _k_.list(train.cars)
+        for (i = 0; i < list1.length; i++)
         {
-            p = this.poleBody.position
-            r = 0.25 + (1 - i / num) * 0.2
-            cb = new CANNON.Body({mass:1,shape:new CANNON.Sphere(r)})
-            cb.position.set(p.x,p.y - i * 0.5,p.z)
-            cb.mesh = new Mesh(Geom.sphere({radius:r,sgmt:8}),Materials.physics.chain)
-            cb.keep = true
-            cb.mesh.setShadow()
-            world.scene.add(cb.mesh)
-            cbs.push(cb)
-            this.cannon.addBody(cb)
-        }
-        var list = _k_.list(cbs)
-        for (i = 0; i < list.length; i++)
-        {
-            cb = list[i]
-            if (i === 0)
+            car = list1[i]
+            if (i > 0)
             {
-                polePivot = new CANNON.Vec3(0,5,0)
-                ballPivot = new CANNON.Vec3(0,0,0)
-                cstr = new CANNON.PointToPointConstraint(this.poleBody,polePivot,cbs[i],ballPivot)
-                cstr.collideConnected = false
+                this.cannon.addConstraint(new CANNON.ConeTwistConstraint(train.cars[i - 1].body,car.body,{axisA:new CANNON.Vec3(0,0,1),pivotA:new CANNON.Vec3(0,0,3),axisB:new CANNON.Vec3(0,0,-1),pivotB:new CANNON.Vec3(0,0,3),twistAngle:deg2rad(90)}))
             }
-            else
-            {
-                cstr = new CANNON.DistanceConstraint(cbs[i - 1],cbs[i],cbs[i - 1].shapes[0].radius + cbs[i].shapes[0].radius)
-                cstr.collideConnected = false
-            }
-            this.cannon.addConstraint(cstr)
         }
     }
 

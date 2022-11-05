@@ -98,8 +98,15 @@ Track = (function ()
 
     Track.prototype["addExitBlockForTrainAtNode"] = function (train, node)
     {
-        var dir, ld, nextTrack, oppNode, oppTracks, sibTracks
+        var dir, ld, nextTrack, oppNode, oppTracks, sibTracks, _85_22_
 
+        this.visitedNodes = ((_85_22_=this.visitedNodes) != null ? _85_22_ : [])
+        if (_k_.in(node,this.visitedNodes))
+        {
+            delete this.visitedNodes
+            return
+        }
+        this.visitedNodes.push(node)
         if (node === this.node[0])
         {
             ld = 6 / this.curve.getLength()
@@ -127,12 +134,12 @@ Track = (function ()
 
         if (_k_.in(train,this.exitBlockTrains))
         {
-            _k_.assert(".", 108, 12, "assert failed!" + " node === this.exitBlockNode", node === this.exitBlockNode)
-            _k_.assert(".", 109, 12, "assert failed!" + " this.blockMesh", this.blockMesh)
+            _k_.assert(".", 114, 12, "assert failed!" + " node === this.exitBlockNode", node === this.exitBlockNode)
+            _k_.assert(".", 115, 12, "assert failed!" + " this.blockMesh", this.blockMesh)
             return
         }
         this.exitBlockTrains.push(train)
-        _k_.assert(".", 114, 8, "assert failed!" + " !this.exitBlockNode || this.exitBlockNode === node", !this.exitBlockNode || this.exitBlockNode === node)
+        _k_.assert(".", 120, 8, "assert failed!" + " !this.exitBlockNode || this.exitBlockNode === node", !this.exitBlockNode || this.exitBlockNode === node)
         this.exitBlockNode = node
         if (!this.blockMesh)
         {
@@ -174,7 +181,7 @@ Track = (function ()
     {
         if (this.blockMesh)
         {
-            _k_.assert(".", 142, 12, "assert failed!" + " this.exitBlockTrains.length === 0", this.exitBlockTrains.length === 0)
+            _k_.assert(".", 148, 12, "assert failed!" + " this.exitBlockTrains.length === 0", this.exitBlockTrains.length === 0)
             this.blockMesh.removeFromParent()
             delete this.exitBlockNode
             return delete this.blockMesh
@@ -190,7 +197,7 @@ Track = (function ()
             return {x:p.x.toFixed(1),y:p.y.toFixed(1),z:p.z.toFixed(1)}
         }
         ctrl = []
-        for (var _158_17_ = i = 0, _158_21_ = this.curve.curves.length; (_158_17_ <= _158_21_ ? i < this.curve.curves.length : i > this.curve.curves.length); (_158_17_ <= _158_21_ ? ++i : --i))
+        for (var _164_17_ = i = 0, _164_21_ = this.curve.curves.length; (_164_17_ <= _164_21_ ? i < this.curve.curves.length : i > this.curve.curves.length); (_164_17_ <= _164_21_ ? ++i : --i))
         {
             ctrl.push(fix(this.curve.curves[i].v1))
             ctrl.push(fix(this.curve.curves[i].v2))
@@ -220,9 +227,9 @@ Track = (function ()
             world.removePickable(this.mesh)
             world.removeObject(this.mesh)
             var list = _k_.list(this.ctrls)
-            for (var _182_21_ = 0; _182_21_ < list.length; _182_21_++)
+            for (var _188_21_ = 0; _188_21_ < list.length; _188_21_++)
             {
-                ctrl = list[_182_21_]
+                ctrl = list[_188_21_]
                 ctrl.del()
             }
             delete this.modeSign
@@ -276,7 +283,7 @@ Track = (function ()
         }
         if (event.button === 0)
         {
-            boxcars = 5
+            boxcars = 1
             length = (boxcars + 1) * Train.carDist
             delta = this.deltaClosestToPoint(hit.point)
             if (this.mode === ModeSign.backward)
@@ -495,9 +502,9 @@ Track = (function ()
 
         points = []
         var list = _k_.list(this.curve.curves)
-        for (var _382_18_ = 0; _382_18_ < list.length; _382_18_++)
+        for (var _388_18_ = 0; _388_18_ < list.length; _388_18_++)
         {
-            curve = list[_382_18_]
+            curve = list[_388_18_]
             points = points.concat([curve.v0,curve.v1,curve.v2,curve.v3])
         }
         return points
@@ -509,9 +516,9 @@ Track = (function ()
 
         points = []
         var list = _k_.list(this.curve.curves)
-        for (var _389_18_ = 0; _389_18_ < list.length; _389_18_++)
+        for (var _395_18_ = 0; _395_18_ < list.length; _395_18_++)
         {
-            curve = list[_389_18_]
+            curve = list[_395_18_]
             points = points.concat([curve.v1,curve.v2,curve.v3])
         }
         if (!includeLast)

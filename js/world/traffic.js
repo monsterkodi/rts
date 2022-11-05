@@ -1,6 +1,6 @@
 // monsterkodi/kode 0.243.0
 
-var _k_ = {assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, min: function () { m = Infinity; for (a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, isFunc: function (o) {return typeof o === 'function'}}
+var _k_ = {assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, min: function () { m = Infinity; for (a of arguments) { if (Array.isArray(a)) {m = _k_.min.apply(_k_.min,[m].concat(a))} else {n = parseFloat(a); if(!isNaN(n)){m = n < m ? n : m}}}; return m }, empty: function (l) {return l==='' || l===null || l===undefined || l!==l || typeof(l) === 'object' && Object.keys(l).length === 0}, isFunc: function (o) {return typeof o === 'function'}}
 
 var COLLISION_DISTANCE, HEAD_DISTANCE, REAREND_DISTANCE, TAIL_DISTANCE, Traffic
 
@@ -65,10 +65,11 @@ Traffic = (function ()
 
         _k_.assert(".", 50, 8, "assert failed!" + " scaledDelta > 0", scaledDelta > 0)
         this.nodeSignals()
+        this.rearendedTrains = []
         var list = _k_.list(this.trains)
-        for (var _54_18_ = 0; _54_18_ < list.length; _54_18_++)
+        for (var _55_18_ = 0; _55_18_ < list.length; _55_18_++)
         {
-            train = list[_54_18_]
+            train = list[_55_18_]
             advance = scaledDelta * train.speed
             if (advance > 0)
             {
@@ -79,10 +80,11 @@ Traffic = (function ()
                 train.advance(advance)
             }
         }
+        this.unloopRearended(scaledDelta)
         var list1 = _k_.list(this.trains)
-        for (var _62_18_ = 0; _62_18_ < list1.length; _62_18_++)
+        for (var _65_18_ = 0; _65_18_ < list1.length; _65_18_++)
         {
-            train = list1[_62_18_]
+            train = list1[_65_18_]
             this.pruneTrainPath(train)
             train.update(scaledDelta,timeSum)
         }
@@ -93,9 +95,9 @@ Traffic = (function ()
         var ct, nd, nn, path, tailDelta, tnd, tpd, tpn, train
 
         var list = _k_.list(this.trains)
-        for (var _75_18_ = 0; _75_18_ < list.length; _75_18_++)
+        for (var _78_18_ = 0; _78_18_ < list.length; _78_18_++)
         {
-            train = list[_75_18_]
+            train = list[_78_18_]
             if (path = train.path)
             {
                 nd = path.nextDistance()
@@ -163,7 +165,7 @@ Traffic = (function ()
         var nextTrack, nn
 
         nn = train.nextNode()
-        _k_.assert(".", 113, 8, "assert failed!" + " nn === node", nn === node)
+        _k_.assert(".", 116, 8, "assert failed!" + " nn === node", nn === node)
         if (nextTrack = this.extendTrainPath(train))
         {
             return nextTrack
@@ -202,9 +204,9 @@ Traffic = (function ()
         delta = path.normDelta(path.delta + advance)
         track = path.trackAtDelta(delta)
         var list = _k_.list(this.trains)
-        for (var _149_18_ = 0; _149_18_ < list.length; _149_18_++)
+        for (var _152_18_ = 0; _152_18_ < list.length; _152_18_++)
         {
-            other = list[_149_18_]
+            other = list[_152_18_]
             if (other === train)
             {
                 continue
@@ -214,6 +216,7 @@ Traffic = (function ()
                 trainToOther = other.tailPrevDistance() - path.prevDistance(delta)
                 if (trainToOther >= 0 && trainToOther < REAREND_DISTANCE)
                 {
+                    this.rearendedTrains.push([train,other])
                     advance = 0
                     break
                 }
@@ -223,6 +226,7 @@ Traffic = (function ()
                 trainToOther = other.tailPrevDistance() + path.nextDistance(delta)
                 if (trainToOther < REAREND_DISTANCE)
                 {
+                    this.rearendedTrains.push([train,other])
                     advance = 0
                     break
                 }
@@ -247,18 +251,76 @@ Traffic = (function ()
         return advance
     }
 
+    Traffic.prototype["unloopRearended"] = function (scaledDelta)
+    {
+        var advance, ll, logRearended, other, stopped, stopping, to, train
+
+        if (_k_.empty(this.rearendedTrains))
+        {
+            return
+        }
+        logRearended = (function (m)
+        {
+            var rec, to
+
+            rec = m + ' '
+            var list = _k_.list(this.rearendedTrains)
+            for (var _192_19_ = 0; _192_19_ < list.length; _192_19_++)
+            {
+                to = list[_192_19_]
+                rec += ' ' + to[0].name + '➜' + to[1].name
+            }
+            console.log(rec)
+        }).bind(this)
+        ll = 0
+        while (this.rearendedTrains.length)
+        {
+            if (ll === this.rearendedTrains.length)
+            {
+                logRearended('loop!')
+                var list = _k_.list(this.rearendedTrains)
+                for (var _201_35_ = 0; _201_35_ < list.length; _201_35_++)
+                {
+                    train = list[_201_35_][0]
+                    other = list[_201_35_][1]
+                    advance = scaledDelta * train.speed
+                    if (advance > 0)
+                    {
+                        train.advance(advance)
+                    }
+                }
+                this.rearendedTrains = []
+            }
+            ll = this.rearendedTrains.length
+            stopping = {}
+            stopped = {}
+            var list1 = _k_.list(this.rearendedTrains)
+            for (var _211_19_ = 0; _211_19_ < list1.length; _211_19_++)
+            {
+                to = list1[_211_19_]
+                stopped[to[0].name] = to[1].name
+                stopping[to[1].name] = to[0].name
+            }
+            this.rearendedTrains = this.rearendedTrains.filter(function (to)
+            {
+                stopped[to[0].name] && stopping[to[0].name]
+                return stopped[to[1].name] && stopping[to[1].name]
+            })
+        }
+    }
+
     Traffic.prototype["extendTrainPath"] = function (train)
     {
-        var accum, choice, choices, length, mode, nextNode, nextTrack, nn, nnopptrck, ot, randm, total, trackMode, tracks, _195_59_
+        var accum, choice, choices, length, mode, nextNode, nextTrack, nn, nnopptrck, ot, randm, total, trackMode, tracks, _272_59_
 
         nn = train.nextNode()
         ot = nn.oppositeTracks(train.currentTrack())
         mode = (ot === nn.outTracks ? 1 : 2)
         choices = []
         var list = _k_.list(ot)
-        for (var _187_22_ = 0; _187_22_ < list.length; _187_22_++)
+        for (var _264_22_ = 0; _264_22_ < list.length; _264_22_++)
         {
-            nextTrack = list[_187_22_]
+            nextTrack = list[_264_22_]
             nextNode = nextTrack.nodeOpposite(nn)
             trackMode = nextTrack.modeForNode(nn) || 3
             if (!(mode & trackMode))
@@ -269,7 +331,7 @@ Traffic = (function ()
             {
                 continue
             }
-            nnopptrck = ((_195_59_=nextNode.oppositeTracks(nextTrack)) != null ? _195_59_ : [])
+            nnopptrck = ((_272_59_=nextNode.oppositeTracks(nextTrack)) != null ? _272_59_ : [])
             if (nnopptrck.length)
             {
                 choices.push([nextTrack,nextNode])
@@ -326,14 +388,14 @@ Traffic = (function ()
 
     Traffic.prototype["checkCargo"] = function (train, advance)
     {
-        var car, maxAdvance, minCar, resource, _250_52_, _259_41_, _268_48_
+        var car, maxAdvance, minCar, resource, _327_52_, _336_41_, _345_48_
 
         maxAdvance = advance
         minCar = null
         var list = _k_.list(train.boxcars())
-        for (var _245_16_ = 0; _245_16_ < list.length; _245_16_++)
+        for (var _322_16_ = 0; _322_16_ < list.length; _322_16_++)
         {
-            car = list[_245_16_]
+            car = list[_322_16_]
             if (car.isEmpty())
             {
                 if (car.waitingForCargo)

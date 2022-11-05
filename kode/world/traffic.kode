@@ -51,6 +51,7 @@ function Traffic
         
         @nodeSignals()
         
+        @rearendedTrains = []
         for train in @trains
             
             advance = scaledDelta * train.speed
@@ -58,6 +59,8 @@ function Traffic
                 advance = @allowTrainAdvance train, advance
             if advance
                 train.advance advance
+
+        @unloopRearended scaledDelta
                 
         for train in @trains
             
@@ -151,11 +154,13 @@ function Traffic
             if other.tailTrack() == track
                 trainToOther = other.tailPrevDistance() - path.prevDistance(delta)
                 if trainToOther >= 0 and trainToOther < REAREND_DISTANCE
+                    @rearendedTrains.push [train, other]
                     advance = 0
                     break
             else if other.tailPrevTrack() == track
                 trainToOther = other.tailPrevDistance() + path.nextDistance(delta)
                 if trainToOther < REAREND_DISTANCE
+                    @rearendedTrains.push [train, other]
                     advance = 0
                     break
             if other.headTrack() == track
@@ -171,6 +176,78 @@ function Traffic
                     
         train.advanceFactor = advance/oldAdvance
         advance
+        
+    # 00000000   00000000   0000000   00000000   00000000  000   000  0000000    00000000  0000000    
+    # 000   000  000       000   000  000   000  000       0000  000  000   000  000       000   000  
+    # 0000000    0000000   000000000  0000000    0000000   000 0 000  000   000  0000000   000   000  
+    # 000   000  000       000   000  000   000  000       000  0000  000   000  000       000   000  
+    # 000   000  00000000  000   000  000   000  00000000  000   000  0000000    00000000  0000000    
+    
+    unloopRearended: (scaledDelta) ->
+        
+        return if empty @rearendedTrains
+
+        logRearended = (m) =>
+            rec = m + ' '
+            for to in @rearendedTrains
+                rec += ' ' + to[0].name + '➜' + to[1].name
+            log rec
+        
+        ll = 0
+        while @rearendedTrains.length
+            if ll == @rearendedTrains.length
+                logRearended 'loop!'
+                # should check for multiple separated loops here!
+                for [train, other] in @rearendedTrains
+                    advance = scaledDelta * train.speed
+                    if advance > 0
+                        train.advance advance
+                @rearendedTrains = []
+                
+            ll = @rearendedTrains.length
+            stopping = {}
+            stopped = {}
+
+            for to in @rearendedTrains
+                stopped[to[0].name] = to[1].name 
+                stopping[to[1].name] = to[0].name
+            
+            @rearendedTrains = @rearendedTrains.filter (to) -> 
+                stopped[to[0].name] and stopping[to[0].name]
+                stopped[to[1].name] and stopping[to[1].name]
+        
+        # chain = ->
+            # return if empty rearended
+            # [train, other] = rearended.shift()
+            # log 'chain' train.name, '➜' other.name
+            # if (stoppedOther = stopped[other.name]) and (stoppingTrain = stopping[train.name]) 
+                # log 'continue loop' loop.length, stoppedOther, stoppingTrain
+                # loop.push [train, other]
+                # visited.push train
+                # if other not in visited
+                    # chain()
+                # else
+                    # return if loop.length == 0
+                    # log 'loop!' loop.length, loop, (loop.map (to) -> to[0].name + '➜' + to[1].name).join " "
+                    # for [train, other] in loop
+                        # advance = scaledDelta * train.speed
+                        # if advance > 0
+                            # train.advance advance
+                    # loop = []
+            # else
+                # log 'not a loop'
+                # for v in visited
+                    # delete stopped[v.name]
+                    # delete stopping[v.name]
+                # loop = []
+                # visited = []
+#         
+        # while rearended.length
+            # rec = ''
+            # rearended.map (to) -> 
+                # rec += ' ' + to[0].name + '➜' + to[1].name
+            # log 'rec' rec
+            # chain()
         
     # 00000000  000   000  000000000  00000000  000   000  0000000    
     # 000        000 000      000     000       0000  000  000   000  

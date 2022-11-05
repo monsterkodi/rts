@@ -53,6 +53,7 @@ onClose = ->
 
 window.onload = ->
     
+    window.rts ?= new RTS $ '#main'
     window.onresize()
 
 # 00000000   00000000  000       0000000    0000000   0000000
@@ -108,15 +109,17 @@ window.onkeydown = (event) ->
         't'         ➜ post.emit 'addTrain'
         'ctrl+s'    ➜ post.emit 'save'
         'ctrl+r'    ➜ post.emit 'reload'
+        'command+s' ➜ post.emit 'save'
+        'command+r' ➜ post.emit 'reload'
         'backspace' 'delete' ➜ post.emit 'delete'
         '.'         ➜ prefs.set 'debug' not prefs.get 'debug'; if prefs.get 'debug' then rts.debug.show() else rts.debug.hide()
         'space'     ➜ rts.togglePause()
         '='         ➜ world.incrSpeed(); world.incrSpeed()
         '-'         ➜ world.decrSpeed(); world.decrSpeed()
         '0'         ➜ world.resetSpeed()
-        # else 
-            # log 'keydown' keyinfo.forEvent event
-            # log 'keydown' keyinfo.comboForEvent event
+        else 
+            log 'keydown' keyinfo.forEvent event
+            log 'keydown' keyinfo.comboForEvent event
     
 window.onkeyup = (event) ->
     

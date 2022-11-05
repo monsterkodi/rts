@@ -81,7 +81,13 @@ function Track
     # 00000000  000   000  000     000     0000000    0000000   0000000    0000000  000   000  
     
     addExitBlockForTrainAtNode: (train, node) ->
-                
+              
+        @visitedNodes ?= []
+        if node in @visitedNodes
+            delete @visitedNodes
+            return
+        @visitedNodes.push node
+        
         if node == @node[0]
             ld = 6/@curve.getLength()
             dir = -1
@@ -226,7 +232,7 @@ function Track
             @nextMode()
         if event.button == 0
             
-            boxcars = 5
+            boxcars = 1
             length  = (boxcars+1)*Train.carDist
             
             delta = @deltaClosestToPoint hit.point

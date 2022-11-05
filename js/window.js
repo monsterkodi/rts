@@ -64,12 +64,15 @@ onClose = function ()
 
 window.onload = function ()
 {
+    var _56_15_
+
+    window.rts = ((_56_15_=window.rts) != null ? _56_15_ : new RTS($('#main')))
     return window.onresize()
 }
 
 reloadWin = function ()
 {
-    var _68_38_
+    var _69_38_
 
     prefs.save()
     clearListeners()
@@ -151,6 +154,12 @@ window.onkeydown = function (event)
         case 'ctrl+r':
             return post.emit('reload')
 
+        case 'command+s':
+            return post.emit('save')
+
+        case 'command+r':
+            return post.emit('reload')
+
         case 'backspace':
         case 'delete':
             return post.emit('delete')
@@ -180,6 +189,9 @@ window.onkeydown = function (event)
         case '0':
             return world.resetSpeed()
 
+        default:
+            console.log('keydown',keyinfo.forEvent(event))
+            console.log('keydown',keyinfo.comboForEvent(event))
     }
 
 }
