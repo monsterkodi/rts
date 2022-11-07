@@ -19,8 +19,8 @@ class Main extends app
             index:        'index.html'
             icon:         '../img/app.ico'
             about:        '../img/about.png'
-            minWidth:     1000 
-            minHeight:    740 
+            minWidth:     500 
+            minHeight:    320 
             singleWindow: true
             
 main = new Main()

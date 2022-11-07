@@ -41,6 +41,7 @@ class Camera extends PerspectiveCamera
         @quat         = quat()
 
         @elem.addEventListener 'mousewheel' @onMouseWheel
+        @elem.addEventListener 'mousemove'  @onMouseMove
         @elem.addEventListener 'mousedown'  @onMouseDown
         @elem.addEventListener 'keypress'   @onKeyPress
         @elem.addEventListener 'keyrelease' @onKeyRelease
@@ -58,6 +59,7 @@ class Camera extends PerspectiveCamera
         @elem.removeEventListener  'keypress'   @onKeyPress
         @elem.removeEventListener  'keyrelease' @onKeyRelease
         @elem.removeEventListener  'mousewheel' @onMouseWheel
+        @elem.removeEventListener  'mousemove'  @onMouseMove
         @elem.removeEventListener  'mousedown'  @onMouseDown
         @elem.removeEventListener  'dblclick'   @onDblClick
         window.removeEventListener 'mouseup'    @onMouseUp
@@ -79,18 +81,18 @@ class Camera extends PerspectiveCamera
         
         @downPos.copy @mouse
         
-        window.addEventListener 'mousemove' @onMouseDrag
         window.addEventListener 'mouseup'   @onMouseUp
         
     onMouseUp: (event) => 
 
-        window.removeEventListener 'mousemove' @onMouseDrag
         window.removeEventListener 'mouseup'   @onMouseUp
         
     onDblClick: (event) =>
         
-    onMouseDrag: (event) =>
+    onMouseMove: (event) =>
 
+        # log event.buttons, event.altKey, event.metaKey, event.ctrlKey, event.shiftKey 
+        
         x = event.clientX-@mouse.x
         y = event.clientY-@mouse.y
         
@@ -100,17 +102,17 @@ class Camera extends PerspectiveCamera
         if @downPos.dist(@mouse) > 60
             @mouseMoved = true
         
-        if event.buttons == 4
+        if event.buttons == 4 or event.buttons == 1 or event.altKey
             s = @dist
         
         if @downPos.dist(@mouse) > 60
             @mouseMoved = true
         
-        if event.buttons == 4
+        if event.buttons == 4 or event.buttons == 1 or event.altKey
             s = @dist
             @pan x*2*s/@size.x, y*s/@size.y
             
-        if event.buttons == 2
+        if event.buttons == 2 or event.metaKey
             @pivot 4000*x/@size.x, 2000*y/@size.y
             
     # 00000000   000  000   000   0000000   000000000  

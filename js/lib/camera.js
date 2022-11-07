@@ -25,7 +25,7 @@ class Camera extends PerspectiveCamera
         this.fadeCenter = this.fadeCenter.bind(this)
         this.panBlocks = this.panBlocks.bind(this)
         this.pivotCenter = this.pivotCenter.bind(this)
-        this.onMouseDrag = this.onMouseDrag.bind(this)
+        this.onMouseMove = this.onMouseMove.bind(this)
         this.onDblClick = this.onDblClick.bind(this)
         this.onMouseUp = this.onMouseUp.bind(this)
         this.onMouseDown = this.onMouseDown.bind(this)
@@ -52,6 +52,7 @@ class Camera extends PerspectiveCamera
         this.centerTarget = vec()
         this.quat = quat()
         this.elem.addEventListener('mousewheel',this.onMouseWheel)
+        this.elem.addEventListener('mousemove',this.onMouseMove)
         this.elem.addEventListener('mousedown',this.onMouseDown)
         this.elem.addEventListener('keypress',this.onKeyPress)
         this.elem.addEventListener('keyrelease',this.onKeyRelease)
@@ -84,6 +85,7 @@ class Camera extends PerspectiveCamera
         this.elem.removeEventListener('keypress',this.onKeyPress)
         this.elem.removeEventListener('keyrelease',this.onKeyRelease)
         this.elem.removeEventListener('mousewheel',this.onMouseWheel)
+        this.elem.removeEventListener('mousemove',this.onMouseMove)
         this.elem.removeEventListener('mousedown',this.onMouseDown)
         this.elem.removeEventListener('dblclick',this.onDblClick)
         window.removeEventListener('mouseup',this.onMouseUp)
@@ -97,20 +99,18 @@ class Camera extends PerspectiveCamera
         this.mouse.x = event.clientX
         this.mouse.y = event.clientY
         this.downPos.copy(this.mouse)
-        window.addEventListener('mousemove',this.onMouseDrag)
         return window.addEventListener('mouseup',this.onMouseUp)
     }
 
     onMouseUp (event)
     {
-        window.removeEventListener('mousemove',this.onMouseDrag)
         return window.removeEventListener('mouseup',this.onMouseUp)
     }
 
     onDblClick (event)
     {}
 
-    onMouseDrag (event)
+    onMouseMove (event)
     {
         var s, x, y
 
@@ -122,7 +122,7 @@ class Camera extends PerspectiveCamera
         {
             this.mouseMoved = true
         }
-        if (event.buttons === 4)
+        if (event.buttons === 4 || event.buttons === 1 || event.altKey)
         {
             s = this.dist
         }
@@ -130,12 +130,12 @@ class Camera extends PerspectiveCamera
         {
             this.mouseMoved = true
         }
-        if (event.buttons === 4)
+        if (event.buttons === 4 || event.buttons === 1 || event.altKey)
         {
             s = this.dist
             this.pan(x * 2 * s / this.size.x,y * s / this.size.y)
         }
-        if (event.buttons === 2)
+        if (event.buttons === 2 || event.metaKey)
         {
             return this.pivot(4000 * x / this.size.x,2000 * y / this.size.y)
         }
@@ -483,7 +483,7 @@ class Camera extends PerspectiveCamera
 
     update ()
     {
-        var compass, s, _435_33_
+        var compass, s, _437_33_
 
         this.degree = _k_.clamp(0,180,this.degree)
         this.quat.reset()
