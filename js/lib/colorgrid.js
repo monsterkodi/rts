@@ -104,8 +104,8 @@ class ColorGrid
                     else
                     {
                         this.geom.addGroup(gs * 6,gc * 6,gm)
-                        gm = row
                         ai = gs + gc
+                        gm = row
                         gc = 1
                         gs = vi
                     }
@@ -125,6 +125,12 @@ class ColorGrid
                 gs = vi
                 vi += rest
             }
+        }
+        if (gc)
+        {
+            this.geom.addGroup(gs * 6,gc * 6,gm)
+            ai = gs + gc
+            gs += gc
         }
         if (ai < this.sz.x * this.sz.y)
         {

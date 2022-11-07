@@ -387,7 +387,7 @@ function Node
             @outMesh.scale.set 1 1 1
         
     onRemoveTrain: (train) =>
-        
+        log 'onRemoveTrain' @name, train.name, @train?.name
         if train == @train
             @setTrain null
             

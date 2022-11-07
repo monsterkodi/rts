@@ -44,9 +44,11 @@ Storage = (function ()
 
     Storage.prototype["startStoringAnimation"] = function (resource)
     {
+        this.resource = resource
+    
         this.animTime = 0
         this.animDuration = 10
-        this.box = new Mesh(Geom.box({size:2,pos:[0,0,1]}),Materials.mining[resource])
+        this.box = new Mesh(Geom.box({size:2,pos:[0,0,1]}),Materials.mining[this.resource])
         this.box.scale.set(1,1,1)
         this.box.position.z = 1.75
         this.box.setShadow()
@@ -68,7 +70,8 @@ Storage = (function ()
         else
         {
             this.box.removeFromParent()
-            return delete this.box
+            delete this.box
+            return this.station.cargoStored(this.resource)
         }
     }
 

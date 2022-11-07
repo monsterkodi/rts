@@ -534,6 +534,9 @@ Node = (function ()
 
     Node.prototype["onRemoveTrain"] = function (train)
     {
+        var _390_53_
+
+        console.log('onRemoveTrain',this.name,train.name,(this.train != null ? this.train.name : undefined))
         if (train === this.train)
         {
             return this.setTrain(null)

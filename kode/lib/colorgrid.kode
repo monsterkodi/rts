@@ -91,8 +91,8 @@ class ColorGrid
                         gm = row
                     else
                         @geom.addGroup gs*6, gc*6, gm
-                        gm = row
                         ai = gs+gc
+                        gm = row
                         gc = 1
                         gs = vi
                 else
@@ -105,7 +105,11 @@ class ColorGrid
                 gc = rest
                 gs = vi
                 vi += rest
-            
+        
+        if gc
+            @geom.addGroup gs*6, gc*6, gm
+            ai = gs+gc
+            gs += gc
         if ai < @sz.x*@sz.y
             @geom.addGroup gs*6, (@sz.x*@sz.y-ai)*6, 0
             
