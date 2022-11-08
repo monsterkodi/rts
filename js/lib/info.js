@@ -33,7 +33,7 @@ class Info
 
     draw (info)
     {
-        var add, car, corpses, k, node, s, station, track, train, v, _1_18_, _1_25_, _1_26_, _1_33_, _106_28_, _106_35_
+        var add, car, corpses, k, node, s, station, track, train, v, _1_11_, _1_18_, _1_25_, _1_26_, _1_33_, _106_28_, _106_35_
 
         this.info.innerHTML = ''
         this.train.innerHTML = ''
@@ -64,7 +64,7 @@ class Info
         for (var _64_20_ = 0; _64_20_ < list.length; _64_20_++)
         {
             station = list[_64_20_]
-            add(`${_k_.rpad(5,station.name)} ${((_1_25_=(station.waitingCar != null ? station.waitingCar.name : undefined)) != null ? _1_25_ : '')} ${(station.arm.waitingForCar ? 'waiting' : '')}`)
+            add(`${_k_.rpad(5,station.name)} ${((_1_25_=(station.waitingCar != null ? station.waitingCar.name : undefined)) != null ? _1_25_ : '')} ${((station.arm != null ? station.arm.waitingForCar : undefined) ? 'waiting' : '')}`)
         }
         add = (function (text)
         {

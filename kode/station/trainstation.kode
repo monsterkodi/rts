@@ -43,15 +43,22 @@ function TrainStation extends Station
         
     onCentralStorage: (storage) =>
         
-        log 'onCentralStorage' storage
+        # log 'onCentralStorage' storage
         if @node.train != @train and not @node.train
             if @nextTrack = @calcNextTrack()
-                nextNode = @nextTrack.nodeOpposite @node
-                @train.path.addTrackNode @nextTrack, nextNode
+                @nextNode = @nextTrack.nodeOpposite @node
             else
                 log 'no build track!'
                 return
-        @startCarProduction()
+                
+        if @hasSpaceForCar()
+            @startCarProduction()
+        else
+            log 'no car space!'
+            
+    hasSpaceForCar: ->
+        log @train.cars.length, @train.tailDelta()
+        @train.cars.length == 0 or @train.tailDelta() > 2
 
     calcNextTrack: ->
         
@@ -100,6 +107,7 @@ function TrainStation extends Station
         @train.addCar car
 
         if @train.cars.length == 1
+            @train.path.addTrackNode @nextTrack, @nextNode
             @node.setTrain @train
             @nextTrack.addTrain @train
             @train.track = @nextTrack
@@ -116,9 +124,19 @@ function TrainStation extends Station
         if not @movingTrain
             world.addAnimation @moveTrain
         
+    # 00     00   0000000   000   000  00000000  000000000  00000000    0000000   000  000   000  
+    # 000   000  000   000  000   000  000          000     000   000  000   000  000  0000  000  
+    # 000000000  000   000   000 000   0000000      000     0000000    000000000  000  000 0 000  
+    # 000 0 000  000   000     000     000          000     000   000  000   000  000  000  0000  
+    # 000   000   0000000       0      00000000     000     000   000  000   000  000  000   000  
+    
     moveTrain: (scaledDelta, timeSum) =>
 
-        @train.advance scaledDelta
+        log scaledDelta, @train.tailDelta()
+        
+        advance = world.traffic.allowTrainAdvance @train, scaledDelta
+        
+        @train.advance advance
         
         if @train.tailDelta() < 4
             @movingTrain = true

@@ -261,10 +261,10 @@ World = (function ()
         var train
 
         track = (track != null ? track : this.cursorTrack)
-        delta = (delta != null ? delta : track.curve.getLength() / 2)
-        node = (node != null ? node : track.node[1])
         if (track && track.node[0] && track.node[1])
         {
+            delta = (delta != null ? delta : track.curve.getLength() / 2)
+            node = (node != null ? node : track.node[1])
             train = this.addTrain({boxcars:boxcars,traffic:true})
             train.path.addTrackNode(track,node)
             train.path.delta = delta

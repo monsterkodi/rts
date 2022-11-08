@@ -48,15 +48,11 @@ TrainStation = (function ()
 
     TrainStation.prototype["onCentralStorage"] = function (storage)
     {
-        var nextNode
-
-        console.log('onCentralStorage',storage)
         if (this.node.train !== this.train && !this.node.train)
         {
             if (this.nextTrack = this.calcNextTrack())
             {
-                nextNode = this.nextTrack.nodeOpposite(this.node)
-                this.train.path.addTrackNode(this.nextTrack,nextNode)
+                this.nextNode = this.nextTrack.nodeOpposite(this.node)
             }
             else
             {
@@ -64,21 +60,34 @@ TrainStation = (function ()
                 return
             }
         }
-        return this.startCarProduction()
+        if (this.hasSpaceForCar())
+        {
+            return this.startCarProduction()
+        }
+        else
+        {
+            console.log('no car space!')
+        }
+    }
+
+    TrainStation.prototype["hasSpaceForCar"] = function ()
+    {
+        console.log(this.train.cars.length,this.train.tailDelta())
+        return this.train.cars.length === 0 || this.train.tailDelta() > 2
     }
 
     TrainStation.prototype["calcNextTrack"] = function ()
     {
-        var accum, choice, choices, length, mode, nextNode, nextTrack, nn, nnopptrck, ot, randm, total, trackMode, tracks, _70_59_
+        var accum, choice, choices, length, mode, nextNode, nextTrack, nn, nnopptrck, ot, randm, total, trackMode, tracks, _77_59_
 
         nn = this.node
         ot = (nn.outTracks.length ? nn.outTracks : nn.inTracks)
         mode = (ot === nn.outTracks ? 1 : 2)
         choices = []
         var list = _k_.list(ot)
-        for (var _62_22_ = 0; _62_22_ < list.length; _62_22_++)
+        for (var _69_22_ = 0; _69_22_ < list.length; _69_22_++)
         {
-            nextTrack = list[_62_22_]
+            nextTrack = list[_69_22_]
             nextNode = nextTrack.nodeOpposite(nn)
             trackMode = nextTrack.modeForNode(nn) || 3
             if (!(mode & trackMode))
@@ -89,7 +98,7 @@ TrainStation = (function ()
             {
                 continue
             }
-            nnopptrck = ((_70_59_=nextNode.oppositeTracks(nextTrack)) != null ? _70_59_ : [])
+            nnopptrck = ((_77_59_=nextNode.oppositeTracks(nextTrack)) != null ? _77_59_ : [])
             if (nnopptrck.length)
             {
                 choices.push([nextTrack,nextNode])
@@ -149,6 +158,7 @@ TrainStation = (function ()
         this.train.addCar(car)
         if (this.train.cars.length === 1)
         {
+            this.train.path.addTrackNode(this.nextTrack,this.nextNode)
             this.node.setTrain(this.train)
             this.nextTrack.addTrain(this.train)
             this.train.track = this.nextTrack
@@ -164,9 +174,9 @@ TrainStation = (function ()
         else
         {
             var list = _k_.list(this.train.cars)
-            for (var _113_18_ = 0; _113_18_ < list.length; _113_18_++)
+            for (var _121_18_ = 0; _121_18_ < list.length; _121_18_++)
             {
-                c = list[_113_18_]
+                c = list[_121_18_]
                 c.deadEye()
             }
         }
@@ -178,7 +188,11 @@ TrainStation = (function ()
 
     TrainStation.prototype["moveTrain"] = function (scaledDelta, timeSum)
     {
-        this.train.advance(scaledDelta)
+        var advance
+
+        console.log(scaledDelta,this.train.tailDelta())
+        advance = world.traffic.allowTrainAdvance(this.train,scaledDelta)
+        this.train.advance(advance)
         if (this.train.tailDelta() < 4)
         {
             this.movingTrain = true

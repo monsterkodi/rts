@@ -62,7 +62,7 @@ class Info
         add = (text) => elem class:'infoText' parent:@station, text:text
         
         for station in world.allStations()
-            add "#{rpad 5 station.name} #{station.waitingCar?.name ? ''} #{station.arm.waitingForCar ? 'waiting' : ''}"
+            add "#{rpad 5 station.name} #{station.waitingCar?.name ? ''} #{station.arm?.waitingForCar ? 'waiting' : ''}"
         
         add = (text) => elem class:'infoText' parent:@train, text:text
         

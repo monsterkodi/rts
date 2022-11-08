@@ -231,10 +231,10 @@ function World extends Convert
     onAddTrain: (track, delta, node, boxcars=3) =>
         
         track ?= @cursorTrack
-        delta ?= track.curve.getLength()/2
-        node  ?= track.node[1]
         
         if track and track.node[0] and track.node[1]
+            delta ?= track.curve.getLength()/2
+            node  ?= track.node[1]
             train = @addTrain boxcars:boxcars, traffic:true
             train.path.addTrackNode track, node
             train.path.delta = delta

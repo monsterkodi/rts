@@ -56,7 +56,7 @@ Engine = (function ()
 
     Engine.prototype["isRearEngine"] = function ()
     {
-        return this === this.train.cars.slice(-1)[0]
+        return this.train.cars.length > 1 && this === this.train.cars.slice(-1)[0]
     }
 
     Engine.prototype["moveToPathDelta"] = function (path, delta)

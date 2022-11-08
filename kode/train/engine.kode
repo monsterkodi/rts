@@ -49,7 +49,7 @@ function Engine extends Car
         
     isRearEngine: ->
         
-        @ == @train.cars[-1]
+        @train.cars.length > 1 and @ == @train.cars[-1]
         
     moveToPathDelta: (path, delta) ->
         
