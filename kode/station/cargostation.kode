@@ -19,7 +19,6 @@ function CargoStation extends Station
         @base = world.construct.meshes.station.armbase.clone()
         @group.add @base
         
-        # @docking = world.construct.meshes.station.docking.clone()
         @docking = new Group
         @docking.position.x = -6
         @group.add @docking

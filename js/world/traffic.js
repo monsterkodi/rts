@@ -388,14 +388,14 @@ Traffic = (function ()
 
     Traffic.prototype["checkCargo"] = function (train, advance)
     {
-        var car, maxAdvance, minCar, resource, _293_52_, _302_41_, _311_48_
+        var car, maxAdvance, minCar, resource, _292_52_, _301_41_, _310_48_
 
         maxAdvance = advance
         minCar = null
         var list = _k_.list(train.boxcars())
-        for (var _288_16_ = 0; _288_16_ < list.length; _288_16_++)
+        for (var _287_16_ = 0; _287_16_ < list.length; _287_16_++)
         {
-            car = list[_288_16_]
+            car = list[_287_16_]
             if (car.isEmpty())
             {
                 if (car.waitingForCargo)

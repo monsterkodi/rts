@@ -1,0 +1,129 @@
+###
+000000000  00000000    0000000   000  000   000   0000000  000000000   0000000   000000000  000   0000000   000   000
+   000     000   000  000   000  000  0000  000  000          000     000   000     000     000  000   000  0000  000
+   000     0000000    000000000  000  000 0 000  0000000      000     000000000     000     000  000   000  000 0 000
+   000     000   000  000   000  000  000  0000       000     000     000   000     000     000  000   000  000  0000
+   000     000   000  000   000  000  000   000  0000000      000     000   000     000     000   0000000   000   000
+###
+
+Station = require './station'
+Engine = require '../train/engine'
+Boxcar = require '../train/boxcar'
+Train  = require '../train/train'
+
+function TrainStation extends Station
+
+    @: (cfg) ->
+        
+        cfg.name ?= "T#{Station.id+1}"
+        super cfg
+        
+        @train       = new Train
+        @trainLength = 3
+        @tailEngine  = false
+
+        @building = world.construct.meshes.station.armbase.clone()
+        @building.children[0].material = Materials.station.train
+        @building.position.z = 6
+        @group.add @building
+        
+        @docking = world.construct.meshes.station.docking.clone()
+        @group.add @docking
+        
+        if cfg.node
+            @node = world.nodeWithName cfg.node
+        else
+            @docking.getWorldPosition Vector.tmp
+            @node = world.addNode pos:Vector.tmp, name:'n'+@name, fixed:true
+            @node.setDir cfg.dir if cfg.dir
+        
+        @node.station = @
+                
+        post.on 'centralStorage' @onCentralStorage
+        
+    onCentralStorage: (storage) =>
+        
+        log 'onCentralStorage' storage
+        if @node.train != @train and not @node.train
+            if @nextTrack = @calcNextTrack()
+                nextNode = @nextTrack.nodeOpposite @node
+                @train.path.addTrackNode @nextTrack, nextNode
+            else
+                log 'no build track!'
+                return
+        @startCarProduction()
+
+    calcNextTrack: ->
+        
+        nn = @node
+        ot = nn.outTracks.length ? nn.outTracks : nn.inTracks
+        mode = ot == nn.outTracks ? 1 : 2
+        choices = []
+        for nextTrack in ot
+            nextNode  = nextTrack.nodeOpposite nn
+            trackMode = nextTrack.modeForNode(nn) or 3
+            if not (mode & trackMode)
+                continue # track points in the wrong direction
+            if nextTrack.hasExitBlockAtNode nn
+                # log "#{nextTrack.name} exit blocked at node #{nn.name} blocking #{train.name}"
+                continue
+            nnopptrck = nextNode.oppositeTracks(nextTrack) ? []
+            if nnopptrck.length
+                choices.push [nextTrack, nextNode]
+                
+        if choices.length
+            if choices.length == 1
+                nextTrack = choices[0][0]
+                nextNode  = choices[0][1]
+            else
+                tracks = choices.map (c) -> c[0]
+                length = tracks.map (t) -> t.lastTrainDistance()
+                total  = 0
+                accum  = length.map (l) -> total += l
+                randm  = randRange 0 total
+                choice = 0
+                while accum[choice] < randm ➜ choice++
+                # log "#{choice+1}" randm.toFixed(1), accum.map (a) -> a.toFixed(1)
+                nextTrack = choices[choice][0]
+                nextNode  = choices[choice][1]
+                
+        nextTrack
+        
+    startCarProduction: ->
+        
+        if @train.cars.length == 0
+            car = new Engine @train
+        else if @train.cars.length == @trainLength-1 and @tailEngine
+            car = new Engine @train
+        else
+            car = new Boxcar @train
+        @train.addCar car
+
+        if @train.cars.length == 1
+            @node.setTrain @train
+            @nextTrack.addTrain @train
+            @train.track = @nextTrack
+            car.deadEye()
+        else if @train.cars.length == @trainLength
+            @train.setColorByName @train.colorName
+            world.traffic.addTrain @train
+            @train = new Train
+            return
+        else
+            for c in @train.cars
+                c.deadEye()
+        
+        if not @movingTrain
+            world.addAnimation @moveTrain
+        
+    moveTrain: (scaledDelta, timeSum) =>
+
+        @train.advance scaledDelta
+        
+        if @train.tailDelta() < 4
+            @movingTrain = true
+            world.addAnimation @moveTrain
+        else
+            @movingTrain = false
+        
+module.exports = TrainStation

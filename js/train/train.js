@@ -12,7 +12,7 @@ Train = (function ()
 {
     Train["carDist"] = 4.2
     Train["numTrains"] = 0
-    function Train (cfg)
+    function Train (cfg = {})
     {
         var colors, _14_33_, _16_33_
 
@@ -41,9 +41,9 @@ Train = (function ()
 
     Train.prototype["toSave"] = function ()
     {
-        var _46_24_
+        var _46_24_, _48_34_
 
-        return {name:this.name,speed:this.speed,track:(this.track != null ? this.track.name : undefined),prevDist:this.path.prevDistance(),node:this.path.nextNode().name,resource:this.resource,path:this.path.toSave(),color:this.colorName,cars:this.cars.map(function (c)
+        return {name:this.name,speed:this.speed,track:(this.track != null ? this.track.name : undefined),prevDist:this.path.prevDistance(),node:(this.path.nextNode() != null ? this.path.nextNode().name : undefined),resource:this.resource,path:this.path.toSave(),color:this.colorName,cars:this.cars.map(function (c)
         {
             return c.toSave()
         })}

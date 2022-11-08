@@ -12,12 +12,13 @@ GRID_SIZE = 10
 CentralStation = (function ()
 {
     _k_.extend(CentralStation, CargoStation)
+    CentralStation["storage"] = {water:0,stuff:0,blood:0,chalk:0}
     function CentralStation (cfg)
     {
-        var label, _19_17_
+        var label, _25_17_
 
         this["updateGrid"] = this["updateGrid"].bind(this)
-        cfg.name = ((_19_17_=cfg.name) != null ? _19_17_ : `C${Station.id + 1}`)
+        cfg.name = ((_25_17_=cfg.name) != null ? _25_17_ : `C${Station.id + 1}`)
         CentralStation.__super__.constructor.call(this,cfg)
         label = world.addLabel({text:'▴➜▪➜●',mono:true,position:[0,-2.61,1.2],color:0xffffff,scale:1.4})
         label.rotateX(deg2rad(90))
@@ -65,6 +66,8 @@ CentralStation = (function ()
 
     CentralStation.prototype["cargoStored"] = function (resource)
     {
+        CentralStation.storage[resource]++
+        post.emit('centralStorage',CentralStation.storage)
         if (this.gridColumns[0].length === GRID_SIZE)
         {
             this.gridShiftTime = 0

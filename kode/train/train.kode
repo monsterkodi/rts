@@ -8,7 +8,7 @@ function Train
     @carDist:   4.2
     @numTrains: 0
 
-    @: (@cfg) ->
+    @: (@cfg = {}) ->
         
         Train.numTrains++
         @name       = (@cfg.name ? "T") + Train.numTrains
@@ -45,7 +45,7 @@ function Train
         speed:    @speed
         track:    @track?.name
         prevDist: @path.prevDistance()
-        node:     @path.nextNode().name
+        node:     @path.nextNode()?.name
         resource: @resource
         path:     @path.toSave()
         color:    @colorName

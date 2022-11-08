@@ -2,7 +2,7 @@
 
 var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}, assert: function (f,l,c,m,t) { if (!t) {console.log(f + ':' + l + ':' + c + ' ▴ ' + m)}}, clamp: function (l,h,v) { var ll = Math.min(l,h), hh = Math.max(l,h); if (!_k_.isNum(v)) { v = ll }; if (v < ll) { v = ll }; if (v > hh) { v = hh }; if (!_k_.isNum(v)) { v = ll }; return v }, in: function (a,l) {return (typeof l === 'string' && typeof a === 'string' && a.length ? '' : []).indexOf.call(l,a) >= 0}, isNum: function (o) {return !isNaN(o) && !isNaN(parseFloat(o)) && (isFinite(o) || o === Infinity || o === -Infinity)}}
 
-var Boxcar, CentralStation, Compass, Construct, Convert, Engine, MiningStation, Node, Physics, Save, Station, Track, Traffic, Train, World
+var Boxcar, CentralStation, Compass, Construct, Convert, Engine, MiningStation, Node, Physics, Save, Station, Track, Traffic, Train, TrainStation, World
 
 Node = require('../track/node')
 Track = require('../track/track')
@@ -11,6 +11,7 @@ Engine = require('../train/engine')
 Boxcar = require('../train/boxcar')
 Compass = require('../track/compass')
 Station = require('../station/station')
+TrainStation = require('../station/trainstation')
 MiningStation = require('../station/miningstation')
 CentralStation = require('../station/centralstation')
 Construct = require('./construct')
@@ -54,14 +55,14 @@ World = (function ()
 
     World.prototype["addLabel"] = function (cfg)
     {
-        var label, _53_34_, _55_45_, _56_32_
+        var label, _54_34_, _56_45_, _57_32_
 
         label = new Text()
         label.text = cfg.text
-        label.fontSize = ((_53_34_=cfg.size) != null ? _53_34_ : 1)
+        label.fontSize = ((_54_34_=cfg.size) != null ? _54_34_ : 1)
         label.font = '../pug/' + ((cfg.mono ? 'Meslo.woff' : 'Bahnschrift.woff'))
-        label.position.copy(vec(((_55_45_=cfg.position) != null ? _55_45_ : 0)))
-        label.color = ((_56_32_=cfg.color) != null ? _56_32_ : 0x9966FF)
+        label.position.copy(vec(((_56_45_=cfg.position) != null ? _56_45_ : 0)))
+        label.color = ((_57_32_=cfg.color) != null ? _57_32_ : 0x9966FF)
         label.anchorX = 'center'
         label.anchorY = 'middle'
         label.noHitTest = true
@@ -88,9 +89,9 @@ World = (function ()
 
         prefs.set('labels',on)
         var list = _k_.list(this.labels)
-        for (var _70_18_ = 0; _70_18_ < list.length; _70_18_++)
+        for (var _71_18_ = 0; _71_18_ < list.length; _71_18_++)
         {
-            label = list[_70_18_]
+            label = list[_71_18_]
             label.visible = on
         }
     }
@@ -114,15 +115,15 @@ World = (function ()
     {
         var animation, oldAnimations, scaledDelta
 
-        _k_.assert(".", 90, 8, "assert failed!" + " delta > 0", delta > 0)
+        _k_.assert(".", 91, 8, "assert failed!" + " delta > 0", delta > 0)
         scaledDelta = delta * this.speed
         this.timeSum += scaledDelta
         oldAnimations = this.animations.clone()
         this.animations = []
         var list = _k_.list(oldAnimations)
-        for (var _96_22_ = 0; _96_22_ < list.length; _96_22_++)
+        for (var _97_22_ = 0; _97_22_ < list.length; _97_22_++)
         {
-            animation = list[_96_22_]
+            animation = list[_97_22_]
             animation(scaledDelta,this.timeSum)
         }
         return this.simulate(scaledDelta)
@@ -164,27 +165,27 @@ World = (function ()
 
         this.traffic.clear()
         var list = _k_.list(this.allTrains())
-        for (var _141_18_ = 0; _141_18_ < list.length; _141_18_++)
+        for (var _142_18_ = 0; _142_18_ < list.length; _142_18_++)
         {
-            train = list[_141_18_]
+            train = list[_142_18_]
             train.del()
         }
         var list1 = _k_.list(this.allStations())
-        for (var _144_20_ = 0; _144_20_ < list1.length; _144_20_++)
+        for (var _145_20_ = 0; _145_20_ < list1.length; _145_20_++)
         {
-            station = list1[_144_20_]
+            station = list1[_145_20_]
             station.del()
         }
         var list2 = _k_.list(this.allNodes())
-        for (var _147_17_ = 0; _147_17_ < list2.length; _147_17_++)
+        for (var _148_17_ = 0; _148_17_ < list2.length; _148_17_++)
         {
-            node = list2[_147_17_]
+            node = list2[_148_17_]
             node.del()
         }
         var list3 = _k_.list(this.allTracks())
-        for (var _150_18_ = 0; _150_18_ < list3.length; _150_18_++)
+        for (var _151_18_ = 0; _151_18_ < list3.length; _151_18_++)
         {
-            track = list3[_150_18_]
+            track = list3[_151_18_]
             track.del()
         }
         return this.physics.clear()
@@ -192,11 +193,11 @@ World = (function ()
 
     World.prototype["setCamera"] = function (cfg = {dist:10,rotate:45,degree:45})
     {
-        var _163_39_, _164_39_, _165_39_, _166_18_
+        var _164_39_, _165_39_, _166_39_, _167_18_
 
-        rts.camera.dist = ((_163_39_=cfg.dist) != null ? _163_39_ : 10)
-        rts.camera.rotate = ((_164_39_=cfg.rotate) != null ? _164_39_ : 45)
-        rts.camera.degree = ((_165_39_=cfg.degree) != null ? _165_39_ : 45)
+        rts.camera.dist = ((_164_39_=cfg.dist) != null ? _164_39_ : 10)
+        rts.camera.rotate = ((_165_39_=cfg.rotate) != null ? _165_39_ : 45)
+        rts.camera.degree = ((_166_39_=cfg.degree) != null ? _166_39_ : 45)
         if ((cfg.pos != null))
         {
             rts.camera.focusOnPoint(vec(cfg.pos))
@@ -279,15 +280,15 @@ World = (function ()
 
     World.prototype["addTrain"] = function (cfg)
     {
-        var engine, i, speed, train, _248_26_
+        var engine, i, speed, train, _249_26_
 
-        speed = ((_248_26_=cfg.speed) != null ? _248_26_ : 1)
+        speed = ((_249_26_=cfg.speed) != null ? _249_26_ : 1)
         train = new Train({speed:speed,name:'T'})
         engine = this.addEngine(train)
         this.physics.addKinematicCar(engine)
         if (cfg.boxcars)
         {
-            for (var _256_21_ = i = 0, _256_25_ = cfg.boxcars; (_256_21_ <= _256_25_ ? i < cfg.boxcars : i > cfg.boxcars); (_256_21_ <= _256_25_ ? ++i : --i))
+            for (var _257_21_ = i = 0, _257_25_ = cfg.boxcars; (_257_21_ <= _257_25_ ? i < cfg.boxcars : i > cfg.boxcars); (_257_21_ <= _257_25_ ? ++i : --i))
             {
                 this.addBoxcar(train)
             }
@@ -312,7 +313,7 @@ World = (function ()
     {
         var boxcar, n
 
-        for (var _275_17_ = n = 0, _275_21_ = num; (_275_17_ <= _275_21_ ? n < num : n > num); (_275_17_ <= _275_21_ ? ++n : --n))
+        for (var _276_17_ = n = 0, _276_21_ = num; (_276_17_ <= _276_21_ ? n < num : n > num); (_276_17_ <= _276_21_ ? ++n : --n))
         {
             boxcar = train.addCar(new Boxcar(train))
         }
@@ -324,9 +325,9 @@ World = (function ()
 
         console.log('delTrains')
         var list = _k_.list(this.allTrains())
-        for (var _282_18_ = 0; _282_18_ < list.length; _282_18_++)
+        for (var _283_18_ = 0; _283_18_ < list.length; _283_18_++)
         {
-            train = list[_282_18_]
+            train = list[_283_18_]
             train.del()
         }
     }
@@ -385,9 +386,9 @@ World = (function ()
         var node
 
         var list = _k_.list(this.allNodes())
-        for (var _299_17_ = 0; _299_17_ < list.length; _299_17_++)
+        for (var _300_17_ = 0; _300_17_ < list.length; _300_17_++)
         {
-            node = list[_299_17_]
+            node = list[_300_17_]
             if (node.name === name)
             {
                 return node
@@ -400,9 +401,9 @@ World = (function ()
         var track
 
         var list = _k_.list(this.allTracks())
-        for (var _303_18_ = 0; _303_18_ < list.length; _303_18_++)
+        for (var _304_18_ = 0; _304_18_ < list.length; _304_18_++)
         {
-            track = list[_303_18_]
+            track = list[_304_18_]
             if (track.name === name)
             {
                 return track
@@ -462,15 +463,15 @@ World = (function ()
         console.log('delTracks')
         this.delTrains()
         var list = _k_.list(this.allTracks())
-        for (var _349_18_ = 0; _349_18_ < list.length; _349_18_++)
+        for (var _350_18_ = 0; _350_18_ < list.length; _350_18_++)
         {
-            track = list[_349_18_]
+            track = list[_350_18_]
             track.del()
         }
         var list1 = _k_.list(this.allNodes())
-        for (var _351_17_ = 0; _351_17_ < list1.length; _351_17_++)
+        for (var _352_17_ = 0; _352_17_ < list1.length; _352_17_++)
         {
-            node = list1[_351_17_]
+            node = list1[_352_17_]
             if (!node.fixed)
             {
                 node.del()
@@ -488,6 +489,11 @@ World = (function ()
         return new MiningStation(cfg)
     }
 
+    World.prototype["addTrainStation"] = function (cfg)
+    {
+        return new TrainStation(cfg)
+    }
+
     World.prototype["addStation"] = function (cfg)
     {
         switch (cfg.name[0])
@@ -497,6 +503,9 @@ World = (function ()
 
             case 'C':
                 return this.addCentralStation(cfg)
+
+            case 'T':
+                return this.addTrainStation(cfg)
 
         }
 

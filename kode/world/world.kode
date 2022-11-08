@@ -13,6 +13,7 @@ Engine         = require '../train/engine'
 Boxcar         = require '../train/boxcar'
 Compass        = require '../track/compass'
 Station        = require '../station/station'
+TrainStation   = require '../station/trainstation'
 MiningStation  = require '../station/miningstation'
 CentralStation = require '../station/centralstation'
 Construct      = require './construct'
@@ -366,11 +367,16 @@ function World extends Convert
         
         new MiningStation cfg
         
+    addTrainStation: (cfg) ->
+        
+        new TrainStation cfg
+        
     addStation: (cfg) ->
         
         switch cfg.name[0] 
             'M' ➜ @addMiningStation  cfg
             'C' ➜ @addCentralStation cfg
+            'T' ➜ @addTrainStation   cfg
         
     # 00000000    0000000    0000000  
     # 000   000  000   000  000       

@@ -163,6 +163,10 @@ Physics = (function ()
     {
         var body
 
+        if (!car)
+        {
+            return
+        }
         var list = _k_.list(this.cannon.bodies)
         for (var _170_17_ = 0; _170_17_ < list.length; _170_17_++)
         {

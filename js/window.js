@@ -189,9 +189,6 @@ window.onkeydown = function (event)
         case '0':
             return world.resetSpeed()
 
-        default:
-            console.log('keydown',keyinfo.forEvent(event))
-            console.log('keydown',keyinfo.comboForEvent(event))
     }
 
 }

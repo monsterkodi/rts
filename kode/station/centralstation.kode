@@ -14,6 +14,12 @@ GRID_SIZE = 10
 
 function CentralStation extends CargoStation
 
+    @storage: 
+        water:0
+        stuff:0
+        blood:0
+        chalk:0
+
     @: (cfg) ->
         
         cfg.name ?= "C#{Station.id+1}"
@@ -47,6 +53,10 @@ function CentralStation extends CargoStation
     resourceIndex: (resource) -> 1 + Object.keys(Colors.mining).indexOf resource
             
     cargoStored: (resource) ->
+        
+        CentralStation.storage[resource]++
+        post.emit 'centralStorage' CentralStation.storage
+        
         if @gridColumns[0].length == GRID_SIZE
             @gridShiftTime = 0
             @gridColumns.unshift []

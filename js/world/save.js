@@ -112,7 +112,6 @@ Save = (function ()
         for (name in save.trains)
         {
             train = save.trains[name]
-            console.log(train)
             track = world.trackWithName(train.track)
             node = world.nodeWithName(train.node)
             boxcars = train.cars.filter(function (c)

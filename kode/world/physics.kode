@@ -166,7 +166,7 @@ function Physics
         cb
         
     removeKinematicCar: (car) ->
-        
+        return if not car
         for body in @cannon.bodies
             if body.kinematic == car.mesh
                 @cannon.removeBody body
