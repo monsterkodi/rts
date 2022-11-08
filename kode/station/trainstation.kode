@@ -6,10 +6,12 @@
    000     000   000  000   000  000  000   000  0000000      000     000   000     000     000   0000000   000   000
 ###
 
+ColorGrid = require '../lib/colorgrid'
 Station = require './station'
 Engine = require '../train/engine'
 Boxcar = require '../train/boxcar'
 Train  = require '../train/train'
+GRID_SIZE = 3
 
 function TrainStation extends Station
 
@@ -38,12 +40,36 @@ function TrainStation extends Station
             @node.setDir cfg.dir if cfg.dir
         
         @node.station = @
-                
+
+        @grid = new ColorGrid gridSize:GRID_SIZE, size:4
+        @grid.quads.rotateX deg2rad 90
+        @grid.quads.position.z = 6+2.5
+        @grid.quads.position.y = -2.61
+        @group.add @grid.quads
+        
+        @gridColumns = [[][][]]
+        
         post.on 'centralStorage' @onCentralStorage
         
-    onCentralStorage: (storage) =>
+    resourceIndex: (resource) -> 1 + Object.keys(Colors.mining).indexOf resource
+        
+    onCentralStorage: (storage, resource) =>
         
         # log 'onCentralStorage' storage
+        ri = @resourceIndex resource
+        # log resource, ri
+        if @gridColumns[ri-1].length < GRID_SIZE
+            @gridColumns[ri-1].push ri
+            @grid.setColumns @gridColumns
+            storage[resource]--
+            
+        for column in @gridColumns
+            if column.length < GRID_SIZE
+                return
+                
+        @gridColumns = [[][][]]
+        @grid.setColumns @gridColumns
+        
         if @node.train != @train and not @node.train
             if @nextTrack = @calcNextTrack()
                 @nextNode = @nextTrack.nodeOpposite @node

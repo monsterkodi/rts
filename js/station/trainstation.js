@@ -2,23 +2,25 @@
 
 var _k_ = {extend: function (c,p) {for (var k in p) { if (Object.hasOwn(p, k)) c[k] = p[k] } function ctor() { this.constructor = c; } ctor.prototype = p.prototype; c.prototype = new ctor(); c.__super__ = p.prototype; return c;}, list: function (l) {return l != null ? typeof l.length === 'number' ? l : [] : []}}
 
-var Boxcar, Engine, Station, Train, TrainStation
+var Boxcar, ColorGrid, Engine, GRID_SIZE, Station, Train, TrainStation
 
+ColorGrid = require('../lib/colorgrid')
 Station = require('./station')
 Engine = require('../train/engine')
 Boxcar = require('../train/boxcar')
 Train = require('../train/train')
+GRID_SIZE = 3
 
 TrainStation = (function ()
 {
     _k_.extend(TrainStation, Station)
     function TrainStation (cfg)
     {
-        var _18_17_
+        var _20_17_
 
         this["moveTrain"] = this["moveTrain"].bind(this)
         this["onCentralStorage"] = this["onCentralStorage"].bind(this)
-        cfg.name = ((_18_17_=cfg.name) != null ? _18_17_ : `T${Station.id + 1}`)
+        cfg.name = ((_20_17_=cfg.name) != null ? _20_17_ : `T${Station.id + 1}`)
         TrainStation.__super__.constructor.call(this,cfg)
         this.train = new Train
         this.trainLength = 3
@@ -43,11 +45,42 @@ TrainStation = (function ()
             }
         }
         this.node.station = this
+        this.grid = new ColorGrid({gridSize:GRID_SIZE,size:4})
+        this.grid.quads.rotateX(deg2rad(90))
+        this.grid.quads.position.z = 6 + 2.5
+        this.grid.quads.position.y = -2.61
+        this.group.add(this.grid.quads)
+        this.gridColumns = [[],[],[]]
         post.on('centralStorage',this.onCentralStorage)
     }
 
-    TrainStation.prototype["onCentralStorage"] = function (storage)
+    TrainStation.prototype["resourceIndex"] = function (resource)
     {
+        return 1 + Object.keys(Colors.mining).indexOf(resource)
+    }
+
+    TrainStation.prototype["onCentralStorage"] = function (storage, resource)
+    {
+        var column, ri
+
+        ri = this.resourceIndex(resource)
+        if (this.gridColumns[ri - 1].length < GRID_SIZE)
+        {
+            this.gridColumns[ri - 1].push(ri)
+            this.grid.setColumns(this.gridColumns)
+            storage[resource]--
+        }
+        var list = _k_.list(this.gridColumns)
+        for (var _66_19_ = 0; _66_19_ < list.length; _66_19_++)
+        {
+            column = list[_66_19_]
+            if (column.length < GRID_SIZE)
+            {
+                return
+            }
+        }
+        this.gridColumns = [[],[],[]]
+        this.grid.setColumns(this.gridColumns)
         if (this.node.train !== this.train && !this.node.train)
         {
             if (this.nextTrack = this.calcNextTrack())
@@ -78,16 +111,16 @@ TrainStation = (function ()
 
     TrainStation.prototype["calcNextTrack"] = function ()
     {
-        var accum, choice, choices, length, mode, nextNode, nextTrack, nn, nnopptrck, ot, randm, total, trackMode, tracks, _77_59_
+        var accum, choice, choices, length, mode, nextNode, nextTrack, nn, nnopptrck, ot, randm, total, trackMode, tracks, _103_59_
 
         nn = this.node
         ot = (nn.outTracks.length ? nn.outTracks : nn.inTracks)
         mode = (ot === nn.outTracks ? 1 : 2)
         choices = []
         var list = _k_.list(ot)
-        for (var _69_22_ = 0; _69_22_ < list.length; _69_22_++)
+        for (var _95_22_ = 0; _95_22_ < list.length; _95_22_++)
         {
-            nextTrack = list[_69_22_]
+            nextTrack = list[_95_22_]
             nextNode = nextTrack.nodeOpposite(nn)
             trackMode = nextTrack.modeForNode(nn) || 3
             if (!(mode & trackMode))
@@ -98,7 +131,7 @@ TrainStation = (function ()
             {
                 continue
             }
-            nnopptrck = ((_77_59_=nextNode.oppositeTracks(nextTrack)) != null ? _77_59_ : [])
+            nnopptrck = ((_103_59_=nextNode.oppositeTracks(nextTrack)) != null ? _103_59_ : [])
             if (nnopptrck.length)
             {
                 choices.push([nextTrack,nextNode])
@@ -174,9 +207,9 @@ TrainStation = (function ()
         else
         {
             var list = _k_.list(this.train.cars)
-            for (var _121_18_ = 0; _121_18_ < list.length; _121_18_++)
+            for (var _147_18_ = 0; _147_18_ < list.length; _147_18_++)
             {
-                c = list[_121_18_]
+                c = list[_147_18_]
                 c.deadEye()
             }
         }

@@ -108,7 +108,10 @@ function Save
             
             track = world.trackWithName train.track
             node  = world.nodeWithName  train.node
-            boxcars = train.cars.filter((c) -> c.type == 'boxcar').length
+            if train.cars?.length
+                boxcars = train.cars.filter((c) -> c.type == 'boxcar').length
+            else
+                boxcars = 0
             if t = world.onAddTrain track, train.prevDist, node, boxcars
                 t.resource = train.resource
                 t.setColorByName train.color if train.color

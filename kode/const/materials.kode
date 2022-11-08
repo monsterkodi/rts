@@ -53,10 +53,10 @@ Materials =
         central:        material 0xffffff, metalness: 0.2 roughness: 0.4
         train:          material 0x888888, metalness: 0.3 roughness: 0.4, dithering:true#, side:THREE.DoubleSide
     mining:
-        chalk:          material Colors.mining.chalk, metalness: 0.6 roughness: 0.05, emissive:0x777777, dithering:true
         water:          material Colors.mining.water, metalness: 0.6 roughness: 0.01, emissive:0x4444aa, dithering:true
         blood:          material Colors.mining.blood, metalness: 0.6 roughness: 0.1,  emissive:0xaa0000, dithering:true
         stuff:          material Colors.mining.stuff, metalness: 0.6 roughness: 0.01, emissive:0x888800, dithering:true
+        chalk:          material Colors.mining.chalk, metalness: 0.6 roughness: 0.05, emissive:0x777777, dithering:true
     selector:
         chalk:          material 0xffffff, metalness: 0.2 roughness: 0.4
         water:          material 0xffffff, metalness: 0.2 roughness: 0.4

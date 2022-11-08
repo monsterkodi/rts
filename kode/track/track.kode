@@ -100,7 +100,7 @@ function Track
         oppTracks = node.oppositeTracks @
         sibTracks = node.siblingTracks @
         
-        if oppTracks.length == 1 and sibTracks.length == 1
+        if oppTracks?.length == 1 and sibTracks?.length == 1
             nextTrack = oppTracks[0]
             oppNode = nextTrack.nodeOpposite node
             # log 'next ------------- ' @name, train.name, nextTrack.name, oppNode.name

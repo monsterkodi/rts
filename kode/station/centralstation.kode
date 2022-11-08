@@ -55,7 +55,7 @@ function CentralStation extends CargoStation
     cargoStored: (resource) ->
         
         CentralStation.storage[resource]++
-        post.emit 'centralStorage' CentralStation.storage
+        post.emit 'centralStorage' CentralStation.storage, resource
         
         if @gridColumns[0].length == GRID_SIZE
             @gridShiftTime = 0

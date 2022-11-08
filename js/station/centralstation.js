@@ -67,7 +67,7 @@ CentralStation = (function ()
     CentralStation.prototype["cargoStored"] = function (resource)
     {
         CentralStation.storage[resource]++
-        post.emit('centralStorage',CentralStation.storage)
+        post.emit('centralStorage',CentralStation.storage,resource)
         if (this.gridColumns[0].length === GRID_SIZE)
         {
             this.gridShiftTime = 0

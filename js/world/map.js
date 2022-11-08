@@ -38,7 +38,7 @@ class Map extends World
     stationTest ()
     {
         this.addTrainStation({pos:[-18,12],dir:Vector.unitX})
-        this.addCentralStation({pos:[-18,0]})
+        this.addCentralStation({pos:[-18,0],dir:Vector.unitX})
         this.addMiningStation({pos:[0,0],resource:'stuff'})
         this.addMiningStation({pos:[18,0],resource:'blood'})
         return this.addMiningStation({pos:[36,0],resource:'water'})

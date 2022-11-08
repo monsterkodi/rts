@@ -120,7 +120,7 @@ Track = (function ()
         this.addExitBlock(train,node,ld,dir)
         oppTracks = node.oppositeTracks(this)
         sibTracks = node.siblingTracks(this)
-        if (oppTracks.length === 1 && sibTracks.length === 1)
+        if ((oppTracks != null ? oppTracks.length : undefined) === 1 && (sibTracks != null ? sibTracks.length : undefined) === 1)
         {
             nextTrack = oppTracks[0]
             oppNode = nextTrack.nodeOpposite(node)
