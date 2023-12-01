@@ -6,12 +6,12 @@ Boxcar = require './boxcar'
 function Train
     
     @carDist:   4.2
-    @numTrains: 0
+    @id: 0
 
     @: (@cfg = {}) ->
         
-        Train.numTrains++
-        @name       = (@cfg.name ? "T") + Train.numTrains
+        Train.id++
+        @name       = @cfg.name ? ("T" + Train.id)
         @path       = new Path @
         @speed      = @cfg.speed ? 1
         @topSpeed   = @speed
@@ -29,7 +29,7 @@ function Train
         @mesh.toSave.key = 'trains'
         
         colors = Object.keys Colors.train
-        @setColorByName colors[Train.numTrains % colors.length]
+        @setColorByName colors[Train.id % colors.length]
         
         world.addObject @mesh
                 

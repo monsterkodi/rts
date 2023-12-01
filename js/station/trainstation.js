@@ -105,7 +105,6 @@ TrainStation = (function ()
 
     TrainStation.prototype["hasSpaceForCar"] = function ()
     {
-        console.log(this.train.cars.length,this.train.tailDelta())
         return this.train.cars.length === 0 || this.train.tailDelta() > 2
     }
 
@@ -201,15 +200,16 @@ TrainStation = (function ()
         {
             this.train.setColorByName(this.train.colorName)
             world.traffic.addTrain(this.train)
+            world.physics.addKinematicCar(this.train.cars[0])
             this.train = new Train
             return
         }
         else
         {
             var list = _k_.list(this.train.cars)
-            for (var _147_18_ = 0; _147_18_ < list.length; _147_18_++)
+            for (var _154_18_ = 0; _154_18_ < list.length; _154_18_++)
             {
-                c = list[_147_18_]
+                c = list[_154_18_]
                 c.deadEye()
             }
         }
@@ -223,7 +223,6 @@ TrainStation = (function ()
     {
         var advance
 
-        console.log(scaledDelta,this.train.tailDelta())
         advance = world.traffic.allowTrainAdvance(this.train,scaledDelta)
         this.train.advance(advance)
         if (this.train.tailDelta() < 4)

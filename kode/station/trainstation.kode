@@ -83,7 +83,7 @@ function TrainStation extends Station
             log 'no car space!'
             
     hasSpaceForCar: ->
-        log @train.cars.length, @train.tailDelta()
+        # log @train.cars.length, @train.tailDelta()
         @train.cars.length == 0 or @train.tailDelta() > 2
 
     calcNextTrack: ->
@@ -122,6 +122,12 @@ function TrainStation extends Station
                 
         nextTrack
         
+    #  0000000   0000000   00000000   00000000   00000000    0000000   0000000    
+    # 000       000   000  000   000  000   000  000   000  000   000  000   000  
+    # 000       000000000  0000000    00000000   0000000    000   000  000   000  
+    # 000       000   000  000   000  000        000   000  000   000  000   000  
+    #  0000000  000   000  000   000  000        000   000   0000000   0000000    
+    
     startCarProduction: ->
         
         if @train.cars.length == 0
@@ -141,6 +147,7 @@ function TrainStation extends Station
         else if @train.cars.length == @trainLength
             @train.setColorByName @train.colorName
             world.traffic.addTrain @train
+            world.physics.addKinematicCar @train.cars[0]
             @train = new Train
             return
         else
@@ -158,7 +165,7 @@ function TrainStation extends Station
     
     moveTrain: (scaledDelta, timeSum) =>
 
-        log scaledDelta, @train.tailDelta()
+        # log scaledDelta, @train.tailDelta()
         
         advance = world.traffic.allowTrainAdvance @train, scaledDelta
         

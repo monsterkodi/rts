@@ -385,6 +385,9 @@ function Node
         else
             @inMesh.scale.set 1 1 1
             @outMesh.scale.set 1 1 1
+            
+            @nodeBox?.removeFromParent()
+            delete @nodeBox
         
     onRemoveTrain: (train) =>
         log 'onRemoveTrain' @name, train.name, @train?.name
@@ -437,10 +440,7 @@ function Node
             world.removeObject block
         
         @setTrain null
-        
-        @nodeBox.removeFromParent()
-        delete @nodeBox
-        
+                
         @blockedTrains = []
         @blocks = []
         

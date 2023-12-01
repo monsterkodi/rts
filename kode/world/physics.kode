@@ -89,7 +89,6 @@ function Physics
                 b.kinematic.getWorldQuaternion q
                 b.position.copy p
                 b.quaternion.copy q
-        # log 'kinematics' cnt
                     
         @cannon.step 1/60, scaledDelta, 10 # max substeps
         if prefs.get 'cannon'
@@ -195,14 +194,14 @@ function Physics
         for car in train.cars
             @addCar car
 
-        for car,i in train.cars
-            if i > 0
-                @cannon.addConstraint new CANNON.ConeTwistConstraint train.cars[i-1].body, car.body,
-                    axisA:  new CANNON.Vec3  0 0 1
-                    pivotA: new CANNON.Vec3  0 0 3
-                    axisB:  new CANNON.Vec3  0 0 -1
-                    pivotB: new CANNON.Vec3  0 0 3
-                    twistAngle: deg2rad 90
+        # for car,i in train.cars
+            # if i > 0
+                # @cannon.addConstraint new CANNON.ConeTwistConstraint train.cars[i-1].body, car.body,
+                    # axisA:  new CANNON.Vec3  0 0 1
+                    # pivotA: new CANNON.Vec3  0 0 3
+                    # axisB:  new CANNON.Vec3  0 0 -1
+                    # pivotB: new CANNON.Vec3  0 0 3
+                    # twistAngle: deg2rad 90
             
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  
     # 000          000     000   000     000     000  000   000  0000  000  

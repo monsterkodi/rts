@@ -228,14 +228,14 @@ function World extends Convert
     #    000     000   000  000   000  000  000  0000  
     #    000     000   000  000   000  000  000   000  
     
-    onAddTrain: (track, delta, node, boxcars=3) =>
+    onAddTrain: (track, delta, node, boxcars=3, name) =>
         
         track ?= @cursorTrack
         
         if track and track.node[0] and track.node[1]
             delta ?= track.curve.getLength()/2
             node  ?= track.node[1]
-            train = @addTrain boxcars:boxcars, traffic:true
+            train = @addTrain boxcars:boxcars, traffic:true, name:name
             train.path.addTrackNode track, node
             train.path.delta = delta
             train.track = track
@@ -246,9 +246,9 @@ function World extends Convert
     
     addTrain: (cfg) ->
 
-        speed = cfg.speed ? 1
+        cfg.speed ?= 1
         
-        train = new Train {speed, name:'T'}
+        train = new Train cfg
         engine = @addEngine train
         
         @physics.addKinematicCar engine
@@ -261,9 +261,6 @@ function World extends Convert
         
         if cfg.traffic
             @traffic.addTrain train
-        
-        # if name in Object.keys Colors.train
-            # train.setColorByName name
         
         train
 
@@ -279,9 +276,10 @@ function World extends Convert
             
     delTrains: =>
         
-        log 'delTrains'
         for train in @allTrains()
             train.del()
+            
+        Train.id = 0
             
     # 000000000  00000000    0000000    0000000  000   000  
     #    000     000   000  000   000  000       000  000   
@@ -345,13 +343,15 @@ function World extends Convert
         
     delTracks: =>
         
-        log 'delTracks'
         @delTrains()
         for track in @allTracks()
             track.del()
         for node in @allNodes()
             if not node.fixed
                 node.del()
+                
+        Node.id  = 0
+        Track.id = 0
                         
     #  0000000  000000000   0000000   000000000  000   0000000   000   000  
     # 000          000     000   000     000     000  000   000  0000  000  

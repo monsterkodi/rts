@@ -496,7 +496,7 @@ Node = (function ()
 
     Node.prototype["setTrain"] = function (train)
     {
-        var block, c1, c2, geom
+        var block, c1, c2, geom, _389_20_
 
         if (train === this.train)
         {
@@ -528,13 +528,15 @@ Node = (function ()
         else
         {
             this.inMesh.scale.set(1,1,1)
-            return this.outMesh.scale.set(1,1,1)
+            this.outMesh.scale.set(1,1,1)
+            ;(this.nodeBox != null ? this.nodeBox.removeFromParent() : undefined)
+            return delete this.nodeBox
         }
     }
 
     Node.prototype["onRemoveTrain"] = function (train)
     {
-        var _390_53_
+        var _393_53_
 
         console.log('onRemoveTrain',this.name,train.name,(this.train != null ? this.train.name : undefined))
         if (train === this.train)
@@ -590,20 +592,18 @@ Node = (function ()
         var block, t
 
         var list = _k_.list(this.blockedTrains)
-        for (var _433_14_ = 0; _433_14_ < list.length; _433_14_++)
+        for (var _436_14_ = 0; _436_14_ < list.length; _436_14_++)
         {
-            t = list[_433_14_]
+            t = list[_436_14_]
             t.unblock()
         }
         var list1 = _k_.list(this.blocks)
-        for (var _436_18_ = 0; _436_18_ < list1.length; _436_18_++)
+        for (var _439_18_ = 0; _439_18_ < list1.length; _439_18_++)
         {
-            block = list1[_436_18_]
+            block = list1[_439_18_]
             world.removeObject(block)
         }
         this.setTrain(null)
-        this.nodeBox.removeFromParent()
-        delete this.nodeBox
         this.blockedTrains = []
         return this.blocks = []
     }

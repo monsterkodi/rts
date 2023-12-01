@@ -80,13 +80,14 @@ function Track
     # 000        000 000   000     000     000   000  000      000   000  000       000  000   
     # 00000000  000   000  000     000     0000000    0000000   0000000    0000000  000   000  
     
-    addExitBlockForTrainAtNode: (train, node) ->
+    addExitBlockForTrainAtNode: (train, node, visitedNodes) ->
               
-        @visitedNodes ?= []
-        if node in @visitedNodes
-            delete @visitedNodes
+        visitedNodes ?= []
+        
+        if node in visitedNodes
             return
-        @visitedNodes.push node
+            
+        visitedNodes.push node
         
         if node == @node[0]
             ld = 6/@curve.getLength()
@@ -104,7 +105,7 @@ function Track
             nextTrack = oppTracks[0]
             oppNode = nextTrack.nodeOpposite node
             # log 'next ------------- ' @name, train.name, nextTrack.name, oppNode.name
-            nextTrack.addExitBlockForTrainAtNode train, oppNode
+            nextTrack.addExitBlockForTrainAtNode train, oppNode, visitedNodes
     
     addExitBlock: (train, node, ld, dir=1) ->
         

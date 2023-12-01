@@ -33,7 +33,7 @@ class Info
 
     draw (info)
     {
-        var add, car, corpses, k, node, s, station, track, train, v, _1_11_, _1_18_, _1_25_, _1_26_, _1_33_, _106_28_, _106_35_
+        var add, car, corpses, k, node, s, station, track, train, v, _1_11_, _1_18_, _1_25_, _1_26_, _1_33_, _109_28_, _109_35_
 
         this.info.innerHTML = ''
         this.train.innerHTML = ''
@@ -112,39 +112,46 @@ class Info
                 train = list5[_89_22_]
                 s += ' ' + _k_.rpad(3,train.name)
             }
+            s += " ▪▪ "
+            var list6 = _k_.list(track.exitBlockTrains)
+            for (var _92_22_ = 0; _92_22_ < list6.length; _92_22_++)
+            {
+                train = list6[_92_22_]
+                s += ' ' + _k_.rpad(3,train.name)
+            }
             add(s)
         }
         add = (function (text)
         {
             return elem({class:'infoText',parent:this.node,text:text})
         }).bind(this)
-        var list6 = _k_.list(world.allNodes())
-        for (var _95_17_ = 0; _95_17_ < list6.length; _95_17_++)
+        var list7 = _k_.list(world.allNodes())
+        for (var _98_17_ = 0; _98_17_ < list7.length; _98_17_++)
         {
-            node = list6[_95_17_]
+            node = list7[_98_17_]
             s = _k_.rpad(5,node.name)
             s += node.commonMode() + ' '
             s += '●'
-            var list7 = _k_.list(node.outTracks)
-            for (var _99_22_ = 0; _99_22_ < list7.length; _99_22_++)
-            {
-                track = list7[_99_22_]
-                s += ' ' + _k_.rpad(3,track.name)
-            }
-            s += ' ▴'
-            var list8 = _k_.list(node.inTracks)
+            var list8 = _k_.list(node.outTracks)
             for (var _102_22_ = 0; _102_22_ < list8.length; _102_22_++)
             {
                 track = list8[_102_22_]
                 s += ' ' + _k_.rpad(3,track.name)
             }
-            s += ' ▪ '
-            s += (((_106_35_=(node.train != null ? node.train.name : undefined)) != null ? _106_35_ : ''))
-            s += ' ▪ '
-            var list9 = _k_.list(node.blockedTrains)
-            for (var _108_22_ = 0; _108_22_ < list9.length; _108_22_++)
+            s += ' ▴'
+            var list9 = _k_.list(node.inTracks)
+            for (var _105_22_ = 0; _105_22_ < list9.length; _105_22_++)
             {
-                train = list9[_108_22_]
+                track = list9[_105_22_]
+                s += ' ' + _k_.rpad(3,track.name)
+            }
+            s += ' ▪ '
+            s += (((_109_35_=(node.train != null ? node.train.name : undefined)) != null ? _109_35_ : ''))
+            s += ' ▪ '
+            var list10 = _k_.list(node.blockedTrains)
+            for (var _111_22_ = 0; _111_22_ < list10.length; _111_22_++)
+            {
+                train = list10[_111_22_]
                 s += ' ' + _k_.rpad(3,train.name)
             }
             add(s)

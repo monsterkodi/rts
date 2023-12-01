@@ -92,9 +92,9 @@ Physics = (function ()
             this.cannonDebugger.update()
         }
         var list1 = _k_.list(this.cannon.bodies)
-        for (var _98_14_ = 0; _98_14_ < list1.length; _98_14_++)
+        for (var _97_14_ = 0; _97_14_ < list1.length; _97_14_++)
         {
-            b = list1[_98_14_]
+            b = list1[_97_14_]
             if (b.mesh)
             {
                 b.mesh.position.copy(b.position)
@@ -131,7 +131,7 @@ Physics = (function ()
 
     Physics.prototype["addCar"] = function (car)
     {
-        var cb, _139_31_
+        var cb, _138_31_
 
         this.addCargo((typeof car.takeCargo === "function" ? car.takeCargo() : undefined))
         cb = new CANNON.Body({mass:1,shape:new CANNON.Cylinder(1,1,3.5,8)})
@@ -168,9 +168,9 @@ Physics = (function ()
             return
         }
         var list = _k_.list(this.cannon.bodies)
-        for (var _170_17_ = 0; _170_17_ < list.length; _170_17_++)
+        for (var _169_17_ = 0; _169_17_ < list.length; _169_17_++)
         {
-            body = list[_170_17_]
+            body = list[_169_17_]
             if (body.kinematic === car.mesh)
             {
                 this.cannon.removeBody(body)
@@ -194,26 +194,17 @@ Physics = (function ()
 
     Physics.prototype["addTrain"] = function (train)
     {
-        var car, i
+        var car
 
         if (train.cars[0].body)
         {
             return
         }
         var list = _k_.list(train.cars)
-        for (var _195_16_ = 0; _195_16_ < list.length; _195_16_++)
+        for (var _194_16_ = 0; _194_16_ < list.length; _194_16_++)
         {
-            car = list[_195_16_]
+            car = list[_194_16_]
             this.addCar(car)
-        }
-        var list1 = _k_.list(train.cars)
-        for (i = 0; i < list1.length; i++)
-        {
-            car = list1[i]
-            if (i > 0)
-            {
-                this.cannon.addConstraint(new CANNON.ConeTwistConstraint(train.cars[i - 1].body,car.body,{axisA:new CANNON.Vec3(0,0,1),pivotA:new CANNON.Vec3(0,0,3),axisB:new CANNON.Vec3(0,0,-1),pivotB:new CANNON.Vec3(0,0,3),twistAngle:deg2rad(90)}))
-            }
         }
     }
 

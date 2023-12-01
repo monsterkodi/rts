@@ -88,6 +88,9 @@ class Info
             s = "#{rpad 4 track.name} #{track.mode} #{rpad 4 track.node[0].name} ▸ #{rpad 4 track.node[1].name} ▪ #{rpad 5 track.exitBlockNode?.name ? ''}" 
             for train in track.trains
                 s += ' ' + rpad 3 train.name
+            s += " ▪▪ "
+            for train in track.exitBlockTrains
+                s += ' ' + rpad 3 train.name
             add s
 
         add = (text) => elem class:'infoText' parent:@node, text:text

@@ -256,7 +256,7 @@ World = (function ()
         return this.scene.add(this.shadowFloor)
     }
 
-    World.prototype["onAddTrain"] = function (track, delta, node, boxcars = 3)
+    World.prototype["onAddTrain"] = function (track, delta, node, boxcars = 3, name)
     {
         var train
 
@@ -265,7 +265,7 @@ World = (function ()
         {
             delta = (delta != null ? delta : track.curve.getLength() / 2)
             node = (node != null ? node : track.node[1])
-            train = this.addTrain({boxcars:boxcars,traffic:true})
+            train = this.addTrain({boxcars:boxcars,traffic:true,name:name})
             train.path.addTrackNode(track,node)
             train.path.delta = delta
             train.track = track
@@ -280,10 +280,10 @@ World = (function ()
 
     World.prototype["addTrain"] = function (cfg)
     {
-        var engine, i, speed, train, _249_26_
+        var engine, i, train, _249_18_
 
-        speed = ((_249_26_=cfg.speed) != null ? _249_26_ : 1)
-        train = new Train({speed:speed,name:'T'})
+        cfg.speed = ((_249_18_=cfg.speed) != null ? _249_18_ : 1)
+        train = new Train(cfg)
         engine = this.addEngine(train)
         this.physics.addKinematicCar(engine)
         if (cfg.boxcars)
@@ -313,7 +313,7 @@ World = (function ()
     {
         var boxcar, n
 
-        for (var _276_17_ = n = 0, _276_21_ = num; (_276_17_ <= _276_21_ ? n < num : n > num); (_276_17_ <= _276_21_ ? ++n : --n))
+        for (var _273_17_ = n = 0, _273_21_ = num; (_273_17_ <= _273_21_ ? n < num : n > num); (_273_17_ <= _273_21_ ? ++n : --n))
         {
             boxcar = train.addCar(new Boxcar(train))
         }
@@ -323,13 +323,13 @@ World = (function ()
     {
         var train
 
-        console.log('delTrains')
         var list = _k_.list(this.allTrains())
-        for (var _283_18_ = 0; _283_18_ < list.length; _283_18_++)
+        for (var _279_18_ = 0; _279_18_ < list.length; _279_18_++)
         {
-            train = list[_283_18_]
+            train = list[_279_18_]
             train.del()
         }
+        return Train.id = 0
     }
 
     World.prototype["addNode"] = function (cfg)
@@ -386,9 +386,9 @@ World = (function ()
         var node
 
         var list = _k_.list(this.allNodes())
-        for (var _300_17_ = 0; _300_17_ < list.length; _300_17_++)
+        for (var _298_17_ = 0; _298_17_ < list.length; _298_17_++)
         {
-            node = list[_300_17_]
+            node = list[_298_17_]
             if (node.name === name)
             {
                 return node
@@ -401,9 +401,9 @@ World = (function ()
         var track
 
         var list = _k_.list(this.allTracks())
-        for (var _304_18_ = 0; _304_18_ < list.length; _304_18_++)
+        for (var _302_18_ = 0; _302_18_ < list.length; _302_18_++)
         {
-            track = list[_304_18_]
+            track = list[_302_18_]
             if (track.name === name)
             {
                 return track
@@ -460,23 +460,24 @@ World = (function ()
     {
         var node, track
 
-        console.log('delTracks')
         this.delTrains()
         var list = _k_.list(this.allTracks())
-        for (var _350_18_ = 0; _350_18_ < list.length; _350_18_++)
+        for (var _347_18_ = 0; _347_18_ < list.length; _347_18_++)
         {
-            track = list[_350_18_]
+            track = list[_347_18_]
             track.del()
         }
         var list1 = _k_.list(this.allNodes())
-        for (var _352_17_ = 0; _352_17_ < list1.length; _352_17_++)
+        for (var _349_17_ = 0; _349_17_ < list1.length; _349_17_++)
         {
-            node = list1[_352_17_]
+            node = list1[_349_17_]
             if (!node.fixed)
             {
                 node.del()
             }
         }
+        Node.id = 0
+        return Track.id = 0
     }
 
     World.prototype["addCentralStation"] = function (cfg)

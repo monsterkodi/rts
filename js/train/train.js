@@ -11,16 +11,16 @@ Boxcar = require('./boxcar')
 Train = (function ()
 {
     Train["carDist"] = 4.2
-    Train["numTrains"] = 0
+    Train["id"] = 0
     function Train (cfg = {})
     {
-        var colors, _14_33_, _16_33_
+        var colors, _14_32_, _16_33_
 
         this.cfg = cfg
     
         this["toSave"] = this["toSave"].bind(this)
-        Train.numTrains++
-        this.name = (((_14_33_=this.cfg.name) != null ? _14_33_ : "T")) + Train.numTrains
+        Train.id++
+        this.name = ((_14_32_=this.cfg.name) != null ? _14_32_ : ("T" + Train.id))
         this.path = new Path(this)
         this.speed = ((_16_33_=this.cfg.speed) != null ? _16_33_ : 1)
         this.topSpeed = this.speed
@@ -35,7 +35,7 @@ Train = (function ()
         this.mesh.toSave = this.toSave
         this.mesh.toSave.key = 'trains'
         colors = Object.keys(Colors.train)
-        this.setColorByName(colors[Train.numTrains % colors.length])
+        this.setColorByName(colors[Train.id % colors.length])
         world.addObject(this.mesh)
     }
 
